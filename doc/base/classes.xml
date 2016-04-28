@@ -2900,6 +2900,12 @@
 		</method>
 	</methods>
 	<signals>
+		<signal name="animation_started">
+			<argument index="0" name="name" type="String">
+			</argument>
+			<description>
+			</description>
+		</signal>
 		<signal name="animation_changed">
 			<argument index="0" name="old_name" type="String">
 			</argument>
@@ -3558,6 +3564,62 @@
 		<method name="get_priority" qualifiers="const">
 			<return type="float">
 			</return>
+			<description>
+			</description>
+		</method>
+		<method name="set_collision_mask">
+			<argument index="0" name="collision_mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_collision_mask" qualifiers="const">
+			<return type="int">
+			</return>
+			<description>
+			</description>
+		</method>
+		<method name="set_layer_mask">
+			<argument index="0" name="layer_mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_layer_mask" qualifiers="const">
+			<return type="int">
+			</return>
+			<description>
+			</description>
+		</method>
+		<method name="set_collision_mask_bit">
+			<argument index="0" name="bit" type="int">
+			</argument>
+			<argument index="1" name="value" type="bool">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_collision_mask_bit" qualifiers="const">
+			<return type="bool">
+			</return>
+			<argument index="0" name="bit" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="set_layer_mask_bit">
+			<argument index="0" name="bit" type="int">
+			</argument>
+			<argument index="1" name="value" type="bool">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_layer_mask_bit" qualifiers="const">
+			<return type="bool">
+			</return>
+			<argument index="0" name="bit" type="int">
+			</argument>
 			<description>
 			</description>
 		</method>
@@ -5622,12 +5684,14 @@
 			<argument index="0" name="texture" type="Texture">
 			</argument>
 			<description>
+			Set the icon that will be displayed next to the text inside the button area.
 			</description>
 		</method>
 		<method name="get_button_icon" qualifiers="const">
 			<return type="Texture">
 			</return>
 			<description>
+			Return the button icon.
 			</description>
 		</method>
 		<method name="set_flat">
@@ -5655,23 +5719,34 @@
 			<argument index="0" name="align" type="int">
 			</argument>
 			<description>
+			Set the text alignment policy, using one of the ALIGN_* constants.
 			</description>
 		</method>
 		<method name="get_text_align" qualifiers="const">
 			<return type="int">
 			</return>
 			<description>
+			Return the text alignment policy.
 			</description>
 		</method>
 		<method name="is_flat" qualifiers="const">
 			<return type="bool">
 			</return>
 			<description>
-			Return the state of the [i]flat[/i] property (see [method set_flat])
+			Return the state of the [i]flat[/i] property (see [method set_flat]).
 			</description>
 		</method>
 	</methods>
 	<constants>
+		<constant name="ALIGN_LEFT" value="0">
+			Align the text to the left.
+		</constant>
+		<constant name="ALIGN_CENTER" value="1">
+			Center the text.
+		</constant>
+		<constant name="ALIGN_RIGHT" value="2">
+			Align the text to the right.
+		</constant>
 	</constants>
 	<theme_items>
 		<theme_item name="hseparation" type="int">
@@ -5703,57 +5778,60 @@
 	Array of Buttons.
 	</brief_description>
 	<description>
-	Array of Buttons. A Button array is useful to have an array of buttons laid out vertically or horizontally. Only one can be selected. This is useful for joy pad based interfaces and option menus.
+	Array of Buttons. A ButtonArray is useful to have an array of buttons laid out vertically or horizontally. Only one button can be selected, and is referenced by its index in the array (first button is 0, second button is 1, etc.).
+	This is useful [i]e.g.[/i] for joypad-friendly interfaces and option menus.
 	</description>
 	<methods>
 		<method name="add_button">
 			<argument index="0" name="text" type="String">
 			</argument>
 			<description>
-			Add a new button.
+			Append a new button to the array, with the specified text.
 			</description>
 		</method>
 		<method name="add_icon_button">
-			<argument index="0" name="icon" type="Object">
+			<argument index="0" name="icon" type="Texture">
 			</argument>
 			<argument index="1" name="text" type="String" default="&quot;&quot;">
 			</argument>
 			<description>
+			Append a new button to the array, with the specified icon and text.
 			</description>
 		</method>
 		<method name="set_button_text">
-			<argument index="0" name="button" type="int">
+			<argument index="0" name="button_idx" type="int">
 			</argument>
 			<argument index="1" name="text" type="String">
 			</argument>
 			<description>
+			Define the text of the specified button.
 			</description>
 		</method>
 		<method name="set_button_icon">
-			<argument index="0" name="button" type="int">
+			<argument index="0" name="button_idx" type="int">
 			</argument>
-			<argument index="1" name="icon" type="Object">
+			<argument index="1" name="icon" type="Texture">
 			</argument>
 			<description>
-			Set the icon of an existing button.
+			Set the icon of the specified button.
 			</description>
 		</method>
 		<method name="get_button_text" qualifiers="const">
 			<return type="String">
 			</return>
-			<argument index="0" name="button" type="int">
+			<argument index="0" name="button_idx" type="int">
 			</argument>
 			<description>
-			Return the text of an existing button.
+			Return the text of the specified button.
 			</description>
 		</method>
 		<method name="get_button_icon" qualifiers="const">
-			<return type="Object">
+			<return type="Texture">
 			</return>
-			<argument index="0" name="button" type="int">
+			<argument index="0" name="button_idx" type="int">
 			</argument>
 			<description>
-			Return the icon of an existing button.
+			Return the icon of the specified button.
 			</description>
 		</method>
 		<method name="get_button_count" qualifiers="const">
@@ -5767,42 +5845,42 @@
 			<return type="int">
 			</return>
 			<description>
-			Return the currently selected button in the array.
+			Return the index of the currently selected button in the array.
 			</description>
 		</method>
 		<method name="get_hovered" qualifiers="const">
 			<return type="int">
 			</return>
 			<description>
-			Return the currently hovered button in the array.
+			Return the index of the currently hovered button in the array.
 			</description>
 		</method>
 		<method name="set_selected">
-			<argument index="0" name="button" type="int">
+			<argument index="0" name="button_idx" type="int">
 			</argument>
 			<description>
-			Select a button in the array.
+			Select a button in the array based on the given index.
 			</description>
 		</method>
 		<method name="erase_button">
-			<argument index="0" name="button" type="int">
+			<argument index="0" name="button_idx" type="int">
 			</argument>
 			<description>
-			Remove a button in the array, by index.
+			Remove the specified button in the array.
 			</description>
 		</method>
 		<method name="clear">
 			<description>
-			Clear the button array.
+			Remove all buttons from the array.
 			</description>
 		</method>
 	</methods>
 	<signals>
 		<signal name="button_selected">
-			<argument index="0" name="button" type="int">
+			<argument index="0" name="button_idx" type="int">
 			</argument>
 			<description>
-			A Button was selected (returns the index).
+			A button has been selected, its index is given as the argument.
 			</description>
 		</signal>
 	</signals>
@@ -7039,6 +7117,7 @@
 			<argument index="0" name="enable" type="bool">
 			</argument>
 			<description>
+				This function will anchor the container children to the top left corner of the the container boundaries, moving all its children to that position, (the children new center will be the top left corner of the container).
 			</description>
 		</method>
 		<method name="is_using_top_left" qualifiers="const">
@@ -7053,8 +7132,10 @@
 </class>
 <class name="CheckBox" inherits="Button" category="Core">
 	<brief_description>
+		Binary choice user interface widget
 	</brief_description>
 	<description>
+		A checkbox allows the user to make a binary choice (choosing only one of two posible options), for example Answer 'yes' or 'no'.
 	</description>
 	<methods>
 	</methods>
@@ -9681,6 +9762,14 @@ This approximation makes straight segments between each point, then subdivides t
 			</argument>
 			<description>
 			Return true if the dictionary has a given key.
+			</description>
+		</method>
+		<method name="has_all">
+			<return type="bool">
+			</return>
+			<argument index="0" name="values" type="Array">
+			</argument>
+			<description>
 			</description>
 		</method>
 		<method name="hash">
@@ -12963,18 +13052,21 @@ Returns an empty String "" at the end of the list.
 			<return type="Vector2">
 			</return>
 			<description>
+			Return the scroll offset.
 			</description>
 		</method>
 		<method name="set_zoom">
 			<argument index="0" name="p_zoom" type="float">
 			</argument>
 			<description>
+			Set the zoom value of the GraphEdit. Zoom value is between [0.01; 1.728].
 			</description>
 		</method>
 		<method name="get_zoom" qualifiers="const">
 			<return type="float">
 			</return>
 			<description>
+			Return the current zoom value.
 			</description>
 		</method>
 		<method name="set_right_disconnects">
@@ -12995,20 +13087,24 @@ Returns an empty String "" at the end of the list.
 	<signals>
 		<signal name="delete_nodes_request">
 			<description>
+			Signal sent when a GraphNode is attempted to be removed from the GraphEdit.
 			</description>
 		</signal>
 		<signal name="duplicate_nodes_request">
 			<description>
+			Signal sent when a GraphNode is attempted to be duplicated in the GraphEdit.
 			</description>
 		</signal>
 		<signal name="popup_request">
 			<argument index="0" name="p_position" type="Vector2">
 			</argument>
 			<description>
+			Signal sent when a popup is requested. Happens on right-clicking in the GraphEdit. 'p_position' is the position of the mouse pointer when the signal is sent.
 			</description>
 		</signal>
 		<signal name="_begin_node_move">
 			<description>
+			Signal sent at the beginning of a GraphNode movement.
 			</description>
 		</signal>
 		<signal name="disconnection_request">
@@ -13039,6 +13135,7 @@ Returns an empty String "" at the end of the list.
 		</signal>
 		<signal name="_end_node_move">
 			<description>
+			Signal sent at the end of a GraphNode movement.
 			</description>
 		</signal>
 	</signals>
@@ -13316,20 +13413,24 @@ Returns an empty String "" at the end of the list.
 </class>
 <class name="GridContainer" inherits="Container" category="Core">
 	<brief_description>
+		Grid container used to arrange elements in a grid like layout
 	</brief_description>
 	<description>
+		Grid container will arrange its children in a grid like structure, the grid columns are specified using the [method set_columns] method and the number of rows will be equal to the number of children in the container divided by the number of columns, for example: if the container has 5 children, and 2 columns, there will be 3 rows in the container. Notice that grid layout will preserve the columns and rows for every size of the container.
 	</description>
 	<methods>
 		<method name="set_columns">
 			<argument index="0" name="columns" type="int">
 			</argument>
 			<description>
+				Sets the numbers of columns in the container, then reorder its children to accommodate the new layout
 			</description>
 		</method>
 		<method name="get_columns" qualifiers="const">
 			<return type="int">
 			</return>
 			<description>
+				Returns the number of columns in this container
 			</description>
 		</method>
 	</methods>
@@ -13820,6 +13921,12 @@ Returns an empty String "" at the end of the list.
 		<method name="set_connection">
 			<argument index="0" name="connection" type="StreamPeer">
 			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_connection" qualifiers="const">
+			<return type="StreamPeer">
+			</return>
 			<description>
 			</description>
 		</method>
@@ -19054,6 +19161,14 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			Set the mesh of the item.
 			</description>
 		</method>
+		<method name="set_item_navmesh">
+			<argument index="0" name="id" type="int">
+			</argument>
+			<argument index="1" name="navmesh" type="NavigationMesh">
+			</argument>
+			<description>
+			</description>
+		</method>
 		<method name="set_item_shape">
 			<argument index="0" name="id" type="int">
 			</argument>
@@ -19078,6 +19193,14 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			</argument>
 			<description>
 			Return the mesh of the item.
+			</description>
+		</method>
+		<method name="get_item_navmesh" qualifiers="const">
+			<return type="NavigationMesh">
+			</return>
+			<argument index="0" name="id" type="int">
+			</argument>
+			<description>
 			</description>
 		</method>
 		<method name="get_item_shape" qualifiers="const">
@@ -20353,21 +20476,21 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="0" name="pos" type="Vector2">
 			</argument>
 			<description>
-			Set the position of the 2d node.
+			Set the position of the 2D node.
 			</description>
 		</method>
 		<method name="set_rot">
 			<argument index="0" name="rot" type="float">
 			</argument>
 			<description>
-			Set the rotation of the 2d node.
+			Set the rotation of the 2D node.
 			</description>
 		</method>
 		<method name="set_scale">
 			<argument index="0" name="scale" type="Vector2">
 			</argument>
 			<description>
-			Set the scale of the 2d node.
+			Set the scale of the 2D node.
 			</description>
 		</method>
 		<method name="get_pos" qualifiers="const">
@@ -20395,6 +20518,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="0" name="radians" type="float">
 			</argument>
 			<description>
+			Apply a 'radians' rotation to the 2D node, starting from its current rotation.
 			</description>
 		</method>
 		<method name="move_local_x">
@@ -20403,6 +20527,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="1" name="scaled" type="bool" default="false">
 			</argument>
 			<description>
+			Apply a local translation on X axis to the 2D node according to the 'delta' of the process. If 'scaled' is false, the movement is normalized.
 			</description>
 		</method>
 		<method name="move_local_y">
@@ -20411,30 +20536,35 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="1" name="scaled" type="bool" default="false">
 			</argument>
 			<description>
+			Apply a local translation on Y axis to the 2D node according to the 'delta' of the process. If 'scaled' is false, the movement is normalized.
 			</description>
 		</method>
 		<method name="translate">
 			<argument index="0" name="offset" type="Vector2">
 			</argument>
 			<description>
+			Apply a local translation of 'offset' to the 2D node, starting from its current local position.
 			</description>
 		</method>
 		<method name="global_translate">
 			<argument index="0" name="offset" type="Vector2">
 			</argument>
 			<description>
+			Apply a global translation of 'offset' to the 2D node, starting from its current global position.
 			</description>
 		</method>
 		<method name="scale">
 			<argument index="0" name="ratio" type="Vector2">
 			</argument>
 			<description>
+			Apply the 'ratio' scale to the 2D node, according to its current scale value.
 			</description>
 		</method>
 		<method name="set_global_pos">
 			<argument index="0" name="pos" type="Vector2">
 			</argument>
 			<description>
+			Set the global position of the 2D node to 'pos'.
 			</description>
 		</method>
 		<method name="get_global_pos" qualifiers="const">
@@ -20448,18 +20578,21 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="0" name="xform" type="Matrix32">
 			</argument>
 			<description>
+			Set the local transform [Matrix32] of the 2D node.
 			</description>
 		</method>
 		<method name="set_global_transform">
 			<argument index="0" name="xform" type="Matrix32">
 			</argument>
 			<description>
+			Set the global transform [Matrix32] of the 2D node.
 			</description>
 		</method>
 		<method name="look_at">
 			<argument index="0" name="point" type="Vector2">
 			</argument>
 			<description>
+			Rotate the 2d node so it points at 'point' position.
 			</description>
 		</method>
 		<method name="get_angle_to" qualifiers="const">
@@ -20468,36 +20601,42 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="0" name="point" type="Vector2">
 			</argument>
 			<description>
+			Return the rotation angle needed for the 2d node to point at 'point' position.
 			</description>
 		</method>
 		<method name="set_z">
 			<argument index="0" name="z" type="int">
 			</argument>
 			<description>
+			Set the Z-index value of the 2D node.
 			</description>
 		</method>
 		<method name="get_z" qualifiers="const">
 			<return type="int">
 			</return>
 			<description>
+			Return the Z-index of the 2D node.
 			</description>
 		</method>
 		<method name="set_z_as_relative">
 			<argument index="0" name="enable" type="bool">
 			</argument>
 			<description>
+			Set the Z-index value as relative to the parent node of this 2D node. Thus, if this 2D node's Z-index value is 2 and its parent's effective Z-index is 3, then the effective Z-index value of this 2D node would be 3 + 2 = 5.
 			</description>
 		</method>
 		<method name="is_z_relative" qualifiers="const">
 			<return type="bool">
 			</return>
 			<description>
+			Return true if the Z-index value of this 2D node is relative to its parent's. Else, return false.
 			</description>
 		</method>
 		<method name="edit_set_pivot">
 			<argument index="0" name="pivot" type="Vector2">
 			</argument>
 			<description>
+			Set the pivot position of the 2D node to 'pivot' value. This method is implemented only in some nodes that inherit Node2D.
 			</description>
 		</method>
 		<method name="get_relative_transform_to_parent" qualifiers="const">
@@ -20506,6 +20645,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="0" name="parent" type="Object">
 			</argument>
 			<description>
+			Return the transform [Matrix32] calculated relatively to the parent of this 2D node.
 			</description>
 		</method>
 	</methods>
@@ -25065,6 +25205,50 @@ This method controls whether the position between two cached points is interpola
 			<description>
 			</description>
 		</method>
+		<method name="set_collision_mask">
+			<argument index="0" name="mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_collision_mask" qualifiers="const">
+			<return type="int">
+			</return>
+			<description>
+			</description>
+		</method>
+		<method name="set_collision_mask_bit">
+			<argument index="0" name="bit" type="int">
+			</argument>
+			<argument index="1" name="value" type="bool">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_collision_mask_bit" qualifiers="const">
+			<return type="bool">
+			</return>
+			<argument index="0" name="bit" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="set_layer_mask_bit">
+			<argument index="0" name="bit" type="int">
+			</argument>
+			<argument index="1" name="value" type="bool">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_layer_mask_bit" qualifiers="const">
+			<return type="bool">
+			</return>
+			<argument index="0" name="bit" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
 		<method name="add_collision_exception_with">
 			<argument index="0" name="body" type="PhysicsBody">
 			</argument>
@@ -25681,6 +25865,22 @@ This method controls whether the position between two cached points is interpola
 			<description>
 			</description>
 		</method>
+		<method name="area_set_layer_mask">
+			<argument index="0" name="area" type="RID">
+			</argument>
+			<argument index="1" name="mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="area_set_collision_mask">
+			<argument index="0" name="area" type="RID">
+			</argument>
+			<argument index="1" name="mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
 		<method name="area_set_param">
 			<argument index="0" name="area" type="RID">
 			</argument>
@@ -25795,6 +25995,42 @@ This method controls whether the position between two cached points is interpola
 			<return type="int">
 			</return>
 			<argument index="0" name="body" type="RID">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="body_set_layer_mask">
+			<argument index="0" name="body" type="RID">
+			</argument>
+			<argument index="1" name="mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="body_get_layer_mask" qualifiers="const">
+			<return type="int">
+			</return>
+			<argument index="0" name="body" type="RID">
+			</argument>
+			<argument index="1" name="arg1" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="body_set_collision_mask">
+			<argument index="0" name="body" type="RID">
+			</argument>
+			<argument index="1" name="mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="body_get_collision_mask" qualifiers="const">
+			<return type="int">
+			</return>
+			<argument index="0" name="body" type="RID">
+			</argument>
+			<argument index="1" name="arg1" type="int">
 			</argument>
 			<description>
 			</description>
@@ -26948,80 +27184,94 @@ This method controls whether the position between two cached points is interpola
 </class>
 <class name="Polygon2D" inherits="Node2D" category="Core">
 	<brief_description>
+		2D polygon representation
 	</brief_description>
 	<description>
+		A Polygon2D is defined by a set of n points connected together by line segments, meaning that the point 1 will be connected with point 2, point 2 with point 3 ..., point n-1 with point n and point n with point 1 in order to close the loop and define a plane.
 	</description>
 	<methods>
 		<method name="set_polygon">
 			<argument index="0" name="polygon" type="Vector2Array">
 			</argument>
 			<description>
+				Defines the set of points that will represent the polygon.
 			</description>
 		</method>
 		<method name="get_polygon" qualifiers="const">
 			<return type="Vector2Array">
 			</return>
 			<description>
+				Returns the set of points that defines this polygon
 			</description>
 		</method>
 		<method name="set_uv">
 			<argument index="0" name="uv" type="Vector2Array">
 			</argument>
 			<description>
+				Sets the uv value for every point of the polygon
 			</description>
 		</method>
 		<method name="get_uv" qualifiers="const">
 			<return type="Vector2Array">
 			</return>
 			<description>
+				Returns the uv value associated with every point of the polygon
 			</description>
 		</method>
 		<method name="set_color">
 			<argument index="0" name="color" type="Color">
 			</argument>
 			<description>
+				Sets the polygon fill color, if the polygon has a texture defined, the defined texture will be tinted to the polygon fill color.
 			</description>
 		</method>
 		<method name="get_color" qualifiers="const">
 			<return type="Color">
 			</return>
 			<description>
+				Returns the polygon fill color
 			</description>
 		</method>
 		<method name="set_texture">
 			<argument index="0" name="texture" type="Object">
 			</argument>
 			<description>
+				Sets the polygon texture.
 			</description>
 		</method>
 		<method name="get_texture" qualifiers="const">
 			<return type="Object">
 			</return>
 			<description>
+				Returns the polygon texture
 			</description>
 		</method>
 		<method name="set_texture_offset">
 			<argument index="0" name="texture_offset" type="Vector2">
 			</argument>
 			<description>
+				Sets the offset of the polygon texture. Initially the texture will appear anchored to the polygon position, the offset is used to move the texture location away from that point (notice that the texture origin is set to its top left corner, so when offset is 0,0 the top left corner of the texture is at the polygon position), for example setting the offset to 10, 10 will move the texture 10 units to the left and 10 units to the top.
 			</description>
 		</method>
 		<method name="get_texture_offset" qualifiers="const">
 			<return type="Vector2">
 			</return>
 			<description>
+				Returns the polygon texture offset
 			</description>
 		</method>
 		<method name="set_texture_rotation">
 			<argument index="0" name="texture_rotation" type="float">
 			</argument>
 			<description>
+				Sets the amount of rotation of the polygon texture, [code]texture_rotation[/code] is specified in degrees and clockwise rotation, meaning that if the texture rotation is set to 45 degrees, the texture will be rotated 45 degrees clockwise along the polygon position plus the texture offset.
 			</description>
 		</method>
 		<method name="get_texture_rotation" qualifiers="const">
 			<return type="float">
 			</return>
 			<description>
+				Returns the rotation in degrees of the texture polygon
 			</description>
 		</method>
 		<method name="set_texture_scale">
@@ -27040,12 +27290,14 @@ This method controls whether the position between two cached points is interpola
 			<argument index="0" name="invert" type="bool">
 			</argument>
 			<description>
+				Sets the polygon as the defined polygon bounding box minus the defined polygon (the defined polygon will appear as a hole on square that contains the defined polygon).
 			</description>
 		</method>
 		<method name="get_invert" qualifiers="const">
 			<return type="bool">
 			</return>
 			<description>
+				Returns whether this polygon is inverted or not
 			</description>
 		</method>
 		<method name="set_invert_border">
@@ -27064,12 +27316,14 @@ This method controls whether the position between two cached points is interpola
 			<argument index="0" name="offset" type="Vector2">
 			</argument>
 			<description>
+				Sets the amount of distance from the polygon points from the polygon position, for example if the offset is set to 10,10 then all the polygon points will move 10 units to the right and 10 units to the bottom.
 			</description>
 		</method>
 		<method name="get_offset" qualifiers="const">
 			<return type="Vector2">
 			</return>
 			<description>
+				Returns the polygon points offset to the polygon position.
 			</description>
 		</method>
 	</methods>
@@ -28265,45 +28519,75 @@ This method controls whether the position between two cached points is interpola
 			<description>
 			</description>
 		</method>
+		<method name="set_layer_mask">
+			<argument index="0" name="mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_layer_mask" qualifiers="const">
+			<return type="int">
+			</return>
+			<description>
+			</description>
+		</method>
+		<method name="set_type_mask">
+			<argument index="0" name="mask" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_type_mask" qualifiers="const">
+			<return type="int">
+			</return>
+			<description>
+			</description>
+		</method>
 	</methods>
 	<constants>
 	</constants>
 </class>
 <class name="RayCast2D" inherits="Node2D" category="Core">
 	<brief_description>
+		Query the closest object intersecting a ray
 	</brief_description>
 	<description>
+		A RayCast2D represents a line from its origin to its destination position [code]cast_to[/code], it is used to query the 2D space in order to find the closest object intersecting with the ray.
 	</description>
 	<methods>
 		<method name="set_enabled">
 			<argument index="0" name="enabled" type="bool">
 			</argument>
 			<description>
+				Enables the RayCast2D. Only enabled raycasts will be able to query the space and report collisions.
 			</description>
 		</method>
 		<method name="is_enabled" qualifiers="const">
 			<return type="bool">
 			</return>
 			<description>
+				Returns whether this raycast is enabled or not
 			</description>
 		</method>
 		<method name="set_cast_to">
 			<argument index="0" name="local_point" type="Vector2">
 			</argument>
 			<description>
+				Sets the ray destination point, so that the ray will test from the ray's origin to [code]local_point[/code]
 			</description>
 		</method>
 		<method name="get_cast_to" qualifiers="const">
 			<return type="Vector2">
 			</return>
 			<description>
+				Return the destination point of this ray object
 			</description>
 		</method>
 		<method name="is_colliding" qualifiers="const">
 			<return type="bool">
 			</return>
 			<description>
-			Return whether the closest object the ray is pointing to is colliding with the vector, with the vector length considered.
+			Return whether the closest object the ray is pointing to is colliding with the vector (considering the vector length).
 			</description>
 		</method>
 		<method name="get_collider" qualifiers="const">
@@ -28317,18 +28601,21 @@ This method controls whether the position between two cached points is interpola
 			<return type="int">
 			</return>
 			<description>
+				Returns the collision shape of the closest object the ray is pointing to.
 			</description>
 		</method>
 		<method name="get_collision_point" qualifiers="const">
 			<return type="Vector2">
 			</return>
 			<description>
+				Returns the collision point in which the ray intersects the closest object.
 			</description>
 		</method>
 		<method name="get_collision_normal" qualifiers="const">
 			<return type="Vector2">
 			</return>
 			<description>
+				Returns the normal of the intersecting object shape face containing the collision point.
 			</description>
 		</method>
 		<method name="add_exception_rid">
@@ -28341,6 +28628,7 @@ This method controls whether the position between two cached points is interpola
 			<argument index="0" name="node" type="Object">
 			</argument>
 			<description>
+				Adds a collision exception so the ray does not report collisions with the specified [code]node[/code].
 			</description>
 		</method>
 		<method name="remove_exception_rid">
@@ -28353,10 +28641,12 @@ This method controls whether the position between two cached points is interpola
 			<argument index="0" name="node" type="Object">
 			</argument>
 			<description>
+				Removes a collision exception so the ray does report collisions with the specified [code]node[/code].
 			</description>
 		</method>
 		<method name="clear_exceptions">
 			<description>
+				Removes all collision exception for this ray.
 			</description>
 		</method>
 		<method name="set_layer_mask">
@@ -28369,6 +28659,7 @@ This method controls whether the position between two cached points is interpola
 			<return type="int">
 			</return>
 			<description>
+				Returns the layer mask for this ray.
 			</description>
 		</method>
 		<method name="set_type_mask">
@@ -35079,6 +35370,14 @@ This method controls whether the position between two cached points is interpola
 			Return true if the string is empty.
 			</description>
 		</method>
+		<method name="ends_with">
+			<return type="bool">
+			</return>
+			<argument index="0" name="text" type="String">
+			</argument>
+			<description>
+			</description>
+		</method>
 		<method name="extension">
 			<return type="String">
 			</return>
@@ -35873,6 +36172,22 @@ This method controls whether the position between two cached points is interpola
 		</method>
 		<method name="add_smooth_group">
 			<argument index="0" name="smooth" type="bool">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="add_triangle_fan">
+			<argument index="0" name="vertexes" type="Vector3Array">
+			</argument>
+			<argument index="1" name="uvs" type="Vector2Array" default="[Vector2Array]">
+			</argument>
+			<argument index="2" name="colors" type="ColorArray" default="ColorArray([ColorArray])">
+			</argument>
+			<argument index="3" name="uv2s" type="Vector2Array" default="[Vector2Array]">
+			</argument>
+			<argument index="4" name="normals" type="Vector3Array" default="Vector3Array()">
+			</argument>
+			<argument index="5" name="tangents" type="Array" default="Array()">
 			</argument>
 			<description>
 			</description>
@@ -37116,6 +37431,12 @@ This method controls whether the position between two cached points is interpola
 			</return>
 			<argument index="0" name="type" type="String">
 			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_stylebox_types" qualifiers="const">
+			<return type="StringArray">
+			</return>
 			<description>
 			</description>
 		</method>
@@ -39932,6 +40253,7 @@ This method controls whether the position between two cached points is interpola
 	Vector used for 2D Math.
 	</brief_description>
 	<description>
+		2-element structure that can be used to represent positions in 2d-space, or any other pair of numeric values.
 	</description>
 	<methods>
 		<method name="angle">
@@ -43031,14 +43353,17 @@ This method controls whether the position between two cached points is interpola
 </class>
 <class name="WeakRef" inherits="Reference" category="Core">
 	<brief_description>
+	Holds an [Object], but does not contribute to the reference count if the object is a reference.
 	</brief_description>
 	<description>
+	A weakref can hold a [Reference], without contributing to the reference counter. A weakref can be created from an [Object] using [method @GDScript.weakref]. If this object is not a reference, weakref still works, however, it does not have any effect on the object. Weakrefs are useful in cases where multiple classes have variables that refer to eachother. Without weakrefs, using these classes could lead to memory leaks, since both references keep eachother from being released. Making part of the variables a weakref can prevent this cyclic dependency, and allows the references to be released.
 	</description>
 	<methods>
 		<method name="get_ref" qualifiers="const">
 			<return type="Object">
 			</return>
 			<description>
+			Returns the [Object] this weakref is referring to.
 			</description>
 		</method>
 	</methods>
