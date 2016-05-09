@@ -1659,35 +1659,27 @@ void TextEdit::_input_event(const InputEvent& p_input_event) {
 
 					if (k.unicode>32) {
 
-						if (cursor.column<text[cursor.line].length() && text[cursor.line][cursor.column]==k.unicode) {
-							//same char, move ahead
-							cursor_set_column(cursor.column+1);
-
+						const CharType chr[2] = {(CharType)k.unicode, 0};
+						if(auto_brace_completion_enabled && _is_pair_symbol(chr[0])) {
+							_consume_pair_symbol(chr[0]);
 						} else {
-							//different char, go back
-							const CharType chr[2] = {(CharType)k.unicode, 0};
-							if(auto_brace_completion_enabled && _is_pair_symbol(chr[0])) {
-								_consume_pair_symbol(chr[0]);
-							} else {
 
-								// remove the old character if in insert mode
-								if (insert_mode) {
-									begin_complex_operation();
+							// remove the old character if in insert mode
+							if (insert_mode) {
+								begin_complex_operation();
 
-									// make sure we don't try and remove empty space
-									if (cursor.column < get_line(cursor.line).length()) {
-										_remove_text(cursor.line, cursor.column, cursor.line, cursor.column + 1);
-									}
-								}
-
-								_insert_text_at_cursor(chr);
-
-								if (insert_mode) {
-									end_complex_operation();
+								// make sure we don't try and remove empty space
+								if (cursor.column < get_line(cursor.line).length()) {
+									_remove_text(cursor.line, cursor.column, cursor.line, cursor.column + 1);
 								}
 							}
-						}
 
+							_insert_text_at_cursor(chr);
+
+							if (insert_mode) {
+								end_complex_operation();
+							}
+						}
 						_update_completion_candidates();
 						accept_event();
 
@@ -2057,7 +2049,17 @@ void TextEdit::_input_event(const InputEvent& p_input_event) {
 						scancode_handled=false;
 						break;
 					}
-#ifdef APPLE_STYLE_KEYS
+#ifndef APPLE_STYLE_KEYS
+					if (k.mod.command) {
+						_scroll_lines_up();
+						break;
+					}
+#else
+					if (k.mod.command && k.mod.alt) {
+						_scroll_lines_up();
+						break;
+					}
+
 					if (k.mod.command)
 						cursor_set_line(0);
 					else
@@ -2084,7 +2086,17 @@ void TextEdit::_input_event(const InputEvent& p_input_event) {
 						scancode_handled=false;
 						break;
 					}
-#ifdef APPLE_STYLE_KEYS
+#ifndef APPLE_STYLE_KEYS
+					if (k.mod.command) {
+						_scroll_lines_down();
+						break;
+					}
+#else
+					if (k.mod.command && k.mod.alt) {
+						_scroll_lines_down();
+						break;
+					}
+
 					if (k.mod.command)
 						cursor_set_line(text.size()-1);
 					else
@@ -2496,6 +2508,36 @@ void TextEdit::_post_shift_selection() {
 
 
 	selection.selecting_text=true;
+}
+
+void TextEdit::_scroll_lines_up() {
+	// adjust the vertical scroll
+	if (get_v_scroll() > 0) {
+		set_v_scroll(get_v_scroll() - 1);
+	}
+
+	// adjust the cursor
+	if (cursor_get_line() >= (get_visible_rows() + get_v_scroll()) && !selection.active) {
+		cursor_set_line((get_visible_rows() + get_v_scroll()) - 1, false);
+	}
+}
+
+void TextEdit::_scroll_lines_down() {
+	// calculate the maximum vertical scroll position
+	int max_v_scroll = get_line_count() - 1;
+	if (!scroll_past_end_of_file_enabled) {
+		max_v_scroll -= get_visible_rows() - 1;
+	}
+
+	// adjust the vertical scroll
+	if (get_v_scroll() < max_v_scroll) {
+		set_v_scroll(get_v_scroll() + 1);
+	}
+
+	// adjust the cursor
+	if ((cursor_get_line()) <= get_v_scroll() - 1 && !selection.active) {
+		cursor_set_line(get_v_scroll(), false);
+	}
 }
 
 /**** TEXT EDIT CORE API ****/
@@ -3861,6 +3903,9 @@ void TextEdit::_update_completion_candidates() {
 		}
 	}
 
+	if (l[cursor.column - 1] == '(' && !pre_keyword && !completion_strings[0].begins_with("\"")) {
+		cancel = true;
+	}
 
 	update();
 
@@ -3876,6 +3921,10 @@ void TextEdit::_update_completion_candidates() {
 	int ci_match=0;
 	for(int i=0;i<completion_strings.size();i++) {
 		if (completion_strings[i].begins_with(s)) {
+			// don't remove duplicates if no input is provided
+			if (completion_options.find(completion_strings[i]) != -1 && s != "") {
+				continue;
+			}
 			completion_options.push_back(completion_strings[i]);
 			int m=0;
 			int max=MIN(completion_current.length(),completion_strings[i].length());
