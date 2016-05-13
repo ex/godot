@@ -1287,14 +1287,13 @@ void Control::set_anchor(Margin p_margin,AnchorType p_anchor, bool p_keep_margin
 
 void Control::_set_anchor(Margin p_margin,AnchorType p_anchor) {
 	#ifdef TOOLS_ENABLED
-	SceneTree *st=OS::get_singleton()->get_main_loop()->cast_to<SceneTree>();
-	if (st && st->is_editor_hint()) {
+	if (is_inside_tree() && get_tree()->is_editor_hint()) {
 		set_anchor(p_margin, p_anchor, EDITOR_DEF("2d_editor/keep_margins_when_changing_anchors", false));
 	} else {
-		set_anchor(p_margin, p_anchor);
+		set_anchor(p_margin, p_anchor, false);
 	}
 	#else
-	set_anchor(p_margin, p_anchor);
+	set_anchor(p_margin, p_anchor, false);
 	#endif
 }
 
@@ -2320,7 +2319,7 @@ void Control::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("grab_click_focus"),&Control::grab_click_focus);
 
-	ObjectTypeDB::bind_method(_MD("set_drag_forwarding;","target:Control"),&Control::set_drag_forwarding);
+	ObjectTypeDB::bind_method(_MD("set_drag_forwarding","target:Control"),&Control::set_drag_forwarding);
 	ObjectTypeDB::bind_method(_MD("set_drag_preview","control:Control"),&Control::set_drag_preview);
 
 	ObjectTypeDB::bind_method(_MD("warp_mouse","to_pos"),&Control::warp_mouse);

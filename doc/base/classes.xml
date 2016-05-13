@@ -2680,6 +2680,22 @@
 			Get the list of names of the animations stored in the player.
 			</description>
 		</method>
+		<method name="animation_set_next">
+			<argument index="0" name="anim_from" type="String">
+			</argument>
+			<argument index="1" name="anim_to" type="String">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="animation_get_next" qualifiers="const">
+			<return type="String">
+			</return>
+			<argument index="0" name="anim_from" type="String">
+			</argument>
+			<description>
+			</description>
+		</method>
 		<method name="set_blend_time">
 			<argument index="0" name="anim_from" type="String">
 			</argument>
@@ -4010,7 +4026,7 @@
 			</description>
 		</method>
 		<method name="overlaps_body" qualifiers="const">
-			<return type="PhysicsBody2D">
+			<return type="bool">
 			</return>
 			<argument index="0" name="body" type="Object">
 			</argument>
@@ -4019,7 +4035,7 @@
 			</description>
 		</method>
 		<method name="overlaps_area" qualifiers="const">
-			<return type="Area2D">
+			<return type="bool">
 			</return>
 			<argument index="0" name="area" type="Object">
 			</argument>
@@ -6766,9 +6782,9 @@
 			</argument>
 			<argument index="1" name="colors" type="ColorArray">
 			</argument>
-			<argument index="2" name="uvs" type="Vector2Array" default="Array()">
+			<argument index="2" name="uvs" type="Vector2Array">
 			</argument>
-			<argument index="3" name="texture" type="Texture" default="Object()">
+			<argument index="3" name="texture" type="Texture" default="NULL">
 			</argument>
 			<argument index="4" name="width" type="float" default="1">
 			</argument>
@@ -6781,9 +6797,9 @@
 			</argument>
 			<argument index="1" name="colors" type="ColorArray">
 			</argument>
-			<argument index="2" name="uvs" type="Vector2Array" default="Array()">
+			<argument index="2" name="uvs" type="Vector2Array" default="Vector2Array()">
 			</argument>
-			<argument index="3" name="texture" type="Texture" default="Object()">
+			<argument index="3" name="texture" type="Texture" default="NULL">
 			</argument>
 			<description>
 			Draw a polygon of any amount of points, convex or concave.
@@ -6794,9 +6810,9 @@
 			</argument>
 			<argument index="1" name="color" type="Color">
 			</argument>
-			<argument index="2" name="uvs" type="Vector2Array" default="Array()">
+			<argument index="2" name="uvs" type="Vector2Array" default="Vector2Array()">
 			</argument>
-			<argument index="3" name="texture" type="Texture" default="Object()">
+			<argument index="3" name="texture" type="Texture" default="NULL">
 			</argument>
 			<description>
 			Draw a colored polygon of any amount of points, convex or concave.
@@ -7118,7 +7134,7 @@
 			</description>
 		</method>
 		<method name="set_rotation">
-			<argument index="0" name="rotation" type="float">
+			<argument index="0" name="radians" type="float">
 			</argument>
 			<description>
 			Set the base rotation for this layer (helper).
@@ -7129,6 +7145,18 @@
 			</return>
 			<description>
 			Return the base rotation for this layer (helper).
+			</description>
+		</method>
+		<method name="set_rotationd">
+			<argument index="0" name="degrees" type="float">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_rotationd" qualifiers="const">
+			<return type="float">
+			</return>
+			<description>
 			</description>
 		</method>
 		<method name="set_scale">
@@ -7146,7 +7174,7 @@
 			</description>
 		</method>
 		<method name="get_world_2d" qualifiers="const">
-			<return type="Canvas">
+			<return type="World2D">
 			</return>
 			<description>
 			Return the [World2D] used by this layer.
@@ -8491,8 +8519,23 @@
 </class>
 <class name="ConfigFile" inherits="Reference" category="Core">
 	<brief_description>
+	Helper class to handle INI-style files.
 	</brief_description>
 	<description>
+	This helper class can be used to store [Variant] values on the filesystem using an INI-style formatting. The stored values as referenced by a section and a key. The stored data can be saved to or parsed from a file, though ConfigFile objects can also be used directly with accessing the filesystem.
+	The following example shows how to parse a INI-style file from the system, read its contents and store new values in it:
+	[codeblock]
+	var config = ConfigFile.new()
+	var err = config.load("user://settings.cfg")
+	if err == OK: # if not, something went wrong with the file loading
+	    # Look for the display/width pair, and default to 1024 if missing
+	    var screen_width = get_value("display", "width", 1024)
+	    # Store a variable if and only it hasn't been defined yet
+		if not config.has_section_key("audio", "mute"):
+		    config.set_value("audio", "mute", false)
+	    # Save the changes by overwriting the previous file
+		config.save("user://settings.cfg")
+	[/codeblock]
 	</description>
 	<methods>
 		<method name="set_value">
@@ -8503,9 +8546,12 @@
 			<argument index="2" name="value" type="Variant">
 			</argument>
 			<description>
+			Assign a value to the specified key of the the specified section. If the section and/or the key do not exist, they are created. Passing a [code]NULL[/code] value deletes the specified key if it exists (and deletes the section if it ends up empty once the key has been removed).
 			</description>
 		</method>
 		<method name="get_value" qualifiers="const">
+			<return type="Variant">
+			</return>
 			<argument index="0" name="section" type="String">
 			</argument>
 			<argument index="1" name="key" type="String">
@@ -8513,6 +8559,7 @@
 			<argument index="2" name="default" type="Variant" default="NULL">
 			</argument>
 			<description>
+			Return the current value for the specified section and key. If the section and/or the key do not exist, the method returns the value of the optional [i]default[/i] argument (and thus [code]NULL[/code] if not specified).
 			</description>
 		</method>
 		<method name="has_section" qualifiers="const">
@@ -8521,6 +8568,7 @@
 			<argument index="0" name="section" type="String">
 			</argument>
 			<description>
+			Check if the specified section exists.
 			</description>
 		</method>
 		<method name="has_section_key" qualifiers="const">
@@ -8531,12 +8579,14 @@
 			<argument index="1" name="key" type="String">
 			</argument>
 			<description>
+			Check if the specified section-key pair exists.
 			</description>
 		</method>
 		<method name="get_sections" qualifiers="const">
 			<return type="StringArray">
 			</return>
 			<description>
+			Return an array of all defined section identifiers.
 			</description>
 		</method>
 		<method name="get_section_keys" qualifiers="const">
@@ -8545,6 +8595,7 @@
 			<argument index="0" name="section" type="String">
 			</argument>
 			<description>
+			Return an array of all defined key identifiers in the specified section.
 			</description>
 		</method>
 		<method name="load">
@@ -8553,6 +8604,7 @@
 			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
+			Load the config file specified as a parameter. The file's contents are parsed and loaded in the ConfigFile object from which the method was called. The return value is one of the OK, FAILED or ERR_* constants listed in [@Global Scope] (if the load was successful, it returns OK).
 			</description>
 		</method>
 		<method name="save">
@@ -8561,6 +8613,8 @@
 			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
+			Save the contents of the ConfigFile object to the file specified as a parameter. The output file uses an INI-style structure.
+			The return value is one of the OK, FAILED or ERR_* constants listed in [@Global Scope] (if the save was successful, it returns OK).
 			</description>
 		</method>
 	</methods>
@@ -8779,7 +8833,13 @@
 			</description>
 		</method>
 		<method name="set_rotation">
-			<argument index="0" name="rotation" type="float">
+			<argument index="0" name="radians" type="float">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="set_rotation_deg">
+			<argument index="0" name="degrees" type="float">
 			</argument>
 			<description>
 			</description>
@@ -8827,6 +8887,12 @@
 			</description>
 		</method>
 		<method name="get_rotation" qualifiers="const">
+			<return type="float">
+			</return>
+			<description>
+			</description>
+		</method>
+		<method name="get_rotation_deg" qualifiers="const">
 			<return type="float">
 			</return>
 			<description>
@@ -9172,6 +9238,12 @@
 			</description>
 		</method>
 		<method name="grab_click_focus">
+			<description>
+			</description>
+		</method>
+		<method name="set_drag_forwarding">
+			<argument index="0" name="target" type="Control">
+			</argument>
 			<description>
 			</description>
 		</method>
@@ -10065,22 +10137,22 @@ This approximation makes straight segments between each point, then subdivides t
 	Type used to handle the filesystem.
 	</brief_description>
 	<description>
-	Directory type. Is used to manage directories and their content (not restricted to the project folder).
-	Example for how to iterate through the files of a directory:
+	Directory type. It is used to manage directories and their content (not restricted to the project folder).
+	Here is an example on how to iterate through the files of a directory:
 	[codeblock]
-	func dir(path):
-	    var d = Directory.new()
-	    if d.open( path )==0:
-	        d.list_dir_begin()
-	        var file_name = d.get_next()
-	        while(file_name!=""):
-	            if d.current_is_dir():
+	func dir_contents(path):
+	    var dir = Directory.new()
+	    if dir.open(path) == OK:
+	        dir.list_dir_begin()
+	        var file_name = dir.get_next()
+	        while (file_name != ""):
+	            if dir.current_is_dir():
 	                print("Found directory: " + file_name)
 	            else:
-	                print("Found file:" + file_name)
-	            file_name = d.get_next()
+	                print("Found file: " + file_name)
+	            file_name = dir.get_next()
 	    else:
-	        print("Some open Error, maybe directory not found?")
+	        print("An error occurred when trying to access the path.")
 	[/codeblock]
 	</description>
 	<methods>
@@ -10090,40 +10162,42 @@ This approximation makes straight segments between each point, then subdivides t
 			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
-			Opens a directory to work with. Needs a path, example "res://folder"
+			Open an existing directory of the filesystem. The [i]path[/i] argument can be within the project tree ([code]res://folder[/code]), the user directory ([code]user://folder[/code]) or an absolute path of the user filesystem (e.g. [code]/tmp/folder[/code] or [code]C:\tmp\folder[/code]).
+			The method returns one of the error code constants defined in [@Global Scope] (OK or ERR_*).
 			</description>
 		</method>
 		<method name="list_dir_begin">
 			<return type="bool">
 			</return>
 			<description>
-			Loads all file names of the current directory (prepares the get_next() function).
+			Initialise the stream used to list all files and directories using the [method get_next] function, closing the current opened stream if needed. Once the stream has been processed, it should typically be closed with [method list_dir_end].
+			Return false if the stream could not be initialised.
 			</description>
 		</method>
 		<method name="get_next">
 			<return type="String">
 			</return>
 			<description>
-			Is used to iterate through the files of the current directory. Returns the name(no path) of the current file/directory, it also contains "." and ".." .
-Returns an empty String "" at the end of the list.
+			Return the next element (file or directory) in the current directory (including [code].[/code] and [code]..[/code]). The name of the file or directory is returned (and not its full path). Once the stream has been fully processed, the method returns an empty String and closes the stream automatically (i.e. [method list_dir_end] would not be mandatory in such a case).
 			</description>
 		</method>
 		<method name="current_is_dir" qualifiers="const">
 			<return type="bool">
 			</return>
 			<description>
-			Returns true if the current file you are looking at with get_next() is a directory or "." or ".." otherwise false.
+			Return whether the current item processed with the last [method get_next] call is a directory ([code].[/code] and [code]..[/code] are considered directories).
 			</description>
 		</method>
 		<method name="list_dir_end">
 			<description>
-			Run this to empty the list of remaining files in get_next(). You can use it to end the iteration, as soon as your goal is reached.
+			Close the current stream opened with [method list_dir_begin] (whether it has been fully processed with [method get_next] or not does not matter).
 			</description>
 		</method>
 		<method name="get_drive_count">
 			<return type="int">
 			</return>
 			<description>
+			On Windows, return the number of drives (partitions) mounted on the current filesystem. On other platforms, the method returns 0.
 			</description>
 		</method>
 		<method name="get_drive">
@@ -10132,6 +10206,7 @@ Returns an empty String "" at the end of the list.
 			<argument index="0" name="idx" type="int">
 			</argument>
 			<description>
+			On Windows, return the name of the drive (partition) passed as an argument (e.g. [code]C:[/code]). On other platforms, or if the requested drive does not existed, the method returns an empty String.
 			</description>
 		</method>
 		<method name="change_dir">
@@ -10140,53 +10215,60 @@ Returns an empty String "" at the end of the list.
 			<argument index="0" name="todir" type="String">
 			</argument>
 			<description>
-			Needs a path or name to the next directory. When the target directory is in the current directory you can use "newfolder" otherwise you need the full path "res://currentfolder/newfolder"
+			Change the currently opened directory to the one passed as an argument. The argument can be relative to the current directory (e.g. [code]newdir[/code] or [code]../newdir[/code]), or an absolute path (e.g. [code]/tmp/newdir[/code] or [code]res://somedir/newdir[/code]).
+			The method returns one of the error code constants defined in [@Global Scope] (OK or ERR_*).
 			</description>
 		</method>
 		<method name="get_current_dir">
 			<return type="String">
 			</return>
 			<description>
-			Returns a path to the current directory, example: "res://folder"
+			Return the absolute path to the currently opened directory (e.g. [code]res://folder[/code] or [code]C:\tmp\folder[/code]).
 			</description>
 		</method>
 		<method name="make_dir">
 			<return type="Error">
 			</return>
-			<argument index="0" name="name" type="String">
+			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
+			Create a directory. The argument can be relative to the current directory, or an absolute path. The target directory should be placed in an already existing directory (to create the full path recursively, see [method make_dir_recursive]).
+			The method returns one of the error code constants defined in [@Global Scope] (OK, FAILED or ERR_*).
 			</description>
 		</method>
 		<method name="make_dir_recursive">
 			<return type="Error">
 			</return>
-			<argument index="0" name="name" type="String">
+			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
+			Create a target directory and all necessary intermediate directories in its path, by calling [method make_dir] recursively. The argument can be relative to the current directory, or an absolute path.
+			Returns one of the error code constants defined in [@Global Scope] (OK, FAILED or ERR_*).
 			</description>
 		</method>
 		<method name="file_exists">
 			<return type="bool">
 			</return>
-			<argument index="0" name="name" type="String">
+			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
+			Return whether the target file exists. The argument can be relative to the current directory, or an absolute path.
 			</description>
 		</method>
 		<method name="dir_exists">
 			<return type="bool">
 			</return>
-			<argument index="0" name="name" type="String">
+			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
-			Returns true if directory exists otherwise false. Needs a path, example: "res://folder"
+			Return whether the target directory exists. The argument can be relative to the current directory, or an absolute path.
 			</description>
 		</method>
 		<method name="get_space_left">
 			<return type="int">
 			</return>
 			<description>
+			On Unix desktop systems, return the available space on the current directory's disk. On other platforms, this information is not available and the method returns 0 or -1.
 			</description>
 		</method>
 		<method name="copy">
@@ -10197,6 +10279,8 @@ Returns an empty String "" at the end of the list.
 			<argument index="1" name="to" type="String">
 			</argument>
 			<description>
+			Copy the [i]from[/i] file to the [i]to[/i] destination. Both arguments should be paths to files, either relative or absolute. If the destination file exists and is not access-protected, it will be overwritten.
+			Returns one of the error code constants defined in [@Global Scope] (OK, FAILED or ERR_*).
 			</description>
 		</method>
 		<method name="rename">
@@ -10207,14 +10291,18 @@ Returns an empty String "" at the end of the list.
 			<argument index="1" name="to" type="String">
 			</argument>
 			<description>
+			Rename (move) the [i]from[/i] file to the [i]to[/i] destination. Both arguments should be paths to files, either relative or absolute. If the destination file exists and is not access-protected, it will be overwritten.
+			Returns one of the error code constants defined in [@Global Scope] (OK or FAILED).
 			</description>
 		</method>
 		<method name="remove">
 			<return type="Error">
 			</return>
-			<argument index="0" name="file" type="String">
+			<argument index="0" name="path" type="String">
 			</argument>
 			<description>
+			Delete the target file or an empty directory. The argument can be relative to the current directory, or an absolute path. If the target directory is not empty, the operation will fail.
+			Returns one of the error code constants defined in [@Global Scope] (OK or FAILED).
 			</description>
 		</method>
 	</methods>
@@ -14065,6 +14153,20 @@ Returns an empty String "" at the end of the list.
 			<description>
 			</description>
 		</method>
+		<method name="request_raw">
+			<return type="int">
+			</return>
+			<argument index="0" name="method" type="int">
+			</argument>
+			<argument index="1" name="url" type="String">
+			</argument>
+			<argument index="2" name="headers" type="StringArray">
+			</argument>
+			<argument index="3" name="body" type="RawArray" default="&quot;&quot;">
+			</argument>
+			<description>
+			</description>
+		</method>
 		<method name="request">
 			<return type="int">
 			</return>
@@ -14688,6 +14790,10 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<description>
 			</description>
 		</method>
+		<method name="fix_alpha_edges">
+			<description>
+			</description>
+		</method>
 		<method name="get_data">
 			<return type="RawArray">
 			</return>
@@ -15208,13 +15314,13 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 	</signals>
 	<constants>
 		<constant name="MOUSE_MODE_VISIBLE" value="0">
-		Makes the mouse cursor visible if it is hidden.
+			Makes the mouse cursor visible if it is hidden.
 		</constant>
 		<constant name="MOUSE_MODE_HIDDEN" value="1">
-		Makes the mouse cursor hidden if it is visible.
+			Makes the mouse cursor hidden if it is visible.
 		</constant>
 		<constant name="MOUSE_MODE_CAPTURED" value="2">
-		Captures the mouse. The mouse will be hidden and unable to leave the game window. But it will still register movement and mouse button presses.
+			Captures the mouse. The mouse will be hidden and unable to leave the game window. But it will still register movement and mouse button presses.
 		</constant>
 	</constants>
 </class>
@@ -16377,7 +16483,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 		<method name="add_item">
 			<argument index="0" name="text" type="String">
 			</argument>
-			<argument index="1" name="icon" type="Texture" default="Object()">
+			<argument index="1" name="icon" type="Texture" default="NULL">
 			</argument>
 			<argument index="2" name="selectable" type="bool" default="true">
 			</argument>
@@ -16629,6 +16735,14 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 		<method name="get_min_icon_size" qualifiers="const">
 			<return type="Vector2">
 			</return>
+			<description>
+			</description>
+		</method>
+		<method name="get_item_at_pos" qualifiers="const">
+			<return type="int">
+			</return>
+			<argument index="0" name="pos" type="Vector2">
+			</argument>
 			<description>
 			</description>
 		</method>
@@ -17963,38 +18077,38 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 </class>
 <class name="LinkButton" inherits="BaseButton" category="Core">
 	<brief_description>
-		Simple button used to represent a link to some resource
+	Simple button used to represent a link to some resource
 	</brief_description>
 	<description>
-		This kind of buttons are primarily used when the interaction with the button causes a context change (like linking to a web page).
+	This kind of buttons are primarily used when the interaction with the button causes a context change (like linking to a web page).
 	</description>
 	<methods>
 		<method name="set_text">
 			<argument index="0" name="text" type="String">
 			</argument>
 			<description>
-				Sets the text of the button.
+			Sets the text of the button.
 			</description>
 		</method>
 		<method name="get_text" qualifiers="const">
 			<return type="String">
 			</return>
 			<description>
-				Returns the text of the button.
+			Returns the text of the button.
 			</description>
 		</method>
 		<method name="set_underline_mode">
 			<argument index="0" name="underline_mode" type="int">
 			</argument>
 			<description>
-				Sets the underline mode for this button, the argument must be one of the [LinkButton] constants (see constants section).
+			Sets the underline mode for this button, the argument must be one of the [LinkButton] constants (see constants section).
 			</description>
 		</method>
 		<method name="get_underline_mode" qualifiers="const">
 			<return type="int">
 			</return>
 			<description>
-				Returns the underline mode for this button.
+			Returns the underline mode for this button.
 			</description>
 		</method>
 	</methods>
@@ -20246,7 +20360,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			</description>
 		</method>
 		<method name="get_parent" qualifiers="const">
-			<return type="Parent">
+			<return type="Node">
 			</return>
 			<description>
 			Return the parent [Node] of the current [Node], or an empty Object if the node lacks a parent.
@@ -20615,6 +20729,10 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 		</constant>
 		<constant name="NOTIFICATION_INSTANCED" value="20">
 		</constant>
+		<constant name="NOTIFICATION_DRAG_BEGIN" value="21">
+		</constant>
+		<constant name="NOTIFICATION_DRAG_END" value="22">
+		</constant>
 		<constant name="PAUSE_MODE_INHERIT" value="0">
 		</constant>
 		<constant name="PAUSE_MODE_STOP" value="1">
@@ -20639,7 +20757,14 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			</description>
 		</method>
 		<method name="set_rot">
-			<argument index="0" name="rot" type="float">
+			<argument index="0" name="radians" type="float">
+			</argument>
+			<description>
+			Set the rotation of the 2D node.
+			</description>
+		</method>
+		<method name="set_rotd">
+			<argument index="0" name="degrees" type="float">
 			</argument>
 			<description>
 			Set the rotation of the 2D node.
@@ -20664,6 +20789,12 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			</return>
 			<description>
 			Return the rotation of the 2D node.
+			</description>
+		</method>
+		<method name="get_rotd" qualifiers="const">
+			<return type="float">
+			</return>
+			<description>
 			</description>
 		</method>
 		<method name="get_scale" qualifiers="const">
@@ -20760,7 +20891,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="0" name="point" type="Vector2">
 			</argument>
 			<description>
-			Return the rotation angle needed for the 2d node to point at 'point' position.
+			Return the rotation angle in radians needed for the 2d node to point at 'point' position.
 			</description>
 		</method>
 		<method name="set_z">
@@ -21029,7 +21160,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<argument index="0" name="size" type="Vector2">
 			</argument>
 			<description>
-				Sets the window size to the specified size.
+			Sets the window size to the specified size.
 			</description>
 		</method>
 		<method name="set_window_fullscreen">
@@ -21107,7 +21238,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			<return type="int">
 			</return>
 			<description>
-				Returns the current screen orientation, the return value will be one of the SCREEN_ORIENTATION constants in this class.
+			Returns the current screen orientation, the return value will be one of the SCREEN_ORIENTATION constants in this class.
 			</description>
 		</method>
 		<method name="set_keep_screen_on">
@@ -23448,7 +23579,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 	</methods>
 	<constants>
 		<constant name="PARAM_DIRECTION" value="0">
-			Direction in degrees at which the particles will be launched, Notice that when the direction is set to 0 the particles will be launched to the negative
+			Direction in radians at which the particles will be launched, Notice that when the direction is set to 0 the particles will be launched to the negative
 		</constant>
 		<constant name="PARAM_SPREAD" value="1">
 		</constant>
@@ -23462,7 +23593,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			Velocity at which the particles will orbit around the emitter center
 		</constant>
 		<constant name="PARAM_GRAVITY_DIRECTION" value="5">
-			Direction in degrees at which the particles will be attracted
+			Direction in radians at which the particles will be attracted
 		</constant>
 		<constant name="PARAM_GRAVITY_STRENGTH" value="6">
 			Strength of the gravitation attraction for each particle
@@ -23475,7 +23606,7 @@ Example: (content-length:12), (Content-Type:application/json; charset=UTF-8)
 			Amount of damping for each particle
 		</constant>
 		<constant name="PARAM_INITIAL_ANGLE" value="10">
-			Initial angle at which each particle will be spawned
+			Initial angle in radians at which each particle will be spawned
 		</constant>
 		<constant name="PARAM_INITIAL_SIZE" value="11">
 			Initial size of each particle
@@ -25033,7 +25164,7 @@ This method controls whether the position between two cached points is interpola
 			</argument>
 			<argument index="1" name="param" type="int">
 			</argument>
-			<argument index="2" name="value" type="float" default="RID()">
+			<argument index="2" name="value" type="float">
 			</argument>
 			<description>
 			</description>
@@ -27483,21 +27614,21 @@ This method controls whether the position between two cached points is interpola
 			<return type="Vector2">
 			</return>
 			<description>
-			Returns the polygon texture offset
+			Returns the polygon texture offset.
 			</description>
 		</method>
 		<method name="set_texture_rotation">
 			<argument index="0" name="texture_rotation" type="float">
 			</argument>
 			<description>
-			Sets the amount of rotation of the polygon texture, [code]texture_rotation[/code] is specified in degrees and clockwise rotation, meaning that if the texture rotation is set to 45 degrees, the texture will be rotated 45 degrees clockwise along the polygon position plus the texture offset.
+			Sets the amount of rotation of the polygon texture, [code]texture_rotation[/code] is specified in radians and clockwise rotation.
 			</description>
 		</method>
 		<method name="get_texture_rotation" qualifiers="const">
 			<return type="float">
 			</return>
 			<description>
-			Returns the rotation in degrees of the texture polygon
+			Returns the rotation in radians of the texture polygon.
 			</description>
 		</method>
 		<method name="set_texture_scale">
@@ -33787,12 +33918,24 @@ This method controls whether the position between two cached points is interpola
 			</description>
 		</method>
 		<method name="set_rotation">
-			<argument index="0" name="rotation" type="Vector3">
+			<argument index="0" name="rotation_rad" type="Vector3">
 			</argument>
 			<description>
 			</description>
 		</method>
 		<method name="get_rotation" qualifiers="const">
+			<return type="Vector3">
+			</return>
+			<description>
+			</description>
+		</method>
+		<method name="set_rotation_deg">
+			<argument index="0" name="rotation_deg" type="Vector3">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_rotation_deg" qualifiers="const">
 			<return type="Vector3">
 			</return>
 			<description>
@@ -34183,13 +34326,13 @@ This method controls whether the position between two cached points is interpola
 	</description>
 	<methods>
 		<method name="set_stream">
-			<argument index="0" name="stream" type="Stream">
+			<argument index="0" name="stream" type="AudioStream">
 			</argument>
 			<description>
 			</description>
 		</method>
 		<method name="get_stream" qualifiers="const">
-			<return type="Stream">
+			<return type="AudioStream">
 			</return>
 			<description>
 			</description>
@@ -35984,8 +36127,12 @@ This method controls whether the position between two cached points is interpola
 		<method name="strip_edges">
 			<return type="String">
 			</return>
+			<argument index="0" name="left" type="bool" default="True">
+			</argument>
+			<argument index="1" name="right" type="bool" default="True">
+			</argument>
 			<description>
-			Return a copy of the string stripped of any non-printable character at the beginning and the end.
+			Return a copy of the string stripped of any non-printable character at the beginning and the end. The optional arguments are used to toggle stripping on the left and right edges respectively.
 			</description>
 		</method>
 		<method name="substr">
@@ -36479,11 +36626,11 @@ This method controls whether the position between two cached points is interpola
 		<method name="add_triangle_fan">
 			<argument index="0" name="vertexes" type="Vector3Array">
 			</argument>
-			<argument index="1" name="uvs" type="Vector2Array" default="[Vector2Array]">
+			<argument index="1" name="uvs" type="Vector2Array" default="Vector2Array()">
 			</argument>
 			<argument index="2" name="colors" type="ColorArray" default="ColorArray([ColorArray])">
 			</argument>
-			<argument index="3" name="uv2s" type="Vector2Array" default="[Vector2Array]">
+			<argument index="3" name="uv2s" type="Vector2Array" default="Vector2Array()">
 			</argument>
 			<argument index="4" name="normals" type="Vector3Array" default="Vector3Array()">
 			</argument>
@@ -36513,7 +36660,7 @@ This method controls whether the position between two cached points is interpola
 		<method name="commit">
 			<return type="Mesh">
 			</return>
-			<argument index="0" name="existing" type="Mesh" default="Object()">
+			<argument index="0" name="existing" type="Mesh" default="NULL">
 			</argument>
 			<description>
 			</description>
@@ -36985,6 +37132,34 @@ This method controls whether the position between two cached points is interpola
 			</return>
 			<description>
 			Return the line the editing cursor is at.
+			</description>
+		</method>
+		<method name="cursor_set_blink_enabled">
+			<argument index="0" name="enable" type="bool">
+			</argument>
+			<description>
+			Set the text editor caret to blink.
+			</description>
+		</method>
+		<method name="cursor_get_blink_enabled" qualifiers="const">
+			<return type="bool">
+			</return>
+			<description>
+			Gets whether the text editor caret is blinking.
+			</description>
+		</method>
+		<method name="cursor_set_blink_speed">
+			<argument index="0" name="blink_speed" type="float">
+			</argument>
+			<description>
+			Set the text editor caret blink speed. Cannot be less then or equal to 0.
+			</description>
+		</method>
+		<method name="cursor_get_blink_speed" qualifiers="const">
+			<return type="float">
+			</return>
+			<description>
+			Gets the text editor caret blink speed.
 			</description>
 		</method>
 		<method name="set_readonly">
@@ -39130,7 +39305,7 @@ This method controls whether the position between two cached points is interpola
 		<method name="create_item">
 			<return type="TreeItem">
 			</return>
-			<argument index="0" name="parent" type="TreeItem" default="Object()">
+			<argument index="0" name="parent" type="TreeItem" default="NULL">
 			</argument>
 			<description>
 			</description>
@@ -39243,6 +39418,22 @@ This method controls whether the position between two cached points is interpola
 			<description>
 			</description>
 		</method>
+		<method name="get_item_at_pos" qualifiers="const">
+			<return type="TreeItem">
+			</return>
+			<argument index="0" name="pos" type="Vector2">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_column_at_pos" qualifiers="const">
+			<return type="int">
+			</return>
+			<argument index="0" name="pos" type="Vector2">
+			</argument>
+			<description>
+			</description>
+		</method>
 		<method name="ensure_cursor_is_visible">
 			<description>
 			</description>
@@ -39289,6 +39480,18 @@ This method controls whether the position between two cached points is interpola
 		</method>
 		<method name="is_folding_hidden" qualifiers="const">
 			<return type="bool">
+			</return>
+			<description>
+			</description>
+		</method>
+		<method name="set_drop_mode_flags">
+			<argument index="0" name="flags" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="get_drop_mode_flags" qualifiers="const">
+			<return type="int">
 			</return>
 			<description>
 			</description>
@@ -39351,6 +39554,12 @@ This method controls whether the position between two cached points is interpola
 		</constant>
 		<constant name="SELECT_MULTI" value="2">
 		</constant>
+		<constant name="DROP_MODE_DISABLED" value="0">
+		</constant>
+		<constant name="DROP_MODE_ON_ITEM" value="1">
+		</constant>
+		<constant name="DROP_MODE_INBETWEEN" value="2">
+		</constant>
 	</constants>
 	<theme_items>
 		<theme_item name="item_margin" type="int">
@@ -39374,6 +39583,8 @@ This method controls whether the position between two cached points is interpola
 		<theme_item name="font_color_selected" type="Color">
 		</theme_item>
 		<theme_item name="font_color" type="Color">
+		</theme_item>
+		<theme_item name="drop_position_color" type="Color">
 		</theme_item>
 		<theme_item name="arrow" type="Texture">
 		</theme_item>
@@ -39703,6 +39914,8 @@ This method controls whether the position between two cached points is interpola
 			<argument index="0" name="column" type="int">
 			</argument>
 			<argument index="1" name="color" type="Color">
+			</argument>
+			<argument index="2" name="just_outline" type="bool" default="false">
 			</argument>
 			<description>
 			</description>
@@ -41264,13 +41477,13 @@ This method controls whether the position between two cached points is interpola
 	</description>
 	<methods>
 		<method name="set_stream">
-			<argument index="0" name="stream" type="Stream">
+			<argument index="0" name="stream" type="VideoStream">
 			</argument>
 			<description>
 			</description>
 		</method>
 		<method name="get_stream" qualifiers="const">
-			<return type="Stream">
+			<return type="VideoStream">
 			</return>
 			<description>
 			</description>
@@ -41744,6 +41957,12 @@ This method controls whether the position between two cached points is interpola
 			<description>
 			</description>
 		</method>
+		<method name="gui_get_drag_data" qualifiers="const">
+			<return type="Variant">
+			</return>
+			<description>
+			</description>
+		</method>
 		<method name="set_disable_input">
 			<argument index="0" name="disable" type="bool">
 			</argument>
@@ -42083,6 +42302,12 @@ This method controls whether the position between two cached points is interpola
 			<return type="int">
 			</return>
 			<argument index="0" name="arg0" type="RID">
+			</argument>
+			<description>
+			</description>
+		</method>
+		<method name="texture_set_shrink_all_x2_on_set_data">
+			<argument index="0" name="shrink" type="bool">
 			</argument>
 			<description>
 			</description>
