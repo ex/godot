@@ -207,13 +207,22 @@ void SceneTreeEditor::_cell_button_pressed(Object *p_item,int p_column,int p_id)
 			_update_tree();
 			emit_signal("node_changed");
 		}
+	} else if (p_id==BUTTON_WARNING) {
+
+		String config_err = n->get_configuration_warning();
+		if (config_err==String())
+			return;
+		config_err=config_err.world_wrap(80);
+		warning->set_text(config_err);
+		warning->popup_centered_minsize();
+
 	}
 }
 
-void SceneTreeEditor::_add_nodes(Node *p_node,TreeItem *p_parent) {
+bool SceneTreeEditor::_add_nodes(Node *p_node,TreeItem *p_parent) {
 
 	if (!p_node)
-		return;
+		return false;
 
 	// only owned nodes are editable, since nodes can create their own (manually owned) child nodes,
 	// which the editor needs not to know about.
@@ -227,7 +236,7 @@ void SceneTreeEditor::_add_nodes(Node *p_node,TreeItem *p_parent) {
 			part_of_subscene=true;
 			//allow
 		} else {
-			return;
+			return false;
 		}
 	} else {
 		part_of_subscene = p_node!=get_scene_node() && get_scene_node()->get_scene_inherited_state().is_valid() && get_scene_node()->get_scene_inherited_state()->find_node_by_path(get_scene_node()->get_path_to(p_node))>=0;
@@ -274,6 +283,12 @@ void SceneTreeEditor::_add_nodes(Node *p_node,TreeItem *p_parent) {
 			}
 			node=node->get_parent();
 		}
+	}
+
+	String warning = p_node->get_configuration_warning();
+
+	if (warning!=String()) {
+		item->add_button(0,get_icon("NodeWarning","EditorIcons"),BUTTON_WARNING);
 	}
 
 	if (p_node==get_scene_node() && p_node->get_scene_inherited_state().is_valid()) {
@@ -345,10 +360,23 @@ void SceneTreeEditor::_add_nodes(Node *p_node,TreeItem *p_parent) {
 		item->set_as_cursor(0);
 	}
 
+	bool keep= ( filter==String() || String(p_node->get_name()).to_lower().find(filter.to_lower())!=-1 );
+
 	for (int i=0;i<p_node->get_child_count();i++) {
 
-		_add_nodes(p_node->get_child(i),item);
+		bool child_keep = _add_nodes(p_node->get_child(i),item);
+
+		keep = keep || child_keep;
+
 	}
+
+	if (!keep) {
+		memdelete(item);
+		return false;
+	} else {
+		return true;
+	}
+
 }
 
 
@@ -545,6 +573,8 @@ void SceneTreeEditor::_notification(int p_what) {
 
 		get_tree()->connect("tree_changed",this,"_tree_changed");
 		get_tree()->connect("node_removed",this,"_node_removed");
+		get_tree()->connect("node_configuration_warning_changed",this,"_warning_changed");
+
 		instance_menu->set_item_icon(3,get_icon("Load","EditorIcons"));
 		tree->connect("item_collapsed",this,"_cell_collapsed");
 		inheritance_menu->set_item_icon(2,get_icon("Load","EditorIcons"));
@@ -561,6 +591,7 @@ void SceneTreeEditor::_notification(int p_what) {
 		get_tree()->disconnect("node_removed",this,"_node_removed");
 		tree->disconnect("item_collapsed",this,"_cell_collapsed");
 		clear_inherit_confirm->disconnect("confirmed",this,"_subscene_option");
+		get_tree()->disconnect("node_configuration_warning_changed",this,"_warning_changed");
 	}
 
 }
@@ -653,7 +684,7 @@ void SceneTreeEditor::_renamed() {
 	String new_name=which->get_text(0);
 	if (new_name.find(".") != -1 || new_name.find("/") != -1) {
 
-		error->set_text("Invalid node name, the following characters are not allowed:\n  \".\", \"/\"");
+		error->set_text(TTR("Invalid node name, the following characters are not allowed:\n  \".\", \"/\""));
 		error->popup_centered_minsize();
 		new_name=n->get_name();
 	}
@@ -699,6 +730,18 @@ void SceneTreeEditor::set_marked(Node *p_marked,bool p_selectable,bool p_childre
 
 
 }
+
+void SceneTreeEditor::set_filter(const String& p_filter) {
+
+	filter=p_filter;
+	_update_tree();
+}
+
+String SceneTreeEditor::get_filter() const {
+
+	return filter;
+}
+
 
 void SceneTreeEditor::set_display_foreign_nodes(bool p_display) {
 
@@ -809,15 +852,22 @@ Variant SceneTreeEditor::get_drag_data_fw(const Point2& p_point,Control* p_from)
 
 	VBoxContainer *vb = memnew( VBoxContainer );
 	Array objs;
+	int list_max = 10;
+	float opacity_step = 1.0f / list_max;
+	float opacity_item = 1.0f;
 	for(int i=0;i<selected.size();i++) {
 
-		HBoxContainer *hb = memnew( HBoxContainer );
-		TextureFrame *tf = memnew(TextureFrame);
-		tf->set_texture(icons[i]);
-		hb->add_child(tf);
-		Label *label = memnew( Label( selected[i]->get_name() ) );
-		hb->add_child(label);
-		vb->add_child(hb);
+		if (i<list_max){
+			HBoxContainer *hb = memnew( HBoxContainer );
+			TextureFrame *tf = memnew(TextureFrame);
+			tf->set_texture(icons[i]);
+			hb->add_child(tf);
+			Label *label = memnew( Label( selected[i]->get_name() ) );
+			hb->add_child(label);
+			vb->add_child(hb);
+			hb->set_opacity(opacity_item);
+			opacity_item -= opacity_step;
+		}
 		NodePath p = selected[i]->get_path();
 		objs.push_back(p);
 	}
@@ -837,6 +887,9 @@ bool SceneTreeEditor::can_drop_data_fw(const Point2& p_point,const Variant& p_da
 
 	if (!can_rename)
 		return false; //not editable tree
+	if (filter!=String())
+		return false; //can't rearrange tree with filter turned on
+
 
 	Dictionary d=p_data;
 	if (!d.has("type"))
@@ -908,6 +961,19 @@ void SceneTreeEditor::drop_data_fw(const Point2& p_point,const Variant& p_data,C
 
 }
 
+void SceneTreeEditor::_rmb_select(const Vector2& p_pos) {
+
+	emit_signal("rmb_pressed",tree->get_global_transform().xform(p_pos));
+}
+
+
+void SceneTreeEditor::_warning_changed(Node* p_for_node) {
+
+	//should use a timer
+	update_timer->start();
+//	print_line("WARNING CHANGED "+String(p_for_node->get_name()));
+
+}
 
 void SceneTreeEditor::_bind_methods() {
 
@@ -923,6 +989,8 @@ void SceneTreeEditor::_bind_methods() {
 	ObjectTypeDB::bind_method("_cell_button_pressed",&SceneTreeEditor::_cell_button_pressed);
 	ObjectTypeDB::bind_method("_cell_collapsed",&SceneTreeEditor::_cell_collapsed);
 	ObjectTypeDB::bind_method("_subscene_option",&SceneTreeEditor::_subscene_option);
+	ObjectTypeDB::bind_method("_rmb_select",&SceneTreeEditor::_rmb_select);
+	ObjectTypeDB::bind_method("_warning_changed",&SceneTreeEditor::_warning_changed);
 
 	ObjectTypeDB::bind_method("_node_script_changed",&SceneTreeEditor::_node_script_changed);
 	ObjectTypeDB::bind_method("_node_visibility_changed",&SceneTreeEditor::_node_visibility_changed);
@@ -931,12 +999,14 @@ void SceneTreeEditor::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("can_drop_data_fw"), &SceneTreeEditor::can_drop_data_fw);
 	ObjectTypeDB::bind_method(_MD("drop_data_fw"), &SceneTreeEditor::drop_data_fw);
 
+
 	ADD_SIGNAL( MethodInfo("node_selected") );
 	ADD_SIGNAL( MethodInfo("node_renamed") );
 	ADD_SIGNAL( MethodInfo("node_prerename") );
 	ADD_SIGNAL( MethodInfo("node_changed") );
 	ADD_SIGNAL( MethodInfo("nodes_rearranged",PropertyInfo(Variant::ARRAY,"paths"),PropertyInfo(Variant::NODE_PATH,"to_path"),PropertyInfo(Variant::INT,"type") ) );
 	ADD_SIGNAL( MethodInfo("files_dropped",PropertyInfo(Variant::STRING_ARRAY,"files"),PropertyInfo(Variant::NODE_PATH,"to_path"),PropertyInfo(Variant::INT,"type") ) );
+	ADD_SIGNAL( MethodInfo("rmb_pressed",PropertyInfo(Variant::VECTOR2,"pos")) ) ;
 
 	ADD_SIGNAL( MethodInfo("open") );
 	ADD_SIGNAL( MethodInfo("open_script") );
@@ -976,6 +1046,11 @@ SceneTreeEditor::SceneTreeEditor(bool p_label,bool p_can_rename, bool p_can_open
 	add_child( tree );
 
 	tree->set_drag_forwarding(this);
+	if (p_can_rename) {
+		tree->set_allow_rmb_select(true);
+		tree->connect("item_rmb_selected",this,"_rmb_select");
+		tree->connect("empty_tree_rmb_selected",this,"_rmb_select");
+	}
 
 	tree->connect("cell_selected", this,"_selected_changed");
 	tree->connect("item_edited", this,"_renamed",varray(),CONNECT_DEFERRED);
@@ -985,6 +1060,11 @@ SceneTreeEditor::SceneTreeEditor(bool p_label,bool p_can_rename, bool p_can_open
 
 	error = memnew( AcceptDialog );
 	add_child(error);
+
+	warning = memnew( AcceptDialog );
+	add_child(warning);
+	warning->set_title("Node Configuration Warning!");
+
 
 	show_enabled_subscene=false;
 
@@ -1014,6 +1094,11 @@ SceneTreeEditor::SceneTreeEditor(bool p_label,bool p_can_rename, bool p_can_open
 	clear_inherit_confirm->get_ok()->set_text(TTR("Clear!"));
 	add_child(clear_inherit_confirm);
 
+	update_timer = memnew(Timer);
+	update_timer->connect("timeout",this,"_update_tree");
+	update_timer->set_one_shot(true);
+	update_timer->set_wait_time(0.5);
+	add_child(update_timer);
 
 }
 
