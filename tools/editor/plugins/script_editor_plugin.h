@@ -122,6 +122,10 @@ class ScriptEditor : public VBoxContainer {
 		FILE_SAVE,
 		FILE_SAVE_AS,
 		FILE_SAVE_ALL,
+		FILE_IMPORT_THEME,
+		FILE_RELOAD_THEME,
+		FILE_SAVE_THEME,
+		FILE_SAVE_THEME_AS,
 		FILE_CLOSE,
 		EDIT_UNDO,
 		EDIT_REDO,
@@ -140,6 +144,7 @@ class ScriptEditor : public VBoxContainer {
 		EDIT_CLONE_DOWN,
 		SEARCH_FIND,
 		SEARCH_FIND_NEXT,
+		SEARCH_FIND_PREV,
 		SEARCH_REPLACE,
 		SEARCH_LOCATE_FUNCTION,
 		SEARCH_GOTO_LINE,
@@ -147,6 +152,9 @@ class ScriptEditor : public VBoxContainer {
 		SEARCH_CLASSES,
 		SEARCH_WEBSITE,
 		DEBUG_TOGGLE_BREAKPOINT,
+		DEBUG_REMOVE_ALL_BREAKPOINTS,
+		DEBUG_GOTO_NEXT_BREAKPOINT,
+		DEBUG_GOTO_PREV_BREAKPOINT,
 		DEBUG_NEXT,
 		DEBUG_STEP,
 		DEBUG_BREAK,
@@ -179,12 +187,14 @@ class ScriptEditor : public VBoxContainer {
 	ItemList *script_list;
 	HSplitContainer *script_split;
 	TabContainer *tab_container;
-	FindReplaceDialog *find_replace_dialog;
+	EditorFileDialog *file_dialog;
 	GotoLineDialog *goto_line_dialog;
 	ConfirmationDialog *erase_tab_confirm;
 	ScriptCreateDialog *script_create_dialog;
 	ScriptEditorDebugger* debugger;
 	ToolButton *scripts_visible;
+
+	String current_theme;
 
 	TextureFrame *script_icon;
 	Label *script_name_label;
@@ -277,6 +287,8 @@ class ScriptEditor : public VBoxContainer {
 	void _update_script_colors();
 	void _update_modified_scripts_for_external_editor();
 
+	int file_dialog_option;
+	void _file_dialog_action(String p_file);
 
 	static ScriptEditor *script_editor;
 protected:

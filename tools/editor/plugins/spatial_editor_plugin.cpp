@@ -3945,7 +3945,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	tool_button[TOOL_MODE_LIST_SELECT]->set_flat(true);
 	button_binds[0]=MENU_TOOL_LIST_SELECT;
 	tool_button[TOOL_MODE_LIST_SELECT]->connect("pressed", this,"_menu_item_pressed",button_binds);
-	tool_button[TOOL_MODE_LIST_SELECT]->set_tooltip("Show a list of all objects at the position clicked\n(same as Alt+RMB in selet mode).");
+	tool_button[TOOL_MODE_LIST_SELECT]->set_tooltip(TTR("Show a list of all objects at the position clicked\n(same as Alt+RMB in select mode)."));
 
 	vs = memnew( VSeparator );
 	hbc_menu->add_child(vs);
@@ -3954,7 +3954,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	PopupMenu *p;
 
 	transform_menu = memnew( MenuButton );
-	transform_menu->set_text("Transform");
+	transform_menu->set_text(TTR("Transform"));
 	hbc_menu->add_child( transform_menu );
 
 	p = transform_menu->get_popup();
@@ -3979,12 +3979,12 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	p->add_check_item(TTR("Use Default sRGB"),MENU_VIEW_USE_DEFAULT_SRGB);
 	p->add_separator();
 
-	p->add_check_item("1 Viewport",MENU_VIEW_USE_1_VIEWPORT,KEY_MASK_CMD+KEY_1);
-	p->add_check_item("2 Viewports",MENU_VIEW_USE_2_VIEWPORTS,KEY_MASK_CMD+KEY_2);
-	p->add_check_item("2 Viewports (Alt)",MENU_VIEW_USE_2_VIEWPORTS_ALT,KEY_MASK_SHIFT+KEY_MASK_CMD+KEY_2);
-	p->add_check_item("3 Viewports",MENU_VIEW_USE_3_VIEWPORTS,KEY_MASK_CMD+KEY_3);
-	p->add_check_item("3 Viewports (Alt)",MENU_VIEW_USE_3_VIEWPORTS_ALT,KEY_MASK_SHIFT+KEY_MASK_CMD+KEY_3);
-	p->add_check_item("4 Viewports",MENU_VIEW_USE_4_VIEWPORTS,KEY_MASK_CMD+KEY_4);
+	p->add_check_item(TTR("1 Viewport"),MENU_VIEW_USE_1_VIEWPORT,KEY_MASK_CMD+KEY_1);
+	p->add_check_item(TTR("2 Viewports"),MENU_VIEW_USE_2_VIEWPORTS,KEY_MASK_CMD+KEY_2);
+	p->add_check_item(TTR("2 Viewports (Alt)"),MENU_VIEW_USE_2_VIEWPORTS_ALT,KEY_MASK_SHIFT+KEY_MASK_CMD+KEY_2);
+	p->add_check_item(TTR("3 Viewports"),MENU_VIEW_USE_3_VIEWPORTS,KEY_MASK_CMD+KEY_3);
+	p->add_check_item(TTR("3 Viewports (Alt)"),MENU_VIEW_USE_3_VIEWPORTS_ALT,KEY_MASK_SHIFT+KEY_MASK_CMD+KEY_3);
+	p->add_check_item(TTR("4 Viewports"),MENU_VIEW_USE_4_VIEWPORTS,KEY_MASK_CMD+KEY_4);
 	p->add_separator();
 
 	p->add_check_item(TTR("Display Normal"),MENU_VIEW_DISPLAY_NORMAL);

@@ -510,13 +510,13 @@ class EditorFontImportDialog : public ConfirmationDialog {
 
 		if (source->get_line_edit()->get_text()=="") {
 			error_dialog->set_text(TTR("No source font file!"));
-			error_dialog->popup_centered(Size2(200,100));
+			error_dialog->popup_centered(Size2(200,100)*EDSCALE);
 			return;
 		}
 
 		if (dest->get_line_edit()->get_text()=="") {
 			error_dialog->set_text(TTR("No target font resource!"));
-			error_dialog->popup_centered(Size2(200,100));
+			error_dialog->popup_centered(Size2(200,100)*EDSCALE);
 			return;
 		}
 
@@ -528,7 +528,7 @@ class EditorFontImportDialog : public ConfirmationDialog {
 
 		if (rimd.is_null()) {
 			error_dialog->set_text(TTR("Can't load/process source font."));
-			error_dialog->popup_centered(Size2(200,100));
+			error_dialog->popup_centered(Size2(200,100)*EDSCALE);
 			return;
 		}
 
@@ -536,7 +536,7 @@ class EditorFontImportDialog : public ConfirmationDialog {
 
 		if (err!=OK) {
 			error_dialog->set_text(TTR("Couldn't save font."));
-			error_dialog->popup_centered(Size2(200,100));
+			error_dialog->popup_centered(Size2(200,100)*EDSCALE);
 			return;
 		}
 
@@ -573,7 +573,7 @@ public:
 
 	void popup_import(const String& p_path) {
 
-		popup_centered(Size2(600,500));
+		popup_centered(Size2(600,500)*EDSCALE);
 
 		if (p_path!="") {
 
@@ -599,6 +599,13 @@ public:
 
 			font_size->set_val(rimd->get_option("font/size"));
 		}
+	}
+
+
+	void set_source_and_dest(const String& p_font,const String& p_dest) {
+		source->get_line_edit()->set_text(p_font);
+		dest->get_line_edit()->set_text(p_dest);
+		_prop_changed();
 	}
 
 	EditorFontImportDialog(EditorFontImportPlugin *p_plugin) {
@@ -1607,7 +1614,7 @@ String EditorFontImportPlugin::get_name() const {
 }
 String EditorFontImportPlugin::get_visible_name() const{
 
-	return "Font";
+	return TTR("Font");
 }
 void EditorFontImportPlugin::import_dialog(const String& p_from){
 
@@ -1627,6 +1634,20 @@ Error EditorFontImportPlugin::import(const String& p_path, const Ref<ResourceImp
 
 	return ResourceSaver::save(p_path,font);
 
+}
+
+void EditorFontImportPlugin::import_from_drop(const Vector<String>& p_drop, const String &p_dest_path) {
+
+	for(int i=0;i<p_drop.size();i++) {
+		String ext = p_drop[i].extension().to_lower();
+		String file = p_drop[i].get_file();
+		if (ext=="ttf" || ext=="otf" || ext=="fnt") {
+
+			import_dialog();
+			dialog->set_source_and_dest(p_drop[i],p_dest_path.plus_file(file.basename()+".fnt"));
+			break;
+		}
+	}
 }
 
 

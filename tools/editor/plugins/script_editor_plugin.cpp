@@ -298,6 +298,10 @@ void ScriptTextEditor::_load_theme_settings() {
 	get_text_edit()->add_color_override("number_color",EDITOR_DEF("text_editor/number_color",Color(0.9,0.6,0.0,2)));
 	get_text_edit()->add_color_override("function_color",EDITOR_DEF("text_editor/function_color",Color(0.4,0.6,0.8)));
 	get_text_edit()->add_color_override("member_variable_color",EDITOR_DEF("text_editor/member_variable_color",Color(0.9,0.3,0.3)));
+	get_text_edit()->add_color_override("mark_color", EDITOR_DEF("text_editor/mark_color", Color(1.0,0.4,0.4,0.4)));
+	get_text_edit()->add_color_override("breakpoint_color", EDITOR_DEF("text_editor/breakpoint_color", Color(0.8,0.8,0.4,0.2)));
+	get_text_edit()->add_color_override("search_result_color",EDITOR_DEF("text_editor/search_result_color",Color(0.05,0.25,0.05,1)));
+	get_text_edit()->add_color_override("search_result_border_color",EDITOR_DEF("text_editor/search_result_border_color",Color(0.1,0.45,0.1,1)));
 
 	Color keyword_color= EDITOR_DEF("text_editor/keyword_color",Color(0.5,0.0,0.2));
 
@@ -584,7 +588,7 @@ void ScriptTextEditor::_bind_methods() {
 }
 
 ScriptTextEditor::ScriptTextEditor() {
-
+	get_text_edit()->set_breakpoint_gutter_width(12);
 }
 
 /*** SCRIPT EDITOR ******/
@@ -951,13 +955,30 @@ void ScriptEditor::swap_lines(TextEdit *tx, int line1, int line2)
     tx->cursor_set_line(line2);
 }
 
+void ScriptEditor::_file_dialog_action(String p_file) {
+
+	switch (file_dialog_option) {
+		case FILE_SAVE_THEME_AS: {
+			if(!EditorSettings::get_singleton()->save_text_editor_theme_as(p_file)) {
+				editor->show_warning(TTR("Error while saving theme"), TTR("Error saving"));
+			}
+		} break;
+		case FILE_IMPORT_THEME: {
+			if(!EditorSettings::get_singleton()->import_text_editor_theme(p_file)) {
+				editor->show_warning(TTR("Error importing theme"), TTR("Error importing"));
+			}
+		} break;
+	}
+	file_dialog_option = -1;
+}
+
 void ScriptEditor::_menu_option(int p_option) {
 
 
 	switch(p_option) {
 		case FILE_NEW: {
 			script_create_dialog->config("Node", ".gd");
-			script_create_dialog->popup_centered(Size2(300, 300));
+			script_create_dialog->popup_centered(Size2(300, 300)*EDSCALE);
 		} break;
 		case FILE_OPEN: {
 
@@ -989,6 +1010,33 @@ void ScriptEditor::_menu_option(int p_option) {
 			}
 
 #endif
+		} break;
+		case FILE_IMPORT_THEME: {
+			file_dialog->set_mode(EditorFileDialog::MODE_OPEN_FILE);
+			file_dialog->set_access(EditorFileDialog::ACCESS_FILESYSTEM);
+			file_dialog_option = FILE_IMPORT_THEME;
+			file_dialog->clear_filters();
+			file_dialog->add_filter("*.tet");
+			file_dialog->popup_centered_ratio();
+			file_dialog->set_title(TTR("Import Theme"));
+		} break;
+		case FILE_RELOAD_THEME: {
+			EditorSettings::get_singleton()->load_text_editor_theme();
+		} break;
+		case FILE_SAVE_THEME: {
+			if(!EditorSettings::get_singleton()->save_text_editor_theme()) {
+				editor->show_warning(TTR("Error while saving theme"), TTR("Error saving"));
+			}
+		} break;
+		case FILE_SAVE_THEME_AS: {
+			file_dialog->set_mode(EditorFileDialog::MODE_SAVE_FILE);
+			file_dialog->set_access(EditorFileDialog::ACCESS_FILESYSTEM);
+			file_dialog_option = FILE_SAVE_THEME_AS;
+			file_dialog->clear_filters();
+			file_dialog->add_filter("*.tet");
+			file_dialog->set_current_path(EditorSettings::get_singleton()->get_settings_path() + "/text_editor_themes/" + EditorSettings::get_singleton()->get("text_editor/color_theme"));
+			file_dialog->popup_centered_ratio();
+			file_dialog->set_title(TTR("Save Theme As.."));
 		} break;
 		case SEARCH_HELP: {
 
@@ -1052,7 +1100,7 @@ void ScriptEditor::_menu_option(int p_option) {
 		switch(p_option) {
 			case FILE_NEW: {
 				script_create_dialog->config("Node", ".gd");
-				script_create_dialog->popup_centered(Size2(300, 300));
+				script_create_dialog->popup_centered(Size2(300, 300)*EDSCALE);
 			} break;
 			case FILE_SAVE: {
 
@@ -1359,18 +1407,19 @@ void ScriptEditor::_menu_option(int p_option) {
 			} break;
 			case SEARCH_FIND: {
 
-				find_replace_dialog->set_text_edit(current->get_text_edit());
-				find_replace_dialog->popup_search();
+				current->get_find_replace_bar()->popup_search();
 			} break;
 			case SEARCH_FIND_NEXT: {
 
-				find_replace_dialog->set_text_edit(current->get_text_edit());
-				find_replace_dialog->search_next();
+				current->get_find_replace_bar()->search_next();
+			} break;
+			case SEARCH_FIND_PREV: {
+
+				current->get_find_replace_bar()->search_prev();
 			} break;
 			case SEARCH_REPLACE: {
 
-				find_replace_dialog->set_text_edit(current->get_text_edit());
-				find_replace_dialog->popup_replace();
+				current->get_find_replace_bar()->popup_replace();
 			} break;
 			case SEARCH_LOCATE_FUNCTION: {
 
@@ -1387,6 +1436,61 @@ void ScriptEditor::_menu_option(int p_option) {
 				bool dobreak = !current->get_text_edit()->is_line_set_as_breakpoint(line);
 				current->get_text_edit()->set_line_as_breakpoint(line,dobreak);
 				get_debugger()->set_breakpoint(current->get_edited_script()->get_path(),line+1,dobreak);
+			} break;
+			case DEBUG_REMOVE_ALL_BREAKPOINTS: {
+				List<int> bpoints;
+				current->get_text_edit()->get_breakpoints(&bpoints);
+
+				for(List<int>::Element *E=bpoints.front();E;E=E->next()) {
+					int line = E->get();
+					bool dobreak = !current->get_text_edit()->is_line_set_as_breakpoint(line);
+					current->get_text_edit()->set_line_as_breakpoint(line,dobreak);
+					get_debugger()->set_breakpoint(current->get_edited_script()->get_path(),line+1,dobreak);
+				}
+			}
+			case DEBUG_GOTO_NEXT_BREAKPOINT: {
+				List<int> bpoints;
+				current->get_text_edit()->get_breakpoints(&bpoints);
+				if (bpoints.size() <= 0) {
+					return;
+				}
+
+				int line=current->get_text_edit()->cursor_get_line();
+				// wrap around
+				if (line >= bpoints[bpoints.size() - 1]) {
+					current->get_text_edit()->cursor_set_line(bpoints[0]);
+				} else {
+					for(List<int>::Element *E=bpoints.front();E;E=E->next()) {
+						int bline = E->get();
+						if (bline > line) {
+							current->get_text_edit()->cursor_set_line(bline);
+							return;
+						}
+					}
+				}
+
+			} break;
+			case DEBUG_GOTO_PREV_BREAKPOINT: {
+				List<int> bpoints;
+				current->get_text_edit()->get_breakpoints(&bpoints);
+				if (bpoints.size() <= 0) {
+					return;
+				}
+
+				int line=current->get_text_edit()->cursor_get_line();
+				// wrap around
+				if (line <= bpoints[0]) {
+					current->get_text_edit()->cursor_set_line(bpoints[bpoints.size() - 1]);
+				} else {
+					for(List<int>::Element *E=bpoints.back();E;E=E->prev()) {
+						int bline = E->get();
+						if (bline < line) {
+							current->get_text_edit()->cursor_set_line(bline);
+							return;
+						}
+					}
+				}
+
 			} break;
 			case DEBUG_NEXT: {
 
@@ -1988,6 +2092,7 @@ void ScriptEditor::edit(const Ref<Script>& p_script) {
 	ste->get_text_edit()->set_highlight_all_occurrences(EditorSettings::get_singleton()->get("text_editor/highlight_all_occurrences"));
 	ste->get_text_edit()->cursor_set_blink_enabled(EditorSettings::get_singleton()->get("text_editor/caret_blink"));
 	ste->get_text_edit()->cursor_set_blink_speed(EditorSettings::get_singleton()->get("text_editor/caret_blink_speed"));
+	ste->get_text_edit()->set_draw_breakpoint_gutter(EditorSettings::get_singleton()->get("text_editor/show_breakpoint_gutter"));
 	ste->get_text_edit()->set_callhint_settings(
 		EditorSettings::get_singleton()->get("text_editor/put_callhint_tooltip_below_current_line"),
 		EditorSettings::get_singleton()->get("text_editor/callhint_tooltip_offset"));
@@ -2122,6 +2227,13 @@ void ScriptEditor::_editor_settings_changed() {
 		autosave_timer->stop();
 	}
 
+	if (current_theme == "") {
+		current_theme = EditorSettings::get_singleton()->get("text_editor/color_theme");
+	} else if (current_theme != EditorSettings::get_singleton()->get("text_editor/color_theme")) {
+		current_theme = EditorSettings::get_singleton()->get("text_editor/color_theme");
+		EditorSettings::get_singleton()->load_text_editor_theme();
+	}
+
 	for(int i=0;i<tab_container->get_child_count();i++) {
 
 		ScriptTextEditor *ste = tab_container->get_child(i)->cast_to<ScriptTextEditor>();
@@ -2137,6 +2249,7 @@ void ScriptEditor::_editor_settings_changed() {
 		ste->get_text_edit()->set_highlight_all_occurrences(EditorSettings::get_singleton()->get("text_editor/highlight_all_occurrences"));
 		ste->get_text_edit()->cursor_set_blink_enabled(EditorSettings::get_singleton()->get("text_editor/caret_blink"));
 		ste->get_text_edit()->cursor_set_blink_speed(EditorSettings::get_singleton()->get("text_editor/caret_blink_speed"));
+		ste->get_text_edit()->set_draw_breakpoint_gutter(EditorSettings::get_singleton()->get("text_editor/show_breakpoint_gutter"));
 	}
 
 }
@@ -2364,6 +2477,7 @@ void ScriptEditor::set_scene_root_script( Ref<Script> p_script ) {
 
 void ScriptEditor::_bind_methods() {
 
+	ObjectTypeDB::bind_method("_file_dialog_action",&ScriptEditor::_file_dialog_action);
 	ObjectTypeDB::bind_method("_tab_changed",&ScriptEditor::_tab_changed);
 	ObjectTypeDB::bind_method("_menu_option",&ScriptEditor::_menu_option);
 	ObjectTypeDB::bind_method("_close_current_tab",&ScriptEditor::_close_current_tab);
@@ -2394,6 +2508,8 @@ void ScriptEditor::_bind_methods() {
 }
 
 ScriptEditor::ScriptEditor(EditorNode *p_editor) {
+
+	current_theme = "";
 
 	completion_cache = memnew( EditorScriptCodeCompletionCache );
 	restoring_layout=false;
@@ -2433,6 +2549,11 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	file_menu->get_popup()->add_item(TTR("History Prev"),WINDOW_PREV,KEY_MASK_CTRL|KEY_MASK_ALT|KEY_LEFT);
 	file_menu->get_popup()->add_item(TTR("History Next"),WINDOW_NEXT,KEY_MASK_CTRL|KEY_MASK_ALT|KEY_RIGHT);
 	file_menu->get_popup()->add_separator();
+	file_menu->get_popup()->add_item(TTR("Import Theme"), FILE_IMPORT_THEME);
+	file_menu->get_popup()->add_item(TTR("Reload Theme"), FILE_RELOAD_THEME);
+	file_menu->get_popup()->add_item(TTR("Save Theme"), FILE_SAVE_THEME);
+	file_menu->get_popup()->add_item(TTR("Save Theme As"), FILE_SAVE_THEME_AS);
+	file_menu->get_popup()->add_separator();
 	file_menu->get_popup()->add_item(TTR("Close"),FILE_CLOSE,KEY_MASK_CMD|KEY_W);
 	file_menu->get_popup()->connect("item_pressed", this,"_menu_option");
 
@@ -2470,6 +2591,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	search_menu->set_text(TTR("Search"));
 	search_menu->get_popup()->add_item(TTR("Find.."),SEARCH_FIND,KEY_MASK_CMD|KEY_F);
 	search_menu->get_popup()->add_item(TTR("Find Next"),SEARCH_FIND_NEXT,KEY_F3);
+	search_menu->get_popup()->add_item(TTR("Find Previous"),SEARCH_FIND_PREV,KEY_MASK_SHIFT|KEY_F3);
 	search_menu->get_popup()->add_item(TTR("Replace.."),SEARCH_REPLACE,KEY_MASK_CMD|KEY_R);
 	search_menu->get_popup()->add_separator();
 	search_menu->get_popup()->add_item(TTR("Goto Function.."),SEARCH_LOCATE_FUNCTION,KEY_MASK_SHIFT|KEY_MASK_CMD|KEY_F);
@@ -2489,6 +2611,9 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	menu_hb->add_child(debug_menu);
 	debug_menu->set_text(TTR("Debug"));
 	debug_menu->get_popup()->add_item(TTR("Toggle Breakpoint"),DEBUG_TOGGLE_BREAKPOINT,KEY_F9);
+	debug_menu->get_popup()->add_item(TTR("Remove All Breakpoints"), DEBUG_REMOVE_ALL_BREAKPOINTS, KEY_MASK_CTRL|KEY_MASK_SHIFT|KEY_F9);
+	debug_menu->get_popup()->add_item(TTR("Goto Next Breakpoint"), DEBUG_GOTO_NEXT_BREAKPOINT, KEY_MASK_CTRL|KEY_PERIOD);
+	debug_menu->get_popup()->add_item(TTR("Goto Previous Breakpoint"), DEBUG_GOTO_PREV_BREAKPOINT, KEY_MASK_CTRL|KEY_COMMA);
 	debug_menu->get_popup()->add_separator();
 	debug_menu->get_popup()->add_item(TTR("Step Over"),DEBUG_NEXT,KEY_F10);
 	debug_menu->get_popup()->add_item(TTR("Step Into"),DEBUG_STEP,KEY_F11);
@@ -2574,9 +2699,6 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 
 	tab_container->connect("tab_changed", this,"_tab_changed");
 
-	find_replace_dialog = memnew(FindReplaceDialog);
-	add_child(find_replace_dialog);
-
 	erase_tab_confirm = memnew( ConfirmationDialog );
 	add_child(erase_tab_confirm);
 	erase_tab_confirm->connect("confirmed", this,"_close_current_tab");
@@ -2585,6 +2707,11 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	script_create_dialog->set_title(TTR("Create Script"));
 	add_child(script_create_dialog);
 	script_create_dialog->connect("script_created", this, "_script_created");
+
+	file_dialog_option = -1;
+	file_dialog = memnew( EditorFileDialog );
+	add_child(file_dialog);
+	file_dialog->connect("file_selected", this,"_file_dialog_action");
 
 	goto_line_dialog = memnew(GotoLineDialog);
 	add_child(goto_line_dialog);

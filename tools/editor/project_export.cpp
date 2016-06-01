@@ -1384,7 +1384,7 @@ ProjectExportDialog::ProjectExportDialog(EditorNode *p_editor) {
 	group_images->set_column_expand(1,false);
 	group_images->set_column_min_width(1,100);
 	group_images->set_column_titles_visible(true);
-	group_images->set_column_title(0,"Image");
+	group_images->set_column_title(0,TTR("Images"));
 	group_images->set_column_title(1,TTR("Group"));
 	group_images->connect("item_edited",this,"_group_item_edited",varray(),CONNECT_DEFERRED);
 
@@ -1427,7 +1427,7 @@ ProjectExportDialog::ProjectExportDialog(EditorNode *p_editor) {
 	sample_vbox->add_margin_child(TTR("Trailing Silence:"),sample_trim);
 
 	script_vbox = memnew( VBoxContainer );
-	script_vbox->set_name("Script");
+	script_vbox->set_name(TTR("Script"));
 	sections->add_child(script_vbox);
 	script_mode = memnew( OptionButton );
 	script_vbox->add_margin_child(TTR("Script Export Mode:"),script_mode);

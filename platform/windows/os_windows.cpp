@@ -724,6 +724,32 @@ LRESULT OS_Windows::WndProc(HWND hWnd,UINT uMsg, WPARAM	wParam,	LPARAM	lParam) {
 			}
 
 		} break;
+		case WM_DROPFILES: {
+
+			HDROP hDropInfo = NULL;
+			hDropInfo = (HDROP) wParam;
+			const int buffsize=4096;
+			wchar_t buf[buffsize];
+
+			int fcount = DragQueryFileW(hDropInfo, 0xFFFFFFFF,NULL,0);
+
+			Vector<String> files;
+
+			for(int i=0;i<fcount;i++) {
+
+				DragQueryFileW(hDropInfo, i, buf, buffsize);
+				String file=buf;
+				files.push_back(file);
+			}
+
+			if (files.size() && main_loop) {
+				main_loop->drop_files(files,0);
+			}
+
+
+		} break;
+
+
 
 		default: {
 
@@ -747,6 +773,8 @@ LRESULT CALLBACK WndProc(HWND	hWnd,UINT uMsg,	WPARAM	wParam,	LPARAM	lParam)	{
 		return DefWindowProcW(hWnd,uMsg,wParam,lParam);
 
 }
+
+
 
 void OS_Windows::process_key_events() {
 
@@ -819,6 +847,75 @@ void OS_Windows::process_key_events() {
 	key_event_pos=0;
 }
 
+enum _MonitorDpiType
+{
+	MDT_Effective_DPI  = 0,
+	MDT_Angular_DPI    = 1,
+	MDT_Raw_DPI        = 2,
+	MDT_Default        = MDT_Effective_DPI
+};
+
+
+static int QueryDpiForMonitor(HMONITOR hmon, _MonitorDpiType dpiType= MDT_Default)
+{
+
+
+	int dpiX = 96, dpiY = 96;
+
+	static HMODULE Shcore = NULL;
+	typedef HRESULT (WINAPI* GetDPIForMonitor_t)(HMONITOR hmonitor, _MonitorDpiType dpiType, UINT *dpiX, UINT *dpiY);
+	static GetDPIForMonitor_t getDPIForMonitor = NULL;
+
+	if (Shcore == NULL)
+	{
+		Shcore = LoadLibraryW(L"Shcore.dll");
+		getDPIForMonitor = Shcore ? (GetDPIForMonitor_t)GetProcAddress(Shcore, "GetDpiForMonitor") : NULL;
+
+		if ((Shcore == NULL) || (getDPIForMonitor == NULL))
+		{
+			if (Shcore)
+				FreeLibrary(Shcore);
+			Shcore = (HMODULE)INVALID_HANDLE_VALUE;
+		}
+	}
+
+	UINT x = 0, y = 0;
+	HRESULT hr = E_FAIL;
+	bool bSet = false;
+	if (hmon && (Shcore != (HMODULE)INVALID_HANDLE_VALUE))
+	{
+		hr = getDPIForMonitor(hmon, dpiType/*MDT_Effective_DPI*/, &x, &y);
+		if (SUCCEEDED(hr) && (x > 0) && (y > 0))
+		{
+
+			dpiX = (int)x;
+			dpiY = (int)y;
+		}
+	}
+	else
+	{
+		static int overallX = 0, overallY = 0;
+		if (overallX <= 0 || overallY <= 0)
+		{
+			HDC hdc = GetDC(NULL);
+			if (hdc)
+			{
+				overallX = GetDeviceCaps(hdc, LOGPIXELSX);
+				overallY = GetDeviceCaps(hdc, LOGPIXELSY);
+				ReleaseDC(NULL, hdc);
+			}
+		}
+		if (overallX > 0 && overallY > 0)
+		{
+			dpiX = overallX; dpiY = overallY;
+		}
+	}
+
+
+	return (dpiX+dpiY)/2;
+}
+
+
 BOOL CALLBACK OS_Windows::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor,  LPARAM dwData) {
 	OS_Windows *self=(OS_Windows*)OS::get_singleton();
 	MonitorInfo minfo;
@@ -828,6 +925,8 @@ BOOL CALLBACK OS_Windows::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPR
 	minfo.rect.pos.y=lprcMonitor->top;
 	minfo.rect.size.x=lprcMonitor->right - lprcMonitor->left;
 	minfo.rect.size.y=lprcMonitor->bottom - lprcMonitor->top;
+
+	minfo.dpi = QueryDpiForMonitor(hMonitor);
 
 	self->monitor_info.push_back(minfo);
 
@@ -1034,6 +1133,8 @@ void OS_Windows::initialize(const VideoMode& p_desired,int p_video_driver,int p_
 	//RegisterTouchWindow(hWnd, 0); // Windows 7
 
 	_ensure_data_dir();
+
+	DragAcceptFiles(hWnd,true);
 
 
 }
@@ -1336,6 +1437,14 @@ Size2 OS_Windows::get_screen_size(int p_screen) const{
 
 	ERR_FAIL_INDEX_V(p_screen,monitor_info.size(),Point2());
 	return Vector2( monitor_info[p_screen].rect.size );
+
+}
+
+int OS_Windows::get_screen_dpi(int p_screen) const {
+
+	ERR_FAIL_INDEX_V(p_screen,monitor_info.size(),72);
+	UINT dpix,dpiy;
+	return monitor_info[p_screen].dpi;
 
 }
 Point2 OS_Windows::get_window_position() const{

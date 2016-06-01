@@ -31,11 +31,24 @@ for root, dirnames, filenames in os.walk('.'):
 		if (filename.find("collada") != -1):
 			continue
 		matches.append(os.path.join(root, filename))
+matches.sort()
 
 
 unique_str = []
 unique_loc = {}
-main_po = ""
+main_po = """
+# LANGUAGE translation of the Godot Engine editor
+# Copyright (C) 2016 Juan Linietsky, Ariel Manzur and the Godot community
+# This file is distributed under the same license as the Godot source code.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Godot Engine editor\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8-bit\\n"
+"""
 
 print("Updating the tools.pot template...")
 
@@ -47,11 +60,16 @@ for fname in matches:
 	lc = 1
 	while (l):
 
+		patterns = ['RTR(\"', 'TTR(\"']
+		idx = 0
 		pos = 0
 		while (pos >= 0):
-			pos = l.find('TTR(\"', pos)
+			pos = l.find(patterns[idx], pos)
 			if (pos == -1):
-				break
+				if (idx < len(patterns) - 1):
+					idx += 1
+					pos = 0
+				continue
 			pos += 5
 
 			msg = ""
@@ -71,7 +89,9 @@ for fname in matches:
 				unique_loc[msg] = [location]
 			elif (not location in unique_loc[msg]):
 				# Add additional location to previous occurence too
-				msg_pos = main_po.find('\nmsgid "' + msg)
+				msg_pos = main_po.find('\nmsgid "' + msg + '"')
+				if (msg_pos == -1):
+					print("Someone apparently thought writing Python was as easy as GDScript. Ping Akien.")
 				main_po = main_po[:msg_pos] + ' ' + location + main_po[msg_pos:]
 				unique_loc[msg].append(location)
 
@@ -85,11 +105,15 @@ f = open("tools.pot", "wb")
 f.write(main_po)
 f.close()
 
+if (os.name == "posix"):
+	os.system("msgmerge -w80 tools.pot tools.pot > tools.pot.wrap")
+	shutil.move("tools.pot.wrap", "tools.pot")
+
 shutil.move("tools.pot", "tools/translations/tools.pot")
 
 # TODO: Make that in a portable way, if we care; if not, kudos to Unix users
 if (os.name == "posix"):
 	added = subprocess.check_output("git diff tools/translations/tools.pot | grep \+msgid | wc -l", shell = True)
 	removed = subprocess.check_output("git diff tools/translations/tools.pot | grep \\\-msgid | wc -l", shell = True)
-	print("Template changes compared to the staged status:")
-	print("  Additions: %s msgids.\n  Deletions: %s msgids." % (int(added), int(removed)))
+	print("\n# Template changes compared to the staged status:")
+	print("#   Additions: %s msgids.\n#   Deletions: %s msgids." % (int(added), int(removed)))

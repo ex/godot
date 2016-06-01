@@ -542,6 +542,10 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			}
 
 		} break;
+		case TOOL_MERGE_FROM_SCENE: {
+
+			EditorNode::get_singleton()->merge_from_scene();
+		} break;
 		case TOOL_NEW_SCENE_FROM: {
 
 			Node *scene = editor_data->get_edited_scene_root();
@@ -583,7 +587,8 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 
 			String existing;
 			if (extensions.size()) {
-				existing="new_scene."+extensions.front()->get().to_lower();
+				String root_name(tocopy->get_name());
+				existing=root_name+"."+extensions.front()->get().to_lower();
 			}
 			new_scene_from_dialog->set_current_path(existing);
 
@@ -1695,6 +1700,7 @@ void SceneTreeDock::_tree_rmb(const Vector2& p_menu_pos) {
 
 	if (selection.size()==1) {
 		menu->add_separator();
+		menu->add_item(TTR("Merge From Scene"),TOOL_MERGE_FROM_SCENE);
 		menu->add_item(TTR("Save Branch as Scene"),TOOL_NEW_SCENE_FROM);
 	}
 	menu->add_separator();
@@ -1786,6 +1792,7 @@ SceneTreeDock::SceneTreeDock(EditorNode *p_editor,Node *p_scene_root,EditorSelec
 	filter_hbc->add_child(filter);
 	filter_icon = memnew( TextureFrame );
 	filter_hbc->add_child(filter_icon);
+	filter_icon->set_stretch_mode(TextureFrame::STRETCH_KEEP_CENTERED);
 	filter->connect("text_changed",this,"_filter_changed");
 
 

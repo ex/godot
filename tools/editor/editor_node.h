@@ -85,6 +85,7 @@
 
 #include "progress_dialog.h"
 
+#include "editor_scale.h"
 /**
 	@author Juan Linietsky <reduzio@gmail.com>
 */
@@ -159,7 +160,7 @@ private:
 		OBJECT_CALL_METHOD,
 		OBJECT_REQUEST_HELP,
 		RUN_PLAY,
-		RUN_PAUSE,
+
 		RUN_STOP,
 		RUN_PLAY_SCENE,
 		RUN_PLAY_NATIVE,
@@ -269,6 +270,7 @@ private:
 	SceneTreeDock *scene_tree_dock;
 	//ResourcesDock *resources_dock;
 	PropertyEditor *property_editor;
+	VBoxContainer *prop_editor_vb;
 	ScenesDock *scenes_dock;
 	EditorRunNative *run_native;
 
@@ -364,6 +366,8 @@ private:
 	bool unsaved_cache;
 	String open_navigate;
 	bool changing_scene;
+
+	bool waiting_for_sources_changed;
 
 	uint32_t circle_step_msec;
 	uint64_t circle_step_frame;
@@ -463,6 +467,7 @@ private:
 	void _add_to_recent_scenes(const String& p_scene);
 	void _update_recent_scenes();
 	void _open_recent_scene(int p_idx);
+	void _dropped_files(const Vector<String>& p_files,int p_screen);
 	//void _open_recent_scene_confirm();
 	String _recent_scene;
 
@@ -580,6 +585,7 @@ public:
 	EditorPlugin *get_editor_plugin_screen() { return editor_plugin_screen; }
 	EditorPluginList *get_editor_plugins_over() { return editor_plugins_over; }
 	PropertyEditor *get_property_editor() { return property_editor; }
+	VBoxContainer *get_property_editor_vb() { return prop_editor_vb; }
 
 	static void add_editor_plugin(EditorPlugin *p_editor);
 	static void remove_editor_plugin(EditorPlugin *p_editor);
@@ -604,6 +610,8 @@ public:
 	void save_resource_in_path(const Ref<Resource>& p_resource,const String& p_path);
 	void save_resource(const Ref<Resource>& p_resource);
 	void save_resource_as(const Ref<Resource>& p_resource, const String &p_at_path=String());
+
+	void merge_from_scene() { _menu_option_confirm(FILE_IMPORT_SUBSCENE,false); }
 
 	static bool has_unsaved_changes() { return singleton->unsaved_cache; }
 
@@ -691,6 +699,8 @@ public:
 	void save_layout();
 
 	void update_keying();
+
+	ToolButton *get_pause_button() { return pause_button; }
 
 
 	ToolButton* add_bottom_panel_item(String p_text,Control *p_item);
