@@ -287,6 +287,9 @@ void ScriptTextEditor::_load_theme_settings() {
 
 
 	get_text_edit()->set_custom_bg_color(EDITOR_DEF("text_editor/background_color",Color(0,0,0,0)));
+	get_text_edit()->add_color_override("completion_background_color", EDITOR_DEF("text_editor/completion_background_color", Color(0,0,0,0)));
+	get_text_edit()->add_color_override("completion_selected_color", EDITOR_DEF("text_editor/completion_selected_color", Color::html("434244")));
+	get_text_edit()->add_color_override("completion_existing_color", EDITOR_DEF("text_editor/completion_existing_color", Color::html("21dfdfdf")));
 	get_text_edit()->add_color_override("font_color",EDITOR_DEF("text_editor/text_color",Color(0,0,0)));
 	get_text_edit()->add_color_override("line_number_color",EDITOR_DEF("text_editor/line_number_color",Color(0,0,0)));
 	get_text_edit()->add_color_override("caret_color",EDITOR_DEF("text_editor/caret_color",Color(0,0,0)));
@@ -302,6 +305,7 @@ void ScriptTextEditor::_load_theme_settings() {
 	get_text_edit()->add_color_override("breakpoint_color", EDITOR_DEF("text_editor/breakpoint_color", Color(0.8,0.8,0.4,0.2)));
 	get_text_edit()->add_color_override("search_result_color",EDITOR_DEF("text_editor/search_result_color",Color(0.05,0.25,0.05,1)));
 	get_text_edit()->add_color_override("search_result_border_color",EDITOR_DEF("text_editor/search_result_border_color",Color(0.1,0.45,0.1,1)));
+	get_text_edit()->add_constant_override("line_spacing", EDITOR_DEF("text_editor/line_spacing",4));
 
 	Color keyword_color= EDITOR_DEF("text_editor/keyword_color",Color(0.5,0.0,0.2));
 
@@ -530,7 +534,7 @@ static void _find_changed_scripts_for_external_editor(Node* p_base, Node*p_curre
 
 }
 
-void ScriptEditor::_update_modified_scripts_for_external_editor() {
+void ScriptEditor::_update_modified_scripts_for_external_editor(Ref<Script> p_for_script) {
 
 	if (!bool(EditorSettings::get_singleton()->get("external_editor/use_external_editor")))
 		return;
@@ -545,6 +549,9 @@ void ScriptEditor::_update_modified_scripts_for_external_editor() {
 	for (Set<Ref<Script> >::Element *E=scripts.front();E;E=E->next()) {
 
 		Ref<Script> script = E->get();
+
+		if (p_for_script.is_valid() && p_for_script!=script)
+			continue;
 
 		if (script->get_path()=="" || script->get_path().find("local://")!=-1 || script->get_path().find("::")!=-1) {
 
@@ -588,7 +595,6 @@ void ScriptTextEditor::_bind_methods() {
 }
 
 ScriptTextEditor::ScriptTextEditor() {
-	get_text_edit()->set_breakpoint_gutter_width(12);
 }
 
 /*** SCRIPT EDITOR ******/
@@ -887,9 +893,20 @@ void ScriptEditor::_res_saved_callback(const Ref<Resource>& p_res) {
 
 	_update_script_names();
 
+
+	if (!pending_auto_reload && auto_reload_running_scripts) {
+		call_deferred("_live_auto_reload_running_scripts");
+		pending_auto_reload=true;
+	}
 }
 
-bool ScriptEditor::_test_script_times_on_disk() {
+void ScriptEditor::_live_auto_reload_running_scripts() {
+	pending_auto_reload=false;
+	debugger->reload_scripts();
+}
+
+
+bool ScriptEditor::_test_script_times_on_disk(Ref<Script> p_for_script) {
 
 
 	disk_changed_list->clear();
@@ -908,6 +925,9 @@ bool ScriptEditor::_test_script_times_on_disk() {
 		if (ste) {
 
 			Ref<Script> script = ste->get_edited_script();
+
+			if (p_for_script.is_valid() && p_for_script!=script)
+				continue;
 
 			if (script->get_path()=="" || script->get_path().find("local://")!=-1 || script->get_path().find("::")!=-1)
 				continue; //internal script, who cares
@@ -1118,6 +1138,7 @@ void ScriptEditor::_menu_option(int p_option) {
 				if (trim_trailing_whitespace_on_save) {
 					_trim_trailing_whitespace(current->get_text_edit());
 				}
+				editor->push_item(current->get_edited_script()->cast_to<Object>());
 				editor->save_resource_as( current->get_edited_script() );
 
 			} break;
@@ -1401,6 +1422,16 @@ void ScriptEditor::_menu_option(int p_option) {
 				te->set_text(text);
 
 
+			} break;
+			case FILE_TOOL_RELOAD:
+			case FILE_TOOL_RELOAD_SOFT: {
+
+				TextEdit *te = current->get_text_edit();
+				Ref<Script> scr = current->get_edited_script();
+				if (scr.is_null())
+					return;
+				scr->set_source_code(te->get_text());
+				scr->get_language()->reload_tool_script(scr,p_option==FILE_TOOL_RELOAD_SOFT);
 			} break;
 			case EDIT_TRIM_TRAILING_WHITESAPCE: {
 				_trim_trailing_whitespace(current->get_text_edit());
@@ -2107,6 +2138,12 @@ void ScriptEditor::edit(const Ref<Script>& p_script) {
 	if (!restoring_layout) {
 		EditorNode::get_singleton()->save_layout();
 	}
+
+	//test for modification, maybe the script was not edited but was loaded
+
+	_test_script_times_on_disk(p_script);
+	_update_modified_scripts_for_external_editor(p_script);
+
 }
 
 void ScriptEditor::save_all_scripts() {
@@ -2126,12 +2163,17 @@ void ScriptEditor::save_all_scripts() {
 			continue;
 
 		Ref<Script> script = ste->get_edited_script();
+		if (script.is_valid())
+			ste->apply_code();
+
 		if (script->get_path()!="" && script->get_path().find("local://")==-1 &&script->get_path().find("::")==-1) {
 			//external script, save it
-			ste->apply_code();
+
 			editor->save_resource(script);
 			//ResourceSaver::save(script->get_path(),script);
+
 		}
+
 	}
 
 }
@@ -2175,7 +2217,7 @@ void ScriptEditor::_editor_stop() {
 
 void ScriptEditor::_add_callback(Object *p_obj, const String& p_function, const StringArray& p_args) {
 
-	print_line("add callback! hohoho");
+	//print_line("add callback! hohoho"); kinda sad to remove this
 	ERR_FAIL_COND(!p_obj);
 	Ref<Script> script = p_obj->get_script();
 	ERR_FAIL_COND( !script.is_valid() );
@@ -2217,7 +2259,6 @@ void ScriptEditor::_add_callback(Object *p_obj, const String& p_function, const 
 
 void ScriptEditor::_editor_settings_changed() {
 
-	print_line("settings changed");
 	trim_trailing_whitespace_on_save = EditorSettings::get_singleton()->get("text_editor/trim_trailing_whitespace_on_save");
 	float autosave_time = EditorSettings::get_singleton()->get("text_editor/autosave_interval_secs");
 	if (autosave_time>0) {
@@ -2252,11 +2293,12 @@ void ScriptEditor::_editor_settings_changed() {
 		ste->get_text_edit()->set_draw_breakpoint_gutter(EditorSettings::get_singleton()->get("text_editor/show_breakpoint_gutter"));
 	}
 
+	ScriptServer::set_reload_scripts_on_save(EDITOR_DEF("text_editor/auto_reload_and_parse_scripts_on_save",true));
+
 }
 
 void ScriptEditor::_autosave_scripts() {
 
-	print_line("autosaving");
 	save_all_scripts();
 }
 
@@ -2475,6 +2517,56 @@ void ScriptEditor::set_scene_root_script( Ref<Script> p_script ) {
 	}
 }
 
+bool ScriptEditor::script_go_to_method(Ref<Script> p_script, const String& p_method) {
+
+	Vector<String> functions;
+	bool found=false;
+
+	for (int i=0;i<tab_container->get_child_count();i++) {
+		ScriptTextEditor *current = tab_container->get_child(i)->cast_to<ScriptTextEditor>();
+
+		if (current && current->get_edited_script()==p_script) {
+			functions=current->get_functions();
+			found=true;
+			break;
+		}
+	}
+
+	if (!found) {
+		String errortxt;
+		int line=-1,col;
+		String text=p_script->get_source_code();
+		List<String> fnc;
+
+		if (p_script->get_language()->validate(text,line,col,errortxt,p_script->get_path(),&fnc)) {
+
+			for (List<String>::Element *E=fnc.front();E;E=E->next())
+				functions.push_back(E->get());
+		}
+	}
+
+	String method_search = p_method + ":";
+
+	for (int i=0;i<functions.size();i++) {
+		String function=functions[i];
+
+		if (function.begins_with(method_search)) {
+
+			edit(p_script);
+			int line=function.get_slice(":",1).to_int();
+			_goto_script_line2(line-1);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void ScriptEditor::set_live_auto_reload_running_scripts(bool p_enabled) {
+
+	auto_reload_running_scripts=p_enabled;
+}
+
 void ScriptEditor::_bind_methods() {
 
 	ObjectTypeDB::bind_method("_file_dialog_action",&ScriptEditor::_file_dialog_action);
@@ -2505,6 +2597,8 @@ void ScriptEditor::_bind_methods() {
 	ObjectTypeDB::bind_method("_request_help",&ScriptEditor::_help_class_open);
 	ObjectTypeDB::bind_method("_history_forward",&ScriptEditor::_history_forward);
 	ObjectTypeDB::bind_method("_history_back",&ScriptEditor::_history_back);
+	ObjectTypeDB::bind_method("_live_auto_reload_running_scripts",&ScriptEditor::_live_auto_reload_running_scripts);
+
 }
 
 ScriptEditor::ScriptEditor(EditorNode *p_editor) {
@@ -2514,6 +2608,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	completion_cache = memnew( EditorScriptCodeCompletionCache );
 	restoring_layout=false;
 	waiting_update_names=false;
+	auto_reload_running_scripts=false;
 	editor=p_editor;
 
 	menu_hb = memnew( HBoxContainer );
@@ -2539,70 +2634,72 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	file_menu = memnew( MenuButton );
 	menu_hb->add_child(file_menu);
 	file_menu->set_text(TTR("File"));
-	file_menu->get_popup()->add_item(TTR("New"),FILE_NEW);
-	file_menu->get_popup()->add_item(TTR("Open"),FILE_OPEN);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/new", TTR("New")), FILE_NEW);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/open", TTR("Open")), FILE_OPEN);
 	file_menu->get_popup()->add_separator();
-	file_menu->get_popup()->add_item(TTR("Save"),FILE_SAVE,KEY_MASK_ALT|KEY_MASK_CMD|KEY_S);
-	file_menu->get_popup()->add_item(TTR("Save As.."),FILE_SAVE_AS);
-	file_menu->get_popup()->add_item(TTR("Save All"),FILE_SAVE_ALL,KEY_MASK_CMD|KEY_MASK_SHIFT|KEY_S);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/save", TTR("Save"), KEY_MASK_ALT|KEY_MASK_CMD|KEY_S), FILE_SAVE);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/save_as", TTR("Save As..")), FILE_SAVE_AS);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/save_all", TTR("Save All"), KEY_MASK_CMD|KEY_MASK_SHIFT|KEY_MASK_ALT|KEY_S), FILE_SAVE_ALL);
 	file_menu->get_popup()->add_separator();
-	file_menu->get_popup()->add_item(TTR("History Prev"),WINDOW_PREV,KEY_MASK_CTRL|KEY_MASK_ALT|KEY_LEFT);
-	file_menu->get_popup()->add_item(TTR("History Next"),WINDOW_NEXT,KEY_MASK_CTRL|KEY_MASK_ALT|KEY_RIGHT);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/history_previous", TTR("History Prev"), KEY_MASK_CTRL|KEY_MASK_ALT|KEY_LEFT), WINDOW_PREV);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/history_next", TTR("History Next"), KEY_MASK_CTRL|KEY_MASK_ALT|KEY_RIGHT), WINDOW_NEXT);
 	file_menu->get_popup()->add_separator();
-	file_menu->get_popup()->add_item(TTR("Import Theme"), FILE_IMPORT_THEME);
-	file_menu->get_popup()->add_item(TTR("Reload Theme"), FILE_RELOAD_THEME);
-	file_menu->get_popup()->add_item(TTR("Save Theme"), FILE_SAVE_THEME);
-	file_menu->get_popup()->add_item(TTR("Save Theme As"), FILE_SAVE_THEME_AS);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/import_theme", TTR("Import Theme")), FILE_IMPORT_THEME);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/reload_theme", TTR("Reload Theme")), FILE_RELOAD_THEME);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/save_theme", TTR("Save Theme")), FILE_SAVE_THEME);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/save_theme_as", TTR("Save Theme As")), FILE_SAVE_THEME_AS);
 	file_menu->get_popup()->add_separator();
-	file_menu->get_popup()->add_item(TTR("Close"),FILE_CLOSE,KEY_MASK_CMD|KEY_W);
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_file", TTR("Close"), KEY_MASK_CMD|KEY_W), FILE_CLOSE);
 	file_menu->get_popup()->connect("item_pressed", this,"_menu_option");
 
 	edit_menu = memnew( MenuButton );
 	menu_hb->add_child(edit_menu);
 	edit_menu->set_text(TTR("Edit"));
-	edit_menu->get_popup()->add_item(TTR("Undo"),EDIT_UNDO,KEY_MASK_CMD|KEY_Z);
-	edit_menu->get_popup()->add_item(TTR("Redo"),EDIT_REDO,KEY_MASK_CMD|KEY_Y);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/undo", TTR("Undo"), KEY_MASK_CMD|KEY_Z), EDIT_UNDO);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/redo", TTR("Redo"), KEY_MASK_CMD|KEY_Y), EDIT_REDO);
 	edit_menu->get_popup()->add_separator();
-	edit_menu->get_popup()->add_item(TTR("Cut"),EDIT_CUT,KEY_MASK_CMD|KEY_X);
-	edit_menu->get_popup()->add_item(TTR("Copy"),EDIT_COPY,KEY_MASK_CMD|KEY_C);
-	edit_menu->get_popup()->add_item(TTR("Paste"),EDIT_PASTE,KEY_MASK_CMD|KEY_V);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/cut", TTR("Cut"), KEY_MASK_CMD|KEY_X), EDIT_CUT);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/copy", TTR("Copy"), KEY_MASK_CMD|KEY_C), EDIT_COPY);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/paste", TTR("Paste"), KEY_MASK_CMD|KEY_V), EDIT_PASTE);
 	edit_menu->get_popup()->add_separator();
-	edit_menu->get_popup()->add_item(TTR("Select All"),EDIT_SELECT_ALL,KEY_MASK_CMD|KEY_A);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/select_all", TTR("Select All"), KEY_MASK_CMD|KEY_A), EDIT_SELECT_ALL);
 	edit_menu->get_popup()->add_separator();
-	edit_menu->get_popup()->add_item(TTR("Move Up"),EDIT_MOVE_LINE_UP,KEY_MASK_ALT|KEY_UP);
-	edit_menu->get_popup()->add_item(TTR("Move Down"),EDIT_MOVE_LINE_DOWN,KEY_MASK_ALT|KEY_DOWN);
-	edit_menu->get_popup()->add_item(TTR("Indent Left"),EDIT_INDENT_LEFT,KEY_MASK_ALT|KEY_LEFT);
-	edit_menu->get_popup()->add_item(TTR("Indent Right"),EDIT_INDENT_RIGHT,KEY_MASK_ALT|KEY_RIGHT);
-	edit_menu->get_popup()->add_item(TTR("Toggle Comment"),EDIT_TOGGLE_COMMENT,KEY_MASK_CMD|KEY_K);
-	edit_menu->get_popup()->add_item(TTR("Clone Down"),EDIT_CLONE_DOWN,KEY_MASK_CMD|KEY_B);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/move_up", TTR("Move Up"), KEY_MASK_ALT|KEY_UP), EDIT_MOVE_LINE_UP);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/move_down", TTR("Move Down"), KEY_MASK_ALT|KEY_DOWN), EDIT_MOVE_LINE_DOWN);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/indent_left", TTR("Indent Left"), KEY_MASK_ALT|KEY_LEFT), EDIT_INDENT_LEFT);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/indent_right", TTR("Indent Right"), KEY_MASK_ALT|KEY_RIGHT), EDIT_INDENT_RIGHT);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/toggle_comment", TTR("Toggle Comment"), KEY_MASK_CMD|KEY_K), EDIT_TOGGLE_COMMENT);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/clone_down", TTR("Clone Down"), KEY_MASK_CMD|KEY_B), EDIT_CLONE_DOWN);
 	edit_menu->get_popup()->add_separator();
 #ifdef OSX_ENABLED
-	edit_menu->get_popup()->add_item(TTR("Complete Symbol"),EDIT_COMPLETE,KEY_MASK_CTRL|KEY_SPACE);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/complete_symbol", TTR("Complete Symbol"), KEY_MASK_CTRL|KEY_SPACE), EDIT_COMPLETE);
 #else
-	edit_menu->get_popup()->add_item(TTR("Complete Symbol"),EDIT_COMPLETE,KEY_MASK_CMD|KEY_SPACE);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/complete_symbol", TTR("Complete Symbol"), KEY_MASK_CMD|KEY_SPACE), EDIT_COMPLETE);
 #endif
-	edit_menu->get_popup()->add_item(TTR("Trim Trailing Whitespace"), EDIT_TRIM_TRAILING_WHITESAPCE, KEY_MASK_CTRL|KEY_MASK_ALT|KEY_T);
-	edit_menu->get_popup()->add_item(TTR("Auto Indent"),EDIT_AUTO_INDENT,KEY_MASK_CMD|KEY_I);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/trim_trailing_whitespace", TTR("Trim Trailing Whitespace"), KEY_MASK_CTRL|KEY_MASK_ALT|KEY_T), EDIT_TRIM_TRAILING_WHITESAPCE);
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/auto_indent", TTR("Auto Indent"), KEY_MASK_CMD|KEY_I), EDIT_AUTO_INDENT);
 	edit_menu->get_popup()->connect("item_pressed", this,"_menu_option");
+	edit_menu->get_popup()->add_separator();
+	edit_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/reload_script_soft", TTR("Soft Reload Script"), KEY_MASK_CMD|KEY_MASK_SHIFT|KEY_R), FILE_TOOL_RELOAD_SOFT);
 
 
 	search_menu = memnew( MenuButton );
 	menu_hb->add_child(search_menu);
 	search_menu->set_text(TTR("Search"));
-	search_menu->get_popup()->add_item(TTR("Find.."),SEARCH_FIND,KEY_MASK_CMD|KEY_F);
-	search_menu->get_popup()->add_item(TTR("Find Next"),SEARCH_FIND_NEXT,KEY_F3);
-	search_menu->get_popup()->add_item(TTR("Find Previous"),SEARCH_FIND_PREV,KEY_MASK_SHIFT|KEY_F3);
-	search_menu->get_popup()->add_item(TTR("Replace.."),SEARCH_REPLACE,KEY_MASK_CMD|KEY_R);
+	search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/find", TTR("Find.."), KEY_MASK_CMD|KEY_F), SEARCH_FIND);
+	search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/find_next", TTR("Find Next"), KEY_F3), SEARCH_FIND_NEXT);
+	search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/find_previous", TTR("Find Previous"), KEY_MASK_SHIFT|KEY_F3), SEARCH_FIND_PREV);
+	search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/replace", TTR("Replace.."), KEY_MASK_CMD|KEY_R), SEARCH_REPLACE);
 	search_menu->get_popup()->add_separator();
-	search_menu->get_popup()->add_item(TTR("Goto Function.."),SEARCH_LOCATE_FUNCTION,KEY_MASK_SHIFT|KEY_MASK_CMD|KEY_F);
-	search_menu->get_popup()->add_item(TTR("Goto Line.."),SEARCH_GOTO_LINE,KEY_MASK_CMD|KEY_L);
+	search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/goto_function", TTR("Goto Function.."), KEY_MASK_SHIFT|KEY_MASK_CMD|KEY_F), SEARCH_LOCATE_FUNCTION);
+	search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/goto_line", TTR("Goto Line.."), KEY_MASK_CMD|KEY_L), SEARCH_GOTO_LINE);
 	search_menu->get_popup()->connect("item_pressed", this,"_menu_option");
 
 	script_search_menu = memnew( MenuButton );
 	menu_hb->add_child(script_search_menu);
 	script_search_menu->set_text(TTR("Search"));
-	script_search_menu->get_popup()->add_item(TTR("Find.."),SEARCH_FIND,KEY_MASK_CMD|KEY_F);
-	script_search_menu->get_popup()->add_item(TTR("Find Next"),SEARCH_FIND_NEXT,KEY_F3);
+	script_search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/find", TTR("Find.."), KEY_MASK_CMD|KEY_F), SEARCH_FIND);
+	script_search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/find_next", TTR("Find Next"), KEY_F3), SEARCH_FIND_NEXT);
 	script_search_menu->get_popup()->connect("item_pressed", this,"_menu_option");
 	script_search_menu->hide();
 
@@ -2610,19 +2707,19 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	debug_menu = memnew( MenuButton );
 	menu_hb->add_child(debug_menu);
 	debug_menu->set_text(TTR("Debug"));
-	debug_menu->get_popup()->add_item(TTR("Toggle Breakpoint"),DEBUG_TOGGLE_BREAKPOINT,KEY_F9);
-	debug_menu->get_popup()->add_item(TTR("Remove All Breakpoints"), DEBUG_REMOVE_ALL_BREAKPOINTS, KEY_MASK_CTRL|KEY_MASK_SHIFT|KEY_F9);
-	debug_menu->get_popup()->add_item(TTR("Goto Next Breakpoint"), DEBUG_GOTO_NEXT_BREAKPOINT, KEY_MASK_CTRL|KEY_PERIOD);
-	debug_menu->get_popup()->add_item(TTR("Goto Previous Breakpoint"), DEBUG_GOTO_PREV_BREAKPOINT, KEY_MASK_CTRL|KEY_COMMA);
+	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/toggle_breakpoint", TTR("Toggle Breakpoint"), KEY_F9), DEBUG_TOGGLE_BREAKPOINT);
+	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/remove_all_breakpoints", TTR("Remove All Breakpoints"), KEY_MASK_CTRL|KEY_MASK_SHIFT|KEY_F9), DEBUG_REMOVE_ALL_BREAKPOINTS);
+	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/goto_next_breakpoint", TTR("Goto Next Breakpoint"), KEY_MASK_CTRL|KEY_PERIOD), DEBUG_GOTO_NEXT_BREAKPOINT);
+	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/goto_previous_breakpoint", TTR("Goto Previous Breakpoint"), KEY_MASK_CTRL|KEY_COMMA), DEBUG_GOTO_PREV_BREAKPOINT);
 	debug_menu->get_popup()->add_separator();
-	debug_menu->get_popup()->add_item(TTR("Step Over"),DEBUG_NEXT,KEY_F10);
-	debug_menu->get_popup()->add_item(TTR("Step Into"),DEBUG_STEP,KEY_F11);
+	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("debugger/step_over", TTR("Step Over"), KEY_F10), DEBUG_NEXT);
+	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("debugger/step_into", TTR("Step Into"), KEY_F11), DEBUG_STEP);
 	debug_menu->get_popup()->add_separator();
-	debug_menu->get_popup()->add_item(TTR("Break"),DEBUG_BREAK);
-	debug_menu->get_popup()->add_item(TTR("Continue"),DEBUG_CONTINUE);
+	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("debugger/break", TTR("Break")), DEBUG_BREAK);
+	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("debugger/continue", TTR("Continue")), DEBUG_CONTINUE);
 	debug_menu->get_popup()->add_separator();
 	//debug_menu->get_popup()->add_check_item("Show Debugger",DEBUG_SHOW);
-	debug_menu->get_popup()->add_check_item(TTR("Keep Debugger Open"),DEBUG_SHOW_KEEP_OPEN);
+	debug_menu->get_popup()->add_check_shortcut(ED_SHORTCUT("debugger/keep_debugger_open", TTR("Keep Debugger Open")), DEBUG_SHOW_KEEP_OPEN);
 	debug_menu->get_popup()->connect("item_pressed", this,"_menu_option");
 
 	debug_menu->get_popup()->set_item_disabled( debug_menu->get_popup()->get_item_index(DEBUG_NEXT), true);
@@ -2647,7 +2744,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	help_menu = memnew( MenuButton );
 	menu_hb->add_child(help_menu);
 	help_menu->set_text(TTR("Help"));
-	help_menu->get_popup()->add_item(TTR("Contextual"), HELP_CONTEXTUAL, KEY_MASK_SHIFT|KEY_F1);
+	help_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/Contextual", TTR("Contextual Help"), KEY_MASK_SHIFT|KEY_F1), HELP_CONTEXTUAL);
 	help_menu->get_popup()->connect("item_pressed", this,"_menu_option");
 
 	menu_hb->add_spacer();
@@ -2875,6 +2972,8 @@ void ScriptEditorPlugin::edited_scene_changed() {
 	script_editor->edited_scene_changed();
 }
 
+
+
 ScriptEditorPlugin::ScriptEditorPlugin(EditorNode *p_node) {
 
 	editor=p_node;
@@ -2885,6 +2984,7 @@ ScriptEditorPlugin::ScriptEditorPlugin(EditorNode *p_node) {
 	script_editor->hide();
 
 	EDITOR_DEF("text_editor/auto_reload_scripts_on_external_change",true);
+	ScriptServer::set_reload_scripts_on_save(EDITOR_DEF("text_editor/auto_reload_and_parse_scripts_on_save",true));
 	EDITOR_DEF("text_editor/open_dominant_script_on_scene_change",true);
 	EDITOR_DEF("external_editor/use_external_editor",false);
 	EDITOR_DEF("external_editor/exec_path","");
@@ -2895,6 +2995,7 @@ ScriptEditorPlugin::ScriptEditorPlugin(EditorNode *p_node) {
 	EDITOR_DEF("text_editor/group_help_pages",true);
 	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING,"external_editor/exec_path",PROPERTY_HINT_GLOBAL_FILE));
 	EDITOR_DEF("external_editor/exec_flags","");
+
 
 }
 

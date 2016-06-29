@@ -79,8 +79,8 @@ const char* GDTokenizer::token_names[TK_MAX]={
 "for",
 "do",
 "while",
-"switch",
-"case",
+"switch (reserved)",
+"case (reserved)",
 "break",
 "continue",
 "pass",
@@ -725,7 +725,7 @@ void GDTokenizerText::_advance() {
 					if (hexa_found) {
 						int val = str.hex_to_int();
 						_make_constant(val);
-					} else if (period_found) {
+					} else if (period_found || exponent_found) {
 						real_t val = str.to_double();
 						//print_line("*%*%*%*% to convert: "+str+" result: "+rtos(val));
 						_make_constant(val);
@@ -874,6 +874,7 @@ void GDTokenizerText::_advance() {
 								{TK_CF_WHILE,"while"},
 								{TK_CF_DO,"do"},
 								{TK_CF_SWITCH,"switch"},
+								{TK_CF_CASE,"case"},
 								{TK_CF_BREAK,"break"},
 								{TK_CF_CONTINUE,"continue"},
 								{TK_CF_RETURN,"return"},

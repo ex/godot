@@ -1,3 +1,31 @@
+/*************************************************************************/
+/*  core_bind.cpp                                                        */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                    http://www.godotengine.org                         */
+/*************************************************************************/
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
 #include "core_bind.h"
 #include "os/os.h"
 #include "geometry.h"
@@ -435,6 +463,15 @@ Error _OS::set_thread_name(const String& p_name) {
 
 	return Thread::set_name(p_name);
 };
+
+void _OS::set_use_vsync(bool p_enable) {
+	OS::get_singleton()->set_use_vsync(p_enable);
+}
+
+bool _OS::is_vsnc_enabled() const {
+
+	return OS::get_singleton()->is_vsnc_enabled();
+}
 
 
 /*
@@ -1110,6 +1147,8 @@ void _OS::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("set_thread_name","name"),&_OS::set_thread_name);
 
+	ObjectTypeDB::bind_method(_MD("set_use_vsync","enable"),&_OS::set_use_vsync);
+	ObjectTypeDB::bind_method(_MD("is_vsnc_enabled"),&_OS::is_vsnc_enabled);
 
 	BIND_CONSTANT( DAY_SUNDAY );
 	BIND_CONSTANT( DAY_MONDAY );
@@ -1527,13 +1566,20 @@ DVector<uint8_t> _File::get_buffer(int p_length) const{
 
 String _File::get_as_text() const {
 
+	ERR_FAIL_COND_V(!f, String());
+
 	String text;
+	size_t original_pos = f->get_pos();
+	f->seek(0);
+
 	String l = get_line();
 	while(!eof_reached()) {
 		text+=l+"\n";
 		l = get_line();
 	}
 	text+=l;
+
+	f->seek(original_pos);
 
 	return text;
 
@@ -1544,6 +1590,12 @@ String _File::get_as_text() const {
 String _File::get_md5(const String& p_path) const {
 
 	return FileAccess::get_md5(p_path);
+
+}
+
+String _File::get_sha256(const String& p_path) const {
+
+	return FileAccess::get_sha256(p_path);
 
 }
 
@@ -1737,6 +1789,7 @@ void _File::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_line"),&_File::get_line);
 	ObjectTypeDB::bind_method(_MD("get_as_text"),&_File::get_as_text);
 	ObjectTypeDB::bind_method(_MD("get_md5","path"),&_File::get_md5);
+	ObjectTypeDB::bind_method(_MD("get_sha256","path"),&_File::get_md5);
 	ObjectTypeDB::bind_method(_MD("get_endian_swap"),&_File::get_endian_swap);
 	ObjectTypeDB::bind_method(_MD("set_endian_swap","enable"),&_File::set_endian_swap);
 	ObjectTypeDB::bind_method(_MD("get_error:Error"),&_File::get_error);
@@ -1845,6 +1898,13 @@ String _Directory::get_current_dir() {
 Error _Directory::make_dir(String p_dir){
 
 	ERR_FAIL_COND_V(!d,ERR_UNCONFIGURED);
+	if (!p_dir.is_rel_path()) {
+		DirAccess *d = DirAccess::create_for_path(p_dir);
+		Error err = d->make_dir(p_dir);
+		memdelete(d);
+		return err;
+
+	}
 	return d->make_dir(p_dir);
 }
 Error _Directory::make_dir_recursive(String p_dir){
@@ -1856,18 +1916,32 @@ Error _Directory::make_dir_recursive(String p_dir){
 bool _Directory::file_exists(String p_file){
 
 	ERR_FAIL_COND_V(!d,false);
+
+	if (!p_file.is_rel_path()) {
+		return FileAccess::exists(p_file);
+	}
+
 	return d->file_exists(p_file);
 }
 
 bool _Directory::dir_exists(String p_dir) {
 	ERR_FAIL_COND_V(!d,false);
-	return d->dir_exists(p_dir);
+	if (!p_dir.is_rel_path()) {
+
+		DirAccess *d = DirAccess::create_for_path(p_dir);
+		bool exists = d->dir_exists(p_dir);
+		memdelete(d);
+		return exists;
+
+	} else {
+		return d->dir_exists(p_dir);
+	}
 }
 
 int _Directory::get_space_left(){
 
 	ERR_FAIL_COND_V(!d,0);
-	return d->get_space_left();
+	return d->get_space_left()/1024*1024; //return value in megabytes, given binding is int
 }
 
 Error _Directory::copy(String p_from,String p_to){
@@ -1878,12 +1952,26 @@ Error _Directory::copy(String p_from,String p_to){
 Error _Directory::rename(String p_from, String p_to){
 
 	ERR_FAIL_COND_V(!d,ERR_UNCONFIGURED);
+	if (!p_from.is_rel_path()) {
+		DirAccess *d = DirAccess::create_for_path(p_from);
+		Error err = d->rename(p_from,p_to);
+		memdelete(d);
+		return err;
+	}
+
 	return d->rename(p_from,p_to);
 
 }
 Error _Directory::remove(String p_name){
 
 	ERR_FAIL_COND_V(!d,ERR_UNCONFIGURED);
+	if (!p_name.is_rel_path()) {
+		DirAccess *d = DirAccess::create_for_path(p_name);
+		Error err = d->remove(p_name);
+		memdelete(d);
+		return err;
+	}
+
 	return d->remove(p_name);
 }
 

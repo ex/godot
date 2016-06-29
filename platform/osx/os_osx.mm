@@ -139,12 +139,10 @@ static int button_mask=0;
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
-/*    _Godotwindow* window;
+	if (OS_OSX::singleton->get_main_loop())
+		OS_OSX::singleton->get_main_loop()->notification(MainLoop::NOTIFICATION_WM_QUIT_REQUEST);
 
-    for (window = _Godot.windowListHead;  window;  window = window->next)
-	_GodotInputWindowCloseRequest(window);
-*/
-    return NSTerminateCancel;
+	return NSTerminateCancel;
 }
 
 - (void)applicationDidHide:(NSNotification *)notification
@@ -772,20 +770,48 @@ static int translateKey(unsigned int key)
 
 - (void)flagsChanged:(NSEvent *)event
 {
-   /* int action;
-    unsigned int newModifierFlags =
-	[event modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+	InputEvent ev;
+	int key = [event keyCode];
+	int mod = [event modifierFlags];
 
-    if (newModifierFlags > window->ns.modifierFlags)
-	action = GLFW_PRESS;
-    else
-	action = GLFW_RELEASE;
+	ev.type=InputEvent::KEY;
 
-    window->ns.modifierFlags = newModifierFlags;
+	if (key == 0x36 || key == 0x37) {
+		if (mod & NSCommandKeyMask) {
+			mod&= ~NSCommandKeyMask;
+			ev.key.pressed = true;
+		} else {
+			ev.key.pressed = false;
+		}
+	} else if (key == 0x38 || key == 0x3c) {
+		if (mod & NSShiftKeyMask) {
+			mod&= ~NSShiftKeyMask;
+			ev.key.pressed = true;
+		} else {
+			ev.key.pressed = false;
+		}
+	} else if (key == 0x3a || key == 0x3d) {
+		if (mod & NSAlternateKeyMask) {
+			mod&= ~NSAlternateKeyMask;
+			ev.key.pressed = true;
+		} else {
+			ev.key.pressed = false;
+		}
+	} else if (key == 0x3b || key == 0x3e) {
+		if (mod & NSControlKeyMask) {
+			mod&= ~NSControlKeyMask;
+			ev.key.pressed = true;
+		} else {
+			ev.key.pressed = false;
+		}
+	} else {
+		return;
+	}
 
-    const int key = translateKey([event keyCode]);
-    const int mods = translateFlags([event modifierFlags]);
-    _glfwInputKey(window, key, [event keyCode], action, mods);*/
+	ev.key.mod=translateFlags(mod);
+	ev.key.scancode = latin_keyboard_keycode_convert(translateKey(key));
+
+	OS_OSX::singleton->push_input(ev);
 }
 
 - (void)keyUp:(NSEvent *)event
@@ -1183,6 +1209,22 @@ String OS_OSX::get_name() {
 	return "OSX";
 }
 
+void OS_OSX::alert(const String& p_alert, const String& p_title) {
+	// Set OS X-compliant variables
+	NSAlert *window = [[NSAlert alloc] init];
+	NSString *ns_title = [NSString stringWithUTF8String:p_title.utf8().get_data()];
+	NSString *ns_alert = [NSString stringWithUTF8String:p_alert.utf8().get_data()];
+
+	[window addButtonWithTitle:@"OK"];
+	[window setMessageText:ns_title];
+	[window setInformativeText:ns_alert];
+	[window setAlertStyle:NSWarningAlertStyle];
+
+	// Display it, then release
+	[window runModal];
+	[window release];
+}
+
 void OS_OSX::set_cursor_shape(CursorShape p_shape) {
 
 	if (cursor_shape==p_shape)
@@ -1435,6 +1477,7 @@ Point2 OS_OSX::get_window_position() const {
 
 	Size2 wp([window_object frame].origin.x, [window_object frame].origin.y);
 	wp*=display_scale;
+	return wp;
 };
 
 

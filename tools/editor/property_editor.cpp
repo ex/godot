@@ -247,7 +247,8 @@ bool CustomPropertyEditor::edit(Object* p_owner,const String& p_name,Variant::Ty
 	hint=p_hint;
 	hint_text=p_hint_text;
 	type_button->hide();
-	color_picker->hide();
+	if (color_picker)
+		color_picker->hide();
 	texture_preview->hide();
 	inheritors_array.clear();
 	text_edit->hide();
@@ -596,6 +597,16 @@ bool CustomPropertyEditor::edit(Object* p_owner,const String& p_name,Variant::Ty
 		} break;
 		case Variant::COLOR: {
 
+			if (!color_picker) {
+				//late init for performance
+				color_picker = memnew( ColorPicker );
+				add_child(color_picker);
+				color_picker->hide();
+				color_picker->set_area_as_parent_rect();
+				for(int i=0;i<4;i++)
+					color_picker->set_margin((Margin)i,5);
+				color_picker->connect("color_changed",this,"_color_changed");
+			}
 
 			color_picker->show();
 			color_picker->set_edit_alpha(hint!=PROPERTY_HINT_COLOR_NO_ALPHA);
@@ -1757,13 +1768,9 @@ CustomPropertyEditor::CustomPropertyEditor() {
 		action_buttons[i]->connect("pressed", this,"_action_pressed",binds);
 	}
 
-	color_picker = memnew( ColorPicker );
-	add_child(color_picker);
-	color_picker->hide();
-	color_picker->set_area_as_parent_rect();
-	for(int i=0;i<4;i++)
-		color_picker->set_margin((Margin)i,5);
-	color_picker->connect("color_changed",this,"_color_changed");
+	color_picker=NULL;
+
+
 
 	set_as_toplevel(true);
 	file = memnew ( EditorFileDialog );
@@ -1956,6 +1963,13 @@ bool PropertyEditor::_is_property_different(const Variant& p_current, const Vari
 			return false;
 	}
 
+	if (p_current.get_type()==Variant::REAL && p_orig.get_type()==Variant::REAL) {
+		float a = p_current;
+		float b = p_orig;
+
+		return Math::abs(a-b)>CMP_EPSILON; //this must be done because, as some scenes save as text, there might be a tiny difference in floats due to numerical error
+	}
+
 	return bool(Variant::evaluate(Variant::OP_NOT_EQUAL,p_current,p_orig));
 }
 
@@ -2128,6 +2142,7 @@ void PropertyEditor::set_item_text(TreeItem *p_item, int p_type, const String& p
 
 			if (obj->get( p_name ).get_type() == Variant::NIL || obj->get( p_name ).operator RefPtr().is_null()) {
 				p_item->set_text(1,"<null>");
+				p_item->set_icon(1,Ref<Texture>());
 
 				Dictionary d = p_item->get_metadata(0);
 				int hint=d.has("hint")?d["hint"].operator int():-1;
@@ -2224,6 +2239,7 @@ void PropertyEditor::_check_reload_status(const String&p_name, TreeItem* item) {
 
 		if (_get_instanced_node_original_property(p_name,vorig) || usage) {
 			Variant v = obj->get(p_name);
+
 
 			bool changed = _is_property_different(v,vorig,usage);
 
@@ -2797,7 +2813,7 @@ void PropertyEditor::update_tree() {
 			if (capitalize_paths)
 				cat = cat.capitalize();
 
-			if (cat.findn(filter)==-1 && name.findn(filter)==-1)
+			if (!filter.is_subsequence_ofi(cat) && !filter.is_subsequence_ofi(name))
 				continue;
 		}
 
@@ -3334,6 +3350,7 @@ void PropertyEditor::update_tree() {
 
 				if (obj->get( p.name ).get_type() == Variant::NIL || obj->get( p.name ).operator RefPtr().is_null()) {
 					item->set_text(1,"<null>");
+					item->set_icon(1,Ref<Texture>());
 
 				} else {
 					RES res = obj->get( p.name ).operator RefPtr();
@@ -3919,6 +3936,7 @@ void PropertyEditor::_bind_methods() {
 	ObjectTypeDB::bind_method( "_filter_changed",&PropertyEditor::_filter_changed);
 	ObjectTypeDB::bind_method( "update_tree",&PropertyEditor::update_tree);
 	ObjectTypeDB::bind_method( "_resource_preview_done",&PropertyEditor::_resource_preview_done);
+	ObjectTypeDB::bind_method( "refresh",&PropertyEditor::refresh);
 
 	ObjectTypeDB::bind_method(_MD("get_drag_data_fw"), &PropertyEditor::get_drag_data_fw);
 	ObjectTypeDB::bind_method(_MD("can_drop_data_fw"), &PropertyEditor::can_drop_data_fw);

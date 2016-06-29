@@ -35,7 +35,7 @@
 #include "scene/2d/canvas_item.h"
 #include "math_2d.h"
 #include "rid.h"
-
+#include "scene/gui/input_action.h"
 /**
 	@author Juan Linietsky <reduzio@gmail.com>
 */
@@ -132,6 +132,7 @@ private:
 		ObjectID drag_owner;
 		bool modal;
 		bool modal_exclusive;
+		uint64_t modal_frame; //frame used to put something as modal
 		Ref<Theme> theme;
 		Control *theme_owner;
 		String tooltip;
@@ -153,6 +154,8 @@ private:
 		HashMap<StringName, Ref<Font>, StringNameHasher > font_override;
 		HashMap<StringName, Color, StringNameHasher > color_override;
 		HashMap<StringName, int, StringNameHasher > constant_override;
+		Map< Ref<Font>, int> font_refcount;
+
 	} data;
 
 	// used internally
@@ -169,7 +172,7 @@ private:
 	float _get_range(int p_idx) const;
 	float _s2a(float p_val, AnchorType p_anchor,float p_range) const;
 	float _a2s(float p_val, AnchorType p_anchor,float p_range) const;
-	void _propagate_theme_changed(Control *p_owner);
+	void _propagate_theme_changed(CanvasItem *p_at, Control *p_owner);
 
 	void _change_notify_margins();
 	void _update_minimum_size();
@@ -183,6 +186,11 @@ private:
 	// Deprecated, should be removed in a future version.
 	void _set_rotation_deg(float p_degrees);
 	float _get_rotation_deg() const;
+
+	void _ref_font(Ref<Font> p_sc);
+	void _unref_font( Ref<Font> p_sc);
+	void _font_changed();
+
 
 friend class Viewport;
 	void _modal_stack_remove();
@@ -242,6 +250,7 @@ public:
 	Size2 get_custom_minimum_size() const;
 
 	bool is_window_modal_on_top() const;
+	uint64_t get_modal_frame() const; //frame in which this was made modal
 
 	Control *get_parent_control() const;
 
@@ -340,6 +349,13 @@ public:
 	Ref<Font> get_font(const StringName& p_name,const StringName& p_type=StringName()) const;
 	Color get_color(const StringName& p_name,const StringName& p_type=StringName()) const;
 	int get_constant(const StringName& p_name,const StringName& p_type=StringName()) const;
+
+	bool has_icon_override(const StringName& p_name) const;
+	bool has_shader_override(const StringName& p_name) const;
+	bool has_stylebox_override(const StringName& p_name) const;
+	bool has_font_override(const StringName& p_name) const;
+	bool has_color_override(const StringName& p_name) const;
+	bool has_constant_override(const StringName& p_name) const;
 
 	bool has_icon(const StringName& p_name,const StringName& p_type=StringName()) const;
 	bool has_shader(const StringName& p_name,const StringName& p_type=StringName()) const;

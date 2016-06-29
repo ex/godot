@@ -477,7 +477,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 		} else if (tokenizer->get_token()==GDTokenizer::TK_IDENTIFIER) {
 			//identifier (reference)
 
-			const ClassNode* cln = static_cast<const ClassNode*>(get_parse_tree());
+			const ClassNode* cln = current_class;
 			bool             bfn = false;
 			StringName       identifier;
 			if (_get_completable_identifier(COMPLETION_IDENTIFIER,identifier)) {
@@ -730,7 +730,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 
 			//find list [ or find dictionary {
 
-			print_line("found bug?");
+			//print_line("found bug?");
 
 			_set_error("Error parsing expression, misplaced: "+String(tokenizer->get_token_name(tokenizer->get_token())));
 			return NULL;		//nothing
@@ -1069,8 +1069,8 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 				// can be followed by an unary op in a valid combination,
 				// due to how precedence works, unaries will always dissapear first
 
-				_set_error("Parser bug..");
-
+				_set_error("Unexpected two consecutive operators.");
+				return NULL;
 			}
 
 
@@ -2408,6 +2408,7 @@ void GDParser::_parse_class(ClassNode *p_class) {
 							return;
 						}
 						current_export.type=type;
+						current_export.usage|=PROPERTY_USAGE_SCRIPT_VARIABLE;
 						tokenizer->advance();
 						if (tokenizer->get_token()==GDTokenizer::TK_COMMA) {
 							// hint expected next!
@@ -2782,6 +2783,8 @@ void GDParser::_parse_class(ClassNode *p_class) {
 
 						current_export.type=Variant::OBJECT;
 						current_export.hint=PROPERTY_HINT_RESOURCE_TYPE;
+						current_export.usage|=PROPERTY_USAGE_SCRIPT_VARIABLE;
+
 						current_export.hint_string=identifier;
 
 						tokenizer->advance();
@@ -2901,6 +2904,7 @@ void GDParser::_parse_class(ClassNode *p_class) {
 								return;
 							}
 							member._export.type=cn->value.get_type();
+							member._export.usage|=PROPERTY_USAGE_SCRIPT_VARIABLE;
 						}
 					}
 #ifdef TOOLS_ENABLED

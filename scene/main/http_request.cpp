@@ -1,3 +1,31 @@
+/*************************************************************************/
+/*  http_request.cpp                                                     */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                    http://www.godotengine.org                         */
+/*************************************************************************/
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
 #include "http_request.h"
 
 void HTTPRequest::_redirect_request(const String& p_new_url) {
@@ -480,8 +508,9 @@ void HTTPRequest::_bind_methods() {
 	BIND_CONSTANT( RESULT_NO_RESPONSE );
 	BIND_CONSTANT( RESULT_BODY_SIZE_LIMIT_EXCEEDED );
 	BIND_CONSTANT( RESULT_REQUEST_FAILED );
-	BIND_CONSTANT( RESULT_REDIRECT_LIMIT_REACHED );
+	BIND_CONSTANT( RESULT_DOWNLOAD_FILE_CANT_OPEN );
 	BIND_CONSTANT( RESULT_DOWNLOAD_FILE_WRITE_ERROR );
+	BIND_CONSTANT( RESULT_REDIRECT_LIMIT_REACHED );
 
 }
 
@@ -498,6 +527,7 @@ HTTPRequest::HTTPRequest()
 	use_ssl=false;
 	response_code=0;
 	request_sent=false;
+	requesting=false;
 	client.instance();
 	use_threads=false;
 	body_size_limit=-1;

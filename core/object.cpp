@@ -1320,14 +1320,16 @@ Array Object::_get_signal_connection_list(const String& p_signal) const{
 	for (List<Connection>::Element *E=conns.front();E;E=E->next()) {
 
 		Connection &c=E->get();
-		Dictionary rc;
-		rc["signal"]=c.signal;
-		rc["method"]=c.method;
-		rc["source"]=c.source;
-		rc["target"]=c.target;
-		rc["binds"]=c.binds;
-		rc["flags"]=c.flags;
-		ret.push_back(rc);
+		if (c.signal == p_signal){
+			Dictionary rc;
+			rc["signal"]=c.signal;
+			rc["method"]=c.method;
+			rc["source"]=c.source;
+			rc["target"]=c.target;
+			rc["binds"]=c.binds;
+			rc["flags"]=c.flags;
+			ret.push_back(rc);
+		}
 	}
 
 	return ret;
@@ -1381,6 +1383,31 @@ void Object::get_signal_connection_list(const StringName& p_signal,List<Connecti
 	for(int i=0;i<s->slot_map.size();i++)
 		p_connections->push_back(s->slot_map.getv(i).conn);
 
+}
+
+bool Object::has_persistent_signal_connections() const {
+
+	const StringName *S=NULL;
+
+	while((S=signal_map.next(S))) {
+
+		const Signal *s=&signal_map[*S];
+
+		for(int i=0;i<s->slot_map.size();i++) {
+
+			if (s->slot_map.getv(i).conn.flags&CONNECT_PERSIST)
+				return true;
+		}
+	}
+
+	return false;
+}
+
+void Object::get_signals_connected_to_this(List<Connection> *p_connections) const {
+
+	for (const List<Connection>::Element *E=connections.front();E;E=E->next()) {
+		p_connections->push_back(E->get());
+	}
 }
 
 

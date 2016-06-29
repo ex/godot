@@ -212,7 +212,7 @@ String GDScriptLanguage::debug_get_stack_level_source(int p_level) const {
 
     ERR_FAIL_INDEX_V(p_level,_debug_call_stack_pos,"");
     int l = _debug_call_stack_pos - p_level -1;
-    return _call_stack[l].function->get_script()->get_path();
+    return _call_stack[l].function->get_source();
 
 }
 void GDScriptLanguage::debug_get_stack_level_locals(int p_level,List<String> *p_locals, List<Variant> *p_values, int p_max_subitems,int p_max_depth) {
@@ -497,11 +497,6 @@ static Ref<Reference> _get_parent_class(GDCompletionContext& context) {
 
 				int base_idx = GDScriptLanguage::get_singleton()->get_global_map()[base];
 				native = GDScriptLanguage::get_singleton()->get_global_array()[base_idx];
-				if (!native.is_valid()) {
-
-					print_line("Global not a class: '"+base+"'");
-
-				}
 				return native;
 			}
 
@@ -1024,7 +1019,7 @@ static bool _guess_identifier_type_in_block(GDCompletionContext& context,int p_l
 }
 
 
-static bool _guess_identifier_from_assignment_in_function(GDCompletionContext& context,const StringName& p_identifier, const StringName& p_function,GDCompletionIdentifier &r_type) {
+static bool _guess_identifier_from_assignment_in_function(GDCompletionContext& context, int p_src_line, const StringName& p_identifier, const StringName& p_function,GDCompletionIdentifier &r_type) {
 
 	const GDParser::FunctionNode* func=NULL;
 	for(int i=0;i<context._class->functions.size();i++) {
@@ -1039,7 +1034,9 @@ static bool _guess_identifier_from_assignment_in_function(GDCompletionContext& c
 
 	for(int i=0;i<func->body->statements.size();i++) {
 
-
+		if (func->body->statements[i]->line == p_src_line) {
+			break;
+		}
 
 		if (func->body->statements[i]->type==GDParser::BlockNode::TYPE_OPERATOR) {
 			const GDParser::OperatorNode *op = static_cast<const GDParser::OperatorNode *>(func->body->statements[i]);
@@ -1160,11 +1157,11 @@ static bool _guess_identifier_type(GDCompletionContext& context,int p_line,const
 				}
 
 				//try to guess from assignment in construtor or _ready
-				if (_guess_identifier_from_assignment_in_function(context,p_identifier,"_ready",r_type))
+				if (_guess_identifier_from_assignment_in_function(context,p_line+1,p_identifier,"_ready",r_type))
 					return true;
-				if (_guess_identifier_from_assignment_in_function(context,p_identifier,"_enter_tree",r_type))
+				if (_guess_identifier_from_assignment_in_function(context,p_line+1,p_identifier,"_enter_tree",r_type))
 					return true;
-				if (_guess_identifier_from_assignment_in_function(context,p_identifier,"_init",r_type))
+				if (_guess_identifier_from_assignment_in_function(context,p_line+1,p_identifier,"_init",r_type))
 					return true;
 
 				return false;
@@ -2122,10 +2119,8 @@ Error GDScriptLanguage::complete_code(const String& p_code, const String& p_base
 	switch(p.get_completion_type()) {
 
 		case GDParser::COMPLETION_NONE: {
-			print_line("No completion");
 		} break;
 		case GDParser::COMPLETION_BUILT_IN_TYPE_CONSTANT: {
-			print_line("Built in type constant");
 			List<StringName> constants;
 			Variant::get_numeric_constants_for_type(p.get_completion_built_in_constant(),&constants);
 			for(List<StringName>::Element *E=constants.front();E;E=E->next()) {
@@ -2141,7 +2136,6 @@ Error GDScriptLanguage::complete_code(const String& p_code, const String& p_base
 			_find_identifiers(context,p.get_completion_line(),isfunction,options);
 		} break;
 		case GDParser::COMPLETION_PARENT_FUNCTION: {
-			print_line("parent function");
 
 		} break;
 		case GDParser::COMPLETION_METHOD:

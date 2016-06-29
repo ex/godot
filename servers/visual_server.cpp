@@ -560,7 +560,7 @@ void VisualServer::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("draw"),&VisualServer::draw);
 	ObjectTypeDB::bind_method(_MD("sync"),&VisualServer::sync);
-	ObjectTypeDB::bind_method(_MD("free"),&VisualServer::free);
+	ObjectTypeDB::bind_method(_MD("free_rid"),&VisualServer::free);
 
 	ObjectTypeDB::bind_method(_MD("set_default_clear_color"),&VisualServer::set_default_clear_color);
 
@@ -705,10 +705,10 @@ void VisualServer::_bind_methods() {
 
 }
 
-void VisualServer::_canvas_item_add_style_box(RID p_item, const Rect2& p_rect, RID p_texture,const Vector<float>& p_margins, const Color& p_modulate) {
+void VisualServer::_canvas_item_add_style_box(RID p_item, const Rect2& p_rect, const Rect2& p_source, RID p_texture,const Vector<float>& p_margins, const Color& p_modulate) {
 
 	ERR_FAIL_COND(p_margins.size()!=4);
-	canvas_item_add_style_box(p_item, p_rect, p_texture,Vector2(p_margins[0],p_margins[1]),Vector2(p_margins[2],p_margins[3]),true,p_modulate);
+	canvas_item_add_style_box(p_item,p_rect,p_source,p_texture,Vector2(p_margins[0],p_margins[1]),Vector2(p_margins[2],p_margins[3]),true,p_modulate);
 }
 
 void VisualServer::_camera_set_orthogonal(RID p_camera,float p_size,float p_z_near,float p_z_far) {
@@ -822,5 +822,3 @@ VisualServer::~VisualServer() {
 
 	singleton=NULL;
 }
-
-

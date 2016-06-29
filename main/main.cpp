@@ -109,6 +109,8 @@ static String locale;
 static bool use_debug_profiler=false;
 static bool force_lowdpi=false;
 static int init_screen=-1;
+static bool use_vsync=true;
+static bool editor=false;
 
 static String unescape_cmdline(const String& p_str) {
 
@@ -280,7 +282,7 @@ Error Main::setup(const char *execpath,int argc, char *argv[],bool p_second_phas
 	packed_data->add_pack_source(zip_packed_data);
 #endif
 
-	bool editor=false;
+
 
 	while(I) {
 
@@ -688,7 +690,10 @@ Error Main::setup(const char *execpath,int argc, char *argv[],bool p_second_phas
 
 #endif
 
-	input_map->load_from_globals();
+	if (editor)
+		input_map->load_default(); //keys for editor
+	else
+		input_map->load_from_globals(); //keys for game
 
 	if (video_driver=="") // specified in engine.cfg
 		video_driver=_GLOBAL_DEF("display/driver",Variant((const char*)OS::get_singleton()->get_video_driver_name(0)));
@@ -723,6 +728,7 @@ Error Main::setup(const char *execpath,int argc, char *argv[],bool p_second_phas
 	GLOBAL_DEF("display/fullscreen",video_mode.fullscreen);
 	GLOBAL_DEF("display/resizable",video_mode.resizable);
 	GLOBAL_DEF("display/borderless_window", video_mode.borderless_window);
+	use_vsync = GLOBAL_DEF("display/use_vsync", use_vsync);
 	GLOBAL_DEF("display/test_width",0);
 	GLOBAL_DEF("display/test_height",0);
 	OS::get_singleton()->_pixel_snap=GLOBAL_DEF("display/use_2d_pixel_snap",false);
@@ -873,6 +879,7 @@ Error Main::setup2() {
 		OS::get_singleton()->set_window_position(init_custom_pos);
 	}
 
+	OS::get_singleton()->set_use_vsync(use_vsync);
 
 	register_core_singletons();
 
@@ -947,7 +954,7 @@ Error Main::setup2() {
 	Globals::get_singleton()->set_custom_property_info("application/icon",PropertyInfo(Variant::STRING,"application/icon",PROPERTY_HINT_FILE,"*.png,*.webp"));
 
 	if (bool(GLOBAL_DEF("display/emulate_touchscreen",false))) {
-		if (!OS::get_singleton()->has_touchscreen_ui_hint() && Input::get_singleton()) {
+		if (!OS::get_singleton()->has_touchscreen_ui_hint() && Input::get_singleton() && !editor) {
 			//only if no touchscreen ui hint, set emulation
 			InputDefault *id = Input::get_singleton()->cast_to<InputDefault>();
 			if (id)

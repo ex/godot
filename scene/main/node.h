@@ -64,6 +64,7 @@ private:
 	struct GroupData {
 
 		bool persistent;
+		SceneTree::Group *group;
 		GroupData() { persistent=false; }
 	};
 
@@ -91,7 +92,7 @@ private:
 		Viewport *viewport;
 
 
-		HashMap< StringName, GroupData,StringNameHasher>  grouped;
+		Map< StringName, GroupData>  grouped;
 		List<Node*>::Element *OW; // owned element
 		List<Node*> owned;
 
@@ -110,6 +111,7 @@ private:
 		bool in_constructor;
 		bool use_placeholder;
 
+		bool display_folded;
 
 	} data;
 
@@ -120,7 +122,7 @@ private:
 	Node *_get_node(const NodePath& p_path) const;
 	Node *_get_child_by_name(const StringName& p_name) const;
 
-
+	void _replace_connections_target(Node* p_new_target);
 
 	void _validate_child_name(Node *p_name, bool p_force_human_readable=false);
 
@@ -223,6 +225,7 @@ public:
 	};
 
 	void get_groups(List<GroupInfo> *p_groups) const;
+	bool has_persistent_groups() const;
 
 	void move_child(Node *p_child,int p_pos);
 	void raise();
@@ -311,6 +314,8 @@ public:
 	NodePath get_import_path() const;
 #endif
 
+	bool is_owned_by_parent() const;
+
 	void get_argument_options(const StringName& p_function,int p_idx,List<String>*r_options) const;
 
 	void clear_internal_tree_resource_paths();
@@ -321,6 +326,8 @@ public:
 
 	void update_configuration_warning();
 
+	void set_display_folded(bool p_folded);
+	bool is_displayed_folded() const;
 	/* CANVAS */
 
 	Node();

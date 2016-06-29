@@ -411,10 +411,10 @@ void TabContainer::_notification(int p_what) {
 			panel->draw(ci, Rect2( 0, top_size.height, size.width, size.height-top_size.height));
 
 		} break;
-		case NOTIFICATION_READY:
 		case NOTIFICATION_THEME_CHANGED: {
-
-			call_deferred("set_current_tab",get_current_tab()); //wait until all changed theme
+			if (get_tab_count() > 0) {
+				call_deferred("set_current_tab",get_current_tab()); //wait until all changed theme
+			}
 		} break;
 	}
 }
@@ -705,13 +705,13 @@ Size2 TabContainer::get_minimum_size() const {
 		if (c->is_set_as_toplevel())
 			continue;
 
-		if (!c->has_meta("_tab_name"))
-			continue;
+		//if (!c->has_meta("_tab_name"))
+		//	continue;
 
 		if (!c->is_visible())
 			continue;
 
-		Size2 cms = c->get_minimum_size();
+		Size2 cms = c->get_combined_minimum_size();
 		ms.x=MAX(ms.x,cms.x);
 		ms.y=MAX(ms.y,cms.y);
 	}
@@ -722,6 +722,9 @@ Size2 TabContainer::get_minimum_size() const {
 
 	ms.y+=MAX(tab_bg->get_minimum_size().y,tab_fg->get_minimum_size().y);
 	ms.y+=font->get_height();
+
+	Ref<StyleBox> sb = get_stylebox("panel");
+	ms+=sb->get_minimum_size();
 
 	return ms;
 }

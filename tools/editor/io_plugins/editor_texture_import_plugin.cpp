@@ -1144,6 +1144,7 @@ Error EditorTextureImportPlugin::import2(const String& p_path, const Ref<Resourc
 
 		if (!p_external) {
 			from->set_editor(get_name());
+			from->set_source_md5(0,FileAccess::get_md5(src_path));
 			existing->set_path(p_path);
 			existing->set_import_metadata(from);
 		}
@@ -1311,21 +1312,30 @@ Error EditorTextureImportPlugin::import2(const String& p_path, const Ref<Resourc
 			ERR_CONTINUE( !source_map.has(i) );
 			for (List<int>::Element *E=source_map[i].front();E;E=E->next()) {
 
-				String apath = p_path.get_base_dir().plus_file(from->get_source_path(E->get()).get_file().basename()+".atex");
+				String apath;
+				String spath = from->get_source_path(E->get()).get_file();
+
+				if (p_external) {
+					apath = p_path.get_base_dir().plus_file(spath.basename()+"."+from->get_source_path(E->get()).md5_text()+".atex");
+				} else {
+					apath = p_path.get_base_dir().plus_file(spath.basename()+".atex");
+				}
 
 				Ref<AtlasTexture> at;
 
 				if (ResourceCache::has(apath)) {
+
 					at = Ref<AtlasTexture>( ResourceCache::get(apath)->cast_to<AtlasTexture>() );
 				} else {
 
 					at = Ref<AtlasTexture>( memnew( AtlasTexture ) );
+
 				}
 				at->set_region(region);
 				at->set_margin(margin);
 				at->set_path(apath);
 				atlases[E->get()]=at;
-				print_line("Atlas Tex: "+apath);
+
 			}
 		}
 		if (ResourceCache::has(p_path)) {
@@ -1834,7 +1844,7 @@ EditorTextureImportPlugin::EditorTextureImportPlugin(EditorNode *p_editor) {
 	} else if (EditorImportExport::get_singleton()->image_get_export_group(p_path)) {
 
 
-		Ref<EditorImportPlugin> pl = EditorImportExport::get_singleton()->get_import_plugin_by_name("texture_2d");
+		Ref<EditorImportPlugin> pl = EditorImportExport::get_singleton()->get_import_plugin_by_name("texture");
 		if (pl.is_valid()) {
 			Vector<uint8_t> ce = pl->custom_export(p_path,p_platform);
 			if (ce.size()) {
@@ -1848,7 +1858,7 @@ EditorTextureImportPlugin::EditorTextureImportPlugin(EditorNode *p_editor) {
 		String xt = p_path.extension().to_lower();
 		if (EditorImportExport::get_singleton()->get_image_formats().has(xt)) { //should check for more I guess?
 
-			Ref<EditorImportPlugin> pl = EditorImportExport::get_singleton()->get_import_plugin_by_name("texture_2d");
+			Ref<EditorImportPlugin> pl = EditorImportExport::get_singleton()->get_import_plugin_by_name("texture");
 			if (pl.is_valid()) {
 				Vector<uint8_t> ce = pl->custom_export(p_path,p_platform);
 				if (ce.size()) {

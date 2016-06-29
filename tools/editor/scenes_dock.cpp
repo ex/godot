@@ -454,8 +454,7 @@ void ScenesDock::_update_files(bool p_keep_selection) {
 		files->set_icon_mode(ItemList::ICON_MODE_TOP);
 		files->set_fixed_column_width(thumbnail_size*3/2);
 		files->set_max_text_lines(2);
-		files->set_min_icon_size(Size2(thumbnail_size,thumbnail_size));
-		files->set_max_icon_size(Size2(thumbnail_size,thumbnail_size));
+		files->set_fixed_icon_size(Size2(thumbnail_size,thumbnail_size));
 
 		if (!has_icon("ResizedFolder","EditorIcons")) {
 			Ref<ImageTexture> folder = get_icon("FolderBig","EditorIcons");
@@ -485,7 +484,7 @@ void ScenesDock::_update_files(bool p_keep_selection) {
 		files->set_max_columns(1);
 		files->set_max_text_lines(1);
 		files->set_fixed_column_width(0);
-		files->set_min_icon_size(Size2());
+		files->set_fixed_icon_size(Size2());
 
 	}
 
@@ -1052,6 +1051,7 @@ void ScenesDock::_file_option(int p_option) {
 				if (path.ends_with("/") || !files->is_selected(i))
 					continue;
 				torem.push_back(path);
+
 			}
 
 			if (torem.empty()) {
@@ -1101,7 +1101,13 @@ void ScenesDock::_file_option(int p_option) {
 			}
 
 		} break;
+		case FILE_COPY_PATH:
 
+			int idx = files->get_current();
+			if (idx<0 || idx>=files->get_item_count())
+				break;
+			String path = files->get_item_metadata(idx);
+			OS::get_singleton()->set_clipboard(path);
 	}
 }
 
@@ -1545,6 +1551,7 @@ void ScenesDock::_files_list_rmb_select(int p_item,const Vector2& p_pos) {
 	}
 
 	if (filenames.size()==1) {
+		file_options->add_item(TTR("Copy Path"), FILE_COPY_PATH);
 		file_options->add_item(TTR("Rename or Move.."),FILE_MOVE);
 	} else {
 		file_options->add_item(TTR("Move To.."),FILE_MOVE);
@@ -1661,7 +1668,7 @@ ScenesDock::ScenesDock(EditorNode *p_editor) {
 
 	button_favorite->set_focus_mode(FOCUS_NONE);
 
-	Control *spacer = memnew( Control);
+//	Control *spacer = memnew( Control);
 
 
 

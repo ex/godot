@@ -142,6 +142,8 @@ class ScriptEditor : public VBoxContainer {
 		EDIT_INDENT_RIGHT,
 		EDIT_INDENT_LEFT,
 		EDIT_CLONE_DOWN,
+		FILE_TOOL_RELOAD,
+		FILE_TOOL_RELOAD_SOFT,
 		SEARCH_FIND,
 		SEARCH_FIND_NEXT,
 		SEARCH_FIND_PREV,
@@ -230,11 +232,15 @@ class ScriptEditor : public VBoxContainer {
 	void _resave_scripts(const String& p_str);
 	void _reload_scripts();
 
-	bool _test_script_times_on_disk();
+	bool _test_script_times_on_disk(Ref<Script> p_for_script=Ref<Script>());
 
 	void _close_current_tab();
 
 	bool grab_focus_block;
+
+	bool pending_auto_reload;
+	bool auto_reload_running_scripts;
+	void _live_auto_reload_running_scripts();
 
 	ScriptEditorQuickOpen *quick_open;
 
@@ -285,7 +291,7 @@ class ScriptEditor : public VBoxContainer {
 	void _go_to_tab(int p_idx);
 	void _update_history_pos(int p_new_pos);
 	void _update_script_colors();
-	void _update_modified_scripts_for_external_editor();
+	void _update_modified_scripts_for_external_editor(Ref<Script> p_for_script=Ref<Script>());
 
 	int file_dialog_option;
 	void _file_dialog_action(String p_file);
@@ -319,9 +325,12 @@ public:
 
 	void set_scene_root_script( Ref<Script> p_script );
 
+	bool script_go_to_method(Ref<Script> p_script, const String& p_method);
+
 	virtual void edited_scene_changed();
 
 	ScriptEditorDebugger *get_debugger() { return debugger; }
+	void set_live_auto_reload_running_scripts(bool p_enabled);
 
 	ScriptEditor(EditorNode *p_editor);
 	~ScriptEditor();
@@ -356,6 +365,7 @@ public:
 	virtual void get_window_layout(Ref<ConfigFile> p_layout);
 
 	virtual void get_breakpoints(List<String> *p_breakpoints);
+
 
 	virtual void edited_scene_changed();
 

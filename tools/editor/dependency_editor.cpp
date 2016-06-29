@@ -1,3 +1,31 @@
+/*************************************************************************/
+/*  dependency_editor.cpp                                                */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                    http://www.godotengine.org                         */
+/*************************************************************************/
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
 #include "dependency_editor.h"
 #include "os/file_access.h"
 #include "scene/gui/margin_container.h"
@@ -399,6 +427,7 @@ void DependencyRemoveDialog::show(const Vector<String> &to_erase) {
 
 	_fill_owners(EditorFileSystem::get_singleton()->get_filesystem());
 
+
 	if (exist) {
 		owners->show();
 		text->set_text(TTR("The files being removed are required by other resources in order for them to work.\nRemove them anyway? (no undo)"));
@@ -417,6 +446,10 @@ void DependencyRemoveDialog::ok_pressed() {
 	DirAccess *da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 	for (Map<String,TreeItem*>::Element *E=files.front();E;E=E->next()) {
 
+		if (ResourceCache::has(E->key())) {
+			Resource *res = ResourceCache::get(E->key());
+			res->set_path(""); //clear reference to path
+		}
 		da->remove(E->key());
 		EditorFileSystem::get_singleton()->update_file(E->key());
 	}

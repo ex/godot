@@ -74,6 +74,9 @@ class TextEdit : public Control  {
 		Ref<StyleBox> style_normal;
 		Ref<StyleBox> style_focus;
 		Ref<Font> font;
+		Color completion_background_color;
+		Color completion_selected_color;
+		Color completion_existing_color;
 		Color caret_color;
 		Color line_number_color;
 		Color font_color;
@@ -217,6 +220,7 @@ class TextEdit : public Control  {
 	Timer *caret_blink_timer;
 	bool caret_blink_enabled;
 	bool draw_caret;
+	bool window_has_focus;
 
 	bool setting_row;
 	bool wrap;
@@ -278,7 +282,7 @@ class TextEdit : public Control  {
 	void _scroll_lines_down();
 
 //	void mouse_motion(const Point& p_pos, const Point& p_rel, int p_button_mask);
-	Size2 get_minimum_size();
+	Size2 get_minimum_size() const;
 
 	int get_row_height() const;
 

@@ -38,15 +38,16 @@
 
 #include "scene/gui/line_edit.h"
 #include "scene/gui/panel_container.h"
-
+#include "scene/gui/center_container.h"
+#include "io/stream_peer_ssl.h"
 
 #include "scene/gui/texture_frame.h"
 #include "scene/gui/margin_container.h"
 #include "io/resource_saver.h"
 
-#include "editor_icons.h"
+#include "editor_themes.h"
 
-
+#include "editor_scale.h"
 
 class NewProjectDialog : public ConfirmationDialog {
 
@@ -829,48 +830,75 @@ ProjectManager::ProjectManager() {
 	if (!EditorSettings::get_singleton())
 		EditorSettings::create();
 
+	{
+		int dpi_mode = EditorSettings::get_singleton()->get("global/hidpi_mode");
+		if (dpi_mode==0) {
+			editor_set_hidpi( OS::get_singleton()->get_screen_dpi(0) > 150 );
+		} else if (dpi_mode==2) {
+			editor_set_hidpi(true);
+		} else {
+			editor_set_hidpi(false);
+		}
+	}
+
 	FileDialog::set_default_show_hidden_files(EditorSettings::get_singleton()->get("file_dialog/show_hidden_files"));
 
 	set_area_as_parent_rect();
 
-	Ref<Theme> theme = Ref<Theme>( memnew( Theme ) );
-	set_theme(theme);
-	editor_register_icons(theme);
+	gui_base = memnew( Control );
+	add_child(gui_base);
+	gui_base->set_area_as_parent_rect();
 
-	String global_font = EditorSettings::get_singleton()->get("global/font");
-	if (global_font!="") {
-		Ref<Font> fnt = ResourceLoader::load(global_font);
-		if (fnt.is_valid()) {
-			theme->set_default_theme_font(fnt);
-		}
-	}
+	set_theme(create_default_theme());
+	Ref<Theme> theme = create_editor_theme();
+	gui_base->set_theme(theme);
 
 	Panel *panel = memnew( Panel );
-	add_child(panel);
+	gui_base->add_child(panel);
 	panel->set_area_as_parent_rect();
 
 	VBoxContainer *vb = memnew( VBoxContainer );
 	panel->add_child(vb);
-	vb->set_area_as_parent_rect(20);
+	vb->set_area_as_parent_rect(20*EDSCALE);
+	vb->set_margin(MARGIN_TOP,4*EDSCALE);
+	vb->set_margin(MARGIN_BOTTOM,4*EDSCALE);
+	vb->add_constant_override("separation",15*EDSCALE);
 
-	OS::get_singleton()->set_window_title(_MKSTR(VERSION_NAME)" - Project Manager");
+	String cp;
+	cp.push_back(0xA9);
+	cp.push_back(0);
+	OS::get_singleton()->set_window_title(_MKSTR(VERSION_NAME)+String(" - ")+TTR("Project Manager")+" - "+cp+" 2008-2016 Juan Linietsky, Ariel Manzur.");
 
+	HBoxContainer *top_hb = memnew( HBoxContainer);
+	vb->add_child(top_hb);
+	TextureFrame *logo = memnew( TextureFrame );
+	logo->set_texture(theme->get_icon("LogoSmall","EditorIcons"));
+	//top_hb->add_child( logo );
+	CenterContainer *ccl = memnew( CenterContainer );
 	Label *l = memnew( Label );
-	l->set_text(_MKSTR(VERSION_NAME)" - Project Manager");
-	l->add_font_override("font",get_font("large","Fonts"));
-	l->set_align(Label::ALIGN_CENTER);
-	vb->add_child(l);
+	l->set_text(_MKSTR(VERSION_NAME)+String(" - ")+TTR("Project Manager"));
+	l->add_font_override("font",get_font("doc","EditorFonts"));
+	ccl->add_child(l);
+	top_hb->add_child(ccl);
+	top_hb->add_spacer();
 	l = memnew( Label );
 	l->set_text("v" VERSION_MKSTRING);
 	//l->add_font_override("font",get_font("bold","Fonts"));
 	l->set_align(Label::ALIGN_CENTER);
-	vb->add_child(l);
-	vb->add_child(memnew(HSeparator));
-	vb->add_margin_child("\n",memnew(Control));
+	top_hb->add_child(l);
+	//vb->add_child(memnew(HSeparator));
+	//vb->add_margin_child("\n",memnew(Control));
 
+	tabs = memnew( TabContainer );
+	vb->add_child(tabs);
+	tabs->set_v_size_flags(SIZE_EXPAND_FILL);
 
 	HBoxContainer *tree_hb = memnew( HBoxContainer);
-	vb->add_margin_child(TTR("Recent Projects:"),tree_hb,true);
+	projects_hb = tree_hb;
+
+	projects_hb->set_name(TTR("Project List"));
+
+	tabs->add_child(tree_hb);
 
 	VBoxContainer *search_tree_vb = memnew(VBoxContainer);
 	search_tree_vb->set_h_size_flags(SIZE_EXPAND_FILL);
@@ -927,7 +955,7 @@ ProjectManager::ProjectManager() {
 	scan_dir->set_access(FileDialog::ACCESS_FILESYSTEM);
 	scan_dir->set_mode(FileDialog::MODE_OPEN_DIR);
 	scan_dir->set_current_dir( EditorSettings::get_singleton()->get("global/default_project_path") );
-	add_child(scan_dir);
+	gui_base->add_child(scan_dir);
 	scan_dir->connect("dir_selected",this,"_scan_begin");
 
 
@@ -951,46 +979,51 @@ ProjectManager::ProjectManager() {
 
 	tree_vb->add_spacer();
 
+
+	if (StreamPeerSSL::is_available()) {
+
+		asset_library = memnew( EditorAssetLibrary(true) );
+		asset_library->set_name("Templates");
+		tabs->add_child(asset_library);
+	} else {
+		WARN_PRINT("Asset Library not available, as it requires SSL to work.");
+	}
+
+
+	CenterContainer *cc = memnew( CenterContainer );
 	Button * cancel = memnew( Button );
 	cancel->set_text(TTR("Exit"));
-	tree_vb->add_child(cancel);
+	cancel->set_custom_minimum_size(Size2(100,1)*EDSCALE);
+	cc->add_child(cancel);
 	cancel->connect("pressed", this,"_exit_dialog");
+	vb->add_child(cc);
 
-
-	vb->add_margin_child("\n",memnew(Control));
-	vb->add_child(memnew(HSeparator));
-
-	l = memnew( Label );
-	String cp;
-	cp.push_back(0xA9);
-	cp.push_back(0);
-	l->set_text(cp+" 2008-2016 Juan Linietsky, Ariel Manzur.");
-	l->set_align(Label::ALIGN_CENTER);
-	vb->add_child(l);
-
+	//
 
 	erase_ask = memnew( ConfirmationDialog );
 	erase_ask->get_ok()->set_text(TTR("Remove"));
 	erase_ask->get_ok()->connect("pressed", this,"_erase_project_confirm");
 
-	add_child(erase_ask);
+	gui_base->add_child(erase_ask);
 
 	multi_open_ask = memnew( ConfirmationDialog );
 	multi_open_ask->get_ok()->set_text(TTR("Edit"));
 	multi_open_ask->get_ok()->connect("pressed", this, "_open_project_confirm");
 
-	add_child(multi_open_ask);
+	gui_base->add_child(multi_open_ask);
 
 	multi_run_ask = memnew( ConfirmationDialog );
 	multi_run_ask->get_ok()->set_text(TTR("Run"));
 	multi_run_ask->get_ok()->connect("pressed", this, "_run_project_confirm");
 
-	add_child(multi_run_ask);
+	gui_base->add_child(multi_run_ask);
+
+
 
 	OS::get_singleton()->set_low_processor_usage_mode(true);
 
 	npdialog = memnew( NewProjectDialog );
-	add_child(npdialog);
+	gui_base->add_child(npdialog);
 
 	npdialog->connect("project_created", this,"_load_recent_projects");
 	_load_recent_projects();

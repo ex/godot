@@ -36,6 +36,8 @@
 #if 1
 
 #include "os/keyboard.h"
+#include "editor_settings.h"
+#include "editor_help.h"
 
 
 void CreateDialog::popup(bool p_dontclear) {
@@ -101,11 +103,26 @@ void CreateDialog::add_type(const String& p_type,HashMap<String,TreeItem*>& p_ty
 		item->set_selectable(0,false);
 	} else {
 
-		if (!*to_select && (search_box->get_text()=="" || p_type.findn(search_box->get_text())!=-1)) {
+		if (!*to_select && (search_box->get_text().is_subsequence_ofi(p_type))) {
 			*to_select=item;
 		}
 
 	}
+
+	if (bool(EditorSettings::get_singleton()->get("scenetree_editor/start_create_dialog_fully_expanded"))) {
+		item->set_collapsed(false);
+	} else {
+		// don't collapse search results
+		bool collapse = (search_box->get_text() == "");
+		// don't collapse the root node
+		collapse &= (item != p_root);
+		// don't collapse abstract nodes on the first tree level
+		collapse &= ((parent != p_root) || (ObjectTypeDB::can_instance(p_type)));
+		item->set_collapsed(collapse);
+	}
+
+	const String& description = EditorHelp::get_doc_data()->class_list[p_type].brief_description;
+	item->set_tooltip(0,description);
 
 
 	if (has_icon(p_type,"EditorIcons")) {
@@ -155,7 +172,7 @@ void CreateDialog::_update_search() {
 			bool found=false;
 			String type=I->get();
 			while(type!="" && ObjectTypeDB::is_type(type,base_type) && type!=base_type) {
-				if (type.findn(search_box->get_text())!=-1) {
+				if (search_box->get_text().is_subsequence_ofi(type)) {
 
 					found=true;
 					break;
@@ -177,7 +194,7 @@ void CreateDialog::_update_search() {
 			const Vector<EditorData::CustomType> &ct = EditorNode::get_editor_data().get_custom_types()[type];
 			for(int i=0;i<ct.size();i++) {
 
-				bool show = search_box->get_text()=="" || ct[i].name.findn(search_box->get_text())!=-1;
+				bool show = search_box->get_text().is_subsequence_ofi(ct[i].name);
 
 				if (!show)
 					continue;

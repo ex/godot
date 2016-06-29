@@ -45,6 +45,7 @@
 #include "io/file_access_memory.h"
 #include "io/translation_loader_po.h"
 #include "io/compression.h"
+#include "os/keyboard.h"
 
 Ref<EditorSettings> EditorSettings::singleton=NULL;
 
@@ -57,6 +58,25 @@ EditorSettings *EditorSettings::get_singleton() {
 bool EditorSettings::_set(const StringName& p_name, const Variant& p_value) {
 
 	_THREAD_SAFE_METHOD_
+
+	if (p_name.operator String()=="shortcuts") {
+
+		Array arr=p_value;
+		ERR_FAIL_COND_V(arr.size() && arr.size()&1,true);
+		for(int i=0;i<arr.size();i+=2) {
+
+			String name = arr[i];
+			InputEvent shortcut = arr[i+1];
+
+			Ref<ShortCut> sc;
+			sc.instance();
+			sc->set_shortcut(shortcut);
+			add_shortcut(name,sc);
+		}
+
+		return true;
+	}
+
 	if (p_value.get_type()==Variant::NIL)
 		props.erase(p_name);
 	else {
@@ -65,6 +85,10 @@ bool EditorSettings::_set(const StringName& p_name, const Variant& p_value) {
 			props[p_name].variant=p_value;
 		else
 			props[p_name]=VariantContainer(p_value,last_order++);
+
+		if (save_changed_setting) {
+			props[p_name].save=true;
+		}
 	}
 
 	emit_signal("settings_changed");
@@ -73,6 +97,25 @@ bool EditorSettings::_set(const StringName& p_name, const Variant& p_value) {
 bool EditorSettings::_get(const StringName& p_name,Variant &r_ret) const {
 
 	_THREAD_SAFE_METHOD_
+
+	if (p_name.operator String()=="shortcuts") {
+
+		Array arr;
+		for (const Map<String,Ref<ShortCut> >::Element *E=shortcuts.front();E;E=E->next()) {
+
+			Ref<ShortCut> sc=E->get();
+			if (!sc->has_meta("original"))
+				continue; //this came from settings but is not any longer used
+
+			InputEvent original = sc->get_meta("original");
+			if (sc->is_shortcut(original) || (original.type==InputEvent::NONE && sc->get_shortcut().type==InputEvent::NONE))
+				continue; //not changed from default, don't save
+			arr.push_back(E->key());
+			arr.push_back(sc->get_shortcut());
+		}
+		r_ret=arr;
+		return true;
+	}
 
 	const VariantContainer *v=props.getptr(p_name);
 	if (!v)
@@ -86,6 +129,7 @@ struct _EVCSort {
 	String name;
 	Variant::Type type;
 	int order;
+	bool save;
 
 	bool operator<(const _EVCSort& p_vcs) const{ return order< p_vcs.order; }
 };
@@ -108,15 +152,24 @@ void EditorSettings::_get_property_list(List<PropertyInfo> *p_list) const {
 		vc.name=*k;
 		vc.order=v->order;
 		vc.type=v->variant.get_type();
+		vc.save=v->save;
+
 
 		vclist.insert(vc);
 	}
 
 	for(Set<_EVCSort>::Element *E=vclist.front();E;E=E->next()) {
 
-		int pinfo = PROPERTY_USAGE_STORAGE;
-		if (!E->get().name.begins_with("_"))
+		int pinfo = 0;
+		if (E->get().save) {
+			pinfo|=PROPERTY_USAGE_STORAGE;
+		}
+
+		if (!E->get().name.begins_with("_") && !E->get().name.begins_with("projects/")) {
 			pinfo|=PROPERTY_USAGE_EDITOR;
+		} else {
+			pinfo|=PROPERTY_USAGE_STORAGE; //hiddens must always be saved
+		}
 
 		PropertyInfo pi(E->get().type, E->get().name);
 		pi.usage=pinfo;
@@ -126,6 +179,8 @@ void EditorSettings::_get_property_list(List<PropertyInfo> *p_list) const {
 
 		p_list->push_back( pi );
 	}
+
+	p_list->push_back(PropertyInfo(Variant::ARRAY,"shortcuts",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR)); //do not edit
 }
 
 bool EditorSettings::has(String p_var) const {
@@ -173,7 +228,7 @@ void EditorSettings::create() {
 
 	String config_path;
 	String config_dir;
-	String config_file="editor_settings.xml";
+	//String config_file="editor_settings.xml";
 	Ref<ConfigFile> extra_config = memnew(ConfigFile);
 
 	String exe_path = OS::get_singleton()->get_executable_path().get_base_dir();
@@ -263,22 +318,32 @@ void EditorSettings::create() {
 		// path at least is validated, so validate config file
 
 
-		config_file_path = config_path+"/"+config_dir+"/"+config_file;
+		config_file_path = config_path+"/"+config_dir+"/editor_settings.tres";
 
-		if (!dir->file_exists(config_file)) {
-			memdelete(dir);
-			WARN_PRINT("Config file does not exist, creating.");
-			goto fail;
+		String open_path = config_file_path;
+
+		if (!dir->file_exists("editor_settings.tres")) {
+
+			open_path = config_path+"/"+config_dir+"/editor_settings.xml";
+
+			if (!dir->file_exists("editor_settings.xml")) {
+
+				memdelete(dir);
+				WARN_PRINT("Config file does not exist, creating.");
+				goto fail;
+			}
 		}
 
 		memdelete(dir);
 
-		singleton = ResourceLoader::load(config_file_path,"EditorSettings");
+		singleton = ResourceLoader::load(open_path,"EditorSettings");
+
 		if (singleton.is_null()) {
 			WARN_PRINT("Could not open config file.");
 			goto fail;
 		}
 
+		singleton->save_changed_setting=true;
 		singleton->config_file_path=config_file_path;
 		singleton->project_config_path=pcp;
 		singleton->settings_path=config_path+"/"+config_dir;
@@ -312,9 +377,10 @@ void EditorSettings::create() {
 	};
 
 	singleton = Ref<EditorSettings>( memnew( EditorSettings ) );
+	singleton->save_changed_setting=true;
 	singleton->config_file_path=config_file_path;
 	singleton->settings_path=config_path+"/"+config_dir;
-	singleton->_load_defaults(extra_config);	
+	singleton->_load_defaults(extra_config);
 	singleton->setup_language();
 	singleton->setup_network();
 	singleton->list_text_editor_themes();
@@ -332,14 +398,11 @@ String EditorSettings::get_settings_path() const {
 void EditorSettings::setup_language() {
 
 	String lang = get("global/editor_language");
-	print_line("LANG IS "+lang);
 	if (lang=="en")
 		return; //none to do
 
 	for(int i=0;i<translations.size();i++) {
-		print_line("TESTING "+translations[i]->get_locale());
 		if (translations[i]->get_locale()==lang) {
-			print_line("ok translation");
 			TranslationServer::get_singleton()->set_tool_translation(translations[i]);
 			break;
 		}
@@ -360,7 +423,7 @@ void EditorSettings::setup_network() {
 		if (ip=="127.0.0.1")
 			continue;
 
-		if (lip!="")
+		if (lip=="")
 			lip=ip;
 		if (ip==current)
 			lip=current; //so it saves
@@ -442,13 +505,19 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 		hints["global/editor_language"]=PropertyInfo(Variant::STRING,"global/editor_language",PROPERTY_HINT_ENUM,lang_hint,PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
 	}
 
+	set("global/hidpi_mode",0);
+	hints["global/hidpi_mode"]=PropertyInfo(Variant::INT,"global/hidpi_mode",PROPERTY_HINT_ENUM,"Auto,LoDPI,HiDPI",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
 	set("global/show_script_in_scene_tabs",false);
 	set("global/font_size",14);
 	hints["global/font_size"]=PropertyInfo(Variant::INT,"global/font_size",PROPERTY_HINT_RANGE,"10,40,1",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
 	set("global/source_font_size",14);
-	hints["global/source_font_size"]=PropertyInfo(Variant::INT,"global/source_font_size",PROPERTY_HINT_RANGE,"10,40,1",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
+	hints["global/source_font_size"]=PropertyInfo(Variant::INT,"global/source_font_size",PROPERTY_HINT_RANGE,"8,96,1",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
 	set("global/custom_font","");
 	hints["global/custom_font"]=PropertyInfo(Variant::STRING,"global/custom_font",PROPERTY_HINT_GLOBAL_FILE,"*.fnt",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
+	set("global/custom_theme","");
+	hints["global/custom_theme"]=PropertyInfo(Variant::STRING,"global/custom_theme",PROPERTY_HINT_GLOBAL_FILE,"*.res,*.tres,*.theme",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
+
+
 	set("global/autoscan_project_path","");
 	hints["global/autoscan_project_path"]=PropertyInfo(Variant::STRING,"global/autoscan_project_path",PROPERTY_HINT_GLOBAL_DIR);
 	set("global/default_project_path","");
@@ -493,6 +562,9 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	set("scenetree_editor/duplicate_node_name_num_separator",0);
 	hints["scenetree_editor/duplicate_node_name_num_separator"]=PropertyInfo(Variant::INT,"scenetree_editor/duplicate_node_name_num_separator",PROPERTY_HINT_ENUM, "None,Space,Underscore,Dash");
 	//set("scenetree_editor/display_old_action_buttons",false);
+	set("scenetree_editor/start_create_dialog_fully_expanded",false);
+	set("scenetree_editor/draw_relationship_lines",false);
+	set("scenetree_editor/relationship_line_color",Color::html("464646"));
 
 	set("gridmap_editor/pick_distance", 5000.0);
 
@@ -511,7 +583,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	set("3d_editor/zoom_modifier",4);
 	hints["3d_editor/zoom_modifier"]=PropertyInfo(Variant::INT,"3d_editor/zoom_modifier",PROPERTY_HINT_ENUM,"None,Shift,Alt,Meta,Ctrl");
 	set("3d_editor/emulate_numpad",false);
-	set("3d_editor/trackpad_hint", false);
+	set("3d_editor/emulate_3_button_mouse", false);
 
 	set("2d_editor/bone_width",5);
 	set("2d_editor/bone_color1",Color(1.0,1.0,1.0,0.9));
@@ -602,6 +674,9 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 
 void EditorSettings::_load_default_text_editor_theme() {
 	set("text_editor/background_color",Color::html("3b000000"));
+	set("text_editor/completion_background_color", Color::html("2C2A32"));
+	set("text_editor/completion_selected_color", Color::html("434244"));
+	set("text_editor/completion_existing_color", Color::html("21dfdfdf"));
 	set("text_editor/caret_color",Color::html("aaaaaa"));
 	set("text_editor/line_number_color",Color::html("66aaaaaa"));
 	set("text_editor/text_color",Color::html("aaaaaa"));
@@ -635,7 +710,6 @@ void EditorSettings::notify_changes() {
 		sml = OS::get_singleton()->get_main_loop()->cast_to<SceneTree>();
 
 	if (!sml) {
-		print_line("not SML");
 		return;
 	}
 
@@ -835,6 +909,9 @@ bool EditorSettings::_save_text_editor_theme(String p_file) {
 	String theme_section = "color_theme";
 	Ref<ConfigFile> cf = memnew( ConfigFile );	// hex is better?
 	cf->set_value(theme_section, "background_color", ((Color)get("text_editor/background_color")).to_html());
+	cf->set_value(theme_section, "completion_background_color", ((Color)get("text_editor/completion_background_color")).to_html());
+	cf->set_value(theme_section, "completion_selected_color", ((Color)get("text_editor/completion_selected_color")).to_html());
+	cf->set_value(theme_section, "completion_existing_color", ((Color)get("text_editor/completion_existing_color")).to_html());
 	cf->set_value(theme_section, "caret_color", ((Color)get("text_editor/caret_color")).to_html());
 	cf->set_value(theme_section, "line_number_color", ((Color)get("text_editor/line_number_color")).to_html());
 	cf->set_value(theme_section, "text_color", ((Color)get("text_editor/text_color")).to_html());
@@ -864,6 +941,42 @@ bool EditorSettings::_save_text_editor_theme(String p_file) {
 	return false;
 }
 
+
+void EditorSettings::add_shortcut(const String& p_name, Ref<ShortCut> &p_shortcut) {
+
+	shortcuts[p_name]=p_shortcut;
+}
+
+bool EditorSettings::is_shortcut(const String&p_name, const InputEvent &p_event) const{
+
+	const Map<String,Ref<ShortCut> >::Element *E=shortcuts.find(p_name);
+	if (!E) {
+		ERR_EXPLAIN("Unknown Shortcut: "+p_name);
+		ERR_FAIL_V(false);
+	}
+
+	return E->get()->is_shortcut(p_event);
+
+}
+
+Ref<ShortCut> EditorSettings::get_shortcut(const String&p_name) const{
+
+	const Map<String,Ref<ShortCut> >::Element *E=shortcuts.find(p_name);
+	if (!E)
+		return Ref<ShortCut>();
+
+	return E->get();
+}
+
+void EditorSettings::get_shortcut_list(List<String> *r_shortcuts) {
+
+	for (const Map<String,Ref<ShortCut> >::Element*E=shortcuts.front();E;E=E->next()) {
+
+		r_shortcuts->push_back(E->key());
+	}
+}
+
+
 void EditorSettings::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("erase","property"),&EditorSettings::erase);
@@ -885,6 +998,7 @@ EditorSettings::EditorSettings() {
 
 	//singleton=this;
 	last_order=0;
+	save_changed_setting=true;
 
 	EditorTranslationList *etl=_editor_translations;
 
@@ -909,6 +1023,7 @@ EditorSettings::EditorSettings() {
 	}
 
 	_load_defaults();
+	save_changed_setting=false;
 
 
 }
@@ -919,4 +1034,44 @@ EditorSettings::~EditorSettings() {
 //	singleton=NULL;
 }
 
+Ref<ShortCut> ED_GET_SHORTCUT(const String& p_path) {
 
+	Ref<ShortCut> sc = EditorSettings::get_singleton()->get_shortcut(p_path);
+	if (!sc.is_valid()) {
+		ERR_EXPLAIN("Used ED_GET_SHORTCUT with invalid shortcut: "+p_path);
+		ERR_FAIL_COND_V(!sc.is_valid(),sc);
+	}
+
+	return sc;
+}
+
+Ref<ShortCut> ED_SHORTCUT(const String& p_path,const String& p_name,uint32_t p_keycode) {
+
+	InputEvent ie;
+	if (p_keycode) {
+		ie.type=InputEvent::KEY;
+		ie.key.unicode=p_keycode&KEY_CODE_MASK;
+		ie.key.scancode=p_keycode&KEY_CODE_MASK;
+		ie.key.mod.shift=bool(p_keycode&KEY_MASK_SHIFT);
+		ie.key.mod.alt=bool(p_keycode&KEY_MASK_ALT);
+		ie.key.mod.control=bool(p_keycode&KEY_MASK_CTRL);
+		ie.key.mod.meta=bool(p_keycode&KEY_MASK_META);
+
+	}
+
+	Ref<ShortCut> sc = EditorSettings::get_singleton()->get_shortcut(p_path);
+	if (sc.is_valid()) {
+
+		sc->set_name(p_name); //keep name (the ones that come from disk have no name)
+		sc->set_meta("original",ie); //to compare against changes
+		return sc;
+	}
+
+	sc.instance();
+	sc->set_name(p_name);
+	sc->set_shortcut(ie);
+	sc->set_meta("original",ie); //to compare against changes
+	EditorSettings::get_singleton()->add_shortcut(p_path,sc);
+
+	return sc;
+}

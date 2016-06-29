@@ -40,7 +40,7 @@ class HTTPClient : public Reference {
 	OBJ_TYPE(HTTPClient,Reference);
 public:
 
-	enum RespondeCode {
+	enum ResponseCode {
 
 		// 1xx informational
 		RESPONSE_CONTINUE = 100,
@@ -201,5 +201,6 @@ public:
 };
 
 VARIANT_ENUM_CAST(HTTPClient::Method);
+VARIANT_ENUM_CAST(HTTPClient::Status);
 
 #endif // HTTP_CLIENT_H

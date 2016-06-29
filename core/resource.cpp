@@ -30,7 +30,7 @@
 #include "core_string_names.h"
 #include <stdio.h>
 #include "os/file_access.h"
-
+#include "io/resource_loader.h"
 
 void ResourceImportMetadata::set_editor(const String& p_editor) {
 
@@ -133,6 +133,7 @@ void ResourceImportMetadata::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("add_source","path","md5"),&ResourceImportMetadata::add_source, "");
 	ObjectTypeDB::bind_method(_MD("get_source_path","idx"),&ResourceImportMetadata::get_source_path);
 	ObjectTypeDB::bind_method(_MD("get_source_md5","idx"),&ResourceImportMetadata::get_source_md5);
+	ObjectTypeDB::bind_method(_MD("set_source_md5","idx", "md5"),&ResourceImportMetadata::set_source_md5);
 	ObjectTypeDB::bind_method(_MD("remove_source","idx"),&ResourceImportMetadata::remove_source);
 	ObjectTypeDB::bind_method(_MD("get_source_count"),&ResourceImportMetadata::get_source_count);
 	ObjectTypeDB::bind_method(_MD("set_option","key","value"),&ResourceImportMetadata::set_option);
@@ -217,14 +218,36 @@ String Resource::get_name() const {
 	return name;
 }
 
-bool Resource::can_reload_from_file() {
+bool Resource::editor_can_reload_from_file() {
 
-	return false;
+	return true; //by default yes
 }
 
 void Resource::reload_from_file() {
 
 
+	String path=get_path();
+	if (!path.is_resource_file())
+		return;
+
+	Ref<Resource> s = ResourceLoader::load(path,get_type(),true);
+
+	if (!s.is_valid())
+		return;
+
+	List<PropertyInfo> pi;
+	s->get_property_list(&pi);
+
+	for (List<PropertyInfo>::Element *E=pi.front();E;E=E->next()) {
+
+		if (!(E->get().usage&PROPERTY_USAGE_STORAGE))
+			continue;
+		if (E->get().name=="resource/path")
+			continue; //do not change path
+
+		set(E->get().name,s->get(E->get().name));
+
+	}
 }
 
 

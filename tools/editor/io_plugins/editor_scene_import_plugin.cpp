@@ -30,6 +30,7 @@
 #include "globals.h"
 #include "tools/editor/editor_node.h"
 #include "scene/resources/packed_scene.h"
+#include "scene/resources/box_shape.h"
 #include "os/file_access.h"
 #include "scene/3d/path.h"
 #include "scene/animation/animation_player.h"
@@ -41,6 +42,10 @@
 #include "scene/3d/physics_body.h"
 #include "scene/3d/portal.h"
 #include "scene/3d/vehicle_body.h"
+#include "scene/resources/sphere_shape.h"
+#include <scene/resources/box_shape.h>
+#include <scene/resources/ray_shape.h>
+#include <scene/resources/plane_shape.h>
 #include "tools/editor/create_dialog.h"
 #include "os/os.h"
 
@@ -817,7 +822,7 @@ void EditorSceneImportDialog::_import(bool p_and_open) {
 			return;
 		}
 		if (wip_open)
-			EditorNode::get_singleton()->load_scene(save_file);
+			EditorNode::get_singleton()->load_scene(save_file,false,false,false);
 
 	}
 
@@ -862,7 +867,7 @@ void EditorSceneImportDialog::_import_confirm() {
 	}
 
 	if (wip_open)
-		EditorNode::get_singleton()->load_scene(wip_save_file);
+		EditorNode::get_singleton()->load_scene(wip_save_file,false,false,false);
 	wip_open=false;
 	wip_save_file="";
 
@@ -1064,12 +1069,14 @@ const EditorSceneImportDialog::FlagInfo EditorSceneImportDialog::scene_flag_name
 	{EditorSceneImportPlugin::SCENE_FLAG_IMPORT_ANIMATIONS,("Actions"),"Import Animations",true},
 	{EditorSceneImportPlugin::SCENE_FLAG_COMPRESS_GEOMETRY,("Actions"),"Compress Geometry",false},
 	{EditorSceneImportPlugin::SCENE_FLAG_GENERATE_TANGENT_ARRAYS,("Actions"),"Force Generation of Tangent Arrays",false},
-	{EditorSceneImportPlugin::SCENE_FLAG_DETECT_ALPHA,("Materials"),"Set Alpha in Materials (-alpha)",true},
-	{EditorSceneImportPlugin::SCENE_FLAG_DETECT_VCOLOR,("Materials"),"Set Vert. Color in Materials (-vcol)",true},
 	{EditorSceneImportPlugin::SCENE_FLAG_LINEARIZE_DIFFUSE_TEXTURES,("Actions"),"SRGB->Linear Of Diffuse Textures",false},
 	{EditorSceneImportPlugin::SCENE_FLAG_CONVERT_NORMALMAPS_TO_XY,("Actions"),"Convert Normal Maps to XY",true},
 	{EditorSceneImportPlugin::SCENE_FLAG_SET_LIGHTMAP_TO_UV2_IF_EXISTS,("Actions"),"Set Material Lightmap to UV2 if Tex2Array Exists",true},
-	{EditorSceneImportPlugin::SCENE_FLAG_CREATE_COLLISIONS,("Create"),"Create Collisions (-col},-colonly)",true},
+	{EditorSceneImportPlugin::SCENE_FLAG_MERGE_KEEP_MATERIALS,("Merge"),"Keep Materials after first import (delete them for re-import).",true},
+	{EditorSceneImportPlugin::SCENE_FLAG_MERGE_KEEP_EXTRA_ANIM_TRACKS,("Merge"),"Keep user-added Animation tracks.",true},
+	{EditorSceneImportPlugin::SCENE_FLAG_DETECT_ALPHA,("Materials"),"Set Alpha in Materials (-alpha)",true},
+	{EditorSceneImportPlugin::SCENE_FLAG_DETECT_VCOLOR,("Materials"),"Set Vert. Color in Materials (-vcol)",true},
+	{EditorSceneImportPlugin::SCENE_FLAG_CREATE_COLLISIONS,("Create"),"Create Collisions and/or Rigid Bodies (-col,-colonly,-rigid)",true},
 	{EditorSceneImportPlugin::SCENE_FLAG_CREATE_PORTALS,("Create"),"Create Portals (-portal)",true},
 	{EditorSceneImportPlugin::SCENE_FLAG_CREATE_ROOMS,("Create"),"Create Rooms (-room)",true},
 	{EditorSceneImportPlugin::SCENE_FLAG_SIMPLIFY_ROOMS,("Create"),"Simplify Rooms",false},
@@ -1685,28 +1692,104 @@ Node* EditorSceneImportPlugin::_fix_node(Node *p_node,Node *p_root,Map<Ref<Mesh>
 		mi->set_baked_light_texture_id(layer);
 	}
 
-	if (p_flags&SCENE_FLAG_CREATE_COLLISIONS && _teststr(name,"colonly") && p_node->cast_to<MeshInstance>()) {
+	if (p_flags&SCENE_FLAG_CREATE_COLLISIONS && _teststr(name,"colonly")) {
+
+		if (isroot)
+			return p_node;
+		
+		if (p_node->cast_to<MeshInstance>()) {
+			MeshInstance *mi = p_node->cast_to<MeshInstance>();
+			Node * col = mi->create_trimesh_collision_node();
+			ERR_FAIL_COND_V(!col,NULL);
+
+			col->set_name(_fixstr(name,"colonly"));
+			col->cast_to<Spatial>()->set_transform(mi->get_transform());
+			p_node->replace_by(col);
+			memdelete(p_node);
+			p_node=col;
+
+			StaticBody *sb = col->cast_to<StaticBody>();
+			CollisionShape *colshape = memnew( CollisionShape);
+			colshape->set_shape(sb->get_shape(0));
+			colshape->set_name("shape");
+			sb->add_child(colshape);
+			colshape->set_owner(p_node->get_owner());
+		} else if (p_node->has_meta("empty_draw_type")) {
+			String empty_draw_type = String(p_node->get_meta("empty_draw_type"));
+			print_line(empty_draw_type);
+			StaticBody *sb = memnew( StaticBody);
+			sb->set_name(_fixstr(name,"colonly"));
+			sb->cast_to<Spatial>()->set_transform(p_node->cast_to<Spatial>()->get_transform());
+			p_node->replace_by(sb);
+			memdelete(p_node);
+			CollisionShape *colshape = memnew( CollisionShape);
+			if (empty_draw_type == "CUBE") {
+				BoxShape *boxShape = memnew( BoxShape);
+				boxShape->set_extents(Vector3(1, 1, 1));
+				colshape->set_shape(boxShape);
+				colshape->set_name("BoxShape");
+			} else if (empty_draw_type == "SINGLE_ARROW") {
+				RayShape *rayShape = memnew( RayShape);
+				rayShape->set_length(1);
+				colshape->set_shape(rayShape);
+				colshape->set_name("RayShape");
+				sb->cast_to<Spatial>()->rotate_x(Math_PI / 2);
+			} else if (empty_draw_type == "IMAGE") {
+				PlaneShape *planeShape = memnew( PlaneShape);
+				colshape->set_shape(planeShape);
+				colshape->set_name("PlaneShape");
+			} else {
+				SphereShape *sphereShape = memnew( SphereShape);
+				sphereShape->set_radius(1);
+				colshape->set_shape(sphereShape);
+				colshape->set_name("SphereShape");
+			}
+			sb->add_child(colshape);
+			colshape->set_owner(sb->get_owner());
+		}
+
+	} else if (p_flags&SCENE_FLAG_CREATE_COLLISIONS && _teststr(name,"rigid") && p_node->cast_to<MeshInstance>()) {
 
 		if (isroot)
 			return p_node;
 
+		// get mesh instance and bounding box
 		MeshInstance *mi = p_node->cast_to<MeshInstance>();
-		Node * col = mi->create_trimesh_collision_node();
+		AABB aabb = mi->get_aabb();
+
+		// create a new rigid body collision node
+		RigidBody * rigid_body = memnew( RigidBody );
+		Node * col = rigid_body;
 		ERR_FAIL_COND_V(!col,NULL);
 
-		col->set_name(_fixstr(name,"colonly"));
+		// remove node name postfix
+		col->set_name(_fixstr(name,"rigid"));
+		// get mesh instance xform matrix to the rigid body collision node
 		col->cast_to<Spatial>()->set_transform(mi->get_transform());
+		// save original node by duplicating it into a new instance and correcting the name
+		Node * mesh = p_node->duplicate();
+		mesh->set_name(_fixstr(name,"rigid"));
+		// reset the xform matrix of the duplicated node so it can inherit parent node xform
+		mesh->cast_to<Spatial>()->set_transform(Transform(Matrix3()));
+		// reparent the new mesh node to the rigid body collision node
+		p_node->add_child(mesh);
+		mesh->set_owner(p_node->get_owner());
+		// replace the original node with the rigid body collision node
 		p_node->replace_by(col);
 		memdelete(p_node);
 		p_node=col;
 
-		StaticBody *sb = col->cast_to<StaticBody>();
+		// create an alias for the rigid body collision node
+		RigidBody *rb = col->cast_to<RigidBody>();
+		// create a new Box collision shape and set the right extents
+		Ref<BoxShape> shape = memnew( BoxShape );
+		shape->set_extents(aabb.get_size() * 0.5);
 		CollisionShape *colshape = memnew( CollisionShape);
-		colshape->set_shape(sb->get_shape(0));
 		colshape->set_name("shape");
-		sb->add_child(colshape);
+		colshape->set_shape(shape);
+		// reparent the new collision shape to the rigid body collision node
+		rb->add_child(colshape);
 		colshape->set_owner(p_node->get_owner());
-
 
 	} else if (p_flags&SCENE_FLAG_CREATE_COLLISIONS &&_teststr(name,"col") && p_node->cast_to<MeshInstance>()) {
 
@@ -2374,6 +2457,138 @@ void EditorSceneImportPlugin::_optimize_animations(Node *scene, float p_max_lin_
 }
 
 
+void EditorSceneImportPlugin::_find_resources_to_merge(Node *scene, Node *node, bool p_merge_material, Map<String, Ref<Material> > &materials, bool p_merge_anims, Map<String,Ref<Animation> >& merged_anims,Set<Ref<Mesh> > &tested_meshes) {
+
+	if (node->get_owner()!=scene)
+		return;
+
+	String path = scene->get_path_to(node);
+
+	if (p_merge_anims && node->cast_to<AnimationPlayer>()) {
+
+		AnimationPlayer *ap = node->cast_to<AnimationPlayer>();
+		List<StringName> anims;
+		ap->get_animation_list(&anims);
+		for (List<StringName>::Element *E=anims.front();E;E=E->next()) {
+			Ref<Animation> anim = ap->get_animation(E->get());
+			Ref<Animation> clone;
+
+			bool has_user_tracks=false;
+
+			for(int i=0;i<anim->get_track_count();i++) {
+
+				if (!anim->track_is_imported(i)) {
+					has_user_tracks=true;
+					break;
+				}
+			}
+
+			if (has_user_tracks) {
+
+				clone = anim->duplicate();
+				for(int i=0;i<clone->get_track_count();i++) {
+					if (clone->track_is_imported(i)) {
+						clone->remove_track(i);
+						i--;
+					}
+				}
+
+				merged_anims[path+"::"+String(E->get())]=clone;
+			}
+		}
+	}
+
+
+
+	if (p_merge_material && node->cast_to<MeshInstance>()) {
+		MeshInstance *mi=node->cast_to<MeshInstance>();
+		Ref<Mesh> mesh = mi->get_mesh();
+		if (mesh.is_valid() && mesh->get_name()!=String() && !tested_meshes.has(mesh)) {
+
+			for(int i=0;i<mesh->get_surface_count();i++) {
+				Ref<Material> material = mesh->surface_get_material(i);
+				materials[mesh->get_name()+":surf:"+mesh->surface_get_name(i)]=material;
+			}
+
+			tested_meshes.insert(mesh);
+		}
+	}
+
+
+
+	for(int i=0;i<node->get_child_count();i++) {
+		_find_resources_to_merge(scene,node->get_child(i),p_merge_material,materials,p_merge_anims,merged_anims,tested_meshes);
+	}
+
+}
+
+
+void EditorSceneImportPlugin::_merge_found_resources(Node *scene, Node *node, bool p_merge_material, const Map<String, Ref<Material> > &materials, bool p_merge_anims, const Map<String,Ref<Animation> >& merged_anims, Set<Ref<Mesh> > &tested_meshes) {
+
+	if (node->get_owner()!=scene)
+		return;
+
+	String path = scene->get_path_to(node);
+
+	if (node->cast_to<AnimationPlayer>()) {
+
+		AnimationPlayer *ap = node->cast_to<AnimationPlayer>();
+		List<StringName> anims;
+		ap->get_animation_list(&anims);
+		for (List<StringName>::Element *E=anims.front();E;E=E->next()) {
+			Ref<Animation> anim = ap->get_animation(E->get());
+
+			String anim_path = path+"::"+String(E->get());
+
+			if (merged_anims.has(anim_path)) {
+
+				Ref<Animation> user_tracks = merged_anims[anim_path];
+				for(int i=0;i<user_tracks->get_track_count();i++) {
+
+					int idx = anim->get_track_count();
+					anim->add_track(user_tracks->track_get_type(i));
+					anim->track_set_path(idx,user_tracks->track_get_path(i));
+					anim->track_set_interpolation_type(idx,user_tracks->track_get_interpolation_type(i));
+					for(int j=0;j<user_tracks->track_get_key_count(i);j++) {
+
+						float ofs = user_tracks->track_get_key_time(i,j);
+						float trans = user_tracks->track_get_key_transition(i,j);
+						Variant value = user_tracks->track_get_key_value(i,j);
+
+						anim->track_insert_key(idx,ofs,value,trans);
+					}
+				}
+			}
+		}
+	}
+
+
+
+	if (node->cast_to<MeshInstance>()) {
+		MeshInstance *mi=node->cast_to<MeshInstance>();
+		Ref<Mesh> mesh = mi->get_mesh();
+		if (mesh.is_valid() && mesh->get_name()!=String() && !tested_meshes.has(mesh)) {
+
+			for(int i=0;i<mesh->get_surface_count();i++) {
+				String sname = mesh->get_name()+":surf:"+mesh->surface_get_name(i);
+
+				if (materials.has(sname)) {
+					mesh->surface_set_material(i,materials[sname]);
+				}
+			}
+
+			tested_meshes.insert(mesh);
+		}
+	}
+
+
+
+	for(int i=0;i<node->get_child_count();i++) {
+		_merge_found_resources(scene,node->get_child(i),p_merge_material,materials,p_merge_anims,merged_anims,tested_meshes);
+	}
+
+}
+
 Error EditorSceneImportPlugin::import2(Node *scene, const String& p_dest_path, const Ref<ResourceImportMetadata>& p_from) {
 
 	Error err=OK;
@@ -2425,6 +2640,28 @@ Error EditorSceneImportPlugin::import2(Node *scene, const String& p_dest_path, c
 	_filter_tracks(scene,animation_filter);
 
 
+	if (scene_flags&(SCENE_FLAG_MERGE_KEEP_MATERIALS|SCENE_FLAG_MERGE_KEEP_EXTRA_ANIM_TRACKS) && FileAccess::exists(p_dest_path)) {
+		//must merge!
+
+		Ref<PackedScene> pscene = ResourceLoader::load(p_dest_path,"PackedScene",true);
+		if (pscene.is_valid()) {
+
+			Node *instance = pscene->instance();
+			if (instance) {
+				Map<String,Ref<Animation> > merged_anims;
+				Map<String,Ref<Material> > merged_materials;
+				Set<Ref<Mesh> > tested_meshes;
+
+				_find_resources_to_merge(instance,instance,scene_flags&SCENE_FLAG_MERGE_KEEP_MATERIALS,merged_materials,scene_flags&SCENE_FLAG_MERGE_KEEP_EXTRA_ANIM_TRACKS,merged_anims,tested_meshes);
+				tested_meshes.clear();
+				_merge_found_resources(instance,instance,scene_flags&SCENE_FLAG_MERGE_KEEP_MATERIALS,merged_materials,scene_flags&SCENE_FLAG_MERGE_KEEP_EXTRA_ANIM_TRACKS,merged_anims,tested_meshes);
+
+				memdelete(instance);
+			}
+
+		}
+
+	}
 
 	/// BEFORE ANYTHING, RUN SCRIPT
 
@@ -2443,8 +2680,9 @@ Error EditorSceneImportPlugin::import2(Node *scene, const String& p_dest_path, c
 			post_import_script = Ref<EditorScenePostImport>( memnew( EditorScenePostImport ) );
 			post_import_script->set_script(scr.get_ref_ptr());
 			if (!post_import_script->get_script_instance()) {
-				EditorNode::add_io_error(TTR("Invalid/broken script for post-import:")+" "+post_import_script_path);
+				EditorNode::add_io_error(TTR("Invalid/broken script for post-import (check console):")+" "+post_import_script_path);
 				post_import_script.unref();
+				return ERR_CANT_CREATE;
 			}
 		}
 	}
@@ -2552,15 +2790,16 @@ Error EditorSceneImportPlugin::import2(Node *scene, const String& p_dest_path, c
 
 	Ref<PackedScene> packer = memnew( PackedScene );
 	packer->pack(scene);
-	packer->set_path(p_dest_path);
+	//packer->set_path(p_dest_path); do not take over, let the changed files reload themselves
 	packer->set_import_metadata(from);
 
 	print_line("SAVING TO: "+p_dest_path);
-	err = ResourceSaver::save(p_dest_path,packer,ResourceSaver::FLAG_REPLACE_SUBRESOURCE_PATHS);
+	err = ResourceSaver::save(p_dest_path,packer); //do not take over, let the changed files reload themselves
 
 	//EditorFileSystem::get_singleton()->update_resource(packer);
 
 	memdelete(scene);
+
 	/*
 	scene->set_filename(p_dest_path);
 	if (r_scene) {
@@ -2580,6 +2819,7 @@ Error EditorSceneImportPlugin::import2(Node *scene, const String& p_dest_path, c
 
 	*/
 
+	EditorNode::get_singleton()->reload_scene(p_dest_path);
 
 	return err;
 

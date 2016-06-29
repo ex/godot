@@ -1,14 +1,31 @@
-/*************************************************/
-/*  register_driver_types.cpp                    */
-/*************************************************/
-/*            This file is part of:              */
-/*                GODOT ENGINE                   */
-/*************************************************/
-/*       Source code within this file is:        */
-/*  (c) 2007-2016 Juan Linietsky, Ariel Manzur   */
-/*             All Rights Reserved.              */
-/*************************************************/
-
+/*************************************************************************/
+/*  register_driver_types.cpp                                            */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                    http://www.godotengine.org                         */
+/*************************************************************************/
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
 #include "register_driver_types.h"
 
 #include "png/image_loader_png.h"
@@ -16,6 +33,7 @@
 #include "png/resource_saver_png.h"
 #include "jpegd/image_loader_jpegd.h"
 #include "dds/texture_loader_dds.h"
+#include "etc1/texture_loader_pkm.h"
 #include "pvr/texture_loader_pvr.h"
 #include "etc1/image_etc.h"
 #include "chibi/event_stream_chibi.h"
@@ -77,6 +95,10 @@ static ImageLoaderJPG *image_loader_jpg=NULL;
 
 #ifdef DDS_ENABLED
 static ResourceFormatDDS *resource_loader_dds=NULL;
+#endif
+
+#ifdef ETC1_ENABLED
+static ResourceFormatPKM *resource_loader_pkm=NULL;
 #endif
 
 
@@ -199,6 +221,11 @@ void register_driver_types() {
 	ResourceLoader::add_resource_format_loader(resource_loader_dds );
 #endif
 
+#ifdef ETC1_ENABLED
+	resource_loader_pkm = memnew( ResourceFormatPKM );
+	ResourceLoader::add_resource_format_loader(resource_loader_pkm);
+#endif
+
 #ifdef PVR_ENABLED
 	resource_loader_pvr = memnew( ResourceFormatPVR );
 	ResourceLoader::add_resource_format_loader(resource_loader_pvr );
@@ -281,6 +308,10 @@ void unregister_driver_types() {
 
 #ifdef DDS_ENABLED
 	memdelete(resource_loader_dds);
+#endif
+
+#ifdef ETC1_ENABLED
+	memdelete(resource_loader_pkm);
 #endif
 
 #ifdef PVR_ENABLED
