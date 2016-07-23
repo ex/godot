@@ -46,8 +46,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../../../;../../../core/;../../../platform/windows/;../../../core/math/;../../../drivers/builtin_zlib/zlib/;../../../drivers/;../../../tools/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WINDOWS_ENABLED;RTAUDIO_ENABLED;WIN32;TYPED_METHOD_BIND;GLES2_ENABLED;GLES1_ENABLED;GLEW_ENABLED;_CRT_SECURE_NO_WARNINGS;MSVC;XML_ENABLED;TOOLS_ENABLED;DEBUG_METHODS_ENABLED;_WINSOCK_DEPRECATED_NO_WARNINGS;PNG_ENABLED;JPG_ENABLED;MODULE_GDSCRIPT_ENABLED;MODULE_GRIDMAP_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../../;../../../core/;../../../platform/windows/;../../../core/math/;../../../drivers/builtin_zlib/zlib/;../../../drivers/gl_context;../../../drivers/freetype/freetype/include;../../../drivers/freetype;../../../drivers/;../../../tools/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWS_ENABLED;RTAUDIO_ENABLED;WIN32;TYPED_METHOD_BIND;GLES2_ENABLED;GLES1_ENABLED;GLEW_ENABLED;_CRT_SECURE_NO_WARNINGS;MSVC;XML_ENABLED;TOOLS_ENABLED;DEBUG_METHODS_ENABLED;_WINSOCK_DEPRECATED_NO_WARNINGS;PNG_ENABLED;JPG_ENABLED;MODULE_GDSCRIPT_ENABLED;MODULE_GRIDMAP_ENABLED;FREETYPE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;4800;4305;4703;4291;4146;4700;4099;4018</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -89,7 +89,6 @@
     <ClInclude Include="..\..\..\bin\tests\test_string.h" />
     <ClInclude Include="..\..\..\core\allocators.h" />
     <ClInclude Include="..\..\..\core\array.h" />
-    <ClInclude Include="..\..\..\core\balloon_allocator.h" />
     <ClInclude Include="..\..\..\core\bind\core_bind.h" />
     <ClInclude Include="..\..\..\core\color.h" />
     <ClInclude Include="..\..\..\core\command_queue_mt.h" />
@@ -100,7 +99,6 @@
     <ClInclude Include="..\..\..\core\error_list.h" />
     <ClInclude Include="..\..\..\core\error_macros.h" />
     <ClInclude Include="..\..\..\core\event_queue.h" />
-    <ClInclude Include="..\..\..\core\fpstr.h" />
     <ClInclude Include="..\..\..\core\func_ref.h" />
     <ClInclude Include="..\..\..\core\globals.h" />
     <ClInclude Include="..\..\..\core\global_constants.h" />
@@ -149,7 +147,6 @@
     <ClInclude Include="..\..\..\core\list.h" />
     <ClInclude Include="..\..\..\core\map.h" />
     <ClInclude Include="..\..\..\core\math\aabb.h" />
-    <ClInclude Include="..\..\..\core\math\bezier_curve.h" />
     <ClInclude Include="..\..\..\core\math\bsp_tree.h" />
     <ClInclude Include="..\..\..\core\math\camera_matrix.h" />
     <ClInclude Include="..\..\..\core\math\face3.h" />
@@ -169,7 +166,6 @@
     <ClInclude Include="..\..\..\core\math\vector3.h" />
     <ClInclude Include="..\..\..\core\message_queue.h" />
     <ClInclude Include="..\..\..\core\method_bind.h" />
-    <ClInclude Include="..\..\..\core\multi_bucket_array.h" />
     <ClInclude Include="..\..\..\core\object.h" />
     <ClInclude Include="..\..\..\core\object_type_db.h" />
     <ClInclude Include="..\..\..\core\os\copymem.h" />
@@ -202,7 +198,6 @@
     <ClInclude Include="..\..\..\core\ref_ptr.h" />
     <ClInclude Include="..\..\..\core\register_core_types.h" />
     <ClInclude Include="..\..\..\core\resource.h" />
-    <ClInclude Include="..\..\..\core\res_ptr.h" />
     <ClInclude Include="..\..\..\core\rid.h" />
     <ClInclude Include="..\..\..\core\ring_buffer.h" />
     <ClInclude Include="..\..\..\core\safe_refcount.h" />
@@ -220,7 +215,6 @@
     <ClInclude Include="..\..\..\core\undo_redo.h" />
     <ClInclude Include="..\..\..\core\ustring.h" />
     <ClInclude Include="..\..\..\core\variant.h" />
-    <ClInclude Include="..\..\..\core\variant_call_bind.h" />
     <ClInclude Include="..\..\..\core\variant_parser.h" />
     <ClInclude Include="..\..\..\core\vector.h" />
     <ClInclude Include="..\..\..\core\version.h" />
@@ -265,14 +259,15 @@
     <ClInclude Include="..\..\..\drivers\dds\texture_loader_dds.h" />
     <ClInclude Include="..\..\..\drivers\etc1\image_etc.h" />
     <ClInclude Include="..\..\..\drivers\etc1\rg_etc1.h" />
+    <ClInclude Include="..\..\..\drivers\freetype\ft2build.h" />
     <ClInclude Include="..\..\..\drivers\gles2\rasterizer_gles2.h" />
     <ClInclude Include="..\..\..\drivers\gles2\rasterizer_instance_gles2.h" />
     <ClInclude Include="..\..\..\drivers\gles2\shader_compiler_gles2.h" />
     <ClInclude Include="..\..\..\drivers\gles2\shader_gles2.h" />
     <ClInclude Include="..\..\..\drivers\gl_context\context_gl.h" />
-    <ClInclude Include="..\..\..\drivers\gl_context\glew.h" />
-    <ClInclude Include="..\..\..\drivers\gl_context\glxew.h" />
-    <ClInclude Include="..\..\..\drivers\gl_context\wglew.h" />
+    <ClInclude Include="..\..\..\drivers\gl_context\GL\glew.h" />
+    <ClInclude Include="..\..\..\drivers\gl_context\GL\glxew.h" />
+    <ClInclude Include="..\..\..\drivers\gl_context\GL\wglew.h" />
     <ClInclude Include="..\..\..\drivers\jpegd\image_loader_jpegd.h" />
     <ClInclude Include="..\..\..\drivers\jpegd\jpgd.h" />
     <ClInclude Include="..\..\..\drivers\mpc\audio_stream_mpc.h" />
@@ -342,7 +337,6 @@
     <ClInclude Include="..\..\..\modules\gdscript\gd_compiler.h" />
     <ClInclude Include="..\..\..\modules\gdscript\gd_functions.h" />
     <ClInclude Include="..\..\..\modules\gdscript\gd_parser.h" />
-    <ClInclude Include="..\..\..\modules\gdscript\gd_pretty_print.h" />
     <ClInclude Include="..\..\..\modules\gdscript\gd_script.h" />
     <ClInclude Include="..\..\..\modules\gdscript\gd_tokenizer.h" />
     <ClInclude Include="..\..\..\modules\gdscript\register_types.h" />
@@ -382,7 +376,6 @@
     <ClInclude Include="..\..\..\scene\2d\navigation2d.h" />
     <ClInclude Include="..\..\..\scene\2d\navigation_polygon.h" />
     <ClInclude Include="..\..\..\scene\2d\node_2d.h" />
-    <ClInclude Include="..\..\..\scene\2d\node_2d_singleton.h" />
     <ClInclude Include="..\..\..\scene\2d\parallax_background.h" />
     <ClInclude Include="..\..\..\scene\2d\parallax_layer.h" />
     <ClInclude Include="..\..\..\scene\2d\particles_2d.h" />
@@ -414,9 +407,7 @@
     <ClInclude Include="..\..\..\scene\3d\mesh_instance.h" />
     <ClInclude Include="..\..\..\scene\3d\multimesh_instance.h" />
     <ClInclude Include="..\..\..\scene\3d\navigation.h" />
-    <ClInclude Include="..\..\..\scene\3d\navigation_agent.h" />
     <ClInclude Include="..\..\..\scene\3d\navigation_mesh.h" />
-    <ClInclude Include="..\..\..\scene\3d\optimized_spatial_scene.h" />
     <ClInclude Include="..\..\..\scene\3d\particles.h" />
     <ClInclude Include="..\..\..\scene\3d\path.h" />
     <ClInclude Include="..\..\..\scene\3d\physics_body.h" />
@@ -442,7 +433,6 @@
     <ClInclude Include="..\..\..\scene\animation\animation_cache.h" />
     <ClInclude Include="..\..\..\scene\animation\animation_player.h" />
     <ClInclude Include="..\..\..\scene\animation\animation_tree_player.h" />
-    <ClInclude Include="..\..\..\scene\animation\transitioner.h" />
     <ClInclude Include="..\..\..\scene\animation\tween.h" />
     <ClInclude Include="..\..\..\scene\audio\event_player.h" />
     <ClInclude Include="..\..\..\scene\audio\sample_player.h" />
@@ -460,7 +450,6 @@
     <ClInclude Include="..\..\..\scene\gui\color_ramp_edit.h" />
     <ClInclude Include="..\..\..\scene\gui\container.h" />
     <ClInclude Include="..\..\..\scene\gui\control.h" />
-    <ClInclude Include="..\..\..\scene\gui\custom_button.h" />
     <ClInclude Include="..\..\..\scene\gui\dialogs.h" />
     <ClInclude Include="..\..\..\scene\gui\file_dialog.h" />
     <ClInclude Include="..\..\..\scene\gui\graph_edit.h" />
@@ -502,11 +491,9 @@
     <ClInclude Include="..\..\..\scene\main\canvas_layer.h" />
     <ClInclude Include="..\..\..\scene\main\http_request.h" />
     <ClInclude Include="..\..\..\scene\main\instance_placeholder.h" />
-    <ClInclude Include="..\..\..\scene\main\misc.h" />
     <ClInclude Include="..\..\..\scene\main\node.h" />
     <ClInclude Include="..\..\..\scene\main\resource_preloader.h" />
     <ClInclude Include="..\..\..\scene\main\scene_main_loop.h" />
-    <ClInclude Include="..\..\..\scene\main\scene_singleton.h" />
     <ClInclude Include="..\..\..\scene\main\timer.h" />
     <ClInclude Include="..\..\..\scene\main\viewport.h" />
     <ClInclude Include="..\..\..\scene\register_scene_types.h" />
@@ -529,11 +516,12 @@
     <ClInclude Include="..\..\..\scene\resources\curve.h" />
     <ClInclude Include="..\..\..\scene\resources\default_theme\default_theme.h" />
     <ClInclude Include="..\..\..\scene\resources\default_theme\theme_data.h" />
+    <ClInclude Include="..\..\..\scene\resources\dynamic_font.h" />
+    <ClInclude Include="..\..\..\scene\resources\dynamic_font_stb.h" />
     <ClInclude Include="..\..\..\scene\resources\environment.h" />
     <ClInclude Include="..\..\..\scene\resources\event_stream.h" />
     <ClInclude Include="..\..\..\scene\resources\font.h" />
     <ClInclude Include="..\..\..\scene\resources\gibberish_stream.h" />
-    <ClInclude Include="..\..\..\scene\resources\height_map_shape.h" />
     <ClInclude Include="..\..\..\scene\resources\material.h" />
     <ClInclude Include="..\..\..\scene\resources\mesh.h" />
     <ClInclude Include="..\..\..\scene\resources\mesh_data_tool.h" />
@@ -545,7 +533,6 @@
     <ClInclude Include="..\..\..\scene\resources\polygon_path_finder.h" />
     <ClInclude Include="..\..\..\scene\resources\ray_shape.h" />
     <ClInclude Include="..\..\..\scene\resources\rectangle_shape_2d.h" />
-    <ClInclude Include="..\..\..\scene\resources\rich_text.h" />
     <ClInclude Include="..\..\..\scene\resources\room.h" />
     <ClInclude Include="..\..\..\scene\resources\sample.h" />
     <ClInclude Include="..\..\..\scene\resources\sample_library.h" />
@@ -565,7 +552,6 @@
     <ClInclude Include="..\..\..\scene\resources\theme.h" />
     <ClInclude Include="..\..\..\scene\resources\tile_set.h" />
     <ClInclude Include="..\..\..\scene\resources\video_stream.h" />
-    <ClInclude Include="..\..\..\scene\resources\volume.h" />
     <ClInclude Include="..\..\..\scene\resources\world.h" />
     <ClInclude Include="..\..\..\scene\resources\world_2d.h" />
     <ClInclude Include="..\..\..\scene\scene_string_names.h" />
@@ -574,7 +560,6 @@
     <ClInclude Include="..\..\..\servers\audio\audio_mixer_sw.h" />
     <ClInclude Include="..\..\..\servers\audio\audio_rb_resampler.h" />
     <ClInclude Include="..\..\..\servers\audio\audio_server_sw.h" />
-    <ClInclude Include="..\..\..\servers\audio\reverb_buffers_sw.h" />
     <ClInclude Include="..\..\..\servers\audio\reverb_sw.h" />
     <ClInclude Include="..\..\..\servers\audio\sample_manager_sw.h" />
     <ClInclude Include="..\..\..\servers\audio\voice_rb_sw.h" />
@@ -629,8 +614,6 @@
     <ClInclude Include="..\..\..\servers\visual\particle_system_sw.h" />
     <ClInclude Include="..\..\..\servers\visual\rasterizer.h" />
     <ClInclude Include="..\..\..\servers\visual\rasterizer_dummy.h" />
-    <ClInclude Include="..\..\..\servers\visual\shader_compiler.h" />
-    <ClInclude Include="..\..\..\servers\visual\shader_graph.h" />
     <ClInclude Include="..\..\..\servers\visual\shader_language.h" />
     <ClInclude Include="..\..\..\servers\visual\visual_server_raster.h" />
     <ClInclude Include="..\..\..\servers\visual\visual_server_wrap_mt.h" />
@@ -644,7 +627,6 @@
     <ClInclude Include="..\..\..\tools\editor\code_editor.h" />
     <ClInclude Include="..\..\..\tools\editor\connections_dialog.h" />
     <ClInclude Include="..\..\..\tools\editor\create_dialog.h" />
-    <ClInclude Include="..\..\..\tools\editor\default_saver.h" />
     <ClInclude Include="..\..\..\tools\editor\dependency_editor.h" />
     <ClInclude Include="..\..\..\tools\editor\doc_code_font.h" />
     <ClInclude Include="..\..\..\tools\editor\doc_data_compressed.h" />
@@ -668,10 +650,8 @@
     <ClInclude Include="..\..\..\tools\editor\editor_run.h" />
     <ClInclude Include="..\..\..\tools\editor\editor_run_native.h" />
     <ClInclude Include="..\..\..\tools\editor\editor_run_script.h" />
-    <ClInclude Include="..\..\..\tools\editor\editor_selection.h" />
     <ClInclude Include="..\..\..\tools\editor\editor_settings.h" />
     <ClInclude Include="..\..\..\tools\editor\editor_sub_scene.h" />
-    <ClInclude Include="..\..\..\tools\editor\editor_vu.h" />
     <ClInclude Include="..\..\..\tools\editor\fileserver\editor_file_server.h" />
     <ClInclude Include="..\..\..\tools\editor\file_type_cache.h" />
     <ClInclude Include="..\..\..\tools\editor\groups_editor.h" />
@@ -688,10 +668,8 @@
     <ClInclude Include="..\..\..\tools\editor\io_plugins\editor_texture_import_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\io_plugins\editor_translation_import_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\multi_node_edit.h" />
-    <ClInclude Include="..\..\..\tools\editor\optimized_save_dialog.h" />
     <ClInclude Include="..\..\..\tools\editor\output_strings.h" />
     <ClInclude Include="..\..\..\tools\editor\pane_drag.h" />
-    <ClInclude Include="..\..\..\tools\editor\plugins\animation_data_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\animation_player_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\animation_tree_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\baked_light_baker.h" />
@@ -702,7 +680,6 @@
     <ClInclude Include="..\..\..\tools\editor\plugins\collision_polygon_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\collision_shape_2d_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\color_ramp_editor_plugin.h" />
-    <ClInclude Include="..\..\..\tools\editor\plugins\control_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\cube_grid_theme_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\editor_preview_plugins.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\item_list_editor_plugin.h" />
@@ -725,7 +702,6 @@
     <ClInclude Include="..\..\..\tools\editor\plugins\shader_graph_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\spatial_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\sprite_frames_editor_plugin.h" />
-    <ClInclude Include="..\..\..\tools\editor\plugins\sprite_region_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\stream_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\style_box_editor_plugin.h" />
     <ClInclude Include="..\..\..\tools\editor\plugins\theme_editor_plugin.h" />
@@ -742,7 +718,6 @@
     <ClInclude Include="..\..\..\tools\editor\reparent_dialog.h" />
     <ClInclude Include="..\..\..\tools\editor\resources_dock.h" />
     <ClInclude Include="..\..\..\tools\editor\run_settings_dialog.h" />
-    <ClInclude Include="..\..\..\tools\editor\scenes.h" />
     <ClInclude Include="..\..\..\tools\editor\scenes_dock.h" />
     <ClInclude Include="..\..\..\tools\editor\scene_tree_dock.h" />
     <ClInclude Include="..\..\..\tools\editor\scene_tree_editor.h" />
@@ -753,6 +728,8 @@
     <ClInclude Include="..\..\..\tools\pck\pck_packer.h" />
     <ClInclude Include="..\..\editor\editor_initialize_ssl.h" />
     <ClInclude Include="..\..\editor\editor_plugin_settings.h" />
+    <ClInclude Include="..\..\editor\plugins\texture_editor_plugin.h" />
+    <ClInclude Include="..\..\editor\plugins\texture_region_editor_plugin.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\bin\tests\test_containers.cpp" />
@@ -782,7 +759,6 @@
     <ClCompile Include="..\..\..\core\dvector.cpp" />
     <ClCompile Include="..\..\..\core\error_macros.cpp" />
     <ClCompile Include="..\..\..\core\event_queue.cpp" />
-    <ClCompile Include="..\..\..\core\fpstr.cpp" />
     <ClCompile Include="..\..\..\core\func_ref.cpp" />
     <ClCompile Include="..\..\..\core\globals.cpp" />
     <ClCompile Include="..\..\..\core\global_constants.cpp" />
@@ -825,13 +801,11 @@
     <ClCompile Include="..\..\..\core\io\xml_parser.cpp" />
     <ClCompile Include="..\..\..\core\io\zip.c" />
     <ClCompile Include="..\..\..\core\math\aabb.cpp" />
-    <ClCompile Include="..\..\..\core\math\bezier_curve.cpp" />
     <ClCompile Include="..\..\..\core\math\bsp_tree.cpp" />
     <ClCompile Include="..\..\..\core\math\camera_matrix.cpp" />
     <ClCompile Include="..\..\..\core\math\face3.cpp" />
     <ClCompile Include="..\..\..\core\math\geometry.cpp" />
     <ClCompile Include="..\..\..\core\math\math_2d.cpp" />
-    <ClCompile Include="..\..\..\core\math\math_defs.cpp" />
     <ClCompile Include="..\..\..\core\math\math_funcs.cpp" />
     <ClCompile Include="..\..\..\core\math\matrix3.cpp" />
     <ClCompile Include="..\..\..\core\math\plane.cpp" />
@@ -866,7 +840,6 @@
     <ClCompile Include="..\..\..\core\os\thread_dummy.cpp" />
     <ClCompile Include="..\..\..\core\os\thread_safe.cpp" />
     <ClCompile Include="..\..\..\core\packed_data_container.cpp" />
-    <ClCompile Include="..\..\..\core\pair.cpp" />
     <ClCompile Include="..\..\..\core\path_db.cpp" />
     <ClCompile Include="..\..\..\core\path_remap.cpp" />
     <ClCompile Include="..\..\..\core\pool_allocator.cpp" />
@@ -875,10 +848,8 @@
     <ClCompile Include="..\..\..\core\ref_ptr.cpp" />
     <ClCompile Include="..\..\..\core\register_core_types.cpp" />
     <ClCompile Include="..\..\..\core\resource.cpp" />
-    <ClCompile Include="..\..\..\core\res_ptr.cpp" />
     <ClCompile Include="..\..\..\core\rid.cpp" />
     <ClCompile Include="..\..\..\core\safe_refcount.cpp" />
-    <ClCompile Include="..\..\..\core\script_debugger_debugger.cpp" />
     <ClCompile Include="..\..\..\core\script_debugger_local.cpp" />
     <ClCompile Include="..\..\..\core\script_debugger_remote.cpp" />
     <ClCompile Include="..\..\..\core\script_encryption_key.cpp" />
@@ -891,8 +862,6 @@
     <ClCompile Include="..\..\..\core\variant_call.cpp" />
     <ClCompile Include="..\..\..\core\variant_op.cpp" />
     <ClCompile Include="..\..\..\core\variant_parser.cpp" />
-    <ClCompile Include="..\..\..\core\vmap.cpp" />
-    <ClCompile Include="..\..\..\core\vset.cpp" />
     <ClCompile Include="..\..\..\drivers\alsa\audio_driver_alsa.cpp" />
     <ClCompile Include="..\..\..\drivers\builtin_zlib\zlib\adler32.c" />
     <ClCompile Include="..\..\..\drivers\builtin_zlib\zlib\compress.c" />
@@ -906,7 +875,6 @@
     <ClCompile Include="..\..\..\drivers\builtin_zlib\zlib\uncompr.c" />
     <ClCompile Include="..\..\..\drivers\builtin_zlib\zlib\zutil.c" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_envelope.cpp" />
-    <ClCompile Include="..\..\..\drivers\chibi\cp_file_access_wrapper.cpp" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_instrument.cpp" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_loader_it.cpp" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_loader_it_info.cpp" />
@@ -925,7 +893,6 @@
     <ClCompile Include="..\..\..\drivers\chibi\cp_player_data_filter.cpp" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_player_data_nna.cpp" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_player_data_notes.cpp" />
-    <ClCompile Include="..\..\..\drivers\chibi\cp_player_data_reserved.cpp" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_player_data_utils.cpp" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_sample.cpp" />
     <ClCompile Include="..\..\..\drivers\chibi\cp_sample_manager.cpp" />
@@ -1012,7 +979,6 @@
     <ClCompile Include="..\..\..\modules\gdscript\gd_editor.cpp" />
     <ClCompile Include="..\..\..\modules\gdscript\gd_functions.cpp" />
     <ClCompile Include="..\..\..\modules\gdscript\gd_parser.cpp" />
-    <ClCompile Include="..\..\..\modules\gdscript\gd_pretty_print.cpp" />
     <ClCompile Include="..\..\..\modules\gdscript\gd_script.cpp" />
     <ClCompile Include="..\..\..\modules\gdscript\gd_tokenizer.cpp" />
     <ClCompile Include="..\..\..\modules\gdscript\register_types.cpp">
@@ -1072,7 +1038,6 @@
     <ClCompile Include="..\..\..\scene\2d\navigation2d.cpp" />
     <ClCompile Include="..\..\..\scene\2d\navigation_polygon.cpp" />
     <ClCompile Include="..\..\..\scene\2d\node_2d.cpp" />
-    <ClCompile Include="..\..\..\scene\2d\node_2d_singleton.cpp" />
     <ClCompile Include="..\..\..\scene\2d\parallax_background.cpp" />
     <ClCompile Include="..\..\..\scene\2d\parallax_layer.cpp" />
     <ClCompile Include="..\..\..\scene\2d\particles_2d.cpp" />
@@ -1104,9 +1069,7 @@
     <ClCompile Include="..\..\..\scene\3d\mesh_instance.cpp" />
     <ClCompile Include="..\..\..\scene\3d\multimesh_instance.cpp" />
     <ClCompile Include="..\..\..\scene\3d\navigation.cpp" />
-    <ClCompile Include="..\..\..\scene\3d\navigation_agent.cpp" />
     <ClCompile Include="..\..\..\scene\3d\navigation_mesh.cpp" />
-    <ClCompile Include="..\..\..\scene\3d\optimized_spatial_scene.cpp" />
     <ClCompile Include="..\..\..\scene\3d\particles.cpp" />
     <ClCompile Include="..\..\..\scene\3d\path.cpp" />
     <ClCompile Include="..\..\..\scene\3d\physics_body.cpp" />
@@ -1132,7 +1095,6 @@
     <ClCompile Include="..\..\..\scene\animation\animation_cache.cpp" />
     <ClCompile Include="..\..\..\scene\animation\animation_player.cpp" />
     <ClCompile Include="..\..\..\scene\animation\animation_tree_player.cpp" />
-    <ClCompile Include="..\..\..\scene\animation\transitioner.cpp" />
     <ClCompile Include="..\..\..\scene\animation\tween.cpp" />
     <ClCompile Include="..\..\..\scene\animation\tween_interpolaters.cpp" />
     <ClCompile Include="..\..\..\scene\audio\event_player.cpp" />
@@ -1151,7 +1113,6 @@
     <ClCompile Include="..\..\..\scene\gui\color_ramp_edit.cpp" />
     <ClCompile Include="..\..\..\scene\gui\container.cpp" />
     <ClCompile Include="..\..\..\scene\gui\control.cpp" />
-    <ClCompile Include="..\..\..\scene\gui\custom_button.cpp" />
     <ClCompile Include="..\..\..\scene\gui\dialogs.cpp" />
     <ClCompile Include="..\..\..\scene\gui\file_dialog.cpp" />
     <ClCompile Include="..\..\..\scene\gui\graph_edit.cpp" />
@@ -1193,11 +1154,9 @@
     <ClCompile Include="..\..\..\scene\main\canvas_layer.cpp" />
     <ClCompile Include="..\..\..\scene\main\http_request.cpp" />
     <ClCompile Include="..\..\..\scene\main\instance_placeholder.cpp" />
-    <ClCompile Include="..\..\..\scene\main\misc.cpp" />
     <ClCompile Include="..\..\..\scene\main\node.cpp" />
     <ClCompile Include="..\..\..\scene\main\resource_preloader.cpp" />
     <ClCompile Include="..\..\..\scene\main\scene_main_loop.cpp" />
-    <ClCompile Include="..\..\..\scene\main\scene_singleton.cpp" />
     <ClCompile Include="..\..\..\scene\main\timer.cpp" />
     <ClCompile Include="..\..\..\scene\main\viewport.cpp" />
     <ClCompile Include="..\..\..\scene\register_scene_types.cpp" />
@@ -1219,11 +1178,12 @@
     <ClCompile Include="..\..\..\scene\resources\convex_polygon_shape_2d.cpp" />
     <ClCompile Include="..\..\..\scene\resources\curve.cpp" />
     <ClCompile Include="..\..\..\scene\resources\default_theme\default_theme.cpp" />
+    <ClCompile Include="..\..\..\scene\resources\dynamic_font.cpp" />
+    <ClCompile Include="..\..\..\scene\resources\dynamic_font_stb.cpp" />
     <ClCompile Include="..\..\..\scene\resources\environment.cpp" />
     <ClCompile Include="..\..\..\scene\resources\event_stream.cpp" />
     <ClCompile Include="..\..\..\scene\resources\font.cpp" />
     <ClCompile Include="..\..\..\scene\resources\gibberish_stream.cpp" />
-    <ClCompile Include="..\..\..\scene\resources\height_map_shape.cpp" />
     <ClCompile Include="..\..\..\scene\resources\material.cpp" />
     <ClCompile Include="..\..\..\scene\resources\mesh.cpp" />
     <ClCompile Include="..\..\..\scene\resources\mesh_data_tool.cpp" />
@@ -1235,7 +1195,6 @@
     <ClCompile Include="..\..\..\scene\resources\polygon_path_finder.cpp" />
     <ClCompile Include="..\..\..\scene\resources\ray_shape.cpp" />
     <ClCompile Include="..\..\..\scene\resources\rectangle_shape_2d.cpp" />
-    <ClCompile Include="..\..\..\scene\resources\rich_text.cpp" />
     <ClCompile Include="..\..\..\scene\resources\room.cpp" />
     <ClCompile Include="..\..\..\scene\resources\sample.cpp" />
     <ClCompile Include="..\..\..\scene\resources\sample_library.cpp" />
@@ -1257,7 +1216,6 @@
     <ClCompile Include="..\..\..\scene\resources\theme.cpp" />
     <ClCompile Include="..\..\..\scene\resources\tile_set.cpp" />
     <ClCompile Include="..\..\..\scene\resources\video_stream.cpp" />
-    <ClCompile Include="..\..\..\scene\resources\volume.cpp" />
     <ClCompile Include="..\..\..\scene\resources\world.cpp" />
     <ClCompile Include="..\..\..\scene\resources\world_2d.cpp" />
     <ClCompile Include="..\..\..\scene\scene_string_names.cpp" />
@@ -1266,10 +1224,8 @@
     <ClCompile Include="..\..\..\servers\audio\audio_mixer_sw.cpp" />
     <ClCompile Include="..\..\..\servers\audio\audio_rb_resampler.cpp" />
     <ClCompile Include="..\..\..\servers\audio\audio_server_sw.cpp" />
-    <ClCompile Include="..\..\..\servers\audio\reverb_buffers_sw.cpp" />
     <ClCompile Include="..\..\..\servers\audio\reverb_sw.cpp" />
     <ClCompile Include="..\..\..\servers\audio\sample_manager_sw.cpp" />
-    <ClCompile Include="..\..\..\servers\audio\voice_rb_sw.cpp" />
     <ClCompile Include="..\..\..\servers\audio_server.cpp" />
     <ClCompile Include="..\..\..\servers\physics\area_pair_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\area_sw.cpp" />
@@ -1281,15 +1237,12 @@
     <ClCompile Include="..\..\..\servers\physics\collision_object_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\collision_solver_sat.cpp" />
     <ClCompile Include="..\..\..\servers\physics\collision_solver_sw.cpp" />
-    <ClCompile Include="..\..\..\servers\physics\constraint_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\gjk_epa.cpp" />
     <ClCompile Include="..\..\..\servers\physics\joints\cone_twist_joint_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\joints\generic_6dof_joint_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\joints\hinge_joint_sw.cpp" />
-    <ClCompile Include="..\..\..\servers\physics\joints\jacobian_entry_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\joints\pin_joint_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\joints\slider_joint_sw.cpp" />
-    <ClCompile Include="..\..\..\servers\physics\joints_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\physics_server_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\shape_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics\space_sw.cpp" />
@@ -1304,7 +1257,6 @@
     <ClCompile Include="..\..\..\servers\physics_2d\collision_object_2d_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics_2d\collision_solver_2d_sat.cpp" />
     <ClCompile Include="..\..\..\servers\physics_2d\collision_solver_2d_sw.cpp" />
-    <ClCompile Include="..\..\..\servers\physics_2d\constraint_2d_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics_2d\joints_2d_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics_2d\physics_2d_server_sw.cpp" />
     <ClCompile Include="..\..\..\servers\physics_2d\physics_2d_server_wrap_mt.cpp" />
@@ -1321,10 +1273,6 @@
     <ClCompile Include="..\..\..\servers\visual\particle_system_sw.cpp" />
     <ClCompile Include="..\..\..\servers\visual\rasterizer.cpp" />
     <ClCompile Include="..\..\..\servers\visual\rasterizer_dummy.cpp" />
-    <ClCompile Include="..\..\..\servers\visual\shader_compiler.cpp" />
-    <ClCompile Include="..\..\..\servers\visual\shader_graph.cpp">
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)\servers</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\servers\visual\shader_language.cpp" />
     <ClCompile Include="..\..\..\servers\visual\visual_server_raster.cpp" />
     <ClCompile Include="..\..\..\servers\visual\visual_server_wrap_mt.cpp" />
@@ -1338,7 +1286,6 @@
     <ClCompile Include="..\..\..\tools\editor\code_editor.cpp" />
     <ClCompile Include="..\..\..\tools\editor\connections_dialog.cpp" />
     <ClCompile Include="..\..\..\tools\editor\create_dialog.cpp" />
-    <ClCompile Include="..\..\..\tools\editor\default_saver.cpp" />
     <ClCompile Include="..\..\..\tools\editor\dependency_editor.cpp" />
     <ClCompile Include="..\..\..\tools\editor\editor_data.cpp" />
     <ClCompile Include="..\..\..\tools\editor\editor_dir_dialog.cpp" />
@@ -1358,10 +1305,8 @@
     <ClCompile Include="..\..\..\tools\editor\editor_run.cpp" />
     <ClCompile Include="..\..\..\tools\editor\editor_run_native.cpp" />
     <ClCompile Include="..\..\..\tools\editor\editor_run_script.cpp" />
-    <ClCompile Include="..\..\..\tools\editor\editor_selection.cpp" />
     <ClCompile Include="..\..\..\tools\editor\editor_settings.cpp" />
     <ClCompile Include="..\..\..\tools\editor\editor_sub_scene.cpp" />
-    <ClCompile Include="..\..\..\tools\editor\editor_vu.cpp" />
     <ClCompile Include="..\..\..\tools\editor\fileserver\editor_file_server.cpp" />
     <ClCompile Include="..\..\..\tools\editor\file_type_cache.cpp" />
     <ClCompile Include="..\..\..\tools\editor\groups_editor.cpp" />
@@ -1378,10 +1323,8 @@
     <ClCompile Include="..\..\..\tools\editor\io_plugins\editor_texture_import_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\io_plugins\editor_translation_import_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\multi_node_edit.cpp" />
-    <ClCompile Include="..\..\..\tools\editor\optimized_save_dialog.cpp" />
     <ClCompile Include="..\..\..\tools\editor\output_strings.cpp" />
     <ClCompile Include="..\..\..\tools\editor\pane_drag.cpp" />
-    <ClCompile Include="..\..\..\tools\editor\plugins\animation_data_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\animation_player_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\animation_tree_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\baked_light_baker.cpp" />
@@ -1393,7 +1336,6 @@
     <ClCompile Include="..\..\..\tools\editor\plugins\collision_polygon_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\collision_shape_2d_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\color_ramp_editor_plugin.cpp" />
-    <ClCompile Include="..\..\..\tools\editor\plugins\control_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\cube_grid_theme_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\editor_preview_plugins.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\item_list_editor_plugin.cpp" />
@@ -1416,7 +1358,6 @@
     <ClCompile Include="..\..\..\tools\editor\plugins\shader_graph_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\spatial_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\sprite_frames_editor_plugin.cpp" />
-    <ClCompile Include="..\..\..\tools\editor\plugins\sprite_region_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\stream_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\style_box_editor_plugin.cpp" />
     <ClCompile Include="..\..\..\tools\editor\plugins\theme_editor_plugin.cpp" />
@@ -1433,7 +1374,6 @@
     <ClCompile Include="..\..\..\tools\editor\reparent_dialog.cpp" />
     <ClCompile Include="..\..\..\tools\editor\resources_dock.cpp" />
     <ClCompile Include="..\..\..\tools\editor\run_settings_dialog.cpp" />
-    <ClCompile Include="..\..\..\tools\editor\scenes.cpp" />
     <ClCompile Include="..\..\..\tools\editor\scenes_dock.cpp" />
     <ClCompile Include="..\..\..\tools\editor\scene_tree_dock.cpp" />
     <ClCompile Include="..\..\..\tools\editor\scene_tree_editor.cpp" />
@@ -1444,6 +1384,8 @@
     <ClCompile Include="..\..\..\tools\pck\pck_packer.cpp" />
     <ClCompile Include="..\..\editor\editor_initialize_ssl.cpp" />
     <ClCompile Include="..\..\editor\editor_plugin_settings.cpp" />
+    <ClCompile Include="..\..\editor\plugins\texture_editor_plugin.cpp" />
+    <ClCompile Include="..\..\editor\plugins\texture_region_editor_plugin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\platform\windows\godot_res.rc">

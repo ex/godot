@@ -232,6 +232,21 @@
     <Filter Include="drivers\pnm">
       <UniqueIdentifier>{0aadddcd-4bcc-4734-9ba1-b0c771703f19}</UniqueIdentifier>
     </Filter>
+    <Filter Include="drivers\freetype">
+      <UniqueIdentifier>{6e20931c-0366-436f-8412-f86b22e714dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drivers\gl_context\GL">
+      <UniqueIdentifier>{5a9d981a-d532-4b0b-a637-b1120e69ccf4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drivers\freetype\freetype">
+      <UniqueIdentifier>{9c929bb2-481c-4aba-9671-037075efa1ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drivers\freetype\freetype\src">
+      <UniqueIdentifier>{8670b0ea-de05-448c-9c62-3a90db603ffe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drivers\freetype\freetype\include">
+      <UniqueIdentifier>{16deb691-c5e2-40a1-a9f7-6dd034b97ae6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\main\performance.h">
@@ -247,9 +262,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\core\array.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\core\balloon_allocator.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\core\color.h">
@@ -277,9 +289,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\core\event_queue.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\core\fpstr.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\core\func_ref.h">
@@ -318,9 +327,6 @@
     <ClInclude Include="..\..\..\core\method_bind.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\core\multi_bucket_array.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\core\object.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -352,9 +358,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\core\register_core_types.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\core\res_ptr.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\core\resource.h">
@@ -409,9 +412,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\core\variant.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\core\variant_call_bind.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\core\vector.h">
@@ -537,9 +537,6 @@
     <ClInclude Include="..\..\..\core\math\aabb.h">
       <Filter>core\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\core\math\bezier_curve.h">
-      <Filter>core\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\core\math\bsp_tree.h">
       <Filter>core\math</Filter>
     </ClInclude>
@@ -657,9 +654,6 @@
     <ClInclude Include="..\..\..\modules\gdscript\gd_parser.h">
       <Filter>modules\gdscript</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\modules\gdscript\gd_pretty_print.h">
-      <Filter>modules\gdscript</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\modules\gdscript\gd_script.h">
       <Filter>modules\gdscript</Filter>
     </ClInclude>
@@ -736,9 +730,6 @@
       <Filter>scene\2d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\2d\node_2d.h">
-      <Filter>scene\2d</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\scene\2d\node_2d_singleton.h">
       <Filter>scene\2d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\2d\parallax_background.h">
@@ -840,13 +831,7 @@
     <ClInclude Include="..\..\..\scene\3d\navigation.h">
       <Filter>scene\3d</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\scene\3d\navigation_agent.h">
-      <Filter>scene\3d</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\scene\3d\navigation_mesh.h">
-      <Filter>scene\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\scene\3d\optimized_spatial_scene.h">
       <Filter>scene\3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\3d\particles.h">
@@ -918,9 +903,6 @@
     <ClInclude Include="..\..\..\scene\animation\animation_tree_player.h">
       <Filter>scene\animation</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\scene\animation\transitioner.h">
-      <Filter>scene\animation</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\scene\animation\tween.h">
       <Filter>scene\animation</Filter>
     </ClInclude>
@@ -964,9 +946,6 @@
       <Filter>scene\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\gui\control.h">
-      <Filter>scene\gui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\scene\gui\custom_button.h">
       <Filter>scene\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\gui\dialogs.h">
@@ -1068,9 +1047,6 @@
     <ClInclude Include="..\..\..\scene\io\resource_format_image.h">
       <Filter>scene\io</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\scene\main\scene_singleton.h">
-      <Filter>scene\main</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\scene\main\timer.h">
       <Filter>scene\main</Filter>
     </ClInclude>
@@ -1078,9 +1054,6 @@
       <Filter>scene\main</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\main\canvas_layer.h">
-      <Filter>scene\main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\scene\main\misc.h">
       <Filter>scene\main</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\main\node.h">
@@ -1152,9 +1125,6 @@
     <ClInclude Include="..\..\..\scene\resources\gibberish_stream.h">
       <Filter>scene\resources</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\scene\resources\height_map_shape.h">
-      <Filter>scene\resources</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\scene\resources\material.h">
       <Filter>scene\resources</Filter>
     </ClInclude>
@@ -1186,9 +1156,6 @@
       <Filter>scene\resources</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\resources\rectangle_shape_2d.h">
-      <Filter>scene\resources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\scene\resources\rich_text.h">
       <Filter>scene\resources</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\scene\resources\room.h">
@@ -1245,9 +1212,6 @@
     <ClInclude Include="..\..\..\scene\resources\video_stream.h">
       <Filter>scene\resources</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\scene\resources\volume.h">
-      <Filter>scene\resources</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\scene\resources\world.h">
       <Filter>scene\resources</Filter>
     </ClInclude>
@@ -1285,9 +1249,6 @@
       <Filter>servers\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\servers\audio\audio_server_sw.h">
-      <Filter>servers\audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\servers\audio\reverb_buffers_sw.h">
       <Filter>servers\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\servers\audio\reverb_sw.h">
@@ -1413,12 +1374,6 @@
     <ClInclude Include="..\..\..\servers\visual\rasterizer_dummy.h">
       <Filter>servers\visual</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\servers\visual\shader_compiler.h">
-      <Filter>servers\visual</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\servers\visual\shader_graph.h">
-      <Filter>servers\visual</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\servers\visual\shader_language.h">
       <Filter>servers\visual</Filter>
     </ClInclude>
@@ -1488,9 +1443,6 @@
     <ClInclude Include="..\..\..\tools\editor\create_dialog.h">
       <Filter>tools\editor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\tools\editor\default_saver.h">
-      <Filter>tools\editor</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\doc_code_font.h">
       <Filter>tools\editor</Filter>
     </ClInclude>
@@ -1548,16 +1500,10 @@
     <ClInclude Include="..\..\..\tools\editor\editor_run_script.h">
       <Filter>tools\editor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\tools\editor\editor_selection.h">
-      <Filter>tools\editor</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\editor_settings.h">
       <Filter>tools\editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\editor_sub_scene.h">
-      <Filter>tools\editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\tools\editor\editor_vu.h">
       <Filter>tools\editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\file_type_cache.h">
@@ -1567,9 +1513,6 @@
       <Filter>tools\editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\import_settings.h">
-      <Filter>tools\editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\tools\editor\optimized_save_dialog.h">
       <Filter>tools\editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\output_strings.h">
@@ -1615,9 +1558,6 @@
       <Filter>tools\editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\scene_tree_editor.h">
-      <Filter>tools\editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\tools\editor\scenes.h">
       <Filter>tools\editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\scenes_dock.h">
@@ -1683,9 +1623,6 @@
     <ClInclude Include="..\..\..\tools\editor\plugins\tile_set_editor_plugin.h">
       <Filter>tools\editor\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\tools\editor\plugins\animation_data_editor_plugin.h">
-      <Filter>tools\editor\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\plugins\animation_player_editor_plugin.h">
       <Filter>tools\editor\plugins</Filter>
     </ClInclude>
@@ -1708,9 +1645,6 @@
       <Filter>tools\editor\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\plugins\collision_polygon_editor_plugin.h">
-      <Filter>tools\editor\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\tools\editor\plugins\control_editor_plugin.h">
       <Filter>tools\editor\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\plugins\cube_grid_theme_editor_plugin.h">
@@ -1965,16 +1899,7 @@
     <ClInclude Include="..\..\..\drivers\etc1\image_etc.h">
       <Filter>drivers\etc1</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\drivers\gl_context\glxew.h">
-      <Filter>drivers\gl_context</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\drivers\gl_context\wglew.h">
-      <Filter>drivers\gl_context</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\drivers\gl_context\context_gl.h">
-      <Filter>drivers\gl_context</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\drivers\gl_context\glew.h">
       <Filter>drivers\gl_context</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\drivers\gles2\rasterizer_instance_gles2.h">
@@ -2196,9 +2121,6 @@
     <ClInclude Include="..\..\..\main\input_default.h">
       <Filter>main</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\tools\editor\plugins\sprite_region_editor_plugin.h">
-      <Filter>tools\editor\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\tools\editor\plugins\color_ramp_editor_plugin.h">
       <Filter>tools\editor\plugins</Filter>
     </ClInclude>
@@ -2283,6 +2205,30 @@
     <ClInclude Include="..\..\..\scene\gui\link_button.h">
       <Filter>scene\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\drivers\freetype\ft2build.h">
+      <Filter>drivers\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\drivers\gl_context\GL\glxew.h">
+      <Filter>drivers\gl_context\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\drivers\gl_context\GL\wglew.h">
+      <Filter>drivers\gl_context\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\drivers\gl_context\GL\glew.h">
+      <Filter>drivers\gl_context\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\scene\resources\dynamic_font.h">
+      <Filter>scene\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\scene\resources\dynamic_font_stb.h">
+      <Filter>scene\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\editor\plugins\texture_editor_plugin.h">
+      <Filter>tools\editor\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\editor\plugins\texture_region_editor_plugin.h">
+      <Filter>tools\editor\plugins</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\main\main.cpp">
@@ -2298,9 +2244,6 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\core\packed_data_container.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\core\pair.cpp">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\core\path_db.cpp">
@@ -2324,9 +2267,6 @@
     <ClCompile Include="..\..\..\core\register_core_types.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\core\res_ptr.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\core\resource.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -2334,9 +2274,6 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\core\safe_refcount.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\core\script_debugger_debugger.cpp">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\core\script_debugger_local.cpp">
@@ -2369,12 +2306,6 @@
     <ClCompile Include="..\..\..\core\variant_op.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\core\vmap.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\core\vset.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\core\array.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -2400,9 +2331,6 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\core\event_queue.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\core\fpstr.cpp">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\core\func_ref.cpp">
@@ -2531,9 +2459,6 @@
     <ClCompile Include="..\..\..\core\io\file_access_pack.cpp">
       <Filter>core\io</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\core\math\math_defs.cpp">
-      <Filter>core\math</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\core\math\math_funcs.cpp">
       <Filter>core\math</Filter>
     </ClCompile>
@@ -2562,9 +2487,6 @@
       <Filter>core\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\core\math\aabb.cpp">
-      <Filter>core\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\core\math\bezier_curve.cpp">
       <Filter>core\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\core\math\bsp_tree.cpp">
@@ -2655,9 +2577,6 @@
       <Filter>modules\gdscript</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\modules\gdscript\gd_parser.cpp">
-      <Filter>modules\gdscript</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\modules\gdscript\gd_pretty_print.cpp">
       <Filter>modules\gdscript</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\modules\gdscript\gd_script.cpp">
@@ -2756,9 +2675,6 @@
     <ClCompile Include="..\..\..\scene\2d\node_2d.cpp">
       <Filter>scene\2d</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\scene\2d\node_2d_singleton.cpp">
-      <Filter>scene\2d</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\scene\2d\parallax_background.cpp">
       <Filter>scene\2d</Filter>
     </ClCompile>
@@ -2822,13 +2738,7 @@
     <ClCompile Include="..\..\..\scene\3d\navigation.cpp">
       <Filter>scene\3d</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\scene\3d\navigation_agent.cpp">
-      <Filter>scene\3d</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\scene\3d\navigation_mesh.cpp">
-      <Filter>scene\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\scene\3d\optimized_spatial_scene.cpp">
       <Filter>scene\3d</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\3d\particles.cpp">
@@ -2910,9 +2820,6 @@
       <Filter>scene\animation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\animation\animation_tree_player.cpp">
-      <Filter>scene\animation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\scene\animation\transitioner.cpp">
       <Filter>scene\animation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\audio\sound_room_params.cpp">
@@ -3017,9 +2924,6 @@
     <ClCompile Include="..\..\..\scene\gui\control.cpp">
       <Filter>scene\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\scene\gui\custom_button.cpp">
-      <Filter>scene\gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\scene\gui\dialogs.cpp">
       <Filter>scene\gui</Filter>
     </ClCompile>
@@ -3062,9 +2966,6 @@
     <ClCompile Include="..\..\..\scene\main\canvas_layer.cpp">
       <Filter>scene\main</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\scene\main\misc.cpp">
-      <Filter>scene\main</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\scene\main\node.cpp">
       <Filter>scene\main</Filter>
     </ClCompile>
@@ -3072,9 +2973,6 @@
       <Filter>scene\main</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\main\scene_main_loop.cpp">
-      <Filter>scene\main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\scene\main\scene_singleton.cpp">
       <Filter>scene\main</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\main\timer.cpp">
@@ -3099,9 +2997,6 @@
       <Filter>scene\resources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\resources\gibberish_stream.cpp">
-      <Filter>scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\scene\resources\height_map_shape.cpp">
       <Filter>scene\resources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\resources\material.cpp">
@@ -3132,9 +3027,6 @@
       <Filter>scene\resources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\resources\rectangle_shape_2d.cpp">
-      <Filter>scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\scene\resources\rich_text.cpp">
       <Filter>scene\resources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\resources\room.cpp">
@@ -3189,9 +3081,6 @@
       <Filter>scene\resources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\resources\video_stream.cpp">
-      <Filter>scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\scene\resources\volume.cpp">
       <Filter>scene\resources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\scene\resources\world.cpp">
@@ -3272,9 +3161,6 @@
     <ClCompile Include="..\..\..\servers\audio\sample_manager_sw.cpp">
       <Filter>servers\audio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\servers\audio\voice_rb_sw.cpp">
-      <Filter>servers\audio</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\servers\audio\audio_driver_dummy.cpp">
       <Filter>servers\audio</Filter>
     </ClCompile>
@@ -3286,12 +3172,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\servers\audio\audio_server_sw.cpp">
       <Filter>servers\audio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\servers\audio\reverb_buffers_sw.cpp">
-      <Filter>servers\audio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\servers\physics\joints_sw.cpp">
-      <Filter>servers\physics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\servers\physics\physics_server_sw.cpp">
       <Filter>servers\physics</Filter>
@@ -3335,9 +3215,6 @@
     <ClCompile Include="..\..\..\servers\physics\collision_solver_sw.cpp">
       <Filter>servers\physics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\servers\physics\constraint_sw.cpp">
-      <Filter>servers\physics</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\servers\physics\gjk_epa.cpp">
       <Filter>servers\physics</Filter>
     </ClCompile>
@@ -3377,9 +3254,6 @@
     <ClCompile Include="..\..\..\servers\physics_2d\collision_solver_2d_sw.cpp">
       <Filter>servers\physics_2d</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\servers\physics_2d\constraint_2d_sw.cpp">
-      <Filter>servers\physics_2d</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\servers\physics_2d\joints_2d_sw.cpp">
       <Filter>servers\physics_2d</Filter>
     </ClCompile>
@@ -3413,16 +3287,7 @@
     <ClCompile Include="..\..\..\servers\visual\rasterizer_dummy.cpp">
       <Filter>servers\visual</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\servers\visual\shader_compiler.cpp">
-      <Filter>servers\visual</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\servers\visual\shader_graph.cpp">
-      <Filter>servers\visual</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\servers\physics\joints\hinge_joint_sw.cpp">
-      <Filter>servers\physics\joints</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\servers\physics\joints\jacobian_entry_sw.cpp">
       <Filter>servers\physics\joints</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\servers\physics\joints\pin_joint_sw.cpp">
@@ -3479,16 +3344,10 @@
     <ClCompile Include="..\..\..\tools\editor\editor_run_script.cpp">
       <Filter>tools\editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\tools\editor\editor_selection.cpp">
-      <Filter>tools\editor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\editor_settings.cpp">
       <Filter>tools\editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\editor_sub_scene.cpp">
-      <Filter>tools\editor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\tools\editor\editor_vu.cpp">
       <Filter>tools\editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\file_type_cache.cpp">
@@ -3498,9 +3357,6 @@
       <Filter>tools\editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\import_settings.cpp">
-      <Filter>tools\editor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\tools\editor\optimized_save_dialog.cpp">
       <Filter>tools\editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\output_strings.cpp">
@@ -3548,9 +3404,6 @@
     <ClCompile Include="..\..\..\tools\editor\scene_tree_editor.cpp">
       <Filter>tools\editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\tools\editor\scenes.cpp">
-      <Filter>tools\editor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\scenes_dock.cpp">
       <Filter>tools\editor</Filter>
     </ClCompile>
@@ -3579,9 +3432,6 @@
       <Filter>tools\editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\create_dialog.cpp">
-      <Filter>tools\editor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\tools\editor\default_saver.cpp">
       <Filter>tools\editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\editor_data.cpp">
@@ -3644,9 +3494,6 @@
     <ClCompile Include="..\..\..\tools\editor\io_plugins\editor_translation_import_plugin.cpp">
       <Filter>tools\editor\io_plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\tools\editor\plugins\animation_data_editor_plugin.cpp">
-      <Filter>tools\editor\plugins</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\plugins\animation_player_editor_plugin.cpp">
       <Filter>tools\editor\plugins</Filter>
     </ClCompile>
@@ -3672,9 +3519,6 @@
       <Filter>tools\editor\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\plugins\collision_polygon_editor_plugin.cpp">
-      <Filter>tools\editor\plugins</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\tools\editor\plugins\control_editor_plugin.cpp">
       <Filter>tools\editor\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\plugins\cube_grid_theme_editor_plugin.cpp">
@@ -3842,9 +3686,6 @@
     <ClCompile Include="..\..\..\drivers\chibi\cp_envelope.cpp">
       <Filter>drivers\chibi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\drivers\chibi\cp_file_access_wrapper.cpp">
-      <Filter>drivers\chibi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\drivers\chibi\cp_instrument.cpp">
       <Filter>drivers\chibi</Filter>
     </ClCompile>
@@ -3897,9 +3738,6 @@
       <Filter>drivers\chibi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\drivers\chibi\cp_player_data_notes.cpp">
-      <Filter>drivers\chibi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\drivers\chibi\cp_player_data_reserved.cpp">
       <Filter>drivers\chibi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\drivers\chibi\cp_player_data_utils.cpp">
@@ -4199,9 +4037,6 @@
     <ClCompile Include="..\..\..\main\input_default.cpp">
       <Filter>main</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\tools\editor\plugins\sprite_region_editor_plugin.cpp">
-      <Filter>tools\editor\plugins</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\tools\editor\plugins\color_ramp_editor_plugin.cpp">
       <Filter>tools\editor\plugins</Filter>
     </ClCompile>
@@ -4279,6 +4114,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\scene\gui\link_button.cpp">
       <Filter>scene\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\scene\resources\dynamic_font_stb.cpp">
+      <Filter>scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\scene\resources\dynamic_font.cpp">
+      <Filter>scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\editor\plugins\texture_region_editor_plugin.cpp">
+      <Filter>tools\editor\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\editor\plugins\texture_editor_plugin.cpp">
+      <Filter>tools\editor\plugins</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
