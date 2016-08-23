@@ -41,6 +41,11 @@
 #include "tools/editor/plugins/animation_player_editor_plugin.h"
 #include "scene/resources/packed_scene.h"
 
+
+#define MIN_ZOOM 0.01
+#define MAX_ZOOM 100
+
+
 class SnapDialog : public ConfirmationDialog {
 
 	OBJ_TYPE(SnapDialog,ConfirmationDialog);
@@ -199,16 +204,12 @@ void CanvasItemEditor::_unhandled_key_input(const InputEvent& p_ev) {
 
 	if (!is_visible() || get_viewport()->gui_has_modal_stack())
 		return;
+
 	if (p_ev.key.mod.control)
-		// prevent to change tool mode when control key is pressed
 		return;
-	if (p_ev.key.pressed && !p_ev.key.echo && p_ev.key.scancode==KEY_Q)
-		_tool_select(TOOL_SELECT);
-	if (p_ev.key.pressed && !p_ev.key.echo && p_ev.key.scancode==KEY_W)
-		_tool_select(TOOL_MOVE);
-	if (p_ev.key.pressed && !p_ev.key.echo && p_ev.key.scancode==KEY_E)
-		_tool_select(TOOL_ROTATE);
+
 	if (p_ev.key.pressed && !p_ev.key.echo && p_ev.key.scancode==KEY_V && drag==DRAG_NONE && can_move_pivot) {
+
 		if (p_ev.key.mod.shift) {
 			//move drag pivot
 			drag=DRAG_PIVOT;
@@ -1066,6 +1067,9 @@ void CanvasItemEditor::_viewport_input_event(const InputEvent& p_event) {
 
 		if (b.button_index==BUTTON_WHEEL_DOWN) {
 
+			if (zoom<MIN_ZOOM)
+				return;
+
 			float prev_zoom=zoom;
 			zoom=zoom*0.95;
 			{
@@ -1080,6 +1084,9 @@ void CanvasItemEditor::_viewport_input_event(const InputEvent& p_event) {
 		}
 
 		if (b.button_index==BUTTON_WHEEL_UP) {
+
+			if (zoom>MAX_ZOOM)
+				return;
 
 			float prev_zoom=zoom;
 			zoom=zoom*(1.0/0.95);
@@ -1940,8 +1947,6 @@ void CanvasItemEditor::_viewport_draw() {
 
 	Map<Node*,Object*> &selection = editor_selection->get_selection();
 
-	CanvasItem *single_item=NULL;
-
 	bool pivot_found=false;
 
 	for(Map<Node*,Object*>::Element *E=selection.front();E;E=E->next()) {
@@ -1961,15 +1966,6 @@ void CanvasItemEditor::_viewport_draw() {
 
 		Matrix32 xform=transform * canvas_item->get_global_transform_with_canvas();
 		VisualServer::get_singleton()->canvas_item_add_set_transform(ci,xform);
-		Point2 ofs=Point2();//get_global_pos();
-		Rect2 draw_rect=rect;
-		Color light_edit_color=Color(1.0,0.8,0.8);
-		Color dark_edit_color=Color(0.4,0.1,0.1);
-		Size2 handle_size=Size2(handle_len,handle_len);
-
-		//select_sb->draw(ci,draw_rect.grow(2));
-		//DRAW_EMPTY_RECT( draw_rect.grow(2), light_edit_color );
-		//DRAW_EMPTY_RECT( draw_rect.grow(1), dark_edit_color );
 
 		Vector2 endpoints[4]={
 
@@ -2541,12 +2537,17 @@ void CanvasItemEditor::_popup_callback(int p_op) {
 			snap_dialog->popup_centered(Size2(220,160));
 		} break;
 		case ZOOM_IN: {
+			if (zoom>MAX_ZOOM)
+				return;
 			zoom=zoom*(1.0/0.5);
 			_update_scroll(0);
 			viewport->update();
 			return;
 		} break;
 		case ZOOM_OUT: {
+			if (zoom<MIN_ZOOM)
+				return;
+
 			zoom=zoom*0.5;
 			_update_scroll(0);
 			viewport->update();
@@ -3307,20 +3308,23 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	hb->add_child(select_button);
 	select_button->connect("pressed",this,"_tool_select",make_binds(TOOL_SELECT));
 	select_button->set_pressed(true);
-	select_button->set_tooltip(TTR("Select Mode (Q)")+"\n"+keycode_get_string(KEY_MASK_CMD)+TTR("Drag: Rotate")+"\n"+TTR("Alt+Drag: Move")+"\n"+TTR("Press 'v' to Change Pivot, 'Shift+v' to Drag Pivot (while moving).")+"\n"+TTR("Alt+RMB: Depth list selection"));
+	select_button->set_shortcut(ED_SHORTCUT("canvas_item_editor/select_mode",TTR("Select Mode"),KEY_Q));
+	select_button->set_tooltip(TTR("Select Mode")+" $sc\n"+keycode_get_string(KEY_MASK_CMD)+TTR("Drag: Rotate")+"\n"+TTR("Alt+Drag: Move")+"\n"+TTR("Press 'v' to Change Pivot, 'Shift+v' to Drag Pivot (while moving).")+"\n"+TTR("Alt+RMB: Depth list selection"));
 
 
 	move_button = memnew( ToolButton );
 	move_button->set_toggle_mode(true);
 	hb->add_child(move_button);
 	move_button->connect("pressed",this,"_tool_select",make_binds(TOOL_MOVE));
-	move_button->set_tooltip(TTR("Move Mode (W)"));
+	move_button->set_shortcut(ED_SHORTCUT("canvas_item_editor/move_mode",TTR("Move Mode"),KEY_W));
+	move_button->set_tooltip(TTR("Move Mode"));
 
 	rotate_button = memnew( ToolButton );
 	rotate_button->set_toggle_mode(true);
 	hb->add_child(rotate_button);
 	rotate_button->connect("pressed",this,"_tool_select",make_binds(TOOL_ROTATE));
-	rotate_button->set_tooltip(TTR("Rotate Mode (E)"));
+	rotate_button->set_shortcut(ED_SHORTCUT("canvas_item_editor/rotate_mode",TTR("Rotate Mode"),KEY_E));
+	rotate_button->set_tooltip(TTR("Rotate Mode"));
 
 	hb->add_child(memnew(VSeparator));
 
@@ -3374,25 +3378,25 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 
 	PopupMenu *p;
 	p = edit_menu->get_popup();
-	p->add_check_item(TTR("Use Snap"),SNAP_USE);
-	p->add_check_item(TTR("Show Grid"),SNAP_SHOW_GRID);
-	p->add_check_item(TTR("Use Rotation Snap"),SNAP_USE_ROTATION);
-	p->add_check_item(TTR("Snap Relative"),SNAP_RELATIVE);
-	p->add_item(TTR("Configure Snap.."),SNAP_CONFIGURE);
+	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/use_snap", TTR("Use Snap")), SNAP_USE);
+	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/show_grid", TTR("Show Grid")), SNAP_SHOW_GRID);
+	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/use_rotation_snap", TTR("Use Rotation Snap")), SNAP_USE_ROTATION);
+	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/snap_relative", TTR("Snap Relative")), SNAP_RELATIVE);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/configure_snap", TTR("Configure Snap..")), SNAP_CONFIGURE);
 	p->add_separator();
-	p->add_check_item(TTR("Use Pixel Snap"),SNAP_USE_PIXEL);
+	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/use_pixel_snap", TTR("Use Pixel Snap")), SNAP_USE_PIXEL);
 	p->add_separator();
-	p->add_item(TTR("Expand to Parent"),EXPAND_TO_PARENT,KEY_MASK_CMD|KEY_P);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/expand_to_parent", TTR("Expand to Parent"), KEY_MASK_CMD | KEY_P), EXPAND_TO_PARENT);
 	p->add_separator();
 	p->add_submenu_item(TTR("Skeleton.."),"skeleton");
 	PopupMenu *p2 = memnew(PopupMenu);
 	p->add_child(p2);
 	p2->set_name("skeleton");
-	p2->add_item(TTR("Make Bones"),SKELETON_MAKE_BONES,KEY_MASK_CMD|KEY_MASK_SHIFT|KEY_B);
-	p2->add_item(TTR("Clear Bones"),SKELETON_CLEAR_BONES);
+	p2->add_shortcut(ED_SHORTCUT("canvas_item_editor/skeleton_make_bones", TTR("Make Bones"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_B ),SKELETON_MAKE_BONES);
+	p2->add_shortcut(ED_SHORTCUT("canvas_item_editor/skeleton_clear_bones", TTR("Clear Bones")), SKELETON_CLEAR_BONES);
 	p2->add_separator();
-	p2->add_item(TTR("Make IK Chain"),SKELETON_SET_IK_CHAIN);
-	p2->add_item(TTR("Clear IK Chain"),SKELETON_CLEAR_IK_CHAIN);
+	p2->add_shortcut(ED_SHORTCUT("canvas_item_editor/skeleton_set_ik_chain", TTR("Make IK Chain")), SKELETON_SET_IK_CHAIN);
+	p2->add_shortcut(ED_SHORTCUT("canvas_item_editor/skeleton_clear_ik_chain", TTR("Clear IK Chain")), SKELETON_CLEAR_IK_CHAIN);
 	p2->connect("item_pressed", this,"_popup_callback");
 
 
@@ -3409,13 +3413,13 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 
 	p = view_menu->get_popup();
 
-	p->add_item(TTR("Zoom In"),ZOOM_IN);
-	p->add_item(TTR("Zoom Out"),ZOOM_OUT);
-	p->add_item(TTR("Zoom Reset"),ZOOM_RESET);
-	p->add_item(TTR("Zoom Set.."),ZOOM_SET);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_in", TTR("Zoom In")), ZOOM_IN);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_out", TTR("Zoom Out")), ZOOM_OUT);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_reset", TTR("Zoom Reset")), ZOOM_RESET);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/zoom_set", TTR("Zoom Set..")), ZOOM_SET);
 	p->add_separator();
-	p->add_item(TTR("Center Selection"), VIEW_CENTER_TO_SELECTION, KEY_F);
-	p->add_item(TTR("Frame Selection"), VIEW_FRAME_TO_SELECTION, KEY_MASK_CMD|KEY_F);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/center_selection", TTR("Center Selection"), KEY_F), VIEW_CENTER_TO_SELECTION);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/frame_selection", TTR("Frame Selection"), KEY_MASK_SHIFT | KEY_F), VIEW_FRAME_TO_SELECTION);
 
 	anchor_menu = memnew( MenuButton );
 	anchor_menu->set_text(TTR("Anchor"));
@@ -3458,7 +3462,8 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	key_insert_button = memnew( Button );
 	key_insert_button->set_focus_mode(FOCUS_NONE);
 	key_insert_button->connect("pressed",this,"_popup_callback",varray(ANIM_INSERT_KEY));
-	key_insert_button->set_tooltip(TTR("Insert Keys (Ins)"));
+	key_insert_button->set_tooltip(TTR("Insert Keys"));
+	key_insert_button->set_shortcut(ED_SHORTCUT("canvas_item_editor/anim_insert_key", TTR("Insert Key"), KEY_INSERT));
 
 	animation_hb->add_child(key_insert_button);
 
@@ -3469,12 +3474,12 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 
 	p = animation_menu->get_popup();
 
-	p->add_item(TTR("Insert Key"),ANIM_INSERT_KEY,KEY_INSERT);
-	p->add_item(TTR("Insert Key (Existing Tracks)"),ANIM_INSERT_KEY_EXISTING,KEY_MASK_CMD+KEY_INSERT);
+	p->add_shortcut(ED_GET_SHORTCUT("canvas_item_editor/anim_insert_key"), ANIM_INSERT_KEY);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/anim_insert_key_existing_tracks", TTR("Insert Key (Existing Tracks)"), KEY_MASK_CMD+KEY_INSERT), ANIM_INSERT_KEY_EXISTING);
 	p->add_separator();
-	p->add_item(TTR("Copy Pose"),ANIM_COPY_POSE);
-	p->add_item(TTR("Paste Pose"),ANIM_PASTE_POSE);
-	p->add_item(TTR("Clear Pose"),ANIM_CLEAR_POSE,KEY_MASK_SHIFT|KEY_K);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/anim_copy_pose", TTR("Copy Pose")), ANIM_COPY_POSE);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/anim_paste_pose", TTR("Paste Pose")), ANIM_PASTE_POSE);
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/anim_clear_pose", TTR("Clear Pose"), KEY_MASK_SHIFT | KEY_K), ANIM_CLEAR_POSE);
 
 	snap_dialog = memnew( SnapDialog );
 	snap_dialog->connect("confirmed",this,"_snap_changed");

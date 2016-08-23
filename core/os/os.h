@@ -174,6 +174,7 @@ public:
 	virtual bool is_window_minimized() const { return false; }
 	virtual void set_window_maximized(bool p_enabled) {}
 	virtual bool is_window_maximized() const { return true; }
+	virtual void request_attention() { }
 
 	virtual void set_borderless_window(int p_borderless) {}
 	virtual bool get_borderless_window() { return 0; }
@@ -186,14 +187,14 @@ public:
 	virtual void set_target_fps(int p_fps);
 	virtual float get_target_fps() const;
 
-	virtual float get_frames_per_second() const { return _fps; };
+	virtual float get_frames_per_second() const { return _fps; }
 
 	virtual void set_keep_screen_on(bool p_enabled);
 	virtual bool is_keep_screen_on() const;
 	virtual void set_low_processor_usage_mode(bool p_enabled);
 	virtual bool is_in_low_processor_usage_mode() const;
 
-	virtual String get_installed_templates_path() const { return ""; };
+	virtual String get_installed_templates_path() const { return ""; }
 	virtual String get_executable_path() const;
 	virtual Error execute(const String& p_path, const List<String>& p_arguments,bool p_blocking,ProcessID *r_child_id=NULL,String* r_pipe=NULL,int *r_exitcode=NULL)=0;
 	virtual Error kill(const ProcessID& p_pid)=0;
@@ -363,7 +364,7 @@ public:
 	virtual void set_screen_orientation(ScreenOrientation p_orientation);
 	ScreenOrientation get_screen_orientation() const;
 
-	virtual void move_window_to_foreground() {};
+	virtual void move_window_to_foreground() {}
 
 	virtual void debug_break();
 
@@ -422,6 +423,8 @@ public:
 
 	virtual void set_use_vsync(bool p_enable);
 	virtual bool is_vsnc_enabled() const;
+
+	Dictionary get_engine_version() const;
 
 	bool is_hidpi_allowed() const { return _allow_hidpi; }
 	OS();

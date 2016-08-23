@@ -77,7 +77,9 @@ class TextEdit : public Control  {
 		Color completion_background_color;
 		Color completion_selected_color;
 		Color completion_existing_color;
+		Color completion_font_color;
 		Color caret_color;
+		Color caret_background_color;
 		Color line_number_color;
 		Color font_color;
 		Color font_selected_color;
@@ -221,6 +223,7 @@ class TextEdit : public Control  {
 	bool caret_blink_enabled;
 	bool draw_caret;
 	bool window_has_focus;
+	bool block_caret;
 
 	bool setting_row;
 	bool wrap;
@@ -393,6 +396,8 @@ public:
 	}
 	void set_auto_indent(bool p_auto_indent);
 
+	void center_viewport_to_cursor();
+
 	void cursor_set_column(int p_col, bool p_adjust_viewport=true);
 	void cursor_set_line(int p_row, bool p_adjust_viewport=true);
 
@@ -404,6 +409,9 @@ public:
 
 	float cursor_get_blink_speed() const;
 	void cursor_set_blink_speed(const float p_speed);
+
+	void cursor_set_block_mode(const bool p_enable);
+	bool cursor_is_block_mode() const;
 
 	void set_readonly(bool p_readonly);
 
@@ -427,9 +435,10 @@ public:
 	void set_current_search_result(int line, int col);
 
 	void set_highlight_all_occurrences(const bool p_enabled);
+	bool is_highlight_all_occurrences_enabled() const;
 	bool is_selection_active() const;
 	int get_selection_from_line() const;
-    int get_selection_from_column() const;
+	int get_selection_from_column() const;
 	int get_selection_to_line() const;
 	int get_selection_to_column() const;
 	String get_selection_text() const;
@@ -468,6 +477,7 @@ public:
 	void menu_option(int p_option);
 
 	void set_show_line_numbers(bool p_show);
+	bool is_show_line_numbers_enabled() const;
 
 	void set_draw_breakpoint_gutter(bool p_draw);
 	bool is_drawing_breakpoint_gutter() const;
@@ -486,7 +496,7 @@ public:
 
 	String get_text_for_completion();
 
-    virtual bool is_text_field() const;
+	virtual bool is_text_field() const;
 	TextEdit();
 	~TextEdit();
 };

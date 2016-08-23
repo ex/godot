@@ -422,6 +422,32 @@ void Control::_resize(const Size2& p_size) {
 	_size_changed();
 }
 
+//moved theme configuration here, so controls can set up even if still not inside active scene
+
+void Control::add_child_notify(Node *p_child) {
+
+	Control *child_c=p_child->cast_to<Control>();
+	if (!child_c)
+		return;
+
+	if (child_c->data.theme.is_null() && data.theme_owner) {
+		child_c->data.theme_owner=data.theme_owner;
+		child_c->notification(NOTIFICATION_THEME_CHANGED);
+	}
+}
+
+void Control::remove_child_notify(Node *p_child) {
+
+	Control *child_c=p_child->cast_to<Control>();
+	if (!child_c)
+		return;
+
+	if (child_c->data.theme_owner && child_c->data.theme.is_null()) {
+		child_c->data.theme_owner=NULL;
+		//notification(NOTIFICATION_THEME_CHANGED);
+	}
+
+}
 
 
 void Control::_notification(int p_notification) {
@@ -512,10 +538,10 @@ void Control::_notification(int p_notification) {
 			}
 
 
-			if (data.theme.is_null() && data.parent && data.parent->data.theme_owner) {
-				data.theme_owner=data.parent->data.theme_owner;
-				notification(NOTIFICATION_THEME_CHANGED);
-			}
+			//if (data.theme.is_null() && data.parent && data.parent->data.theme_owner) {
+			//	data.theme_owner=data.parent->data.theme_owner;
+			//	notification(NOTIFICATION_THEME_CHANGED);
+			//}
 
 		} break;
 		case NOTIFICATION_EXIT_CANVAS: {
@@ -547,10 +573,10 @@ void Control::_notification(int p_notification) {
 
 			data.parent=NULL;
 			data.parent_canvas_item=NULL;
-			if (data.theme_owner && data.theme.is_null()) {
-				data.theme_owner=NULL;
+			//if (data.theme_owner && data.theme.is_null()) {
+			//	data.theme_owner=NULL;
 				//notification(NOTIFICATION_THEME_CHANGED);
-			}
+			//}
 
 		} break;
 		 case NOTIFICATION_MOVED_IN_PARENT: {
@@ -1865,7 +1891,7 @@ void Control::_modal_stack_remove() {
 
 }
 
-void Control::_propagate_theme_changed(CanvasItem *p_at,Control *p_owner) {
+void Control::_propagate_theme_changed(CanvasItem *p_at,Control *p_owner,bool p_assign) {
 
 	Control *c = p_at->cast_to<Control>();
 
@@ -1884,14 +1910,29 @@ void Control::_propagate_theme_changed(CanvasItem *p_at,Control *p_owner) {
 
 	if (c) {
 
-		c->data.theme_owner=p_owner;
+		if (p_assign) {
+			c->data.theme_owner=p_owner;
+		}
 		c->_notification(NOTIFICATION_THEME_CHANGED);
 		c->update();
 	}
 }
 
+
+void Control::_theme_changed() {
+
+	_propagate_theme_changed(this,this,false);
+}
+
 void Control::set_theme(const Ref<Theme>& p_theme) {
 
+
+	if (data.theme==p_theme)
+		return;
+
+	if (data.theme.is_valid()) {
+		data.theme->disconnect("changed",this,"_theme_changed");
+	}
 
 	data.theme=p_theme;
 	if (!p_theme.is_null()) {
@@ -1909,6 +1950,9 @@ void Control::set_theme(const Ref<Theme>& p_theme) {
 
 	}
 
+	if (data.theme.is_valid()) {
+		data.theme->connect("changed",this,"_theme_changed");
+	}
 
 }
 
@@ -2244,6 +2288,7 @@ void Control::set_rotation(float p_radians) {
 	data.rotation=p_radians;
 	update();
 	_notify_transform();
+	_change_notify("rect/rotation");
 }
 
 float Control::get_rotation() const{
@@ -2447,6 +2492,10 @@ void Control::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("warp_mouse","to_pos"),&Control::warp_mouse);
 
 	ObjectTypeDB::bind_method(_MD("minimum_size_changed"), &Control::minimum_size_changed);
+
+	ObjectTypeDB::bind_method(_MD("_theme_changed"), &Control::_theme_changed);
+
+
 
 	ObjectTypeDB::bind_method(_MD("_font_changed"), &Control::_font_changed);
 

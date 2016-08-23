@@ -62,7 +62,6 @@ def get_opts():
 	('use_leak_sanitizer','Use llvm compiler sanitize memory leaks','no'),
 	('pulseaudio','Detect & Use pulseaudio','yes'),
 	('udev','Use udev for gamepad connection callbacks','no'),
-	('new_wm_api', 'Use experimental window management API','no'),
 	('debug_release', 'Add debug symbols to release version','no'),
 	]
 
@@ -182,7 +181,9 @@ def configure(env):
 			print("PulseAudio development libraries not found, disabling driver")
 
 	env.Append(CPPFLAGS=['-DX11_ENABLED','-DUNIX_ENABLED','-DGLES2_ENABLED','-DGLES_OVER_GL'])
-	env.Append(LIBS=['GL', 'GLU', 'pthread', 'z', 'dl'])
+	env.Append(LIBS=['GL', 'pthread', 'z'])
+	if (platform.system() == "Linux"):
+		env.Append(LIBS='dl')
 	#env.Append(CPPFLAGS=['-DMPC_FIXED_POINT'])
 
 #host compiler is default..
@@ -202,12 +203,10 @@ def configure(env):
 	env.Append( BUILDERS = { 'GLSL120GLES' : env.Builder(action = methods.build_gles2_headers, suffix = 'glsl.h',src_suffix = '.glsl') } )
 	#env.Append( BUILDERS = { 'HLSL9' : env.Builder(action = methods.build_hlsl_dx9_headers, suffix = 'hlsl.h',src_suffix = '.hlsl') } )
 
-	if(env["new_wm_api"]=="yes"):
-		env.Append(CPPFLAGS=['-DNEW_WM_API'])
-		env.ParseConfig('pkg-config xinerama --cflags --libs')
-
 	if (env["use_static_cpp"]=="yes"):
 		env.Append(LINKFLAGS=['-static-libstdc++'])
 
-	env["x86_opt_gcc"]=True
+	list_of_x86 = ['x86_64', 'x86', 'i386', 'i586']
+	if any(platform.machine() in s for s in list_of_x86):
+		env["x86_opt_gcc"]=True
 

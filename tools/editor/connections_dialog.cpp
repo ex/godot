@@ -309,6 +309,7 @@ ConnectDialog::ConnectDialog() {
 
 
 	tree = memnew(SceneTreeEditor(false));
+	tree->get_scene_tree()->connect("item_activated",this,"_ok");
 	vbc_left->add_margin_child(TTR("Connect To Node:"),tree,true);
 
 
@@ -673,7 +674,7 @@ void ConnectionsDock::update_tree() {
 						tname=Variant::get_type_name(pi.type);
 					}
 					signaldesc+=tname+" "+(pi.name==""?String("arg "+itos(i)):pi.name);
-					argnames.push_back(pi.name);
+					argnames.push_back(pi.name+":"+tname);
 
 				}
 				signaldesc+=" ";

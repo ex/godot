@@ -44,7 +44,7 @@ void GDScriptLanguage::get_string_delimiters(List<String> *p_delimiters) const {
 
 
 }
-String GDScriptLanguage::get_template(const String& p_class_name, const String& p_base_class_name) const {
+Ref<Script> GDScriptLanguage::get_template(const String& p_class_name, const String& p_base_class_name) const {
 
 	String _template = String()+
 	"\nextends %BASE%\n\n"+
@@ -58,7 +58,14 @@ String GDScriptLanguage::get_template(const String& p_class_name, const String& 
 	"\n"+
 	"\n";
 
-	return _template.replace("%BASE%",p_base_class_name);
+	_template = _template.replace("%BASE%",p_base_class_name);
+
+	Ref<GDScript> script;
+	script.instance();
+	script->set_source_code(_template);
+
+	return script;
+
 }
 
 
@@ -297,7 +304,7 @@ void GDScriptLanguage::get_public_functions(List<MethodInfo> *p_functions) const
 	}
 	{
 		MethodInfo mi;
-		mi.name="yield";
+		mi.name="yield:GDFunctionState";
 		mi.arguments.push_back(PropertyInfo(Variant::OBJECT,"object"));
 		mi.arguments.push_back(PropertyInfo(Variant::STRING,"signal"));
 		mi.default_arguments.push_back(Variant::NIL);
@@ -328,7 +335,7 @@ String GDScriptLanguage::make_function(const String& p_class,const String& p_nam
 		for(int i=0;i<p_args.size();i++) {
 			if (i>0)
 				s+=", ";
-			s+=p_args[i];
+			s+=p_args[i].get_slice(":",0);
 		}
 		s+=" ";
 	}
@@ -449,57 +456,21 @@ static Ref<Reference> _get_parent_class(GDCompletionContext& context) {
 			}
 
 			String base=context._class->extends_class[0];
-			const GDParser::ClassNode *p = context._class->owner;
-			Ref<GDScript> base_class;
-#if 0
-			while(p) {
 
-				if (p->subclasses.has(base)) {
+			if (context._class->extends_class.size()>1) {
 
-					base_class=p->subclasses[base];
-					break;
-				}
-				p=p->_owner;
+				return REF();
+
 			}
-#endif
-			if (base_class.is_valid()) {
-#if 0
-				for(int i=1;i<context._class->extends_class.size();i++) {
+			//if not found, try engine classes
+			if (!GDScriptLanguage::get_singleton()->get_global_map().has(base)) {
 
-					String subclass=context._class->extends_class[i];
-
-					if (base_class->subclasses.has(subclass)) {
-
-						base_class=base_class->subclasses[subclass];
-					} else {
-
-						//print_line("Could not find subclass: "+subclass);
-						return _get_type_from_class(context); //fail please
-					}
-				}
-
-				script=base_class;
-#endif
-
-			} else {
-
-				if (context._class->extends_class.size()>1) {
-
-					return REF();
-
-
-				}
-				//if not found, try engine classes
-				if (!GDScriptLanguage::get_singleton()->get_global_map().has(base)) {
-
-					return REF();
-				}
-
-				int base_idx = GDScriptLanguage::get_singleton()->get_global_map()[base];
-				native = GDScriptLanguage::get_singleton()->get_global_array()[base_idx];
-				return native;
+				return REF();
 			}
 
+			int base_idx = GDScriptLanguage::get_singleton()->get_global_map()[base];
+			native = GDScriptLanguage::get_singleton()->get_global_array()[base_idx];
+			return native;
 
 		}
 
@@ -1492,7 +1463,7 @@ static void _make_function_hint(const GDParser::FunctionNode* p_func,int p_argid
 }
 
 
-static void _find_type_arguments(const GDParser::Node*p_node,int p_line,const StringName& p_method,const GDCompletionIdentifier& id, int p_argidx, Set<String>& result, String& arghint) {
+static void _find_type_arguments(GDCompletionContext& context,const GDParser::Node*p_node,int p_line,const StringName& p_method,const GDCompletionIdentifier& id, int p_argidx, Set<String>& result, String& arghint) {
 
 
 	//print_line("find type arguments?");
@@ -1729,8 +1700,30 @@ static void _find_type_arguments(const GDParser::Node*p_node,int p_line,const St
 				if (p_argidx==0) {
 					List<MethodInfo> sigs;
 					ObjectTypeDB::get_signal_list(id.obj_type,&sigs);
+
+					if (id.script.is_valid()) {
+						id.script->get_script_signal_list(&sigs);
+					} else if (id.value.get_type()==Variant::OBJECT) {
+						Object *obj = id.value;
+						if (obj && !obj->get_script().is_null()) {
+							Ref<Script> scr=obj->get_script();
+							if (scr.is_valid()) {
+								scr->get_script_signal_list(&sigs);
+							}
+						}
+					}
+
 					for (List<MethodInfo>::Element *E=sigs.front();E;E=E->next()) {
 						result.insert("\""+E->get().name+"\"");
+					}
+
+				} else if (p_argidx==2){
+
+
+					if (context._class) {
+						for(int i=0;i<context._class->functions.size();i++) {
+							result.insert("\""+context._class->functions[i]->name+"\"");
+						}
 					}
 				}
 				/*if (p_argidx==2) {
@@ -1973,7 +1966,7 @@ static void _find_call_arguments(GDCompletionContext& context,const GDParser::No
 						if (!context._class->owner)
 							ci.value=context.base;
 
-						_find_type_arguments(p_node,p_line,id->name,ci,p_argidx,result,arghint);
+						_find_type_arguments(context,p_node,p_line,id->name,ci,p_argidx,result,arghint);
 						//guess type..
 						/*
 						List<MethodInfo> methods;
@@ -1996,7 +1989,7 @@ static void _find_call_arguments(GDCompletionContext& context,const GDParser::No
 			GDCompletionIdentifier ci;
 			if (_guess_expression_type(context,op->arguments[0],p_line,ci)) {
 
-				_find_type_arguments(p_node,p_line,id->name,ci,p_argidx,result,arghint);
+				_find_type_arguments(context,p_node,p_line,id->name,ci,p_argidx,result,arghint);
 				return;
 			}
 
@@ -2100,10 +2093,8 @@ static void _find_call_arguments(GDCompletionContext& context,const GDParser::No
 }
 
 Error GDScriptLanguage::complete_code(const String& p_code, const String& p_base_path, Object*p_owner, List<String>* r_options, String &r_call_hint) {
-	//print_line( p_code.replace(String::chr(0xFFFF),"<cursor>"));
 
 	GDParser p;
-	//Error parse(const String& p_code, const String& p_base_path="", bool p_just_validate=false,const String& p_self_path="",bool p_for_completion=false);
 
 	Error err = p.parse(p_code,p_base_path,false,"",true);
 	bool isfunction=false;
@@ -2204,7 +2195,6 @@ Error GDScriptLanguage::complete_code(const String& p_code, const String& p_base
 								if (code!="") {
 									//if there is code, parse it. This way is slower but updates in real-time
 									GDParser p;
-									//Error parse(const String& p_code, const String& p_base_path="", bool p_just_validate=false,const String& p_self_path="",bool p_for_completion=false);
 
 									Error err = p.parse(scr->get_source_code(),scr->get_path().get_base_dir(),true,"",false);
 
@@ -2421,7 +2411,24 @@ Error GDScriptLanguage::complete_code(const String& p_code, const String& p_base
 				}
 			}
 		} break;
+		case GDParser::COMPLETION_YIELD: {
 
+			const GDParser::Node *node = p.get_completion_node();
+
+			GDCompletionIdentifier t;
+			if (!_guess_expression_type(context,node,p.get_completion_line(),t))
+				break;
+
+			if (t.type==Variant::OBJECT && t.obj_type!=StringName()) {
+
+				List<MethodInfo> sigs;
+				ObjectTypeDB::get_signal_list(t.obj_type,&sigs);
+				for (List<MethodInfo>::Element *E=sigs.front();E;E=E->next()) {
+					options.insert("\""+E->get().name+"\"");
+				}
+			}
+
+		} break;
 
 	}
 

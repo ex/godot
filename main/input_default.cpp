@@ -30,6 +30,7 @@
 #include "servers/visual_server.h"
 #include "os/os.h"
 #include "input_map.h"
+#include "scene/resources/texture.h"
 
 void InputDefault::SpeedTrack::update(const Vector2& p_delta_p) {
 
@@ -101,7 +102,7 @@ bool InputDefault::is_action_pressed(const StringName& p_action) {
 
 	const List<InputEvent> *alist = InputMap::get_singleton()->get_action_list(p_action);
 	if (!alist)
-		return NULL;
+		return false;
 
 
 	for (const List<InputEvent>::Element *E=alist->front();E;E=E->next()) {
@@ -220,18 +221,18 @@ void InputDefault::joy_connection_changed(int p_idx, bool p_connected, String p_
 			};
 		};
 		js.uid = uidname;
-		//printf("looking for mappings for guid %ls\n", uidname.c_str());
+		js.connected = true;
 		int mapping = fallback_mapping;
 		for (int i=0; i < map_db.size(); i++) {
 			if (js.uid == map_db[i].uid) {
 				mapping = i;
 				js.name = map_db[i].name;
-				//printf("found mapping\n");
 			};
 		};
 		js.mapping = mapping;
 	}
 	else {
+		js.connected = false;
 		for (int i = 0; i < JOY_BUTTON_MAX; i++) {
 
 			if (i < JOY_AXIS_MAX)
@@ -256,6 +257,12 @@ Vector3 InputDefault::get_magnetometer() {
 
 	_THREAD_SAFE_METHOD_
 	return magnetometer;
+}
+
+Vector3 InputDefault::get_gyroscope() {
+
+	_THREAD_SAFE_METHOD_
+	return gyroscope;
 }
 
 void InputDefault::parse_input_event(const InputEvent& p_event) {
@@ -385,6 +392,14 @@ void InputDefault::set_magnetometer(const Vector3& p_magnetometer) {
 
 }
 
+void InputDefault::set_gyroscope(const Vector3& p_gyroscope) {
+
+	_THREAD_SAFE_METHOD_
+
+	gyroscope=p_gyroscope;
+
+}
+
 void InputDefault::set_main_loop(MainLoop *p_main_loop) {
 	main_loop=p_main_loop;
 
@@ -463,9 +478,11 @@ void InputDefault::set_custom_mouse_cursor(const RES& p_cursor,const Vector2& p_
 		set_mouse_mode(MOUSE_MODE_VISIBLE);
 		VisualServer::get_singleton()->cursor_set_visible(false);
 	} else {
+		Ref<AtlasTexture> atex = custom_cursor;
+		Rect2 region = atex.is_valid() ? atex->get_region() : Rect2();
 		set_mouse_mode(MOUSE_MODE_HIDDEN);
 		VisualServer::get_singleton()->cursor_set_visible(true);
-		VisualServer::get_singleton()->cursor_set_texture(custom_cursor->get_rid(),p_hotspot);
+		VisualServer::get_singleton()->cursor_set_texture(custom_cursor->get_rid(),p_hotspot, 0, region);
 		VisualServer::get_singleton()->cursor_set_pos(get_mouse_pos());
 	}
 }
@@ -571,6 +588,7 @@ static const char *s_ControllerMappings [] =
 	"030000004f04000023b3000000010000,Thrustmaster Dual Trigger 3-in-1,x:b0,a:b1,b:b2,y:b3,back:b8,start:b9,dpleft:h0.8,dpdown:h0.0,dpdown:h0.4,dpright:h0.0,dpright:h0.2,dpup:h0.0,dpup:h0.1,leftshoulder:h0.0,leftshoulder:b4,lefttrigger:b6,rightshoulder:b5,righttrigger:b7,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a2,righty:a5,",
 	"030000005e0400001907000000010000,X360 Wireless Controller,a:b0,b:b1,back:b6,dpdown:b14,dpleft:b11,dpright:b12,dpup:b13,guide:b8,leftshoulder:b4,leftstick:b9,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b10,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,",
 	"030000005e0400008902000021010000,Microsoft X-Box pad v2 (US),x:b3,a:b0,b:b1,y:b4,back:b6,start:b7,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,dpup:h0.1,leftshoulder:b5,lefttrigger:a2,rightshoulder:b2,righttrigger:a5,leftstick:b8,rightstick:b9,leftx:a0,lefty:a1,rightx:a3,righty:a4,",
+	"030000005e0400008e02000001000000,Microsoft X-Box 360 pad,leftstick:b9,leftx:a0,lefty:a1,dpdown:h0.1,rightstick:b10,rightshoulder:b5,rightx:a3,start:b7,righty:a4,dpleft:h0.2,lefttrigger:a2,x:b2,dpup:h0.4,back:b6,leftshoulder:b4,y:b3,a:b0,dpright:h0.8,righttrigger:a5,b:b1,",
 	"030000005e0400008e02000004010000,Microsoft X-Box 360 pad,a:b0,b:b1,x:b2,y:b3,back:b6,start:b7,guide:b8,leftshoulder:b4,rightshoulder:b5,leftstick:b9,rightstick:b10,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,",
 	"030000005e0400008e02000010010000,X360 Controller,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b8,leftshoulder:b4,leftstick:b9,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b10,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,",
 	"030000005e0400008e02000014010000,X360 Controller,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b8,leftshoulder:b4,leftstick:b9,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b10,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,",
@@ -1038,4 +1056,16 @@ bool InputDefault::is_joy_mapped(int p_device) {
 
 String InputDefault::get_joy_guid_remapped(int p_device) const {
 	return joy_names[p_device].uid;
+}
+
+Array InputDefault::get_connected_joysticks() {
+	Array ret;
+	Map<int, Joystick>::Element *elem = joy_names.front();
+	while (elem) {
+		if (elem->get().connected) {
+			ret.push_back(elem->key());
+		}
+		elem = elem->next();
+	}
+	return ret;
 }

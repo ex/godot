@@ -33,6 +33,7 @@
 #include "gd_functions.h"
 #include "map.h"
 #include "object.h"
+#include "script_language.h"
 
 class GDParser {
 public:
@@ -88,6 +89,7 @@ public:
 			StringName getter;
 			int line;
 			Node *expression;
+			ScriptInstance::RPCMode rpc_mode;
 		};
 		struct Constant {
 			StringName identifier;
@@ -119,12 +121,13 @@ public:
 	struct FunctionNode : public Node {
 
 		bool _static;
+		ScriptInstance::RPCMode rpc_mode;
 		StringName name;
 		Vector<StringName> arguments;
 		Vector<Node*> default_values;
 		BlockNode *body;
 
-		FunctionNode() { type=TYPE_FUNCTION; _static=false; }
+		FunctionNode() { type=TYPE_FUNCTION; _static=false; rpc_mode=ScriptInstance::RPC_MODE_DISABLED; }
 
 	};
 
@@ -375,7 +378,8 @@ public:
 		COMPLETION_METHOD,
 		COMPLETION_CALL_ARGUMENTS,
 		COMPLETION_INDEX,
-		COMPLETION_VIRTUAL_FUNC
+		COMPLETION_VIRTUAL_FUNC,
+		COMPLETION_YIELD,
 	};
 
 
@@ -428,6 +432,9 @@ private:
 
 	PropertyInfo current_export;
 
+	ScriptInstance::RPCMode rpc_mode;
+
+
 	void _set_error(const String& p_error, int p_line=-1, int p_column=-1);
 	bool _recover_from_completion();
 
@@ -435,7 +442,7 @@ private:
 	bool _parse_arguments(Node* p_parent, Vector<Node*>& p_args, bool p_static, bool p_can_codecomplete=false);
 	bool _enter_indent_block(BlockNode *p_block=NULL);
 	bool _parse_newline();
-	Node* _parse_expression(Node *p_parent,bool p_static,bool p_allow_assign=false);
+	Node* _parse_expression(Node *p_parent, bool p_static, bool p_allow_assign=false, bool p_parsing_constant=false);
 	Node* _reduce_expression(Node *p_node,bool p_to_const=false);
 	Node* _parse_and_reduce_expression(Node *p_parent,bool p_static,bool p_reduce_const=false,bool p_allow_assign=false);
 

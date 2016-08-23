@@ -104,12 +104,17 @@ bool EditorSettings::_get(const StringName& p_name,Variant &r_ret) const {
 		for (const Map<String,Ref<ShortCut> >::Element *E=shortcuts.front();E;E=E->next()) {
 
 			Ref<ShortCut> sc=E->get();
-			if (!sc->has_meta("original"))
-				continue; //this came from settings but is not any longer used
 
-			InputEvent original = sc->get_meta("original");
-			if (sc->is_shortcut(original) || (original.type==InputEvent::NONE && sc->get_shortcut().type==InputEvent::NONE))
-				continue; //not changed from default, don't save
+			if (optimize_save) {
+				if (!sc->has_meta("original")) {
+					continue; //this came from settings but is not any longer used
+				}
+
+				InputEvent original = sc->get_meta("original");
+				if (sc->is_shortcut(original) || (original.type==InputEvent::NONE && sc->get_shortcut().type==InputEvent::NONE))
+					continue; //not changed from default, don't save
+			}
+
 			arr.push_back(E->key());
 			arr.push_back(sc->get_shortcut());
 		}
@@ -161,7 +166,7 @@ void EditorSettings::_get_property_list(List<PropertyInfo> *p_list) const {
 	for(Set<_EVCSort>::Element *E=vclist.front();E;E=E->next()) {
 
 		int pinfo = 0;
-		if (E->get().save) {
+		if (E->get().save || !optimize_save) {
 			pinfo|=PROPERTY_USAGE_STORAGE;
 		}
 
@@ -549,6 +554,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	set("text_editor/create_signal_callbacks",true);
 	set("text_editor/autosave_interval_secs",0);
 
+	set("text_editor/block_caret", false);
 	set("text_editor/caret_blink", false);
 	set("text_editor/caret_blink_speed", 0.65);
 	hints["text_editor/caret_blink_speed"]=PropertyInfo(Variant::REAL,"text_editor/caret_blink_speed",PROPERTY_HINT_RANGE,"0.1, 10, 0.1");
@@ -605,8 +611,8 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 
 	set("on_save/compress_binary_resources",true);
 	set("on_save/save_modified_external_resources",true);
-	set("on_save/save_paths_as_relative",false);
-	set("on_save/save_paths_without_extension",false);
+	//set("on_save/save_paths_as_relative",false);
+	//set("on_save/save_paths_without_extension",false);
 
 	set("text_editor/create_signal_callbacks",true);
 
@@ -677,7 +683,10 @@ void EditorSettings::_load_default_text_editor_theme() {
 	set("text_editor/completion_background_color", Color::html("2C2A32"));
 	set("text_editor/completion_selected_color", Color::html("434244"));
 	set("text_editor/completion_existing_color", Color::html("21dfdfdf"));
+	set("text_editor/completion_scroll_color", Color::html("ffffff"));
+	set("text_editor/completion_font_color", Color::html("aaaaaa"));
 	set("text_editor/caret_color",Color::html("aaaaaa"));
+	set("text_editor/caret_background_color", Color::html("000000"));
 	set("text_editor/line_number_color",Color::html("66aaaaaa"));
 	set("text_editor/text_color",Color::html("aaaaaa"));
 	set("text_editor/text_selected_color",Color::html("000000"));
@@ -912,7 +921,10 @@ bool EditorSettings::_save_text_editor_theme(String p_file) {
 	cf->set_value(theme_section, "completion_background_color", ((Color)get("text_editor/completion_background_color")).to_html());
 	cf->set_value(theme_section, "completion_selected_color", ((Color)get("text_editor/completion_selected_color")).to_html());
 	cf->set_value(theme_section, "completion_existing_color", ((Color)get("text_editor/completion_existing_color")).to_html());
+	cf->set_value(theme_section, "completion_scroll_color", ((Color)get("text_editor/completion_scroll_color")).to_html());
+	cf->set_value(theme_section, "completion_font_color", ((Color)get("text_editor/completion_font_color")).to_html());
 	cf->set_value(theme_section, "caret_color", ((Color)get("text_editor/caret_color")).to_html());
+	cf->set_value(theme_section, "caret_background_color", ((Color)get("text_editor/caret_background_color")).to_html());
 	cf->set_value(theme_section, "line_number_color", ((Color)get("text_editor/line_number_color")).to_html());
 	cf->set_value(theme_section, "text_color", ((Color)get("text_editor/text_color")).to_html());
 	cf->set_value(theme_section, "text_selected_color", ((Color)get("text_editor/text_selected_color")).to_html());
@@ -933,6 +945,8 @@ bool EditorSettings::_save_text_editor_theme(String p_file) {
 	cf->set_value(theme_section, "word_highlighted_color", ((Color)get("text_editor/word_highlighted_color")).to_html());
 	cf->set_value(theme_section, "search_result_color", ((Color)get("text_editor/search_result_color")).to_html());
 	cf->set_value(theme_section, "search_result_border_color", ((Color)get("text_editor/search_result_border_color")).to_html());
+
+
 	Error err = cf->save(p_file);
 
 	if (err == OK) {
@@ -976,6 +990,10 @@ void EditorSettings::get_shortcut_list(List<String> *r_shortcuts) {
 	}
 }
 
+void EditorSettings::set_optimize_save(bool p_optimize) {
+
+	optimize_save=p_optimize;
+}
 
 void EditorSettings::_bind_methods() {
 
@@ -998,6 +1016,7 @@ EditorSettings::EditorSettings() {
 
 	//singleton=this;
 	last_order=0;
+	optimize_save=true;
 	save_changed_setting=true;
 
 	EditorTranslationList *etl=_editor_translations;

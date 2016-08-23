@@ -304,7 +304,7 @@ void GDFunctions::call(Function p_func,const Variant **p_args,int p_arg_count,Va
 		case MATH_DECIMALS: {
 			VALIDATE_ARG_COUNT(1);
 			VALIDATE_ARG_NUM(0);
-			r_ret=Math::decimals(*p_args[0]);
+			r_ret=Math::step_decimals(*p_args[0]);
 		} break;
 		case MATH_STEPIFY: {
 			VALIDATE_ARG_COUNT(2);
@@ -502,7 +502,6 @@ void GDFunctions::call(Function p_func,const Variant **p_args,int p_arg_count,Va
 
 			Ref<FuncRef> fr = memnew( FuncRef);
 
-			Object *obj = *p_args[0];
 			fr->set_instance(*p_args[0]);
 			fr->set_function(*p_args[1]);
 

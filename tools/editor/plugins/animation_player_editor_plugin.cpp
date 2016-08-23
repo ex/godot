@@ -43,6 +43,7 @@ void AnimationPlayerEditor::_node_removed(Node *p_node) {
 
 		key_editor->set_animation(Ref<Animation>());
 		key_editor->set_root(NULL);
+		key_editor->show_select_node_warning(true);
 		_update_player();
 		//editor->animation_editor_make_visible(false);
 
@@ -376,8 +377,8 @@ void AnimationPlayerEditor::_animation_save_in_path(const Ref<Resource>& p_resou
 	int flg = 0;
 	if (EditorSettings::get_singleton()->get("on_save/compress_binary_resources"))
 		flg |= ResourceSaver::FLAG_COMPRESS;
-	if (EditorSettings::get_singleton()->get("on_save/save_paths_as_relative"))
-		flg |= ResourceSaver::FLAG_RELATIVE_PATHS;
+	//if (EditorSettings::get_singleton()->get("on_save/save_paths_as_relative"))
+	//	flg |= ResourceSaver::FLAG_RELATIVE_PATHS;
 
 	String path = Globals::get_singleton()->localize_path(p_path);
 	Error err = ResourceSaver::save(path, p_resource, flg | ResourceSaver::FLAG_REPLACE_SUBRESOURCE_PATHS);
@@ -407,7 +408,6 @@ void AnimationPlayerEditor::_animation_save(const Ref<Resource>& p_resource) {
 void AnimationPlayerEditor::_animation_save_as(const Ref<Resource>& p_resource) {
 
 	file->set_mode(EditorFileDialog::MODE_SAVE_FILE);
-	bool relpaths = (p_resource->has_meta("__editor_relpaths__") && p_resource->get_meta("__editor_relpaths__").operator bool());
 
 	List<String> extensions;
 	ResourceSaver::get_recognized_extensions(p_resource, &extensions);
@@ -833,6 +833,7 @@ void AnimationPlayerEditor::_update_player() {
 	remove_anim->set_disabled(animlist.size()==0);
 	resource_edit_anim->set_disabled(animlist.size()==0);
 	save_anim->set_disabled(animlist.size() == 0);
+	tool_anim->set_disabled(player==NULL);
 
 
 	int active_idx=-1;
@@ -890,9 +891,11 @@ void AnimationPlayerEditor::edit(AnimationPlayer *p_player) {
 		return; //ignore, pinned
 	player=p_player;
 
-	if (player)
+	if (player) {
 		_update_player();
-	else {
+		key_editor->show_select_node_warning(false);
+	} else {
+		key_editor->show_select_node_warning(true);
 
 //		hide();
 
@@ -1124,6 +1127,7 @@ void AnimationPlayerEditor::_hide_anim_editors() {
 
 	key_editor->set_animation(Ref<Animation>());
 	key_editor->set_root(NULL);
+	key_editor->show_select_node_warning(true);
 //		editor->animation_editor_make_visible(false);
 
 }
@@ -1404,6 +1408,7 @@ AnimationPlayerEditor::AnimationPlayerEditor(EditorNode *p_editor) {
 	hb->add_child(animation);
 	animation->set_h_size_flags(SIZE_EXPAND_FILL);
 	animation->set_tooltip(TTR("Display list of animations in player."));
+	animation->set_clip_text(true);
 
 	autoplay = memnew( ToolButton );
 	hb->add_child(autoplay);
@@ -1531,6 +1536,8 @@ void AnimationPlayerEditorPlugin::edit(Object *p_object) {
 	if (!p_object)
 		return;
 	anim_editor->edit(p_object->cast_to<AnimationPlayer>());
+
+
 }
 
 bool AnimationPlayerEditorPlugin::handles(Object *p_object) const {

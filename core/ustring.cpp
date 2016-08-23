@@ -3491,7 +3491,7 @@ bool String::is_valid_integer() const {
 		return false;
 
 	int from=0;
-	if (operator[](0)=='+' || operator[](0)=='-')
+	if (len!=1 && (operator[](0)=='+' || operator[](0)=='-'))
 		from++;
 
 	for(int i=from;i<len;i++) {
@@ -3836,7 +3836,6 @@ String String::lpad(int min_length, const String& character) const {
 String String::sprintf(const Array& values, bool* error) const {
 	String formatted;
 	CharType* self = (CharType*)c_str();
-	int num_items = values.size();
 	bool in_format = false;
 	int value_index = 0;
 	int min_chars;

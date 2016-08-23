@@ -36,21 +36,6 @@
 #include "io/compression.h"
 #include "scene/resources/theme.h"
 
-struct _ConstantComparator {
-
-	inline bool operator()(const DocData::ConstantDoc &a, const DocData::ConstantDoc &b) const {
-		String left_a = a.name.find("_") == -1 ? a.name : a.name.substr(0, a.name.find("_"));
-		String left_b = b.name.find("_") == -1 ? b.name : b.name.substr(0, b.name.find("_"));
-		if (left_a == left_b) // If they have the same prefix
-			if (a.value == b.value)
-				return a.name < b.name; // Sort by name if the values are the same
-			else
-				return a.value < b.value; // Sort by value otherwise
-		else
-			return left_a < left_b; // Sort by name if the prefixes aren't the same
-	}
-};
-
 void DocData::merge_from(const DocData& p_data) {
 
 	for( Map<String,ClassDoc>::Element *E=class_list.front();E;E=E->next()) {
@@ -291,14 +276,9 @@ void DocData::generate(bool p_basic_types) {
 								default_arg_text=Variant::get_type_name(default_arg.get_type())+"("+default_arg_text+")";
 								break;
 
-							case Variant::VECTOR2:		// 5
-							case Variant::RECT2:
-							case Variant::VECTOR3:
-							case Variant::PLANE:
-							case Variant::QUAT:
 							case Variant::_AABB: //sorry naming convention fail :( not like it's used often // 10
-							case Variant::MATRIX3:
 							case Variant::COLOR:
+							case Variant::PLANE:
 							case Variant::RAW_ARRAY:
 							case Variant::INT_ARRAY:
 							case Variant::REAL_ARRAY:
@@ -307,6 +287,13 @@ void DocData::generate(bool p_basic_types) {
 							case Variant::VECTOR3_ARRAY:
 							case Variant::COLOR_ARRAY:
 								default_arg_text=Variant::get_type_name(default_arg.get_type())+"("+default_arg_text+")";
+								break;
+							case Variant::VECTOR2:		// 5
+							case Variant::RECT2:
+							case Variant::VECTOR3:
+							case Variant::QUAT:
+							case Variant::MATRIX3:
+								default_arg_text=Variant::get_type_name(default_arg.get_type())+default_arg_text;
 								break;
 							case Variant::OBJECT:
 							case Variant::INPUT_EVENT:
@@ -454,6 +441,12 @@ void DocData::generate(bool p_basic_types) {
 		classes.pop_front();
 	}
 
+
+	{
+		//so it can be documented that it does not exist
+		class_list["Variant"]=ClassDoc();
+		class_list["Variant"].name="Variant";
+	}
 
 	if (!p_basic_types)
 		return;
@@ -949,11 +942,11 @@ Error DocData::save(const String& p_path) {
 		_write_string(f,0,header);
 		_write_string(f,1,"<brief_description>");
 		if (c.brief_description!="")
-			_write_string(f,1,c.brief_description.xml_escape());
+			_write_string(f,2,c.brief_description.xml_escape());
 		_write_string(f,1,"</brief_description>");
 		_write_string(f,1,"<description>");
 		if (c.description!="")
-			_write_string(f,1,c.description.xml_escape());
+			_write_string(f,2,c.description.xml_escape());
 		_write_string(f,1,"</description>");
 		_write_string(f,1,"<methods>");
 
@@ -989,7 +982,7 @@ Error DocData::save(const String& p_path) {
 
 			_write_string(f,3,"<description>");
 			if (m.description!="")
-				_write_string(f,3,m.description.xml_escape());
+				_write_string(f,4,m.description.xml_escape());
 			_write_string(f,3,"</description>");
 
 			_write_string(f,2,"</method>");
@@ -1035,7 +1028,7 @@ Error DocData::save(const String& p_path) {
 
 				_write_string(f,3,"<description>");
 				if (m.description!="")
-					_write_string(f,3,m.description.xml_escape());
+					_write_string(f,4,m.description.xml_escape());
 				_write_string(f,3,"</description>");
 
 				_write_string(f,2,"</signal>");
@@ -1046,7 +1039,6 @@ Error DocData::save(const String& p_path) {
 
 		_write_string(f,1,"<constants>");
 
-		c.constants.sort_custom<_ConstantComparator>();
 
 		for(int i=0;i<c.constants.size();i++) {
 

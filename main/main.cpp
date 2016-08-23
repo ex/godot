@@ -101,7 +101,7 @@ static bool init_fullscreen=false;
 static bool init_use_custom_pos=false;
 static bool debug_collisions=false;
 static bool debug_navigation=false;
-static bool allow_hidpi=true;
+static int frame_delay=0;
 static Vector2 init_custom_pos;
 static int video_driver_idx=-1;
 static int audio_driver_idx=-1;
@@ -262,7 +262,6 @@ Error Main::setup(const char *execpath,int argc, char *argv[],bool p_second_phas
 	Vector<String> breakpoints;
 	bool use_custom_res=true;
 	bool force_res=false;
-	bool profile=false;
 
 	I=args.front();
 
@@ -490,7 +489,7 @@ Error Main::setup(const char *execpath,int argc, char *argv[],bool p_second_phas
 
 			if (I->next()) {
 
-				OS::get_singleton()->set_frame_delay(I->next()->get().to_int());
+				frame_delay=I->next()->get().to_int();
 				N=I->next()->next();
 			} else {
 				goto error;
@@ -807,11 +806,18 @@ Error Main::setup(const char *execpath,int argc, char *argv[],bool p_second_phas
 			OS::get_singleton()->set_screen_orientation(OS::SCREEN_LANDSCAPE);
 	}
 
+
 	OS::get_singleton()->set_iterations_per_second(GLOBAL_DEF("physics/fixed_fps",60));
-	OS::get_singleton()->set_target_fps(GLOBAL_DEF("application/target_fps",0));
+	OS::get_singleton()->set_target_fps(GLOBAL_DEF("debug/force_fps",0));
 
 	if (!OS::get_singleton()->_verbose_stdout) //overrided
 		OS::get_singleton()->_verbose_stdout=GLOBAL_DEF("debug/verbose_stdout",false);
+
+	if (frame_delay==0) {
+		frame_delay=GLOBAL_DEF("application/frame_delay_msec",0);
+	}
+
+	OS::get_singleton()->set_frame_delay(frame_delay);
 
 	message_queue = memnew( MessageQueue );
 
@@ -916,6 +922,8 @@ Error Main::setup2() {
 		if (boot_logo_path!=String() /*&& FileAccess::exists(boot_logo_path)*/) {
 			print_line("Boot splash path: "+boot_logo_path);
 			Error err = boot_logo.load(boot_logo_path);
+			if (err)
+				ERR_PRINTS("Non-existing or invalid boot splash at: " + boot_logo_path + ". Loading default splash.");
 		}
 
 		if (!boot_logo.empty()) {
@@ -1040,7 +1048,6 @@ bool Main::start() {
 	String _import_script;
 	String dumpstrings;
 	bool noquit=false;
-	bool convert_old=false;
 	bool export_debug=false;
 	bool project_manager_request = false;
 	List<String> args = OS::get_singleton()->get_cmdline_args();
@@ -1050,8 +1057,6 @@ bool Main::start() {
 			doc_base=false;
 		} else if (args[i]=="-noquit") {
 			noquit=true;
-		} else if (args[i]=="-convert_old") {
-			convert_old=true;
 		} else if (args[i]=="-editor" || args[i]=="-e") {
 			editor=true;
 		} else if (args[i] == "-pm" || args[i] == "-project_manager") {
@@ -1499,6 +1504,8 @@ bool Main::start() {
 		if (project_manager_request || (script=="" && test=="" && game_path=="" && !editor)) {
 
 			ProjectManager *pmanager = memnew( ProjectManager );
+			ProgressDialog *progress_dialog = memnew( ProgressDialog );
+			pmanager->add_child(progress_dialog);
 			sml->get_root()->add_child(pmanager);
 			OS::get_singleton()->set_context(OS::CONTEXT_PROJECTMAN);
 		}

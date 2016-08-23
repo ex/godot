@@ -474,6 +474,7 @@ static void _call_##m_type##_##m_method(Variant& r_ret,Variant& p_self,const Var
 	VCALL_LOCALMEM2R(Array,rfind);
 	VCALL_LOCALMEM1R(Array,find_last);
 	VCALL_LOCALMEM1R(Array,count);
+	VCALL_LOCALMEM1R(Array,has);
 	VCALL_LOCALMEM1(Array,erase);
 	VCALL_LOCALMEM0(Array,sort);
 	VCALL_LOCALMEM2(Array,sort_custom);
@@ -947,9 +948,21 @@ static void _call_##m_type##_##m_method(Variant& r_ret,Variant& p_self,const Var
 	struct ConstantData {
 
 		Map<StringName,int> value;
+#ifdef DEBUG_ENABLED
+		List<StringName> value_ordered;
+#endif
 	};
 
 	static ConstantData* constant_data;
+
+	static void add_constant(int p_type, StringName p_constant_name, int p_constant_value) {
+
+		constant_data[p_type].value[p_constant_name] = p_constant_value;
+#ifdef DEBUG_ENABLED
+		constant_data[p_type].value_ordered.push_back(p_constant_name);
+#endif
+
+	}
 
 };
 
@@ -1160,6 +1173,56 @@ bool Variant::has_method(const StringName& p_method) const {
 
 }
 
+Vector<Variant::Type> Variant::get_method_argument_types(Variant::Type p_type,const StringName& p_method) {
+
+	const _VariantCall::TypeFunc &fd = _VariantCall::type_funcs[p_type];
+
+	const Map<StringName,_VariantCall::FuncData>::Element *E = fd.functions.find(p_method);
+	if (!E)
+		return Vector<Variant::Type>();
+
+	return E->get().arg_types;
+}
+
+Vector<StringName> Variant::get_method_argument_names(Variant::Type p_type,const StringName& p_method) {
+
+
+	const _VariantCall::TypeFunc &fd = _VariantCall::type_funcs[p_type];
+
+	const Map<StringName,_VariantCall::FuncData>::Element *E = fd.functions.find(p_method);
+	if (!E)
+		return Vector<StringName>();
+
+	return E->get().arg_names;
+
+}
+
+Variant::Type Variant::get_method_return_type(Variant::Type p_type,const StringName& p_method,bool* r_has_return) {
+
+	const _VariantCall::TypeFunc &fd = _VariantCall::type_funcs[p_type];
+
+	const Map<StringName,_VariantCall::FuncData>::Element *E = fd.functions.find(p_method);
+	if (!E)
+		return Variant::NIL;
+
+	if (r_has_return)
+		*r_has_return=E->get().return_type;
+
+	return E->get().return_type;
+}
+
+Vector<Variant> Variant::get_method_default_arguments(Variant::Type p_type,const StringName& p_method) {
+
+	const _VariantCall::TypeFunc &fd = _VariantCall::type_funcs[p_type];
+
+	const Map<StringName,_VariantCall::FuncData>::Element *E = fd.functions.find(p_method);
+	if (!E)
+		return Vector<Variant>();
+
+	return E->get().default_args;
+
+}
+
 void Variant::get_method_list(List<MethodInfo> *p_list) const {
 
 
@@ -1241,9 +1304,15 @@ void Variant::get_numeric_constants_for_type(Variant::Type p_type, List<StringNa
 
 	_VariantCall::ConstantData& cd = _VariantCall::constant_data[p_type];
 
+#ifdef DEBUG_ENABLED
+	for(List<StringName>::Element *E=cd.value_ordered.front();E;E=E->next()) {
+
+		p_constants->push_back(E->get());
+#else
 	for(Map<StringName,int>::Element *E=cd.value.front();E;E=E->next()) {
 
 		p_constants->push_back(E->key());
+#endif
 	}
 }
 
@@ -1498,6 +1567,7 @@ _VariantCall::addfunc(Variant::m_vtype,Variant::m_ret,_SCS(#m_method),VCALL(m_cl
 	ADDFUNC2(ARRAY,INT,Array,rfind,NIL,"what",INT,"from",varray(-1));
 	ADDFUNC1(ARRAY,INT,Array,find_last,NIL,"value",varray());
 	ADDFUNC1(ARRAY,INT,Array,count,NIL,"value",varray());
+	ADDFUNC1(ARRAY,BOOL,Array,has,NIL,"value",varray());
 	ADDFUNC0(ARRAY,NIL,Array,pop_back,varray());
 	ADDFUNC0(ARRAY,NIL,Array,pop_front,varray());
 	ADDFUNC0(ARRAY,NIL,Array,sort,varray());
@@ -1649,10 +1719,10 @@ _VariantCall::addfunc(Variant::m_vtype,Variant::m_ret,_SCS(#m_method),VCALL(m_cl
 
 	ADDFUNC0(INPUT_EVENT,BOOL,InputEvent,is_pressed,varray());
 	ADDFUNC1(INPUT_EVENT,BOOL,InputEvent,is_action,STRING,"action",varray());
-	ADDFUNC1(INPUT_EVENT,BOOL,InputEvent,is_action_pressed,STRING,"is_action_pressed",varray());
-	ADDFUNC1(INPUT_EVENT,BOOL,InputEvent,is_action_released,STRING,"is_action_released",varray());
+	ADDFUNC1(INPUT_EVENT,BOOL,InputEvent,is_action_pressed,STRING,"action",varray());
+	ADDFUNC1(INPUT_EVENT,BOOL,InputEvent,is_action_released,STRING,"action",varray());
 	ADDFUNC0(INPUT_EVENT,BOOL,InputEvent,is_echo,varray());
-    ADDFUNC2(INPUT_EVENT,NIL,InputEvent,set_as_action,STRING,"action",BOOL,"pressed",varray());
+	ADDFUNC2(INPUT_EVENT,NIL,InputEvent,set_as_action,STRING,"action",BOOL,"pressed",varray());
 
 	/* REGISTER CONSTRUCTORS */
 
@@ -1671,7 +1741,7 @@ _VariantCall::addfunc(Variant::m_vtype,Variant::m_ret,_SCS(#m_method),VCALL(m_cl
 	_VariantCall::add_constructor(_VariantCall::Plane_init3,Variant::PLANE,"normal",Variant::VECTOR3,"d",Variant::REAL);
 
 	_VariantCall::add_constructor(_VariantCall::Quat_init1,Variant::QUAT,"x",Variant::REAL,"y",Variant::REAL,"z",Variant::REAL,"w",Variant::REAL);
-    _VariantCall::add_constructor(_VariantCall::Quat_init2,Variant::QUAT,"axis",Variant::VECTOR3,"angle",Variant::REAL);
+	_VariantCall::add_constructor(_VariantCall::Quat_init2,Variant::QUAT,"axis",Variant::VECTOR3,"angle",Variant::REAL);
 
 	_VariantCall::add_constructor(_VariantCall::Color_init1,Variant::COLOR,"r",Variant::REAL,"g",Variant::REAL,"b",Variant::REAL,"a",Variant::REAL);
 	_VariantCall::add_constructor(_VariantCall::Color_init2,Variant::COLOR,"r",Variant::REAL,"g",Variant::REAL,"b",Variant::REAL);
@@ -1688,54 +1758,54 @@ _VariantCall::addfunc(Variant::m_vtype,Variant::m_ret,_SCS(#m_method),VCALL(m_cl
 
 	/* REGISTER CONSTANTS */
 
-	_VariantCall::constant_data[Variant::VECTOR3].value["AXIS_X"]=Vector3::AXIS_X;
-	_VariantCall::constant_data[Variant::VECTOR3].value["AXIS_Y"]=Vector3::AXIS_Y;
-	_VariantCall::constant_data[Variant::VECTOR3].value["AXIS_Z"]=Vector3::AXIS_Z;
-
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["NONE"]=InputEvent::NONE;
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["KEY"]=InputEvent::KEY;
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["MOUSE_MOTION"]=InputEvent::MOUSE_MOTION;
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["MOUSE_BUTTON"]=InputEvent::MOUSE_BUTTON;
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["JOYSTICK_MOTION"]=InputEvent::JOYSTICK_MOTION;
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["JOYSTICK_BUTTON"]=InputEvent::JOYSTICK_BUTTON;
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["SCREEN_TOUCH"]=InputEvent::SCREEN_TOUCH;
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["SCREEN_DRAG"]=InputEvent::SCREEN_DRAG;
-	_VariantCall::constant_data[Variant::INPUT_EVENT].value["ACTION"]=InputEvent::ACTION;
-
-	_VariantCall::constant_data[Variant::IMAGE].value["COMPRESS_BC"]=Image::COMPRESS_BC;
-	_VariantCall::constant_data[Variant::IMAGE].value["COMPRESS_PVRTC2"]=Image::COMPRESS_PVRTC2;
-	_VariantCall::constant_data[Variant::IMAGE].value["COMPRESS_PVRTC4"]=Image::COMPRESS_PVRTC4;
-	_VariantCall::constant_data[Variant::IMAGE].value["COMPRESS_ETC"]=Image::COMPRESS_ETC;
+	_VariantCall::add_constant(Variant::VECTOR3,"AXIS_X",Vector3::AXIS_X);
+	_VariantCall::add_constant(Variant::VECTOR3,"AXIS_Y",Vector3::AXIS_Y);
+	_VariantCall::add_constant(Variant::VECTOR3,"AXIS_Z",Vector3::AXIS_Z);
 
 
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"NONE",InputEvent::NONE);
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"KEY",InputEvent::KEY);
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"MOUSE_MOTION",InputEvent::MOUSE_MOTION);
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"MOUSE_BUTTON",InputEvent::MOUSE_BUTTON);
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"JOYSTICK_MOTION",InputEvent::JOYSTICK_MOTION);
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"JOYSTICK_BUTTON",InputEvent::JOYSTICK_BUTTON);
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"SCREEN_TOUCH",InputEvent::SCREEN_TOUCH);
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"SCREEN_DRAG",InputEvent::SCREEN_DRAG);
+	_VariantCall::add_constant(Variant::INPUT_EVENT,"ACTION",InputEvent::ACTION);
 
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_GRAYSCALE"]=Image::FORMAT_GRAYSCALE;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_INTENSITY"]=Image::FORMAT_INTENSITY;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_GRAYSCALE_ALPHA"]=Image::FORMAT_GRAYSCALE_ALPHA;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_RGB"]=Image::FORMAT_RGB;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_RGBA"]=Image::FORMAT_RGBA;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_INDEXED"]=Image::FORMAT_INDEXED;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_INDEXED_ALPHA"]=Image::FORMAT_INDEXED_ALPHA;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_YUV_422"]=Image::FORMAT_YUV_422;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_YUV_444"]=Image::FORMAT_YUV_444;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_BC1"]=Image::FORMAT_BC1;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_BC2"]=Image::FORMAT_BC2;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_BC3"]=Image::FORMAT_BC3;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_BC4"]=Image::FORMAT_BC4;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_BC5"]=Image::FORMAT_BC5;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_PVRTC2"]=Image::FORMAT_PVRTC2;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_PVRTC2_ALPHA"]=Image::FORMAT_PVRTC2_ALPHA;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_PVRTC4"]=Image::FORMAT_PVRTC4;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_PVRTC4_ALPHA"]=Image::FORMAT_PVRTC4_ALPHA;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_ETC"]=Image::FORMAT_ETC;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_ATC"]=Image::FORMAT_ATC;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_ATC_ALPHA_EXPLICIT"]=Image::FORMAT_ATC_ALPHA_EXPLICIT;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_ATC_ALPHA_INTERPOLATED"]=Image::FORMAT_ATC_ALPHA_INTERPOLATED;
-	_VariantCall::constant_data[Variant::IMAGE].value["FORMAT_CUSTOM"]=Image::FORMAT_CUSTOM;
 
-	_VariantCall::constant_data[Variant::IMAGE].value["INTERPOLATE_NEAREST"]=Image::INTERPOLATE_NEAREST;
-	_VariantCall::constant_data[Variant::IMAGE].value["INTERPOLATE_BILINEAR"]=Image::INTERPOLATE_BILINEAR;
-	_VariantCall::constant_data[Variant::IMAGE].value["INTERPOLATE_CUBIC"]=Image::INTERPOLATE_CUBIC;
+	_VariantCall::add_constant(Variant::IMAGE,"COMPRESS_BC",Image::COMPRESS_BC);
+	_VariantCall::add_constant(Variant::IMAGE,"COMPRESS_PVRTC2",Image::COMPRESS_PVRTC2);
+	_VariantCall::add_constant(Variant::IMAGE,"COMPRESS_PVRTC4",Image::COMPRESS_PVRTC4);
+	_VariantCall::add_constant(Variant::IMAGE,"COMPRESS_ETC",Image::COMPRESS_ETC);
+
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_GRAYSCALE",Image::FORMAT_GRAYSCALE);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_INTENSITY",Image::FORMAT_INTENSITY);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_GRAYSCALE_ALPHA",Image::FORMAT_GRAYSCALE_ALPHA);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_RGB",Image::FORMAT_RGB);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_RGBA",Image::FORMAT_RGBA);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_INDEXED",Image::FORMAT_INDEXED);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_INDEXED_ALPHA",Image::FORMAT_INDEXED_ALPHA);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_YUV_422",Image::FORMAT_YUV_422);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_YUV_444",Image::FORMAT_YUV_444);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_BC1",Image::FORMAT_BC1);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_BC2",Image::FORMAT_BC2);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_BC3",Image::FORMAT_BC3);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_BC4",Image::FORMAT_BC4);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_BC5",Image::FORMAT_BC5);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_PVRTC2",Image::FORMAT_PVRTC2);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_PVRTC2_ALPHA",Image::FORMAT_PVRTC2_ALPHA);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_PVRTC4",Image::FORMAT_PVRTC4);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_PVRTC4_ALPHA",Image::FORMAT_PVRTC4_ALPHA);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_ETC",Image::FORMAT_ETC);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_ATC",Image::FORMAT_ATC);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_ATC_ALPHA_EXPLICIT",Image::FORMAT_ATC_ALPHA_EXPLICIT);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_ATC_ALPHA_INTERPOLATED",Image::FORMAT_ATC_ALPHA_INTERPOLATED);
+	_VariantCall::add_constant(Variant::IMAGE,"FORMAT_CUSTOM",Image::FORMAT_CUSTOM);
+
+	_VariantCall::add_constant(Variant::IMAGE,"INTERPOLATE_NEAREST",Image::INTERPOLATE_NEAREST);
+	_VariantCall::add_constant(Variant::IMAGE,"INTERPOLATE_BILINEAR",Image::INTERPOLATE_BILINEAR);
+	_VariantCall::add_constant(Variant::IMAGE,"INTERPOLATE_CUBIC",Image::INTERPOLATE_CUBIC);
 }
 
 void unregister_variant_methods() {

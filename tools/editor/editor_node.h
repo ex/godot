@@ -42,7 +42,7 @@
 #include "scene/gui/split_container.h"
 #include "scene/gui/center_container.h"
 #include "scene/gui/texture_progress.h"
-#include "tools/editor/scenes_dock.h"
+#include "tools/editor/filesystem_dock.h"
 #include "tools/editor/scene_tree_editor.h"
 #include "tools/editor/property_editor.h"
 #include "tools/editor/create_dialog.h"
@@ -74,7 +74,6 @@
 #include "tools/editor/editor_sub_scene.h"
 #include "editor_import_export.h"
 #include "editor_reimport_dialog.h"
-#include "import_settings.h"
 #include "tools/editor/editor_plugin.h"
 #include "tools/editor/editor_name_dialog.h"
 
@@ -95,6 +94,7 @@
 
 
 typedef void (*EditorNodeInitCallback)();
+typedef void (*EditorPluginInitializeCallback)();
 
 class EditorPluginList;
 
@@ -125,6 +125,7 @@ private:
 		FILE_OPEN_SCENE,
 		FILE_SAVE_SCENE,
 		FILE_SAVE_AS_SCENE,
+		FILE_SAVE_ALL_SCENES,
 		FILE_SAVE_BEFORE_RUN,
 		FILE_SAVE_AND_RUN,
 		FILE_IMPORT_SUBSCENE,
@@ -177,7 +178,6 @@ private:
 		RUN_RELOAD_SCRIPTS,
 		SETTINGS_UPDATE_ALWAYS,
 		SETTINGS_UPDATE_CHANGES,
-		SETTINGS_IMPORT,
 		SETTINGS_EXPORT_PREFERENCES,
 		SETTINGS_PREFERENCES,
 		SETTINGS_OPTIMIZED_PRESETS,
@@ -276,7 +276,7 @@ private:
 	PropertyEditor *property_editor;
 	NodeDock *node_dock;
 	VBoxContainer *prop_editor_vb;
-	ScenesDock *scenes_dock;
+	FileSystemDock *scenes_dock;
 	EditorRunNative *run_native;
 
 	HBoxContainer *search_bar;
@@ -338,7 +338,6 @@ private:
 	Vector<EditorPlugin*> editor_table;
 
 	EditorReImportDialog *reimport_dialog;
-	ImportSettingsDialog *import_settings;
 
 	ProgressDialog *progress_dialog;
 	BackgroundProgress *progress_hb;
@@ -441,7 +440,7 @@ private:
 
 	void _node_renamed();
 	void _editor_select(int p_which);
-	void _set_scene_metadata(const String &p_file);
+	void _set_scene_metadata(const String &p_file, int p_idx=-1);
 	void _get_scene_metadata(const String& p_file);
 	void _update_title();
 	void _update_scene_tabs();
@@ -451,10 +450,10 @@ private:
 
 	void _rebuild_import_menu();
 
-	void _save_scene(String p_file);
+	void _save_scene(String p_file, int idx = -1);
 
 
-	void _instance_request(const String& p_path);
+	void _instance_request(const Vector<String>& p_files);
 
 	void _property_keyed(const String& p_keyed, const Variant& p_value, bool p_advance);
 	void _transform_keyed(Object *sp,const String& p_sub,const Transform& p_key);
@@ -577,10 +576,19 @@ private:
 
 	static void _file_access_close_error_notify(const String& p_str);
 
+
+	enum {
+		MAX_INIT_CALLBACKS=128
+	};
+
+	static int plugin_init_callback_count;
+	static EditorPluginInitializeCallback plugin_init_callbacks[MAX_INIT_CALLBACKS];
 protected:
 	void _notification(int p_what);
 	static void _bind_methods();
 public:
+
+	static void add_plugin_init_callback(EditorPluginInitializeCallback p_callback);
 
 	enum EditorTable {
 		EDITOR_2D = 0,
@@ -588,6 +596,7 @@ public:
 		EDITOR_SCRIPT
 	};
 
+	void set_visible_editor(EditorTable p_table) { _editor_select(p_table); }
 	static EditorNode* get_singleton() { return singleton; }
 
 
@@ -668,7 +677,8 @@ public:
 	static VSplitContainer *get_top_split() { return singleton->top_split; }
 
 	void request_instance_scene(const String &p_path);
-	ScenesDock *get_scenes_dock();
+	void request_instance_scenes(const Vector<String>& p_files);
+	FileSystemDock *get_scenes_dock();
 	SceneTreeDock *get_scene_tree_dock();
 	static UndoRedo* get_undo_redo() { return &singleton->editor_data.get_undo_redo(); }
 
@@ -741,6 +751,8 @@ public:
 
 	static void add_init_callback(EditorNodeInitCallback p_callback) { _init_callbacks.push_back(p_callback); }
 
+
+
 };
 
 
@@ -762,7 +774,7 @@ public:
 		plugins_list = p_plugins_list;
 	}
 
-	Vector<EditorPlugin*> get_plugins_list() {
+	Vector<EditorPlugin*>& get_plugins_list() {
 		return plugins_list;
 	}
 

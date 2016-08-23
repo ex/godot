@@ -34,6 +34,7 @@
 
 #include "canvas_item_editor_plugin.h"
 #include "tools/editor/editor_settings.h"
+#include "tools/editor/editor_scale.h"
 
 void TileMapEditor::_notification(int p_what) {
 
@@ -49,6 +50,12 @@ void TileMapEditor::_notification(int p_what) {
 			rotate_180->set_icon(get_icon("Rotate180","EditorIcons"));
 			rotate_270->set_icon(get_icon("Rotate270","EditorIcons"));
 
+		} break;
+		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
+
+			if (is_visible()) {
+				_update_palette();
+			}
 		} break;
 	}
 }
@@ -205,16 +212,16 @@ void TileMapEditor::_update_palette() {
 	if (tiles.empty())
 		return;
 
+	float min_size = EDITOR_DEF("tile_map/preview_size", 64);
+	min_size *= EDSCALE;
+	int hseparation = EDITOR_DEF("tile_map/palette_item_hseparation",8);
+	bool show_tile_names = bool(EDITOR_DEF("tile_map/show_tile_names", true));
 
-	palette->set_max_columns(0);
-	palette->add_constant_override("hseparation", 6);
+	palette->add_constant_override("hseparation", hseparation*EDSCALE);
+	palette->add_constant_override("vseparation", 8*EDSCALE);
 
-	float min_size = EDITOR_DEF("tile_map/preview_size",64);
 	palette->set_fixed_icon_size(Size2(min_size, min_size));
-	palette->set_fixed_column_width(min_size*3/2);
-	palette->set_icon_mode(ItemList::ICON_MODE_TOP);
-	palette->set_max_text_lines(2);
-
+	palette->set_fixed_column_width(min_size * MAX(size_slider->get_val(), 1));
 
 	String filter = search_box->get_text().strip_edges();
 
@@ -223,15 +230,19 @@ void TileMapEditor::_update_palette() {
 		String name;
 
 		if (tileset->tile_get_name(E->get())!="") {
-			name = tileset->tile_get_name(E->get());
+			name = itos(E->get())+" - "+tileset->tile_get_name(E->get());
 		} else {
 			name = "#"+itos(E->get());
 		}
 
-		if (filter != "" && name.findn(filter) == -1)
+		if (filter != "" && !filter.is_subsequence_ofi(name))
 			continue;
 
-		palette->add_item(name);
+		if (show_tile_names) {
+			palette->add_item(name);
+		} else {
+			palette->add_item(String());
+		}
 
 		Ref<Texture> tex = tileset->tile_get_texture(E->get());
 
@@ -252,7 +263,7 @@ void TileMapEditor::_update_palette() {
 	if (selected != -1)
 		set_selected_tile(selected);
 	else
-		palette->select(0, true);
+		palette->select(0);
 }
 
 void TileMapEditor::_pick_tile(const Point2& p_pos) {
@@ -412,6 +423,24 @@ void TileMapEditor::_draw_cell(int p_cell, const Point2i& p_point, bool p_flip_h
 	if (node->get_tile_origin()==TileMap::TILE_ORIGIN_TOP_LEFT) {
 
 		rect.pos+=tile_ofs;
+	} else if (node->get_tile_origin()==TileMap::TILE_ORIGIN_BOTTOM_LEFT) {
+		Size2 cell_size = node->get_cell_size();
+		
+		rect.pos+=tile_ofs;
+		
+		if(p_transpose)
+		{
+			if(p_flip_h)
+				rect.pos.x-=cell_size.x;
+			else
+				rect.pos.x+=cell_size.x;
+		} else {
+			if(p_flip_v)
+				rect.pos.y-=cell_size.y;
+			else
+				rect.pos.y+=cell_size.y;
+		}
+
 	} else if (node->get_tile_origin()==TileMap::TILE_ORIGIN_CENTER) {
 		rect.pos+=node->get_cell_size()/2;
 		Vector2 s = r.size;
@@ -1330,6 +1359,9 @@ TileMapEditor::TileMapEditor(EditorNode *p_editor) {
 	palette = memnew( ItemList );
 	palette->set_v_size_flags(SIZE_EXPAND_FILL);
 	palette->set_custom_minimum_size(Size2(mw,0));
+	palette->set_max_columns(0);
+	palette->set_icon_mode(ItemList::ICON_MODE_TOP);
+	palette->set_max_text_lines(2);
 	add_child(palette);
 
 	// Add menu items
@@ -1440,6 +1472,9 @@ void TileMapEditorPlugin::make_visible(bool p_visible) {
 TileMapEditorPlugin::TileMapEditorPlugin(EditorNode *p_node) {
 
 	EDITOR_DEF("tile_map/preview_size",64);
+	EDITOR_DEF("tile_map/palette_item_hseparation",8);
+	EDITOR_DEF("tile_map/show_tile_names", true);
+
 	tile_map_editor = memnew( TileMapEditor(p_node) );
 	add_control_to_container(CONTAINER_CANVAS_EDITOR_SIDE, tile_map_editor);
 	tile_map_editor->hide();

@@ -98,6 +98,9 @@ public:
 	virtual void set_source_code(const String& p_code)=0;
 	virtual Error reload(bool p_keep_state=false)=0;
 
+	virtual bool has_method(const StringName& p_method) const=0;
+	virtual MethodInfo get_method_info(const StringName& p_method) const=0;
+
 	virtual bool is_tool() const=0;
 
 	virtual String get_node_type() const=0;
@@ -110,6 +113,7 @@ public:
 	virtual bool get_property_default_value(const StringName& p_property,Variant& r_value) const=0;
 
 	virtual void update_exports() {} //editor tool
+	virtual void get_script_method_list(List<MethodInfo> *p_list) const=0;
 
 
 	Script() {}
@@ -117,6 +121,8 @@ public:
 
 class ScriptInstance {
 public:
+
+
 	virtual bool set(const StringName& p_name, const Variant& p_value)=0;
 	virtual bool get(const StringName& p_name, Variant &r_ret) const=0;
 	virtual void get_property_list(List<PropertyInfo> *p_properties) const=0;
@@ -143,6 +149,17 @@ public:
 	virtual Ref<Script> get_script() const=0;
 
 	virtual bool is_placeholder() const { return false; }
+
+	enum RPCMode {
+		RPC_MODE_DISABLED,
+		RPC_MODE_REMOTE,
+		RPC_MODE_SYNC,
+		RPC_MODE_MASTER,
+		RPC_MODE_SLAVE,
+	};
+
+	virtual RPCMode get_rpc_mode(const StringName& p_method) const=0;
+	virtual RPCMode get_rset_mode(const StringName& p_variable) const=0;
 
 	virtual ScriptLanguage *get_language()=0;
 	virtual ~ScriptInstance();
@@ -177,7 +194,7 @@ public:
 	virtual void get_reserved_words(List<String> *p_words) const=0;
 	virtual void get_comment_delimiters(List<String> *p_delimiters) const=0;
 	virtual void get_string_delimiters(List<String> *p_delimiters) const=0;
-	virtual String get_template(const String& p_class_name, const String& p_base_class_name) const=0;
+	virtual Ref<Script> get_template(const String& p_class_name, const String& p_base_class_name) const=0;
 	virtual bool validate(const String& p_script, int &r_line_error,int &r_col_error,String& r_test_error, const String& p_path="",List<String> *r_functions=NULL) const=0;
 	virtual Script *create_script() const=0;
 	virtual bool has_named_classes() const=0;
@@ -274,6 +291,9 @@ public:
 	void update(const List<PropertyInfo> &p_properties,const Map<StringName,Variant>& p_values); //likely changed in editor
 
 	virtual bool is_placeholder() const { return true; }
+
+	virtual RPCMode get_rpc_mode(const StringName& p_method) const { return RPC_MODE_DISABLED; }
+	virtual RPCMode get_rset_mode(const StringName& p_variable) const { return RPC_MODE_DISABLED; }
 
 	PlaceHolderScriptInstance(ScriptLanguage *p_language, Ref<Script> p_script,Object *p_owner);
 	~PlaceHolderScriptInstance();

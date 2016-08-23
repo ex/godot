@@ -372,8 +372,7 @@ Variant GDFunction::call(GDInstance *p_instance, const Variant **p_args, int p_a
 
 					if (obj_A->get_script_instance() && obj_A->get_script_instance()->get_language()==GDScriptLanguage::get_singleton()) {
 
-						GDInstance *ins = static_cast<GDInstance*>(obj_A->get_script_instance());
-						GDScript *cmp = ins->script.ptr();
+						GDScript *cmp = static_cast<GDScript*>(obj_A->get_script_instance()->get_script().ptr());
 						//bool found=false;
 						while(cmp) {
 
@@ -846,6 +845,8 @@ Variant GDFunction::call(GDInstance *p_instance, const Variant **p_args, int p_a
 				gdfs->state._class=_class;
 				gdfs->state.ip=ip+ipofs;
 				gdfs->state.line=line;
+				gdfs->state.instance_id=(p_instance && p_instance->get_owner())?p_instance->get_owner()->get_instance_ID():0;
+				gdfs->state.script_id=_class->get_instance_ID();
 				//gdfs->state.result_pos=ip+ipofs-1;
 				gdfs->state.defarg=defarg;
 				gdfs->state.instance=p_instance;
@@ -1308,6 +1309,7 @@ GDFunction::GDFunction() : function_list(this) {
 
 	_stack_size=0;
 	_call_size=0;
+	rpc_mode=ScriptInstance::RPC_MODE_DISABLED;
 	name="<anonymous>";
 #ifdef DEBUG_ENABLED
 	_func_cname=NULL;
@@ -1351,6 +1353,18 @@ GDFunction::~GDFunction()  {
 
 
 Variant GDFunctionState::_signal_callback(const Variant** p_args, int p_argcount, Variant::CallError& r_error) {
+
+#ifdef DEBUG_ENABLED
+	if (state.instance_id && !ObjectDB::get_instance(state.instance_id)) {
+		ERR_EXPLAIN("Resumed after yield, but class instance is gone");
+		ERR_FAIL_V(Variant());
+	}
+
+	if (state.script_id && !ObjectDB::get_instance(state.script_id)) {
+		ERR_EXPLAIN("Resumed after yield, but script is gone");
+		ERR_FAIL_V(Variant());
+	}
+#endif
 
 	Variant arg;
 	r_error.error=Variant::CallError::CALL_OK;
@@ -1398,6 +1412,17 @@ bool GDFunctionState::is_valid() const {
 Variant GDFunctionState::resume(const Variant& p_arg) {
 
 	ERR_FAIL_COND_V(!function,Variant());
+#ifdef DEBUG_ENABLED
+	if (state.instance_id && !ObjectDB::get_instance(state.instance_id)) {
+		ERR_EXPLAIN("Resumed after yield, but class instance is gone");
+		ERR_FAIL_V(Variant());
+	}
+
+	if (state.script_id && !ObjectDB::get_instance(state.script_id)) {
+		ERR_EXPLAIN("Resumed after yield, but script is gone");
+		ERR_FAIL_V(Variant());
+	}
+#endif
 
 	state.result=p_arg;
 	Variant::CallError err;

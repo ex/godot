@@ -31,6 +31,7 @@
 #include "io/resource_loader.h"
 #include "os/file_access.h"
 #include "script_language.h"
+#include "gd_script.h"
 
 template<class T>
 T* GDParser::alloc_node() {
@@ -216,7 +217,7 @@ bool GDParser::_get_completable_identifier(CompletionType p_type,StringName& ide
 }
 
 
-GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_allow_assign) {
+GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_allow_assign,bool p_parsing_constant) {
 
 //	Vector<Node*> expressions;
 //	Vector<OperatorNode::Operator> operators;
@@ -224,6 +225,8 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 	Vector<Expression> expression;
 
 	Node *expr=NULL;
+
+	int op_line = tokenizer->get_token_line(); // when operators are created at the bottom, the line might have been changed (\n found)
 
 	while(true) {
 
@@ -243,7 +246,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 			//subexpression ()
 			tokenizer->advance();
 			parenthesis++;
-			Node* subexpr = _parse_expression(p_parent,p_static);
+			Node* subexpr = _parse_expression(p_parent,p_static,p_allow_assign,p_parsing_constant);
 			parenthesis--;
 			if (!subexpr)
 				return NULL;
@@ -375,6 +378,21 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 
 				tokenizer->advance();
 
+				if (tokenizer->get_token()==GDTokenizer::TK_CURSOR) {
+
+
+					completion_cursor=StringName();
+					completion_node=object;
+					completion_type=COMPLETION_YIELD;
+					completion_class=current_class;
+					completion_function=current_function;
+					completion_line=tokenizer->get_token_line();
+					completion_argument=0;
+					completion_block=current_block;
+					completion_found=true;
+					tokenizer->advance();
+				}
+
 				Node *signal = _parse_and_reduce_expression(p_parent,p_static);
 				if (!signal)
 					return NULL;
@@ -484,13 +502,23 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 
 			}
 
-			for( int i=0; i<cln->constant_expressions.size(); ++i ) {
+			if (p_parsing_constant) {
+				for( int i=0; i<cln->constant_expressions.size(); ++i ) {
 
-				if( cln->constant_expressions[i].identifier == identifier ) {
+					if( cln->constant_expressions[i].identifier == identifier ) {
 
-					expr = cln->constant_expressions[i].expression;
-					bfn  = true;
-					break;
+						expr = cln->constant_expressions[i].expression;
+						bfn  = true;
+						break;
+					}
+				}
+
+				if (GDScriptLanguage::get_singleton()->get_global_map().has(identifier)) {
+					//check from constants
+					ConstantNode *constant = alloc_node<ConstantNode>();
+					constant->value = GDScriptLanguage::get_singleton()->get_global_array()[ GDScriptLanguage::get_singleton()->get_global_map()[identifier] ];
+					expr=constant;
+					bfn = true;
 				}
 			}
 
@@ -503,8 +531,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 		} else if (/*tokenizer->get_token()==GDTokenizer::TK_OP_ADD ||*/ tokenizer->get_token()==GDTokenizer::TK_OP_SUB || tokenizer->get_token()==GDTokenizer::TK_OP_NOT || tokenizer->get_token()==GDTokenizer::TK_OP_BIT_INVERT) {
 
 			//single prefix operators like !expr -expr ++expr --expr
-			OperatorNode *op = alloc_node<OperatorNode>();
-
+			alloc_node<OperatorNode>();
 			Expression e;
 			e.is_op=true;
 
@@ -567,7 +594,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 						_set_error("',' or ']' expected");
 						return NULL;
 					}
-					Node *n = _parse_expression(arr,p_static);
+					Node *n = _parse_expression(arr,p_static,p_allow_assign,p_parsing_constant);
 					if (!n)
 						return NULL;
 					arr->elements.push_back(n);
@@ -674,7 +701,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 							expecting=DICT_EXPECT_VALUE;
 						} else {
 							//python/js style more flexible
-							key = _parse_expression(dict,p_static);
+							key = _parse_expression(dict,p_static,p_allow_assign,p_parsing_constant);
 							if (!key)
 								return NULL;
 							expecting=DICT_EXPECT_COLON;
@@ -682,7 +709,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 					}
 
 					if (expecting==DICT_EXPECT_VALUE) {
-						Node *value = _parse_expression(dict,p_static);
+						Node *value = _parse_expression(dict,p_static,p_allow_assign,p_parsing_constant);
 						if (!value)
 							return NULL;
 						expecting=DICT_EXPECT_COMMA;
@@ -833,7 +860,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 
 				tokenizer->advance(1);
 
-				Node *subexpr = _parse_expression(op,p_static);
+				Node *subexpr = _parse_expression(op,p_static,p_allow_assign,p_parsing_constant);
 				if (!subexpr) {
 					return NULL;
 				}
@@ -1041,6 +1068,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 				OperatorNode *op = alloc_node<OperatorNode>();
 				op->op=expression[i].op;
 				op->arguments.push_back(expression[i+1].node);
+				op->line=op_line; //line might have been changed from a \n
 				expression[i].is_op=false;
 				expression[i].node=op;
 				expression.remove(i+1);
@@ -1056,6 +1084,7 @@ GDParser::Node* GDParser::_parse_expression(Node *p_parent,bool p_static,bool p_
 
 			OperatorNode *op = alloc_node<OperatorNode>();
 			op->op=expression[next_op].op;
+			op->line=op_line; //line might have been changed from a \n
 
 			if (expression[next_op-1].is_op) {
 
@@ -1258,6 +1287,8 @@ GDParser::Node* GDParser::_reduce_expression(Node *p_node,bool p_to_const) {
 							} break;
 						}
 
+						error_line=op->line;
+
 						return p_node;
 					}
 
@@ -1293,6 +1324,7 @@ GDParser::Node* GDParser::_reduce_expression(Node *p_node,bool p_to_const) {
 					Variant v = ca->value.get(cb->value,&valid);
 					if (!valid) {
 						_set_error("invalid index in constant expression");
+						error_line=op->line;
 						return op;
 					}
 
@@ -1330,6 +1362,7 @@ GDParser::Node* GDParser::_reduce_expression(Node *p_node,bool p_to_const) {
 					Variant v = ca->value.get_named(ib->name,&valid);
 					if (!valid) {
 						_set_error("invalid index '"+String(ib->name)+"' in constant expression");
+						error_line=op->line;
 						return op;
 					}
 
@@ -1359,6 +1392,7 @@ GDParser::Node* GDParser::_reduce_expression(Node *p_node,bool p_to_const) {
 
 					if (op->arguments[0]->type==Node::TYPE_CONSTANT) {
 						_set_error("Can't assign to constant",tokenizer->get_token_line()-1);
+						error_line=op->line;
 						return op;
 					}
 
@@ -1374,6 +1408,7 @@ GDParser::Node* GDParser::_reduce_expression(Node *p_node,bool p_to_const) {
 	Variant::evaluate(m_vop,static_cast<ConstantNode*>(op->arguments[0])->value,Variant(),res,valid);\
 	if (!valid) {\
 		_set_error("Invalid operand for unary operator");\
+		error_line=op->line;\
 		return p_node;\
 	}\
 	ConstantNode *cn = alloc_node<ConstantNode>();\
@@ -1386,6 +1421,7 @@ GDParser::Node* GDParser::_reduce_expression(Node *p_node,bool p_to_const) {
 	Variant::evaluate(m_vop,static_cast<ConstantNode*>(op->arguments[0])->value,static_cast<ConstantNode*>(op->arguments[1])->value,res,valid);\
 	if (!valid) {\
 		_set_error("Invalid operands for operator");\
+		error_line=op->line;\
 		return p_node;\
 	}\
 	ConstantNode *cn = alloc_node<ConstantNode>();\
@@ -1432,7 +1468,7 @@ GDParser::Node* GDParser::_reduce_expression(Node *p_node,bool p_to_const) {
 
 GDParser::Node* GDParser::_parse_and_reduce_expression(Node *p_parent,bool p_static,bool p_reduce_const,bool p_allow_assign) {
 
-	Node* expr=_parse_expression(p_parent,p_static,p_allow_assign);
+	Node* expr=_parse_expression(p_parent,p_static,p_allow_assign,p_reduce_const);
 	if (!expr || error_set)
 		return NULL;
 	expr = _reduce_expression(expr,p_reduce_const);
@@ -1526,6 +1562,10 @@ void GDParser::_parse_block(BlockNode *p_block,bool p_static) {
 					return;
 				}
 				tokenizer->advance();
+				if(tokenizer->get_token()==GDTokenizer::TK_SEMICOLON) {
+					// Ignore semicolon after 'pass'
+					tokenizer->advance();
+				}
 			} break;
 			case GDTokenizer::TK_PR_VAR: {
 				//variale declaration and (eventual) initialization
@@ -2035,6 +2075,7 @@ void GDParser::_parse_class(ClassNode *p_class) {
 		if (error_set)
 			return;
 
+
 		if (indent_level>tab_level.back()->get()) {
 			p_class->end_line=tokenizer->get_token_line();
 			return; //go back a level
@@ -2330,6 +2371,9 @@ void GDParser::_parse_class(ClassNode *p_class) {
 				function->default_values=default_values;
 				function->_static=_static;
 				function->line=fnline;
+
+				function->rpc_mode=rpc_mode;
+				rpc_mode=ScriptInstance::RPC_MODE_DISABLED;
 
 
 				if (_static)
@@ -2802,25 +2846,101 @@ void GDParser::_parse_class(ClassNode *p_class) {
 
 				}
 
-				if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR) {
+				if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR && tokenizer->get_token()!=GDTokenizer::TK_PR_ONREADY && tokenizer->get_token()!=GDTokenizer::TK_PR_REMOTE && tokenizer->get_token()!=GDTokenizer::TK_PR_MASTER && tokenizer->get_token()!=GDTokenizer::TK_PR_SLAVE && tokenizer->get_token()!=GDTokenizer::TK_PR_SYNC) {
 
 					current_export=PropertyInfo();
+					_set_error("Expected 'var', 'onready', 'remote', 'master', 'slave' or 'sync'.");
+					return;
+				}
+
+				continue;
+			} break;
+			case GDTokenizer::TK_PR_ONREADY: {
+
+				//may be fallthrough from export, ignore if so
+				tokenizer->advance();
+				if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR) {
 					_set_error("Expected 'var'.");
 					return;
 				}
 
-			}; //fallthrough to var
-			case GDTokenizer::TK_PR_ONREADY: {
+				continue;
+			} break;
+			case GDTokenizer::TK_PR_REMOTE: {
 
-				if (token==GDTokenizer::TK_PR_ONREADY) {
-					//may be fallthrough from export, ignore if so
-					tokenizer->advance();
+				//may be fallthrough from export, ignore if so
+				tokenizer->advance();
+				if (current_export.type)  {
 					if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR) {
 						_set_error("Expected 'var'.");
 						return;
 					}
+
+				} else {
+					if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR && tokenizer->get_token()!=GDTokenizer::TK_PR_FUNCTION) {
+						_set_error("Expected 'var' or 'func'.");
+						return;
+					}
 				}
-			}; //fallthrough to var
+				rpc_mode=ScriptInstance::RPC_MODE_REMOTE;
+
+				continue;
+			} break;
+			case GDTokenizer::TK_PR_MASTER: {
+
+				//may be fallthrough from export, ignore if so
+				tokenizer->advance();
+				if (current_export.type)  {
+					if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR) {
+						_set_error("Expected 'var'.");
+						return;
+					}
+
+				} else {
+					if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR && tokenizer->get_token()!=GDTokenizer::TK_PR_FUNCTION) {
+						_set_error("Expected 'var' or 'func'.");
+						return;
+					}
+				}
+
+				rpc_mode=ScriptInstance::RPC_MODE_MASTER;
+				continue;
+			} break;
+			case GDTokenizer::TK_PR_SLAVE: {
+
+				//may be fallthrough from export, ignore if so
+				tokenizer->advance();
+				if (current_export.type)  {
+					if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR) {
+						_set_error("Expected 'var'.");
+						return;
+					}
+
+				} else {
+					if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR && tokenizer->get_token()!=GDTokenizer::TK_PR_FUNCTION) {
+						_set_error("Expected 'var' or 'func'.");
+						return;
+					}
+				}
+
+				rpc_mode=ScriptInstance::RPC_MODE_SLAVE;
+				continue;
+			} break;
+			case GDTokenizer::TK_PR_SYNC: {
+
+				//may be fallthrough from export, ignore if so
+				tokenizer->advance();
+				if (tokenizer->get_token()!=GDTokenizer::TK_PR_VAR && tokenizer->get_token()!=GDTokenizer::TK_PR_FUNCTION) {
+					if (current_export.type)
+						_set_error("Expected 'var'.");
+					else
+						_set_error("Expected 'var' or 'func'.");
+					return;
+				}
+
+				rpc_mode=ScriptInstance::RPC_MODE_SYNC;
+				continue;
+			} break;
 			case GDTokenizer::TK_PR_VAR: {
 				//variale declaration and (eventual) initialization
 
@@ -2844,7 +2964,11 @@ void GDParser::_parse_class(ClassNode *p_class) {
 				member.expression=NULL;
 				member._export.name=member.identifier;
 				member.line=tokenizer->get_token_line();
+				member.rpc_mode=rpc_mode;
+
 				tokenizer->advance();
+
+				rpc_mode=ScriptInstance::RPC_MODE_DISABLED;
 
 				if (tokenizer->get_token()==GDTokenizer::TK_OP_ASSIGN) {
 
@@ -3188,6 +3312,7 @@ void GDParser::clear() {
 	current_class=NULL;
 
 	completion_found=false;
+	rpc_mode=ScriptInstance::RPC_MODE_DISABLED;
 
 	current_function=NULL;
 

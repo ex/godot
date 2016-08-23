@@ -1213,7 +1213,9 @@ def detect_modules():
 	register_cpp=""
 	unregister_cpp=""
 
-	for x in glob.glob("modules/*"):
+	files = glob.glob("modules/*")
+	files.sort() #so register_module_types does not change that often, and also plugins are registered in alphabetic order
+	for x in files:
 		if (not os.path.isdir(x)):
 			continue
 		x=x.replace("modules/","") # rest of world
@@ -1326,7 +1328,9 @@ def android_add_aidl_dir(self,subpath):
 def android_add_jni_dir(self,subpath):
 	base_path = self.Dir(".").abspath+"/modules/"+self.current_module+"/"+subpath
 	self.android_jni_dirs.append(base_path)
-
+def android_add_default_config(self,config):
+	self.android_default_config.append(config)
+	
 def android_add_to_manifest(self,file):
 	base_path = self.Dir(".").abspath+"/modules/"+self.current_module+"/"+file
 	f = open(base_path,"rb")

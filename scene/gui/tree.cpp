@@ -693,6 +693,7 @@ void TreeItem::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("add_button","column","button:Texture","button_idx","disabled"),&TreeItem::add_button,DEFVAL(-1),DEFVAL(false));
 	ObjectTypeDB::bind_method(_MD("get_button_count","column"),&TreeItem::get_button_count);
 	ObjectTypeDB::bind_method(_MD("get_button:Texture","column","button_idx"),&TreeItem::get_button);
+	ObjectTypeDB::bind_method(_MD("set_button","column","button_idx","button:Texture"),&TreeItem::set_button);
 	ObjectTypeDB::bind_method(_MD("erase_button","column","button_idx"),&TreeItem::erase_button);
 	ObjectTypeDB::bind_method(_MD("is_button_disabled","column","button_idx"),&TreeItem::is_button_disabled);
 
@@ -973,21 +974,11 @@ int Tree::draw_item(const Point2i& p_pos,const Point2& p_draw_ofs, const Size2& 
 
 	/* Draw label, if height fits */
 
-	Point2i guide_from;
 
 		bool skip=(p_item==root && hide_root);
-   // printf("skip (%p == %p && %i) %i\n",p_item,root,hide_root,skip);
 
 
 	if (!skip && (p_pos.y+label_h-cache.offset.y)>0) {
-
-	  //  printf("entering\n");
-
-		int height=label_h;
-
-		Point2i guide_space=Point2i( cache.guide_width , height );
-
-
 
 		if (!hide_folding && p_item->childs) { //has childs, draw the guide box
 
@@ -1040,7 +1031,7 @@ int Tree::draw_item(const Point2i& p_pos,const Point2& p_draw_ofs, const Size2& 
 
 				Point2i o = Point2i( ofs+w-s.width, p_pos.y )-cache.offset+p_draw_ofs;
 
-				if (cache.click_type==Cache::CLICK_BUTTON && cache.click_item==p_item && cache.click_column==i && !p_item->cells[i].buttons[j].disabled) {
+				if (cache.click_type==Cache::CLICK_BUTTON && cache.click_item==p_item && cache.click_column==i && cache.click_index==j && !p_item->cells[i].buttons[j].disabled) {
 					//being pressed
 					cache.button_pressed->draw(get_canvas_item(),Rect2(o,s));
 				}
@@ -1188,8 +1179,8 @@ int Tree::draw_item(const Point2i& p_pos,const Point2& p_draw_ofs, const Size2& 
 
 						Ref<Texture> updown = cache.updown;
 
-						//String valtext = String::num( p_item->cells[i].val, Math::decimals( p_item->cells[i].step ) );
-						String valtext = rtos( p_item->cells[i].val );
+						String valtext = String::num( p_item->cells[i].val, Math::step_decimals( p_item->cells[i].step ) );
+						//String valtext = rtos( p_item->cells[i].val );
 						font->draw( ci, text_pos, valtext, col, item_rect.size.x-updown->get_width());
 
 						if (!p_item->cells[i].editable)
@@ -1345,7 +1336,7 @@ int Tree::_count_selected_items(TreeItem* p_from) const {
 	return count;
 
 }
-void Tree::select_single_item(TreeItem *p_selected,TreeItem *p_current,int p_col,TreeItem *p_prev,bool *r_in_range) {
+void Tree::select_single_item(TreeItem *p_selected, TreeItem *p_current, int p_col, TreeItem *p_prev, bool *r_in_range, bool p_force_deselect) {
 
 	TreeItem::Cell &selected_cell=p_selected->cells[p_col];
 
@@ -1354,6 +1345,8 @@ void Tree::select_single_item(TreeItem *p_selected,TreeItem *p_current,int p_col
 		*r_in_range=true;
 		switched=true;
 	}
+
+	bool emitted_row=false;
 
 	for (int i=0;i<columns.size();i++) {
 
@@ -1373,7 +1366,10 @@ void Tree::select_single_item(TreeItem *p_selected,TreeItem *p_current,int p_col
 					selected_item=p_selected;
 					selected_col=0;
 					selected_item=p_selected;
-					emit_signal("item_selected");
+					if (!emitted_row) {
+						emit_signal("item_selected");
+						emitted_row=true;
+					}
 					//if (p_col==i)
 					//	p_current->selected_signal.call(p_col);
 				}
@@ -1414,7 +1410,7 @@ void Tree::select_single_item(TreeItem *p_selected,TreeItem *p_current,int p_col
 			} else {
 
 
-				if (r_in_range && *r_in_range) {
+				if (r_in_range && *r_in_range && !p_force_deselect) {
 
 
 					if (!c.selected && c.selectable) {
@@ -1422,7 +1418,7 @@ void Tree::select_single_item(TreeItem *p_selected,TreeItem *p_current,int p_col
 						emit_signal("multi_selected",p_current,i,true);
 					}
 
-				} else if (!r_in_range){
+				} else if (!r_in_range || p_force_deselect){
 					if (select_mode==SELECT_MULTI && c.selected)
 						emit_signal("multi_selected",p_current,i,false);
 					c.selected=false;
@@ -1441,7 +1437,7 @@ void Tree::select_single_item(TreeItem *p_selected,TreeItem *p_current,int p_col
 
 	while (c) {
 
-		select_single_item(p_selected,c,p_col,p_prev,r_in_range);
+		select_single_item(p_selected,c,p_col,p_prev,r_in_range,p_current->is_collapsed() || p_force_deselect);
 		c=c->next;
 	}
 
@@ -1655,7 +1651,6 @@ int Tree::propagate_mouse_event(const Point2i &p_pos,int x_ofs,int y_ofs,bool p_
 		/* editing */
 
 		bool bring_up_editor=force_select_on_already_selected ? (c.selected && already_selected) : c.selected;
-		bool bring_up_value_editor=false;
 		String editor_text=c.text;
 
 		switch (c.mode) {
@@ -1706,9 +1701,6 @@ int Tree::propagate_mouse_event(const Point2i &p_pos,int x_ofs,int y_ofs,bool p_
 					bring_up_editor=false;
 				} else {
 
-					Ref<Texture> updown = cache.updown;
-
-
 					if (x >= (col_width-item_h/2)) {
 
 						/* touching the combo */
@@ -1754,8 +1746,7 @@ int Tree::propagate_mouse_event(const Point2i &p_pos,int x_ofs,int y_ofs,bool p_
 
 					}  else {
 
-						editor_text=String::num( p_item->cells[col].val, Math::decimals( p_item->cells[col].step ) );
-						bring_up_value_editor=false;
+						editor_text=String::num( p_item->cells[col].val, Math::step_decimals( p_item->cells[col].step ) );
 						if (select_mode==SELECT_MULTI && get_tree()->get_last_event_id() == focus_in_id)
 							bring_up_editor=false;
 
@@ -2274,7 +2265,7 @@ void Tree::_input_event(InputEvent p_event) {
 				update();
 			}
 
-			if (pressing_for_editor && popup_edited_item && popup_edited_item->get_cell_mode(popup_edited_item_col)==TreeItem::CELL_MODE_RANGE) {
+			if (pressing_for_editor && popup_edited_item &&	(popup_edited_item->get_cell_mode(popup_edited_item_col)==TreeItem::CELL_MODE_RANGE || popup_edited_item->get_cell_mode(popup_edited_item_col)==TreeItem::CELL_MODE_RANGE_EXPRESSION)) {
 				//range drag
 
 				if (!range_drag_enabled) {
@@ -2530,7 +2521,7 @@ bool Tree::edit_selected() {
 		text_editor->set_pos( textedpos );
 		text_editor->set_size( rect.size);
 		text_editor->clear();
-		text_editor->set_text( c.mode==TreeItem::CELL_MODE_STRING?c.text:rtos(c.val) );
+		text_editor->set_text( c.mode==TreeItem::CELL_MODE_STRING?c.text:String::num( c.val, Math::step_decimals( c.step ) ) );
 		text_editor->select_all();
 
 		if (c.mode==TreeItem::CELL_MODE_RANGE || c.mode==TreeItem::CELL_MODE_RANGE_EXPRESSION ) {

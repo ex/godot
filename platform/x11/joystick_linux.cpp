@@ -45,7 +45,9 @@
 #define test_bit(nr, addr)  (((1UL << ((nr) % LONG_BITS)) & ((addr)[(nr) / LONG_BITS])) != 0)
 #define NBITS(x) ((((x)-1)/LONG_BITS)+1)
 
+#ifdef UDEV_ENABLED
 static const char* ignore_str = "/dev/input/js";
+#endif
 
 joystick_linux::Joystick::Joystick() {
 	fd = -1;
@@ -198,7 +200,6 @@ void joystick_linux::monitor_joysticks(udev *p_udev) {
 		}
 		usleep(50000);
 	}
-	//printf("exit udev\n");
 	udev_monitor_unref(mon);
 }
 #endif
@@ -258,7 +259,7 @@ void joystick_linux::close_joystick(int p_id) {
 		attached_devices.remove(attached_devices.find(joy.devpath));
 		input->joy_connection_changed(p_id, false, "");
 	};
-};
+}
 
 static String _hex_str(uint8_t p_byte) {
 
@@ -270,7 +271,7 @@ static String _hex_str(uint8_t p_byte) {
 	ret[1] = dict[p_byte & 0xF];
 
 	return ret;
-};
+}
 
 void joystick_linux::setup_joystick_properties(int p_id) {
 

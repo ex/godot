@@ -32,6 +32,7 @@
 #include "scene/gui/separator.h"
 #include "scene/resources/dynamic_font.h"
 #include "os/keyboard.h"
+#include "tools/editor/editor_scale.h"
 
 void GotoLineDialog::popup_find_line(TextEdit *p_edit) {
 
@@ -132,8 +133,9 @@ bool FindReplaceBar::_search(uint32_t p_flags, int p_from_line, int p_from_col) 
 
 	if (found) {
 		if (!preserve_cursor) {
-			text_edit->cursor_set_line(line);
-			text_edit->cursor_set_column(col+text.length());
+			text_edit->cursor_set_line(line, false);
+			text_edit->cursor_set_column(col+text.length(), false);
+			text_edit->center_viewport_to_cursor();
 		}
 
 		text_edit->set_search_text(text);
@@ -186,7 +188,9 @@ void FindReplaceBar::_replace_all() {
 	text_edit->cursor_set_line(0);
 	text_edit->cursor_set_column(0);
 
+	String replace_text=get_replace_text();
 	int search_text_len=get_search_text().length();
+
 	int rc=0;
 
 	replace_all_mode = true;
@@ -202,7 +206,7 @@ void FindReplaceBar::_replace_all() {
 		if (match_from < prev_match)
 			break; // done
 
-		prev_match=match_to;
+		prev_match=Point2i(result_line,result_col+replace_text.length());
 
 		text_edit->select(result_line,result_col,result_line,match_to.y);
 
@@ -212,12 +216,12 @@ void FindReplaceBar::_replace_all() {
 				continue;
 
 			// replace but adjust selection bounds
-			text_edit->insert_text_at_cursor(get_replace_text());
+			text_edit->insert_text_at_cursor(replace_text);
 			if (match_to.x==selection_end.x)
-				selection_end.y+=get_replace_text().length() - get_search_text().length();
+				selection_end.y+=replace_text.length()-search_text_len;
 		} else {
 			// just replace
-			text_edit->insert_text_at_cursor(get_replace_text());
+			text_edit->insert_text_at_cursor(replace_text);
 		}
 
 		rc++;
@@ -984,43 +988,54 @@ void CodeTextEditor::_text_editor_input_event(const InputEvent& p_event) {
 		if (mb.pressed && mb.mod.command) {
 
 			if (mb.button_index==BUTTON_WHEEL_UP) {
-
-				font_resize_val+=1;
-
-				if (font_resize_timer->get_time_left()==0)
-					font_resize_timer->start();
-
+				_zoom_in();
 			} else if (mb.button_index==BUTTON_WHEEL_DOWN) {
-
-				font_resize_val-=1;
-
-				if (font_resize_timer->get_time_left()==0)
-					font_resize_timer->start();
+				_zoom_out();
 			}
 		}
 	} else if (p_event.type==InputEvent::KEY) {
 
-		const InputEventKey& k=p_event.key;
-
-		if (k.pressed && k.mod.command) {
-
-			if (k.scancode==KEY_0) { // reset source font size to default
-
-				Ref<DynamicFont> font = text_editor->get_font("font");
-
-				if (font.is_valid()) {
-					EditorSettings::get_singleton()->set("global/source_font_size",14);
-					font->set_size(14);
-				}
+		if (p_event.key.pressed) {
+			if (ED_IS_SHORTCUT("script_editor/zoom_in", p_event)) {
+				_zoom_in();
+			}
+			if (ED_IS_SHORTCUT("script_editor/zoom_out", p_event)) {
+				_zoom_out();
+			}
+			if (ED_IS_SHORTCUT("script_editor/reset_zoom", p_event)) {
+				_reset_zoom();
 			}
 		}
 	}
 }
 
+void CodeTextEditor::_zoom_in() {
+	font_resize_val+=1;
+
+	if (font_resize_timer->get_time_left()==0)
+		font_resize_timer->start();
+}
+
+void CodeTextEditor::_zoom_out() {
+	font_resize_val-=1;
+
+	if (font_resize_timer->get_time_left()==0)
+		font_resize_timer->start();
+}
+
+void CodeTextEditor::_reset_zoom() {
+	Ref<DynamicFont> font = text_editor->get_font("font"); // reset source font size to default
+
+	if (font.is_valid()) {
+		EditorSettings::get_singleton()->set("global/source_font_size",14);
+		font->set_size(14);
+	}
+}
+
 void CodeTextEditor::_line_col_changed() {
 
-	String text = String()+TTR("Line:")+" "+itos(text_editor->cursor_get_line()+1)+", "+TTR("Col:")+" "+itos(text_editor->cursor_get_column());
-	line_col->set_text(text);
+	line_nb->set_text(itos(text_editor->cursor_get_line() + 1));
+	col_nb->set_text(itos(text_editor->cursor_get_column()));
 }
 
 void CodeTextEditor::_text_changed() {
@@ -1039,7 +1054,11 @@ void CodeTextEditor::_code_complete_timer_timeout() {
 void CodeTextEditor::_complete_request() {
 
 	List<String> entries;
-	_code_complete_script(text_editor->get_text_for_completion(),&entries);
+	String ctext = text_editor->get_text_for_completion();
+	_code_complete_script(ctext,&entries);
+	if (code_complete_func) {
+		code_complete_func(code_complete_ud,ctext,&entries);
+	}
 	// print_line("COMPLETE: "+p_request);
 	if (entries.size()==0)
 		return;
@@ -1123,13 +1142,16 @@ void CodeTextEditor::_text_changed_idle_timeout() {
 
 
 	_validate_script();
+	emit_signal("validate_script");
 }
 
 void CodeTextEditor::_notification(int p_what) {
 
 
-	if (p_what==EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED)
+	if (p_what==EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED) {
 		_load_theme_settings();
+		emit_signal("load_theme_settings");
+	}
 	if (p_what==NOTIFICATION_ENTER_TREE) {
 		_update_font();
 	}
@@ -1145,9 +1167,24 @@ void CodeTextEditor::_bind_methods() {
 	ObjectTypeDB::bind_method("_code_complete_timer_timeout",&CodeTextEditor::_code_complete_timer_timeout);
 	ObjectTypeDB::bind_method("_complete_request",&CodeTextEditor::_complete_request);
 	ObjectTypeDB::bind_method("_font_resize_timeout",&CodeTextEditor::_font_resize_timeout);
+
+	ADD_SIGNAL(MethodInfo("validate_script"));
+	ADD_SIGNAL(MethodInfo("load_theme_settings"));
+
 }
 
+void CodeTextEditor::set_code_complete_func(CodeTextEditorCodeCompleteFunc p_code_complete_func,void * p_ud) {
+	code_complete_func=p_code_complete_func;
+	code_complete_ud=p_ud;
+}
+
+
 CodeTextEditor::CodeTextEditor() {
+
+	code_complete_func=NULL;
+	ED_SHORTCUT("script_editor/zoom_in", TTR("Zoom In"), KEY_MASK_CMD|KEY_EQUAL);
+	ED_SHORTCUT("script_editor/zoom_out", TTR("Zoom Out"), KEY_MASK_CMD|KEY_MINUS);
+	ED_SHORTCUT("script_editor/reset_zoom", TTR("Reset Zoom"), KEY_MASK_CMD|KEY_0);
 
 	find_replace_bar = memnew( FindReplaceBar );
 	add_child(find_replace_bar);
@@ -1174,6 +1211,7 @@ CodeTextEditor::CodeTextEditor() {
 	HBoxContainer *status_bar = memnew( HBoxContainer );
 	status_mc->add_child(status_bar);
 	status_bar->set_h_size_flags(SIZE_EXPAND_FILL);
+	status_bar->add_child( memnew( Label ) ); //to keep the height if the other labels are not visible
 
 	idle = memnew( Timer );
 	add_child(idle);
@@ -1195,10 +1233,33 @@ CodeTextEditor::CodeTextEditor() {
 
 	status_bar->add_spacer();
 
-	line_col = memnew( Label );
-	status_bar->add_child(line_col);
-	line_col->set_valign(Label::VALIGN_CENTER);
+	Label *line_txt = memnew( Label );
+	status_bar->add_child(line_txt);
+	line_txt->set_align(Label::ALIGN_RIGHT);
+	line_txt->set_valign(Label::VALIGN_CENTER);
+	line_txt->set_v_size_flags(SIZE_FILL);
+	line_txt->set_text(TTR("Line:"));
 
+	line_nb = memnew( Label );
+	status_bar->add_child(line_nb);
+	line_nb->set_valign(Label::VALIGN_CENTER);
+	line_nb->set_v_size_flags(SIZE_FILL);
+	line_nb->set_autowrap(true); // workaround to prevent resizing the label on each change
+	line_nb->set_custom_minimum_size(Size2(40,1)*EDSCALE);
+
+	Label *col_txt = memnew( Label );
+	status_bar->add_child(col_txt);
+	col_txt->set_align(Label::ALIGN_RIGHT);
+	col_txt->set_valign(Label::VALIGN_CENTER);
+	col_txt->set_v_size_flags(SIZE_FILL);
+	col_txt->set_text(TTR("Col:"));
+
+	col_nb = memnew( Label );
+	status_bar->add_child(col_nb);
+	col_nb->set_valign(Label::VALIGN_CENTER);
+	col_nb->set_v_size_flags(SIZE_FILL);
+	col_nb->set_autowrap(true); // workaround to prevent resizing the label on each change
+	col_nb->set_custom_minimum_size(Size2(40,1)*EDSCALE);
 
 	text_editor->connect("input_event", this,"_text_editor_input_event");
 	text_editor->connect("cursor_changed", this,"_line_col_changed");

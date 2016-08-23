@@ -44,6 +44,7 @@ class InputDefault : public Input {
 	Map<StringName,int> custom_action_press;
 	Vector3 accelerometer;
 	Vector3 magnetometer;
+	Vector3 gyroscope;
 	Vector2 mouse_pos;
 	MainLoop *main_loop;
 
@@ -75,6 +76,7 @@ class InputDefault : public Input {
 	struct Joystick {
 		StringName name;
 		StringName uid;
+		bool connected;
 		bool last_buttons[JOY_BUTTON_MAX + 19]; //apparently SDL specifies 35 possible buttons on android
 		float last_axis[JOY_AXIS_MAX];
 		float filter;
@@ -93,6 +95,7 @@ class InputDefault : public Input {
 
 				last_buttons[i] = false;
 			}
+			connected = false;
 			last_hat = HAT_MASK_CENTER;
 			filter = 0.01f;
 			mapping = -1;
@@ -168,6 +171,7 @@ public:
 
 	virtual float get_joy_axis(int p_device,int p_axis);
 	String get_joy_name(int p_idx);
+	virtual Array get_connected_joysticks();
 	virtual Vector2 get_joy_vibration_strength(int p_device);
 	virtual float get_joy_vibration_duration(int p_device);
 	virtual uint64_t get_joy_vibration_timestamp(int p_device);
@@ -176,6 +180,7 @@ public:
 
 	virtual Vector3 get_accelerometer();
 	virtual Vector3 get_magnetometer();
+	virtual Vector3 get_gyroscope();
 
 	virtual Point2 get_mouse_pos() const;
 	virtual Point2 get_mouse_speed() const;
@@ -187,6 +192,7 @@ public:
 	void parse_input_event(const InputEvent& p_event);
 	void set_accelerometer(const Vector3& p_accel);
 	void set_magnetometer(const Vector3& p_magnetometer);
+	void set_gyroscope(const Vector3& p_gyroscope);
 	void set_joy_axis(int p_device,int p_axis,float p_value);
 
 	virtual void start_joy_vibration(int p_device, float p_weak_magnitude, float p_strong_magnitude, float p_duration=0);

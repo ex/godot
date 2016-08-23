@@ -71,12 +71,14 @@ class SceneTreeDock : public VBoxContainer {
 	};
 
 
+	bool restore_script_editor_on_drag;
 
 	int current_option;
 	CreateDialog *create_dialog;
 
 	ToolButton *button_add;
 	ToolButton *button_instance;
+	ToolButton *button_create_script;
 
 	SceneTreeEditor *scene_tree;
 
@@ -128,6 +130,8 @@ class SceneTreeDock : public VBoxContainer {
 
 	void _node_prerenamed(Node* p_node, const String& p_new_name);
 
+	void _nodes_drag_begin();
+	void _input(InputEvent p_event);
 	void _unhandled_key_input(InputEvent p_event);
 
 	void _import_subscene();
@@ -139,7 +143,7 @@ class SceneTreeDock : public VBoxContainer {
 
 	void _fill_path_renames(Vector<StringName> base_path,Vector<StringName> new_base_path,Node * p_node, List<Pair<NodePath,NodePath> > *p_renames);
 
-	void _normalize_drop(Node*& to_node, int &to_pos,int p_type);
+	void _normalize_drop(Node*& to_node, int &to_pos, int p_type);
 
 	void _nodes_dragged(Array p_nodes,NodePath p_to,int p_type);
 	void _files_dropped(Vector<String> p_files,NodePath p_to,int p_type);
@@ -147,6 +151,8 @@ class SceneTreeDock : public VBoxContainer {
 	void _tree_rmb(const Vector2& p_menu_pos);
 
 	void _filter_changed(const String& p_filter);
+
+	void _perform_instance_scenes(const Vector<String>& p_files,Node* parent,int p_pos);
 
 protected:
 
@@ -160,7 +166,7 @@ public:
 	void import_subscene();
 	void set_edited_scene(Node* p_scene);
 	void instance(const String& p_path);
-	void instance_scenes(const Vector<String>& p_files,Node* parent,int p_pos);
+	void instance_scenes(const Vector<String>& p_files, Node *p_parent=NULL);
 	void set_selected(Node *p_node, bool p_emit_selected=false);
 	void fill_path_renames(Node* p_node, Node *p_new_parent, List<Pair<NodePath,NodePath> > *p_renames);
 	void perform_node_renames(Node* p_base,List<Pair<NodePath,NodePath> > *p_renames, Map<Ref<Animation>, Set<int> > *r_rem_anims=NULL);

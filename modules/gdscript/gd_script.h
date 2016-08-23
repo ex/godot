@@ -64,6 +64,7 @@ class GDScript : public Script {
 		int index;
 		StringName setter;
 		StringName getter;
+		ScriptInstance::RPCMode rpc_mode;
 	};
 
 friend class GDInstance;
@@ -120,7 +121,11 @@ friend class GDScriptLanguage;
 	virtual void _placeholder_erased(PlaceHolderScriptInstance *p_placeholder);
 #endif
 
+#ifdef DEBUG_ENABLED
 
+	Map<ObjectID,List<Pair<StringName,Variant> > > pending_reload_state;
+
+#endif
 
 	bool _update_exports();
 
@@ -177,6 +182,10 @@ public:
 
 	bool get_property_default_value(const StringName& p_property,Variant& r_value) const;
 
+	virtual void get_script_method_list(List<MethodInfo> *p_list) const;
+	virtual bool has_method(const StringName& p_method) const;
+	virtual MethodInfo get_method_info(const StringName& p_method) const;
+
 	virtual ScriptLanguage *get_language() const;
 
 	GDScript();
@@ -202,6 +211,8 @@ friend class GDCompiler;
 
 public:
 
+	_FORCE_INLINE_ Object* get_owner() { return owner; }
+
 	virtual bool set(const StringName& p_name, const Variant& p_value);
 	virtual bool get(const StringName& p_name, Variant &r_ret) const;
 	virtual void get_property_list(List<PropertyInfo> *p_properties) const;
@@ -226,6 +237,10 @@ public:
 
 	void reload_members();
 
+	virtual RPCMode get_rpc_mode(const StringName& p_method) const;
+	virtual RPCMode get_rset_mode(const StringName& p_variable) const;
+
+
 	GDInstance();
 	~GDInstance();
 
@@ -240,28 +255,30 @@ class GDScriptLanguage : public ScriptLanguage {
 	Map<StringName,int> globals;
 
 
-    struct CallLevel {
+	struct CallLevel {
 
-        Variant *stack;
-        GDFunction *function;
-        GDInstance *instance;
-        int *ip;
-        int *line;
+		Variant *stack;
+		GDFunction *function;
+		GDInstance *instance;
+		int *ip;
+		int *line;
 
-    };
+	};
 
 
-    int _debug_parse_err_line;
-    String _debug_parse_err_file;
-    String _debug_error;
-    int _debug_call_stack_pos;
-    int _debug_max_call_stack;
-    CallLevel *_call_stack;
+	int _debug_parse_err_line;
+	String _debug_parse_err_file;
+	String _debug_error;
+	int _debug_call_stack_pos;
+	int _debug_max_call_stack;
+	CallLevel *_call_stack;
 
 	void _add_global(const StringName& p_name,const Variant& p_value);
 
 
 	Mutex *lock;
+
+
 
 friend class GDScript;
 
@@ -276,54 +293,54 @@ public:
 
 	int calls;
 
-    bool debug_break(const String& p_error,bool p_allow_continue=true);
-    bool debug_break_parse(const String& p_file, int p_line,const String& p_error);
+	bool debug_break(const String& p_error,bool p_allow_continue=true);
+	bool debug_break_parse(const String& p_file, int p_line,const String& p_error);
 
-    _FORCE_INLINE_ void enter_function(GDInstance *p_instance,GDFunction *p_function, Variant *p_stack, int *p_ip, int *p_line) {
+	_FORCE_INLINE_ void enter_function(GDInstance *p_instance,GDFunction *p_function, Variant *p_stack, int *p_ip, int *p_line) {
 
-        if (Thread::get_main_ID()!=Thread::get_caller_ID())
-            return; //no support for other threads than main for now
+		if (Thread::get_main_ID()!=Thread::get_caller_ID())
+			return; //no support for other threads than main for now
 
-        if (ScriptDebugger::get_singleton()->get_lines_left()>0 && ScriptDebugger::get_singleton()->get_depth()>=0)
-            ScriptDebugger::get_singleton()->set_depth( ScriptDebugger::get_singleton()->get_depth() +1 );
+		if (ScriptDebugger::get_singleton()->get_lines_left()>0 && ScriptDebugger::get_singleton()->get_depth()>=0)
+			ScriptDebugger::get_singleton()->set_depth( ScriptDebugger::get_singleton()->get_depth() +1 );
 
-        if (_debug_call_stack_pos >= _debug_max_call_stack) {
-            //stack overflow
-            _debug_error="Stack Overflow (Stack Size: "+itos(_debug_max_call_stack)+")";
-            ScriptDebugger::get_singleton()->debug(this);
-            return;
+		if (_debug_call_stack_pos >= _debug_max_call_stack) {
+			//stack overflow
+			_debug_error="Stack Overflow (Stack Size: "+itos(_debug_max_call_stack)+")";
+			ScriptDebugger::get_singleton()->debug(this);
+			return;
+		}
+
+		_call_stack[_debug_call_stack_pos].stack=p_stack;
+		_call_stack[_debug_call_stack_pos].instance=p_instance;
+		_call_stack[_debug_call_stack_pos].function=p_function;
+		_call_stack[_debug_call_stack_pos].ip=p_ip;
+		_call_stack[_debug_call_stack_pos].line=p_line;
+		_debug_call_stack_pos++;
 	}
 
-        _call_stack[_debug_call_stack_pos].stack=p_stack;
-        _call_stack[_debug_call_stack_pos].instance=p_instance;
-        _call_stack[_debug_call_stack_pos].function=p_function;
-        _call_stack[_debug_call_stack_pos].ip=p_ip;
-        _call_stack[_debug_call_stack_pos].line=p_line;
-        _debug_call_stack_pos++;
-    }
+	_FORCE_INLINE_ void exit_function() {
 
-    _FORCE_INLINE_ void exit_function() {
+		if (Thread::get_main_ID()!=Thread::get_caller_ID())
+			return; //no support for other threads than main for now
 
-        if (Thread::get_main_ID()!=Thread::get_caller_ID())
-            return; //no support for other threads than main for now
+		if (ScriptDebugger::get_singleton()->get_lines_left()>0 && ScriptDebugger::get_singleton()->get_depth()>=0)
+			ScriptDebugger::get_singleton()->set_depth( ScriptDebugger::get_singleton()->get_depth() -1 );
 
-        if (ScriptDebugger::get_singleton()->get_lines_left()>0 && ScriptDebugger::get_singleton()->get_depth()>=0)
-	    ScriptDebugger::get_singleton()->set_depth( ScriptDebugger::get_singleton()->get_depth() -1 );
+		if (_debug_call_stack_pos==0) {
 
-        if (_debug_call_stack_pos==0) {
+			_debug_error="Stack Underflow (Engine Bug)";
+			ScriptDebugger::get_singleton()->debug(this);
+			return;
+		}
 
-            _debug_error="Stack Underflow (Engine Bug)";
-            ScriptDebugger::get_singleton()->debug(this);
-            return;
-        }
-
-        _debug_call_stack_pos--;
-    }
+		_debug_call_stack_pos--;
+	}
 
 
 	virtual Vector<StackInfo> debug_get_current_stack_info() {
-	    if (Thread::get_main_ID()!=Thread::get_caller_ID())
-		return Vector<StackInfo>();
+		if (Thread::get_main_ID()!=Thread::get_caller_ID())
+			return Vector<StackInfo>();
 
 		Vector<StackInfo> csi;
 		csi.resize(_debug_call_stack_pos);
@@ -365,7 +382,7 @@ public:
 	virtual void get_reserved_words(List<String> *p_words) const;
 	virtual void get_comment_delimiters(List<String> *p_delimiters) const;
 	virtual void get_string_delimiters(List<String> *p_delimiters) const;
-	virtual String get_template(const String& p_class_name, const String& p_base_class_name) const;
+	virtual Ref<Script> get_template(const String& p_class_name, const String& p_base_class_name) const;
 	virtual bool validate(const String& p_script,int &r_line_error,int &r_col_error,String& r_test_error, const String& p_path="",List<String> *r_functions=NULL) const;
 	virtual Script *create_script() const;
 	virtual bool has_named_classes() const;

@@ -220,6 +220,7 @@ void ScriptEditorDebugger::debug_continue() {
 	msg.push_back("continue");
 	ppeer->put_var(msg);
 
+
 }
 
 void ScriptEditorDebugger::_scene_tree_folded(Object* obj) {
@@ -338,8 +339,9 @@ void ScriptEditorDebugger::_parse_message(const String& p_msg,const Array& p_dat
 		docontinue->set_disabled(false);
 		emit_signal("breaked",true,can_continue);
 		OS::get_singleton()->move_window_to_foreground();
-		if (!profiler->is_seeking())
+		if (error!="") {
 			tabs->set_current_tab(0);
+		}
 
 		profiler->set_enabled(false);
 
@@ -359,7 +361,7 @@ void ScriptEditorDebugger::_parse_message(const String& p_msg,const Array& p_dat
 		forward->set_disabled(true);
 		dobreak->set_disabled(false);
 		docontinue->set_disabled(true);
-		emit_signal("breaked",false,false);
+		emit_signal("breaked",false,false,Variant());
 		//tabs->set_current_tab(0);
 		profiler->set_enabled(true);
 		profiler->disable_seeking();
@@ -819,7 +821,6 @@ void ScriptEditorDebugger::_performance_draw() {
 	if(which.empty())
 		return;
 
-	Color graph_color=get_color("font_color","TextEdit");
 	Ref<StyleBox> graph_sb = get_stylebox("normal","TextEdit");
 	Ref<Font> graph_font = get_font("font","TextEdit");
 

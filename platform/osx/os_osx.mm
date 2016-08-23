@@ -1497,6 +1497,16 @@ Size2 OS_OSX::get_window_size() const {
 void OS_OSX::set_window_size(const Size2 p_size) {
 
 	Size2 size=p_size;
+
+	// NSRect used by setFrame includes the title bar, so add it to our size.y
+	CGFloat menuBarHeight = [[[NSApplication sharedApplication] mainMenu] menuBarHeight];
+	if (menuBarHeight != 0.f) {
+		size.y+= menuBarHeight;
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= 101104
+	} else {
+		size.y+= [[NSStatusBar systemStatusBar] thickness];
+#endif
+	}
 	NSRect frame = [window_object frame];
 	[window_object setFrame:NSMakeRect(frame.origin.x, frame.origin.y, size.x, size.y) display:YES];
 };
@@ -1575,6 +1585,11 @@ bool OS_OSX::is_window_maximized() const {
 void OS_OSX::move_window_to_foreground() {
 
 	[window_object orderFrontRegardless];
+}
+
+void OS_OSX::request_attention() {
+
+	[NSApp requestUserAttention:NSCriticalRequest];
 }
 
 String OS_OSX::get_executable_path() const {
