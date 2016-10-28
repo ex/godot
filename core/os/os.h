@@ -62,6 +62,10 @@ class OS {
 	bool _pixel_snap;
 	bool _allow_hidpi;
 
+	uint64_t _fixed_frames;
+	uint64_t _idle_frames;
+	bool _in_fixed;
+
 	char *last_error;
 
 public:
@@ -282,6 +286,10 @@ public:
 
 	uint64_t get_frames_drawn();
 
+	uint64_t get_fixed_frames() const { return _fixed_frames; }
+	uint64_t get_idle_frames() const { return _idle_frames; }
+	bool is_in_fixed_frame() const { return _in_fixed; }
+
 	bool is_stdout_verbose() const;
 
 	enum CursorShape {
@@ -364,6 +372,7 @@ public:
 	virtual void set_screen_orientation(ScreenOrientation p_orientation);
 	ScreenOrientation get_screen_orientation() const;
 
+	virtual void enable_for_stealing_focus(ProcessID pid) {}
 	virtual void move_window_to_foreground() {}
 
 	virtual void debug_break();

@@ -73,8 +73,8 @@ class FindReplaceBar : public HBoxContainer {
 	TextureButton *hide_button;
 
 	LineEdit *replace_text;
-	ToolButton *replace;
-	ToolButton *replace_all;
+	Button *replace;
+	Button *replace_all;
 	CheckBox *selection_only;
 
 	VBoxContainer *text_vbc;
@@ -98,6 +98,7 @@ class FindReplaceBar : public HBoxContainer {
 	void _search_options_changed(bool p_pressed);
 	void _search_text_changed(const String& p_text);
 	void _search_text_entered(const String& p_text);
+	void _replace_text_entered(const String& p_text);
 
 protected:
 	void _notification(int p_what);
@@ -241,6 +242,7 @@ protected:
 
 public:
 
+	void update_editor_settings();
 	void set_error(const String& p_error);
 	void update_line_and_column() { _line_col_changed(); }
 	TextEdit *get_text_edit() { return text_editor; }

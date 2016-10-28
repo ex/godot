@@ -153,6 +153,7 @@ class SceneTreeDock : public VBoxContainer {
 	void _filter_changed(const String& p_filter);
 
 	void _perform_instance_scenes(const Vector<String>& p_files,Node* parent,int p_pos);
+	void _replace_with_branch_scene(const String& p_file,Node* base);
 
 protected:
 
@@ -162,6 +163,8 @@ public:
 
 	String get_filter();
 	void set_filter(const String& p_filter);
+
+	void _focus_node();
 
 	void import_subscene();
 	void set_edited_scene(Node* p_scene);
@@ -173,6 +176,7 @@ public:
 	SceneTreeEditor *get_tree_editor() { return scene_tree; }
 
 
+	void open_script_dialog(Node* p_for_node);
 	SceneTreeDock(EditorNode *p_editor,Node *p_scene_root,EditorSelection *p_editor_selection,EditorData &p_editor_data);
 };
 

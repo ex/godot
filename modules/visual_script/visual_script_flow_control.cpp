@@ -2,6 +2,7 @@
 #include "os/keyboard.h"
 #include "globals.h"
 
+
 //////////////////////////////////////////
 ////////////////RETURN////////////////////
 //////////////////////////////////////////
@@ -85,7 +86,7 @@ void VisualScriptReturn::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("set_enable_return_value","enable"),&VisualScriptReturn::set_enable_return_value);
 	ObjectTypeDB::bind_method(_MD("is_return_value_enabled"),&VisualScriptReturn::is_return_value_enabled);
 
-	String argt="Variant";
+	String argt="Any";
 	for(int i=1;i<Variant::VARIANT_MAX;i++) {
 		argt+=","+Variant::get_type_name(Variant::Type(i));
 	}
@@ -152,7 +153,7 @@ static Ref<VisualScriptNode> create_return_node(const String& p_name) {
 
 int VisualScriptCondition::get_output_sequence_port_count() const {
 
-	return 2;
+	return 3;
 }
 
 bool VisualScriptCondition::has_input_sequence_port() const{
@@ -173,8 +174,10 @@ String VisualScriptCondition::get_output_sequence_port_text(int p_port) const {
 
 	if (p_port==0)
 		return "true";
-	else
+	else if (p_port==1)
 		return "false";
+	else
+		return "done";
 }
 
 PropertyInfo VisualScriptCondition::get_input_value_port_info(int p_idx) const{
@@ -217,10 +220,12 @@ public:
 
 	virtual int step(const Variant** p_inputs,Variant** p_outputs,StartMode p_start_mode,Variant* p_working_mem,Variant::CallError& r_error,String& r_error_str) {
 
-		if (p_inputs[0]->operator bool())
-			return 0;
+		if (p_start_mode==START_MODE_CONTINUE_SEQUENCE)
+			return 2;
+		else if (p_inputs[0]->operator bool())
+			return 0 | STEP_FLAG_PUSH_STACK_BIT;
 		else
-			return 1;
+			return 1 | STEP_FLAG_PUSH_STACK_BIT;
 	}
 
 
@@ -598,70 +603,64 @@ VisualScriptSequence::VisualScriptSequence() {
 ////////////////EVENT TYPE FILTER///////////
 //////////////////////////////////////////
 
-static const char* event_type_names[InputEvent::TYPE_MAX]={
-	"None",
-	"Key",
-	"MouseMotion",
-	"MouseButton",
-	"JoystickMotion",
-	"JoystickButton",
-	"ScreenTouch",
-	"ScreenDrag",
-	"Action"
-};
+int VisualScriptSwitch::get_output_sequence_port_count() const {
 
-int VisualScriptInputSelector::get_output_sequence_port_count() const {
-
-	return InputEvent::TYPE_MAX;
+	return case_values.size()+1;
 }
 
-bool VisualScriptInputSelector::has_input_sequence_port() const{
+bool VisualScriptSwitch::has_input_sequence_port() const{
 
 	return true;
 }
 
-int VisualScriptInputSelector::get_input_value_port_count() const{
+int VisualScriptSwitch::get_input_value_port_count() const{
 
 
-	return 1;
+	return case_values.size()+1;
 }
-int VisualScriptInputSelector::get_output_value_port_count() const{
+int VisualScriptSwitch::get_output_value_port_count() const{
 
-	return 1;
-}
-
-String VisualScriptInputSelector::get_output_sequence_port_text(int p_port) const {
-
-	return event_type_names[p_port];
+	return 0;
 }
 
-PropertyInfo VisualScriptInputSelector::get_input_value_port_info(int p_idx) const{
+String VisualScriptSwitch::get_output_sequence_port_text(int p_port) const {
 
-	return PropertyInfo(Variant::INPUT_EVENT,"event");
+	if (p_port==case_values.size())
+		return "done";
+
+	return String();
 }
 
-PropertyInfo VisualScriptInputSelector::get_output_value_port_info(int p_idx) const{
+PropertyInfo VisualScriptSwitch::get_input_value_port_info(int p_idx) const{
 
-	return PropertyInfo(Variant::INPUT_EVENT,"");
+	if (p_idx<case_values.size()) {
+		return PropertyInfo(case_values[p_idx].type," =");
+	} else
+		return PropertyInfo(Variant::NIL,"input");
 }
 
+PropertyInfo VisualScriptSwitch::get_output_value_port_info(int p_idx) const{
 
-String VisualScriptInputSelector::get_caption() const {
-
-	return "InputSelector";
-}
-
-String VisualScriptInputSelector::get_text() const {
-
-	return "";
+	return PropertyInfo();
 }
 
 
-class VisualScriptNodeInstanceInputSelector : public VisualScriptNodeInstance {
+String VisualScriptSwitch::get_caption() const {
+
+	return "Switch";
+}
+
+String VisualScriptSwitch::get_text() const {
+
+	return "'input' is:";
+}
+
+
+class VisualScriptNodeInstanceSwitch : public VisualScriptNodeInstance {
 public:
 
 	VisualScriptInstance* instance;
-	InputEvent::Type type;
+	int case_count;
 
 	//virtual int get_working_memory_size() const { return 0; }
 	//virtual bool is_output_port_unsequenced(int p_idx) const { return false; }
@@ -669,37 +668,95 @@ public:
 
 	virtual int step(const Variant** p_inputs,Variant** p_outputs,StartMode p_start_mode,Variant* p_working_mem,Variant::CallError& r_error,String& r_error_str) {
 
-		if (p_inputs[0]->get_type()!=Variant::INPUT_EVENT) {
-			r_error_str="Input value not of type event";
-			r_error.error=Variant::CallError::CALL_ERROR_INVALID_METHOD;
-			return 0;
+		if (p_start_mode==START_MODE_CONTINUE_SEQUENCE) {
+			return case_count; //exit
 		}
 
-		InputEvent event = *p_inputs[0];
+		for(int i=0;i<case_count;i++) {
 
-		*p_outputs[0] = event;
+			if (*p_inputs[i]==*p_inputs[case_count]) {
+				return i|STEP_FLAG_PUSH_STACK_BIT;
+			}
+		}
 
-		return event.type;
+		return case_count;
 	}
 
 
 };
 
-VisualScriptNodeInstance* VisualScriptInputSelector::instance(VisualScriptInstance* p_instance) {
+VisualScriptNodeInstance* VisualScriptSwitch::instance(VisualScriptInstance* p_instance) {
 
-	VisualScriptNodeInstanceInputSelector * instance = memnew(VisualScriptNodeInstanceInputSelector );
+	VisualScriptNodeInstanceSwitch * instance = memnew(VisualScriptNodeInstanceSwitch );
 	instance->instance=p_instance;
+	instance->case_count=case_values.size();
 	return instance;
 }
 
+bool VisualScriptSwitch::_set(const StringName& p_name, const Variant& p_value) {
+
+	if (String(p_name)=="case_count") {
+		case_values.resize(p_value);
+		_change_notify();
+		ports_changed_notify();
+		return true;
+	}
+
+	if (String(p_name).begins_with("case/")) {
+
+		int idx = String(p_name).get_slice("/",1).to_int();
+		ERR_FAIL_INDEX_V(idx,case_values.size(),false);
+
+		case_values[idx].type=Variant::Type(int(p_value));
+		_change_notify();
+		ports_changed_notify();
+
+		return true;
+	}
+
+	return false;
+}
+
+bool VisualScriptSwitch::_get(const StringName& p_name,Variant &r_ret) const {
+
+	if (String(p_name)=="case_count") {
+		r_ret=case_values.size();
+		return true;
+	}
+
+	if (String(p_name).begins_with("case/")) {
+
+		int idx = String(p_name).get_slice("/",1).to_int();
+		ERR_FAIL_INDEX_V(idx,case_values.size(),false);
+
+		r_ret=case_values[idx].type;
+		return true;
+	}
+
+	return false;
+
+}
+void VisualScriptSwitch::_get_property_list( List<PropertyInfo> *p_list) const {
+
+	p_list->push_back(PropertyInfo(Variant::INT,"case_count",PROPERTY_HINT_RANGE,"0,128"));
+
+	String argt="Any";
+	for(int i=1;i<Variant::VARIANT_MAX;i++) {
+		argt+=","+Variant::get_type_name(Variant::Type(i));
+	}
+
+	for(int i=0;i<case_values.size();i++) {
+		p_list->push_back(PropertyInfo(Variant::INT,"case/"+itos(i),PROPERTY_HINT_ENUM,argt));
+	}
+}
 
 
-void VisualScriptInputSelector::_bind_methods() {
+void VisualScriptSwitch::_bind_methods() {
 
 
 }
 
-VisualScriptInputSelector::VisualScriptInputSelector() {
+VisualScriptSwitch::VisualScriptSwitch() {
 
 
 }
@@ -1354,6 +1411,19 @@ bool VisualScriptInputFilter::_get(const StringName& p_name,Variant &r_ret) cons
 	}
 	return false;
 }
+
+static const char* event_type_names[InputEvent::TYPE_MAX]={
+	"None",
+	"Key",
+	"MouseMotion",
+	"MouseButton",
+	"JoystickMotion",
+	"JoystickButton",
+	"ScreenTouch",
+	"ScreenDrag",
+	"Action"
+};
+
 void VisualScriptInputFilter::_get_property_list( List<PropertyInfo> *p_list) const {
 
 	p_list->push_back(PropertyInfo(Variant::INT,"filter_count",PROPERTY_HINT_RANGE,"0,64"));
@@ -1660,6 +1730,197 @@ VisualScriptInputFilter::VisualScriptInputFilter() {
 }
 
 
+//////////////////////////////////////////
+////////////////TYPE CAST///////////
+//////////////////////////////////////////
+
+
+int VisualScriptTypeCast::get_output_sequence_port_count() const {
+
+	return 2;
+}
+
+bool VisualScriptTypeCast::has_input_sequence_port() const{
+
+	return true;
+}
+
+int VisualScriptTypeCast::get_input_value_port_count() const{
+
+
+	return 1;
+}
+int VisualScriptTypeCast::get_output_value_port_count() const{
+
+	return 1;
+}
+
+String VisualScriptTypeCast::get_output_sequence_port_text(int p_port) const {
+
+	return p_port==0 ? "yes" : "no";
+}
+
+PropertyInfo VisualScriptTypeCast::get_input_value_port_info(int p_idx) const{
+
+	return PropertyInfo(Variant::OBJECT,"instance");
+}
+
+PropertyInfo VisualScriptTypeCast::get_output_value_port_info(int p_idx) const{
+
+	return PropertyInfo(Variant::OBJECT,"");
+}
+
+
+String VisualScriptTypeCast::get_caption() const {
+
+	return "TypeCast";
+}
+
+String VisualScriptTypeCast::get_text() const {
+
+	if (script!=String())
+		return "Is "+script.get_file()+"?";
+	else
+		return "Is "+base_type+"?";
+}
+
+void VisualScriptTypeCast::set_base_type(const StringName& p_type) {
+
+	if (base_type==p_type)
+		return;
+
+	base_type=p_type;
+	_change_notify();
+	ports_changed_notify();
+}
+
+StringName VisualScriptTypeCast::get_base_type() const{
+
+	return base_type;
+}
+
+void VisualScriptTypeCast::set_base_script(const String& p_path){
+
+	if (script==p_path)
+		return;
+
+	script=p_path;
+	_change_notify();
+	ports_changed_notify();
+
+}
+String VisualScriptTypeCast::get_base_script() const{
+
+	return script;
+}
+
+
+class VisualScriptNodeInstanceTypeCast : public VisualScriptNodeInstance {
+public:
+
+	VisualScriptInstance* instance;
+	StringName base_type;
+	String script;
+
+	//virtual int get_working_memory_size() const { return 0; }
+	//virtual bool is_output_port_unsequenced(int p_idx) const { return false; }
+	//virtual bool get_output_port_unsequenced(int p_idx,Variant* r_value,Variant* p_working_mem,String &r_error) const { return false; }
+
+	virtual int step(const Variant** p_inputs,Variant** p_outputs,StartMode p_start_mode,Variant* p_working_mem,Variant::CallError& r_error,String& r_error_str) {
+
+		Object *obj = *p_inputs[0];
+
+		*p_outputs[0]=Variant();
+
+		if (!obj) {
+			r_error.error=Variant::CallError::CALL_ERROR_INVALID_METHOD;
+			r_error_str="Instance is null";
+			return 0;
+		}
+
+		if (script!=String()) {
+
+			Ref<Script> obj_script = obj->get_script();
+			if (!obj_script.is_valid()) {
+				return 1; //well, definitely not the script because object we got has no script.
+			}
+
+			if (!ResourceCache::has(script)) {
+				//if the script is not in use by anyone, we can safely assume whathever we got is not casting to it.
+				return 1;
+			}
+			Ref<Script> cast_script = Ref<Resource>(ResourceCache::get(script));
+			if (!cast_script.is_valid()) {
+				r_error.error=Variant::CallError::CALL_ERROR_INVALID_METHOD;
+				r_error_str="Script path is not a script: "+script;
+				return 1;
+			}
+
+			while(obj_script.is_valid()) {
+
+				if (cast_script==obj_script) {
+					*p_outputs[0]=*p_inputs[0]; //copy
+					return 0; // it is the script, yey
+				}
+
+				obj_script=obj_script->get_base_script();
+			}
+
+			return 1; //not found sorry
+		}
+
+		if (ObjectTypeDB::is_type(obj->get_type_name(),base_type)) {
+			*p_outputs[0]=*p_inputs[0]; //copy
+			return 0;
+		} else
+			return 1;
+
+	}
+
+
+};
+
+VisualScriptNodeInstance* VisualScriptTypeCast::instance(VisualScriptInstance* p_instance) {
+
+	VisualScriptNodeInstanceTypeCast * instance = memnew(VisualScriptNodeInstanceTypeCast );
+	instance->instance=p_instance;
+	instance->base_type=base_type;
+	instance->script=script;
+	return instance;
+}
+
+
+
+void VisualScriptTypeCast::_bind_methods() {
+
+	ObjectTypeDB::bind_method(_MD("set_base_type","type"),&VisualScriptTypeCast::set_base_type);
+	ObjectTypeDB::bind_method(_MD("get_base_type"),&VisualScriptTypeCast::get_base_type);
+
+	ObjectTypeDB::bind_method(_MD("set_base_script","path"),&VisualScriptTypeCast::set_base_script);
+	ObjectTypeDB::bind_method(_MD("get_base_script"),&VisualScriptTypeCast::get_base_script);
+
+
+	List<String> script_extensions;
+	for(int i=0;i>ScriptServer::get_language_count();i++) {
+		ScriptServer::get_language(i)->get_recognized_extensions(&script_extensions);
+	}
+
+	String script_ext_hint;
+	for (List<String>::Element *E=script_extensions.front();E;E=E->next()) {
+		if (script_ext_hint!=String())
+			script_ext_hint+=",";
+		script_ext_hint+="*."+E->get();
+	}
+
+	ADD_PROPERTY(PropertyInfo(Variant::STRING,"function/base_type",PROPERTY_HINT_TYPE_STRING,"Object"),_SCS("set_base_type"),_SCS("get_base_type"));
+	ADD_PROPERTY(PropertyInfo(Variant::STRING,"property/base_script",PROPERTY_HINT_FILE,script_ext_hint),_SCS("set_base_script"),_SCS("get_base_script"));
+
+}
+
+VisualScriptTypeCast::VisualScriptTypeCast() {
+
+	base_type="Object";
+}
 
 
 void register_visual_script_flow_control_nodes() {
@@ -1670,8 +1931,9 @@ void register_visual_script_flow_control_nodes() {
 	VisualScriptLanguage::singleton->add_register_func("flow_control/while",create_node_generic<VisualScriptWhile>);
 	VisualScriptLanguage::singleton->add_register_func("flow_control/iterator",create_node_generic<VisualScriptIterator>);
 	VisualScriptLanguage::singleton->add_register_func("flow_control/sequence",create_node_generic<VisualScriptSequence>);
-	VisualScriptLanguage::singleton->add_register_func("flow_control/input_select",create_node_generic<VisualScriptInputSelector>);
+	VisualScriptLanguage::singleton->add_register_func("flow_control/switch",create_node_generic<VisualScriptSwitch>);
 	VisualScriptLanguage::singleton->add_register_func("flow_control/input_filter",create_node_generic<VisualScriptInputFilter>);
+	VisualScriptLanguage::singleton->add_register_func("flow_control/type_cast",create_node_generic<VisualScriptTypeCast>);
 
 
 

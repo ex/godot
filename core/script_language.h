@@ -38,6 +38,8 @@
 
 class ScriptLanguage;
 
+typedef void (*ScriptEditRequestFunction)(const String& p_path);
+
 class ScriptServer {
 	enum {
 
@@ -49,6 +51,8 @@ class ScriptServer {
 	static bool scripting_enabled;
 	static bool reload_scripts_on_save;
 public:
+
+	static ScriptEditRequestFunction edit_request_func;
 
 	static void set_scripting_enabled(bool p_enabled);
 	static bool is_scripting_enabled();
@@ -88,6 +92,8 @@ public:
 
 	virtual bool can_instance() const=0;
 
+	virtual Ref<Script> get_base_script() const=0; //for script inheritance
+
 	virtual StringName get_instance_base_type() const=0; // this may not work in all scripts, will return empty if so
 	virtual ScriptInstance* instance_create(Object *p_this)=0;
 	virtual bool instance_has(const Object *p_this) const=0;
@@ -114,7 +120,9 @@ public:
 
 	virtual void update_exports() {} //editor tool
 	virtual void get_script_method_list(List<MethodInfo> *p_list) const=0;
+	virtual void get_script_property_list(List<PropertyInfo> *p_list) const=0;
 
+	virtual int get_member_line(const StringName& p_member) const { return 0; }
 
 	Script() {}
 };
@@ -200,7 +208,26 @@ public:
 	virtual bool has_named_classes() const=0;
 	virtual int find_function(const String& p_function,const String& p_code) const=0;
 	virtual String make_function(const String& p_class,const String& p_name,const StringArray& p_args) const=0;
+
 	virtual Error complete_code(const String& p_code, const String& p_base_path, Object*p_owner,List<String>* r_options,String& r_call_hint) { return ERR_UNAVAILABLE; }
+
+	struct LookupResult {
+		enum Type {
+			RESULT_SCRIPT_LOCATION,
+			RESULT_CLASS,
+			RESULT_CLASS_CONSTANT,
+			RESULT_CLASS_PROPERTY,
+			RESULT_CLASS_METHOD
+		};
+		Type type;
+		Ref<Script> script;
+		String class_name;
+		String class_member;
+		int location;
+	};
+
+	virtual Error lookup_code(const String& p_code, const String& p_symbol,const String& p_base_path, Object*p_owner,LookupResult& r_result) { return ERR_UNAVAILABLE; }
+
 	virtual void auto_indent_code(String& p_code,int p_from_line,int p_to_line) const=0;
 	virtual void add_global_constant(const StringName& p_variable,const Variant& p_value)=0;
 

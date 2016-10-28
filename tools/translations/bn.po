@@ -8,7 +8,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
-"PO-Revision-Date: 2016-08-10 17:10+0000\n"
+"PO-Revision-Date: 2016-09-02 13:47+0000\n"
 "Last-Translator: ABU MD. MARUF SARKER <maruf.webdev@gmail.com>\n"
 "Language-Team: Bengali <https://hosted.weblate.org/projects/godot-engine/"
 "godot/bn/>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.8-dev\n"
+"X-Generator: Weblate 2.8\n"
 
 #: modules/gdscript/gd_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -31,6 +31,12 @@ msgstr "বিন্যাস জানার জন্য যথেষ্ট �
 #: modules/gdscript/gd_functions.cpp
 msgid "step argument is zero!"
 msgstr "ধাপ মান শূন্য!"
+
+#: modules/gdscript/gd_functions.cpp
+msgid ""
+"Paths cannot start with '/', absolute paths must start with 'res://', "
+"'user://', or 'local://'"
+msgstr ""
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Not a script with an instance"
@@ -65,100 +71,140 @@ msgid ""
 "A node yielded without working memory, please read the docs on how to yield "
 "properly!"
 msgstr ""
+"একটি নোড কার্যকর মেমোরি ছাড়াই উৎপন্ন হয়েছে, কি করে সঠিকভাবে সরবারহ করতে হয় তা "
+"অনুগ্রহ করে ডকুমেন্টেশনে পড়ুন!"
 
 #: modules/visual_script/visual_script.cpp
 msgid ""
 "Node yielded, but did not return a function state in the first working "
 "memory."
 msgstr ""
+"নোড ডাকা হয়েছে, কিন্তু প্রথম কার্যকর মেমোরিতে ফাংশনের কোনো অবস্থা ফেরত পাঠায়নি।"
 
 #: modules/visual_script/visual_script.cpp
 msgid ""
 "Return value must be assigned to first element of node working memory! Fix "
 "your node please."
 msgstr ""
+"নোডের কার্যকর মেমোরির প্রাথমিক উপাদানে অবশ্যই ফিরতি মান নির্দিষ্ট করতে হবে! অনুগ্রহ "
+"করে আপনার নোডটি মেরামত করুন।"
 
 #: modules/visual_script/visual_script.cpp
 msgid "Node returned an invalid sequence output: "
-msgstr ""
+msgstr "নোড অনিয়মিত ক্রমের ফলাফল পাঠিয়েছে: "
 
 #: modules/visual_script/visual_script.cpp
 msgid "Found sequence bit but not the node in the stack, report bug!"
 msgstr ""
+"ক্রম বিট (bit) পাওয়া গিয়েছে কিন্তু নোডটি স্ট্যাক/তাক-এ নেই, সমস্যাটি রিপোর্ট করুন!"
 
 #: modules/visual_script/visual_script.cpp
 msgid "Stack overflow with stack depth: "
-msgstr ""
+msgstr "স্ট্যাক/তাক-এর গভীরতায় স্ট্যাক/তাক অধিপ্রবাহিত/প্লাবিত হয়েছে: "
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Functions:"
-msgstr ""
+msgstr "ফাংশনগুলি:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Variables:"
-msgstr ""
+msgstr "ভেরিয়েবলস/চলকসমূহ:"
 
 #: modules/visual_script/visual_script_editor.cpp tools/editor/editor_help.cpp
 msgid "Signals:"
-msgstr ""
+msgstr "সিগন্যালস/সংকেতসমূহ:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Name is not a valid identifier:"
-msgstr ""
+msgstr "নামটি কার্যকর সনাক্তকারী নয়:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Name already in use by another func/var/signal:"
-msgstr ""
+msgstr "নামটি ইতিমধ্যেই অপর ফাংশন/চলক(ভেরিয়েবল)/সংকেত(সিগন্যাল)-এ ব্যবহৃত হয়েছে:"
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Rename Function"
-msgstr "নির্বাচিত সমূহ অপসারণ করুন"
+msgstr "ফাংশনের (Function) নতুন নামকরণ করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Rename Variable"
-msgstr ""
+msgstr "চলক/ভেরিয়েবল-এর নামান্তর করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Rename Signal"
-msgstr ""
+msgstr "সংকেত/সিগন্যাল-এর নামান্তর করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Function"
-msgstr ""
+msgstr "ফাংশন সংযোজন করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Variable"
-msgstr ""
+msgstr "চলক/ভেরিয়েবল সংযোজন করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Signal"
-msgstr ""
+msgstr "সংকেত/সিগন্যাল সংযোজন করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Remove Function"
-msgstr "নির্বাচিত সমূহ অপসারণ করুন"
+msgstr "ফাংশন (Function) অপসারণ করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Remove Variable"
-msgstr ""
+msgstr "চলক/ভেরিয়েবল অপসারণ করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Editing Variable:"
-msgstr ""
+msgstr "চলক/ভেরিয়েবল সম্পাদন:"
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Remove Signal"
-msgstr "নির্বাচিত সমূহ অপসারণ করুন"
+msgstr "সংকেত (Signal) অপসারণ করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Editing Signal:"
-msgstr ""
+msgstr "সংকেত/সিগন্যাল সম্পাদন:"
+
+#: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
+msgid "Change Expression"
+msgstr "অ্যানিমেশনের (Anim) ট্র্যানজিশন/স্থানান্তরণ পরিবর্তন করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Node"
+msgstr "নোড সংযোজন করুন"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a Getter. Hold Shift to drop a generic signature."
+msgstr ""
+"গেটার (Getter) ফেলতে/নামাতে মেটা কী (Meta) চাপুন। জেনেরিক সিগনেচার (generic "
+"signature) ফেলতে/নামাতে শিফট কী (Shift) চাপুন।"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a Getter. Hold Shift to drop a generic signature."
+msgstr ""
+"গেটার (Getter) ফেলতে/নামাতে কন্ট্রোল কী (Ctrl) চাপুন। জেনেরিক সিগনেচার (generic "
+"signature) ফেলতে/নামাতে শিফট কী (Shift) চাপুন।"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a simple reference to the node."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a simple reference to the node."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a Variable Setter."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a Variable Setter."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Add Preload Node"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
@@ -166,11 +212,49 @@ msgid "Add Node(s) From Tree"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
+msgid "Add Getter Property"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
 msgid "Add Setter Property"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-msgid "Add Getter Property"
+#, fuzzy
+msgid "Condition"
+msgstr "অনুবাদসমূহ"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Sequence"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Switch"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Iterator"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "While"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Return"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp tools/editor/call_dialog.cpp
+msgid "Call"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Get"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+#: tools/editor/property_editor.cpp
+msgid "Set"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
@@ -224,9 +308,8 @@ msgid "Change"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Delete Selected"
-msgstr "নির্বাচিত সমূহ অনুলিপি করুন"
+msgstr "নির্বাচিত সমূহ অপসারণ করুন"
 
 #: modules/visual_script/visual_script_editor.cpp
 #: tools/editor/plugins/script_text_editor.cpp
@@ -234,8 +317,20 @@ msgid "Toggle Breakpoint"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-msgid "Find Node Tyoe"
+msgid "Find Node Type"
 msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Copy Nodes"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Cut Nodes"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Paste Nodes"
+msgstr "নোড-সমূহ প্রতিলেপন/পেস্ট করুন"
 
 #: modules/visual_script/visual_script_flow_control.cpp
 msgid "Input type not iterable: "
@@ -282,12 +377,6 @@ msgid "VariableSet not found in script: "
 msgstr ""
 
 #: modules/visual_script/visual_script_nodes.cpp
-msgid ""
-"Custom node has no _get_output_port_unsequenced(idx,wmem), but unsequenced "
-"ports were specified."
-msgstr ""
-
-#: modules/visual_script/visual_script_nodes.cpp
 msgid "Custom node has no _step() method, can't process graph."
 msgstr ""
 
@@ -295,6 +384,87 @@ msgstr ""
 msgid ""
 "Invalid return value from _step(), must be integer (seq out), or string "
 "(error)."
+msgstr ""
+
+#: modules/visual_script/visual_script_nodes.cpp
+msgid "just pressed"
+msgstr ""
+
+#: modules/visual_script/visual_script_nodes.cpp
+msgid "just released"
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid ""
+"Couldn't read the certficate file. Are the path and password both correct?"
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Error creating the signature object."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Error creating the package signature."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid ""
+"No export templates found.\n"
+"Download and install export templates."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Custom debug package not found."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Custom release package not found."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+#, fuzzy
+msgid "Invalid unique name."
+msgstr "ফন্টের আকার অগ্র্যহনযোগ্য।"
+
+#: platform/winrt/export/export.cpp
+#, fuzzy
+msgid "Invalid product GUID."
+msgstr "ফন্টের আকার অগ্র্যহনযোগ্য।"
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid publisher GUID."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid background color."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
 msgstr ""
 
 #: scene/2d/animated_sprite.cpp
@@ -478,6 +648,11 @@ msgstr ""
 "NavigationMeshInstance-কে অবশ্যই Navigation-এর অংশ অথবা অংশের অংশ হতে হবে। "
 "এটা শুধুমাত্র ন্যাভিগেশনের তথ্য প্রদান করে।"
 
+#: scene/3d/remote_transform.cpp
+#, fuzzy
+msgid "Path property must point to a valid Spatial node to work."
+msgstr "Path এর দিক অবশ্যই একটি কার্যকর Particles2D এর দিকে নির্দেশ করাতে হবে।"
+
 #: scene/3d/scenario_fx.cpp
 msgid ""
 "Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
@@ -532,7 +707,8 @@ msgstr "সব ফাইল (*)"
 #: scene/gui/file_dialog.cpp tools/editor/editor_file_dialog.cpp
 #: tools/editor/editor_help.cpp tools/editor/editor_node.cpp
 #: tools/editor/filesystem_dock.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 msgid "Open"
 msgstr "খুলুন"
 
@@ -1075,7 +1251,8 @@ msgstr ""
 
 #: tools/editor/asset_library_editor_plugin.cpp tools/editor/create_dialog.cpp
 #: tools/editor/editor_help.cpp tools/editor/editor_node.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 #: tools/editor/settings_config_dialog.cpp
 msgid "Search:"
 msgstr ""
@@ -1123,10 +1300,6 @@ msgstr ""
 
 #: tools/editor/call_dialog.cpp
 msgid "Method List For '%s':"
-msgstr ""
-
-#: tools/editor/call_dialog.cpp
-msgid "Call"
 msgstr ""
 
 #: tools/editor/call_dialog.cpp
@@ -1248,6 +1421,12 @@ msgid "Method in target Node must be specified!"
 msgstr ""
 
 #: tools/editor/connections_dialog.cpp
+msgid ""
+"Target method not found! Specify a valid method or attach a script to target "
+"Node."
+msgstr ""
+
+#: tools/editor/connections_dialog.cpp
 msgid "Connect To Node:"
 msgstr ""
 
@@ -1323,9 +1502,24 @@ msgstr ""
 msgid "Create New"
 msgstr ""
 
+#: tools/editor/create_dialog.cpp tools/editor/editor_file_dialog.cpp
+#: tools/editor/filesystem_dock.cpp
+msgid "Favorites:"
+msgstr ""
+
+#: tools/editor/create_dialog.cpp tools/editor/editor_file_dialog.cpp
+msgid "Recent:"
+msgstr ""
+
 #: tools/editor/create_dialog.cpp tools/editor/editor_help.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 msgid "Matches:"
+msgstr ""
+
+#: tools/editor/create_dialog.cpp tools/editor/editor_help.cpp
+#: tools/editor/property_selector.cpp tools/editor/script_editor_debugger.cpp
+msgid "Description:"
 msgstr ""
 
 #: tools/editor/dependency_editor.cpp
@@ -1589,14 +1783,6 @@ msgstr ""
 msgid "Move Favorite Down"
 msgstr ""
 
-#: tools/editor/editor_file_dialog.cpp tools/editor/filesystem_dock.cpp
-msgid "Favorites:"
-msgstr ""
-
-#: tools/editor/editor_file_dialog.cpp
-msgid "Recent:"
-msgstr ""
-
 #: tools/editor/editor_file_dialog.cpp
 msgid "Preview:"
 msgstr ""
@@ -1644,10 +1830,6 @@ msgstr ""
 
 #: tools/editor/editor_help.cpp
 msgid "Constants:"
-msgstr ""
-
-#: tools/editor/editor_help.cpp tools/editor/script_editor_debugger.cpp
-msgid "Description:"
 msgstr ""
 
 #: tools/editor/editor_help.cpp
@@ -1995,14 +2177,6 @@ msgid "Go to previously opened scene."
 msgstr ""
 
 #: tools/editor/editor_node.cpp
-msgid "Fullscreen Mode"
-msgstr ""
-
-#: tools/editor/editor_node.cpp
-msgid "Distraction Free Mode"
-msgstr ""
-
-#: tools/editor/editor_node.cpp
 msgid "Next tab"
 msgstr ""
 
@@ -2085,6 +2259,10 @@ msgstr ""
 
 #: tools/editor/editor_node.cpp
 msgid "Quit to Project List"
+msgstr ""
+
+#: tools/editor/editor_node.cpp
+msgid "Distraction Free Mode"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
@@ -2246,6 +2424,10 @@ msgid "Editor Layout"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
+msgid "Toggle Fullscreen"
+msgstr ""
+
+#: tools/editor/editor_node.cpp
 msgid "Install Export Templates"
 msgstr ""
 
@@ -2267,6 +2449,10 @@ msgstr ""
 
 #: tools/editor/editor_node.cpp
 msgid "Update Changes"
+msgstr ""
+
+#: tools/editor/editor_node.cpp
+msgid "Disable Update Spinner"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
@@ -2307,6 +2493,10 @@ msgstr ""
 
 #: tools/editor/editor_node.cpp
 msgid "FileSystem"
+msgstr ""
+
+#: tools/editor/editor_node.cpp tools/editor/node_dock.cpp
+msgid "Node"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
@@ -3138,10 +3328,6 @@ msgid "MultiNode Set"
 msgstr ""
 
 #: tools/editor/node_dock.cpp
-msgid "Node"
-msgstr ""
-
-#: tools/editor/node_dock.cpp
 msgid "Groups"
 msgstr ""
 
@@ -3579,9 +3765,8 @@ msgid "Paste Pose"
 msgstr ""
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Select Mode"
-msgstr "সবগুলি বাছাই করুন"
+msgstr "মোড (Mode) বাছাই করুন"
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Drag: Rotate"
@@ -3600,9 +3785,8 @@ msgid "Alt+RMB: Depth list selection"
 msgstr ""
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Move Mode"
-msgstr "সংযোগ (অ্যাড) বোতাম সরান"
+msgstr "মোড (Mode) সরান"
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Rotate Mode"
@@ -3680,6 +3864,10 @@ msgstr ""
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Clear Bones"
+msgstr ""
+
+#: tools/editor/plugins/canvas_item_editor_plugin.cpp
+msgid "Show Bones"
 msgstr ""
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
@@ -4421,6 +4609,11 @@ msgid "Close Docs"
 msgstr ""
 
 #: tools/editor/plugins/script_editor_plugin.cpp
+#, fuzzy
+msgid "Close All"
+msgstr "সবগুলি বাছাই করুন"
+
+#: tools/editor/plugins/script_editor_plugin.cpp
 #: tools/editor/plugins/script_text_editor.cpp
 #: tools/editor/plugins/shader_editor_plugin.cpp
 msgid "Find.."
@@ -4526,6 +4719,10 @@ msgstr ""
 #: tools/editor/plugins/script_editor_plugin.cpp
 msgid ""
 "Built-in scripts can only be edited when the scene they belong to is loaded"
+msgstr ""
+
+#: tools/editor/plugins/script_text_editor.cpp
+msgid "Pick Color"
 msgstr ""
 
 #: tools/editor/plugins/script_text_editor.cpp tools/editor/scene_tree_dock.cpp
@@ -4904,6 +5101,10 @@ msgid "Insert Animation Key"
 msgstr ""
 
 #: tools/editor/plugins/spatial_editor_plugin.cpp
+msgid "Focus Origin"
+msgstr ""
+
+#: tools/editor/plugins/spatial_editor_plugin.cpp
 msgid "Focus Selection"
 msgstr ""
 
@@ -5166,6 +5367,10 @@ msgstr ""
 #: tools/editor/plugins/theme_editor_plugin.cpp
 #: tools/editor/plugins/tile_set_editor_plugin.cpp
 msgid "Remove Item"
+msgstr ""
+
+#: tools/editor/plugins/theme_editor_plugin.cpp
+msgid "Theme"
 msgstr ""
 
 #: tools/editor/plugins/theme_editor_plugin.cpp
@@ -5980,6 +6185,10 @@ msgid "Assign"
 msgstr ""
 
 #: tools/editor/property_editor.cpp
+msgid "New Script"
+msgstr ""
+
+#: tools/editor/property_editor.cpp
 msgid "Error loading file: Not a resource!"
 msgstr ""
 
@@ -5996,10 +6205,6 @@ msgid "On"
 msgstr ""
 
 #: tools/editor/property_editor.cpp
-msgid "Set"
-msgstr ""
-
-#: tools/editor/property_editor.cpp
 msgid "Properties:"
 msgstr ""
 
@@ -6010,6 +6215,14 @@ msgstr ""
 #: tools/editor/property_editor.cpp
 msgid "Sections:"
 msgstr ""
+
+#: tools/editor/property_selector.cpp
+msgid "Select Property"
+msgstr "গুণাগুণ/বৈশিষ্ট্য বাছাই করুন"
+
+#: tools/editor/property_selector.cpp
+msgid "Select Method"
+msgstr "মেথড/পদ্ধতি বাছাই করুন"
 
 #: tools/editor/pvrtc_compress.cpp
 msgid "Could not execute PVRTC tool:"
@@ -6216,9 +6429,8 @@ msgid "Save Branch as Scene"
 msgstr ""
 
 #: tools/editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Delete (No Confirm)"
-msgstr "অনুগ্রহ করে নিশ্চিত করুন..."
+msgstr "অপসারণ করুন (নিশ্চয়তাকরণ নেই)"
 
 #: tools/editor/scene_tree_dock.cpp
 msgid "Add/Create a New Node"

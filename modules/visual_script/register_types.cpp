@@ -36,12 +36,17 @@
 #include "visual_script_builtin_funcs.h"
 #include "visual_script_flow_control.h"
 #include "visual_script_yield_nodes.h"
+#include "visual_script_expression.h"
 
 
 VisualScriptLanguage *visual_script_language=NULL;
 
 
 void register_visual_script_types() {
+
+	visual_script_language=memnew( VisualScriptLanguage );
+	//script_language_gd->init();
+	ScriptServer::register_language(visual_script_language);
 
 	ObjectTypeDB::register_type<VisualScript>();
 	ObjectTypeDB::register_virtual_type<VisualScriptNode>();
@@ -54,7 +59,9 @@ void register_visual_script_types() {
 	ObjectTypeDB::register_type<VisualScriptIndexGet>();
 	ObjectTypeDB::register_type<VisualScriptIndexSet>();
 	ObjectTypeDB::register_type<VisualScriptGlobalConstant>();
+	ObjectTypeDB::register_type<VisualScriptClassConstant>();
 	ObjectTypeDB::register_type<VisualScriptMathConstant>();
+	ObjectTypeDB::register_type<VisualScriptBasicTypeConstant>();
 	ObjectTypeDB::register_type<VisualScriptEngineSingleton>();
 	ObjectTypeDB::register_type<VisualScriptSceneNode>();
 	ObjectTypeDB::register_type<VisualScriptSceneTree>();
@@ -62,11 +69,20 @@ void register_visual_script_types() {
 	ObjectTypeDB::register_type<VisualScriptSelf>();
 	ObjectTypeDB::register_type<VisualScriptCustomNode>();
 	ObjectTypeDB::register_type<VisualScriptSubCall>();
+	ObjectTypeDB::register_type<VisualScriptComment>();
+	ObjectTypeDB::register_type<VisualScriptConstructor>();
+	ObjectTypeDB::register_type<VisualScriptLocalVar>();
+	ObjectTypeDB::register_type<VisualScriptLocalVarSet>();
+	ObjectTypeDB::register_type<VisualScriptInputAction>();
+	ObjectTypeDB::register_type<VisualScriptDeconstruct>();
+	ObjectTypeDB::register_type<VisualScriptPreload>();
+	ObjectTypeDB::register_type<VisualScriptTypeCast>();
+
 
 	ObjectTypeDB::register_type<VisualScriptFunctionCall>();
 	ObjectTypeDB::register_type<VisualScriptPropertySet>();
 	ObjectTypeDB::register_type<VisualScriptPropertyGet>();
-	ObjectTypeDB::register_type<VisualScriptScriptCall>();
+//	ObjectTypeDB::register_type<VisualScriptScriptCall>();
 	ObjectTypeDB::register_type<VisualScriptEmitSignal>();
 
 	ObjectTypeDB::register_type<VisualScriptReturn>();
@@ -75,22 +91,22 @@ void register_visual_script_types() {
 	ObjectTypeDB::register_type<VisualScriptIterator>();
 	ObjectTypeDB::register_type<VisualScriptSequence>();
 	ObjectTypeDB::register_type<VisualScriptInputFilter>();
-	ObjectTypeDB::register_type<VisualScriptInputSelector>();
+	ObjectTypeDB::register_type<VisualScriptSwitch	>();
 
 	ObjectTypeDB::register_type<VisualScriptYield>();
 	ObjectTypeDB::register_type<VisualScriptYieldSignal>();
 
 	ObjectTypeDB::register_type<VisualScriptBuiltinFunc>();
 
-	visual_script_language=memnew( VisualScriptLanguage );
-	//script_language_gd->init();
-	ScriptServer::register_language(visual_script_language);
+
+	ObjectTypeDB::register_type<VisualScriptExpression>();
 
 	register_visual_script_nodes();
 	register_visual_script_func_nodes();
 	register_visual_script_builtin_func_node();
 	register_visual_script_flow_control_nodes();
 	register_visual_script_yield_nodes();
+	register_visual_script_expression_node();
 
 #ifdef TOOLS_ENABLED
 	VisualScriptEditor::register_editor();
@@ -102,8 +118,13 @@ void register_visual_script_types() {
 void unregister_visual_script_types() {
 
 
+	unregister_visual_script_nodes();
+
 	ScriptServer::unregister_language(visual_script_language);
 
+#ifdef TOOLS_ENABLED
+	VisualScriptEditor::free_clipboard();
+#endif
 	if (visual_script_language)
 		memdelete( visual_script_language );
 

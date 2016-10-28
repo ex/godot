@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
-"PO-Revision-Date: 2016-08-10 10:28+0000\n"
+"PO-Revision-Date: 2016-08-12 09:47+0000\n"
 "Last-Translator: matevž lapajne <sivar.lapajne@gmail.com>\n"
 "Language-Team: Slovenian <https://hosted.weblate.org/projects/godot-engine/"
 "godot/sl/>\n"
@@ -21,20 +21,26 @@ msgstr ""
 #: modules/gdscript/gd_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
 msgid "Invalid type argument to convert(), use TYPE_* constants."
-msgstr "Neveljaven tip argumenta za convert(), use TYPE_* constants."
+msgstr "Neveljavena vrsta argumenta za convert(), uporabite TYPE_* konstanto."
 
 #: modules/gdscript/gd_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
 msgid "Not enough bytes for decoding bytes, or invalid format."
-msgstr "Ni dovolj bajtov za dekodiranje bajtov, ali neveljaven format."
+msgstr "Ni dovolj pomnilnika za dekodiranje bajtov, ali neveljaven format."
 
 #: modules/gdscript/gd_functions.cpp
 msgid "step argument is zero!"
 msgstr "stopnja argumenta je nič!"
 
 #: modules/gdscript/gd_functions.cpp
+msgid ""
+"Paths cannot start with '/', absolute paths must start with 'res://', "
+"'user://', or 'local://'"
+msgstr ""
+
+#: modules/gdscript/gd_functions.cpp
 msgid "Not a script with an instance"
-msgstr "Ni skripta z primerom"
+msgstr "To ni skripta z instanco"
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Not based on a script"
@@ -42,20 +48,20 @@ msgstr "Ne temelji na skripti"
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Not based on a resource file"
-msgstr "Ne temelji na viru datoteke"
+msgstr "Ne temelji na datoteki virov"
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Invalid instance dictionary format (missing @path)"
-msgstr "Neveljaven primer slovarskega formata (manjka @path)"
+msgstr "Neveljaven primer formata slovarja (manjka @path)"
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Invalid instance dictionary format (can't load script at @path)"
 msgstr ""
-"Neveljaven primer slovarskega formata (ne morem naložiti skripte ob @path)"
+"Neveljaven primer formata slovarja (ni mogoče naložiti skripte iz @path)"
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Invalid instance dictionary format (invalid script at @path)"
-msgstr "Neveljaven primer slovarskega formata (neveljavna skripta na @path)"
+msgstr "Neveljaven primer formata slovarja (neveljavna skripta v @path)"
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Invalid instance dictionary (invalid subclasses)"
@@ -66,109 +72,185 @@ msgid ""
 "A node yielded without working memory, please read the docs on how to yield "
 "properly!"
 msgstr ""
+"Node je bil sprejet brez potrebnega pomnilnika, pravilen postopek je opisan "
+"v dokumentaciji!"
 
 #: modules/visual_script/visual_script.cpp
 msgid ""
 "Node yielded, but did not return a function state in the first working "
 "memory."
 msgstr ""
+"Node pridobljen, vendar se ne vrne v funkcijalno stanje v prvem delavnem "
+"spominu."
 
 #: modules/visual_script/visual_script.cpp
 msgid ""
 "Return value must be assigned to first element of node working memory! Fix "
 "your node please."
 msgstr ""
+"Vrnjena vrednost mora biti dodeljena prvemu elementu v node-delavnemu "
+"spominu! Prosim, da popraviš node."
 
 #: modules/visual_script/visual_script.cpp
 msgid "Node returned an invalid sequence output: "
-msgstr ""
+msgstr "Node je vrnil napačno zaporedje na izhodu: "
 
 #: modules/visual_script/visual_script.cpp
 msgid "Found sequence bit but not the node in the stack, report bug!"
-msgstr ""
+msgstr "Zaporedni bit najden, vendar ne node v skladu, prijavi napako!"
 
 #: modules/visual_script/visual_script.cpp
 msgid "Stack overflow with stack depth: "
-msgstr ""
+msgstr "Sklad prepoln z stack depth: "
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Functions:"
-msgstr ""
+msgstr "Funkcije:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Variables:"
-msgstr ""
+msgstr "Spremenljivke:"
 
 #: modules/visual_script/visual_script_editor.cpp tools/editor/editor_help.cpp
 msgid "Signals:"
-msgstr ""
+msgstr "Signali:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Name is not a valid identifier:"
-msgstr ""
+msgstr "Ime ni pravilen identifikator:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Name already in use by another func/var/signal:"
-msgstr ""
+msgstr "Ime že uporablja druga funkcija/sprem/signal:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Rename Function"
-msgstr ""
+msgstr "Preimenuj Funkcijo"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Rename Variable"
-msgstr ""
+msgstr "Preimenuj Spremenljivko"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Rename Signal"
-msgstr ""
+msgstr "Preimenuj Signal"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Function"
-msgstr ""
+msgstr "Dodaj Funkcijo"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Variable"
-msgstr ""
+msgstr "Dodaj Spremenljivko"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Signal"
-msgstr ""
+msgstr "Dodaj Signal"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Remove Function"
-msgstr ""
+msgstr "Odstrani Funkcijo"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Remove Variable"
-msgstr ""
+msgstr "Odstrani Spremenljivko"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Editing Variable:"
-msgstr ""
+msgstr "Urejanje Spremenljivke:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Remove Signal"
-msgstr ""
+msgstr "Odstrani Signal"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Editing Signal:"
+msgstr "Urejanje Signala:"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Change Expression"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Node"
+msgstr "Dodaj Node"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a Getter. Hold Shift to drop a generic signature."
 msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a Getter. Hold Shift to drop a generic signature."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a simple reference to the node."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a simple reference to the node."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a Variable Setter."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a Variable Setter."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
+msgid "Add Preload Node"
+msgstr "Dodaj Node"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Node(s) From Tree"
-msgstr ""
-
-#: modules/visual_script/visual_script_editor.cpp
-msgid "Add Setter Property"
-msgstr ""
+msgstr "Dodaj Node(e) iz Drevesa"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Getter Property"
+msgstr "Dodaj Getter Lastnost"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Add Setter Property"
+msgstr "Dodaj Setter Lastnost"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Condition"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Sequence"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Switch"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Iterator"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "While"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Return"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp tools/editor/call_dialog.cpp
+msgid "Call"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Get"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+#: tools/editor/property_editor.cpp
+msgid "Set"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
@@ -178,23 +260,23 @@ msgstr ""
 #: tools/editor/plugins/shader_editor_plugin.cpp
 #: tools/editor/project_manager.cpp
 msgid "Edit"
-msgstr ""
+msgstr "Uredi"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Base Type:"
-msgstr ""
+msgstr "Osnovni Tip:"
 
 #: modules/visual_script/visual_script_editor.cpp tools/editor/editor_help.cpp
 msgid "Members:"
-msgstr ""
+msgstr "Člani:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Available Nodes:"
-msgstr ""
+msgstr "Na voljo Nodes:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Select or create a function to edit graph"
-msgstr ""
+msgstr "Izberi ali ustvari funkcijo za urejanje grafa"
 
 #: modules/visual_script/visual_script_editor.cpp tools/editor/call_dialog.cpp
 #: tools/editor/connections_dialog.cpp
@@ -207,91 +289,180 @@ msgstr ""
 #: tools/editor/project_settings.cpp tools/editor/property_editor.cpp
 #: tools/editor/run_settings_dialog.cpp tools/editor/settings_config_dialog.cpp
 msgid "Close"
-msgstr ""
+msgstr "Zapri"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Edit Signal Arguments:"
-msgstr ""
+msgstr "Uredi Argumente Signala:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Edit Variable:"
-msgstr ""
+msgstr "Uredi Spremenljivko:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Change"
-msgstr ""
+msgstr "Spremeni"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Delete Selected"
-msgstr ""
+msgstr "Izbriši Izbrano"
 
 #: modules/visual_script/visual_script_editor.cpp
 #: tools/editor/plugins/script_text_editor.cpp
 msgid "Toggle Breakpoint"
+msgstr "Preklopi na Zaustavitev"
+
+#: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
+msgid "Find Node Type"
+msgstr "Najdi Node Type"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Copy Nodes"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-msgid "Find Node Tyoe"
+msgid "Cut Nodes"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Paste Nodes"
 msgstr ""
 
 #: modules/visual_script/visual_script_flow_control.cpp
 msgid "Input type not iterable: "
-msgstr ""
+msgstr "Vhodni tip ni spremenljiv: "
 
 #: modules/visual_script/visual_script_flow_control.cpp
 msgid "Iterator became invalid"
-msgstr ""
+msgstr "Iterator je bil neveljaven"
 
 #: modules/visual_script/visual_script_flow_control.cpp
 msgid "Iterator became invalid: "
-msgstr ""
+msgstr "Iterator je neveljaven: "
 
 #: modules/visual_script/visual_script_func_nodes.cpp
 msgid "Invalid index property name."
-msgstr ""
+msgstr "Neveljaven indeks lastnosti imena."
 
 #: modules/visual_script/visual_script_func_nodes.cpp
 msgid "Base object is not a Node!"
-msgstr ""
+msgstr "Osnovni objekt ni Node!"
 
 #: modules/visual_script/visual_script_func_nodes.cpp
 msgid "Path does not lead Node!"
-msgstr ""
+msgstr "Pot ne vodi do Node!"
 
 #: modules/visual_script/visual_script_func_nodes.cpp
 msgid "Invalid index property name '%s' in node %s."
-msgstr ""
+msgstr "Neveljaven indeks lastnosti imena '%s' v node %s."
 
 #: modules/visual_script/visual_script_nodes.cpp
 msgid ": Invalid argument of type: "
-msgstr ""
+msgstr ": Neveljaven argument od tipa: "
 
 #: modules/visual_script/visual_script_nodes.cpp
 msgid ": Invalid arguments: "
-msgstr ""
+msgstr ": Neveljavni argumenti: "
 
 #: modules/visual_script/visual_script_nodes.cpp
 msgid "VariableGet not found in script: "
-msgstr ""
+msgstr "VariableGet ni najden v skripti: "
 
 #: modules/visual_script/visual_script_nodes.cpp
 msgid "VariableSet not found in script: "
-msgstr ""
-
-#: modules/visual_script/visual_script_nodes.cpp
-msgid ""
-"Custom node has no _get_output_port_unsequenced(idx,wmem), but unsequenced "
-"ports were specified."
-msgstr ""
+msgstr "VariableSet ni najden v skripti: "
 
 #: modules/visual_script/visual_script_nodes.cpp
 msgid "Custom node has no _step() method, can't process graph."
-msgstr ""
+msgstr "Custom node nima _step() metode, grafa ni mogoče obdelati."
 
 #: modules/visual_script/visual_script_nodes.cpp
 msgid ""
 "Invalid return value from _step(), must be integer (seq out), or string "
 "(error)."
+msgstr ""
+"Neveljavna vrnitev vrednosti od _step(), mora biti število (seq out), ali "
+"string (error)."
+
+#: modules/visual_script/visual_script_nodes.cpp
+msgid "just pressed"
+msgstr ""
+
+#: modules/visual_script/visual_script_nodes.cpp
+msgid "just released"
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid ""
+"Couldn't read the certficate file. Are the path and password both correct?"
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Error creating the signature object."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Error creating the package signature."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid ""
+"No export templates found.\n"
+"Download and install export templates."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Custom debug package not found."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Custom release package not found."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+#, fuzzy
+msgid "Invalid unique name."
+msgstr "Neveljaven indeks lastnosti imena."
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid product GUID."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid publisher GUID."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid background color."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
 msgstr ""
 
 #: scene/2d/animated_sprite.cpp
@@ -307,6 +478,8 @@ msgid ""
 "Only one visible CanvasModulate is allowed per scene (or set of instanced "
 "scenes). The first created one will work, while the rest will be ignored."
 msgstr ""
+"Le en viden CanvasModulate je dovoljen na sceno (ali niz instanciranih "
+"scen). Prvi ustvarjen se bo uporabil, medtem ko bodo drugi prezrti."
 
 #: scene/2d/collision_polygon_2d.cpp
 msgid ""
@@ -314,10 +487,14 @@ msgid ""
 "CollisionObject2D derived node. Please only use it as a child of Area2D, "
 "StaticBody2D, RigidBody2D, KinematicBody2D, etc. to give them a shape."
 msgstr ""
+"CollisionPolygon2D služi le, da zagotavlja collision obliko nodu "
+"CollisionObject2D, ki izhaja iz njega. Naprošamo vas, da ga uporabite le kot "
+"otroka od Area2D, StaticBody2D, RigidBody2D, KinematicBody2D, etc. da jim "
+"date obliko."
 
 #: scene/2d/collision_polygon_2d.cpp
 msgid "An empty CollisionPolygon2D has no effect on collision."
-msgstr ""
+msgstr "Prazen CollisionPolygon2D nima vpliva na collision."
 
 #: scene/2d/collision_shape_2d.cpp
 msgid ""
@@ -325,6 +502,10 @@ msgid ""
 "CollisionObject2D derived node. Please only use it as a child of Area2D, "
 "StaticBody2D, RigidBody2D, KinematicBody2D, etc. to give them a shape."
 msgstr ""
+"CollisionShape2D služi le, da zagotavlja collision obliko nodu "
+"CollisionObject2D, ki izhaja iz njega. Naprošamo vas, da ga uporabite le kot "
+"otroka od Area2D, StaticBody2D, RigidBody2D, KinematicBody2D, etc. da jim "
+"date obliko."
 
 #: scene/2d/collision_shape_2d.cpp
 msgid ""
@@ -438,6 +619,10 @@ msgid ""
 "It only provides navigation data."
 msgstr ""
 
+#: scene/3d/remote_transform.cpp
+msgid "Path property must point to a valid Spatial node to work."
+msgstr ""
+
 #: scene/3d/scenario_fx.cpp
 msgid ""
 "Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
@@ -486,7 +671,8 @@ msgstr ""
 #: scene/gui/file_dialog.cpp tools/editor/editor_file_dialog.cpp
 #: tools/editor/editor_help.cpp tools/editor/editor_node.cpp
 #: tools/editor/filesystem_dock.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 msgid "Open"
 msgstr ""
 
@@ -1022,7 +1208,8 @@ msgstr ""
 
 #: tools/editor/asset_library_editor_plugin.cpp tools/editor/create_dialog.cpp
 #: tools/editor/editor_help.cpp tools/editor/editor_node.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 #: tools/editor/settings_config_dialog.cpp
 msgid "Search:"
 msgstr ""
@@ -1070,10 +1257,6 @@ msgstr ""
 
 #: tools/editor/call_dialog.cpp
 msgid "Method List For '%s':"
-msgstr ""
-
-#: tools/editor/call_dialog.cpp
-msgid "Call"
 msgstr ""
 
 #: tools/editor/call_dialog.cpp
@@ -1195,6 +1378,12 @@ msgid "Method in target Node must be specified!"
 msgstr ""
 
 #: tools/editor/connections_dialog.cpp
+msgid ""
+"Target method not found! Specify a valid method or attach a script to target "
+"Node."
+msgstr ""
+
+#: tools/editor/connections_dialog.cpp
 msgid "Connect To Node:"
 msgstr ""
 
@@ -1270,9 +1459,24 @@ msgstr ""
 msgid "Create New"
 msgstr ""
 
+#: tools/editor/create_dialog.cpp tools/editor/editor_file_dialog.cpp
+#: tools/editor/filesystem_dock.cpp
+msgid "Favorites:"
+msgstr ""
+
+#: tools/editor/create_dialog.cpp tools/editor/editor_file_dialog.cpp
+msgid "Recent:"
+msgstr ""
+
 #: tools/editor/create_dialog.cpp tools/editor/editor_help.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 msgid "Matches:"
+msgstr ""
+
+#: tools/editor/create_dialog.cpp tools/editor/editor_help.cpp
+#: tools/editor/property_selector.cpp tools/editor/script_editor_debugger.cpp
+msgid "Description:"
 msgstr ""
 
 #: tools/editor/dependency_editor.cpp
@@ -1533,14 +1737,6 @@ msgstr ""
 msgid "Move Favorite Down"
 msgstr ""
 
-#: tools/editor/editor_file_dialog.cpp tools/editor/filesystem_dock.cpp
-msgid "Favorites:"
-msgstr ""
-
-#: tools/editor/editor_file_dialog.cpp
-msgid "Recent:"
-msgstr ""
-
 #: tools/editor/editor_file_dialog.cpp
 msgid "Preview:"
 msgstr ""
@@ -1588,10 +1784,6 @@ msgstr ""
 
 #: tools/editor/editor_help.cpp
 msgid "Constants:"
-msgstr ""
-
-#: tools/editor/editor_help.cpp tools/editor/script_editor_debugger.cpp
-msgid "Description:"
 msgstr ""
 
 #: tools/editor/editor_help.cpp
@@ -1939,14 +2131,6 @@ msgid "Go to previously opened scene."
 msgstr ""
 
 #: tools/editor/editor_node.cpp
-msgid "Fullscreen Mode"
-msgstr ""
-
-#: tools/editor/editor_node.cpp
-msgid "Distraction Free Mode"
-msgstr ""
-
-#: tools/editor/editor_node.cpp
 msgid "Next tab"
 msgstr ""
 
@@ -2029,6 +2213,10 @@ msgstr ""
 
 #: tools/editor/editor_node.cpp
 msgid "Quit to Project List"
+msgstr ""
+
+#: tools/editor/editor_node.cpp
+msgid "Distraction Free Mode"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
@@ -2190,6 +2378,10 @@ msgid "Editor Layout"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
+msgid "Toggle Fullscreen"
+msgstr ""
+
+#: tools/editor/editor_node.cpp
 msgid "Install Export Templates"
 msgstr ""
 
@@ -2211,6 +2403,10 @@ msgstr ""
 
 #: tools/editor/editor_node.cpp
 msgid "Update Changes"
+msgstr ""
+
+#: tools/editor/editor_node.cpp
+msgid "Disable Update Spinner"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
@@ -2251,6 +2447,10 @@ msgstr ""
 
 #: tools/editor/editor_node.cpp
 msgid "FileSystem"
+msgstr ""
+
+#: tools/editor/editor_node.cpp tools/editor/node_dock.cpp
+msgid "Node"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
@@ -3082,10 +3282,6 @@ msgid "MultiNode Set"
 msgstr ""
 
 #: tools/editor/node_dock.cpp
-msgid "Node"
-msgstr ""
-
-#: tools/editor/node_dock.cpp
 msgid "Groups"
 msgstr ""
 
@@ -3622,6 +3818,10 @@ msgstr ""
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Clear Bones"
+msgstr ""
+
+#: tools/editor/plugins/canvas_item_editor_plugin.cpp
+msgid "Show Bones"
 msgstr ""
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
@@ -4363,6 +4563,11 @@ msgid "Close Docs"
 msgstr ""
 
 #: tools/editor/plugins/script_editor_plugin.cpp
+#, fuzzy
+msgid "Close All"
+msgstr "Zapri"
+
+#: tools/editor/plugins/script_editor_plugin.cpp
 #: tools/editor/plugins/script_text_editor.cpp
 #: tools/editor/plugins/shader_editor_plugin.cpp
 msgid "Find.."
@@ -4468,6 +4673,10 @@ msgstr ""
 #: tools/editor/plugins/script_editor_plugin.cpp
 msgid ""
 "Built-in scripts can only be edited when the scene they belong to is loaded"
+msgstr ""
+
+#: tools/editor/plugins/script_text_editor.cpp
+msgid "Pick Color"
 msgstr ""
 
 #: tools/editor/plugins/script_text_editor.cpp tools/editor/scene_tree_dock.cpp
@@ -4846,6 +5055,10 @@ msgid "Insert Animation Key"
 msgstr ""
 
 #: tools/editor/plugins/spatial_editor_plugin.cpp
+msgid "Focus Origin"
+msgstr ""
+
+#: tools/editor/plugins/spatial_editor_plugin.cpp
 msgid "Focus Selection"
 msgstr ""
 
@@ -5108,6 +5321,10 @@ msgstr ""
 #: tools/editor/plugins/theme_editor_plugin.cpp
 #: tools/editor/plugins/tile_set_editor_plugin.cpp
 msgid "Remove Item"
+msgstr ""
+
+#: tools/editor/plugins/theme_editor_plugin.cpp
+msgid "Theme"
 msgstr ""
 
 #: tools/editor/plugins/theme_editor_plugin.cpp
@@ -5922,6 +6139,10 @@ msgid "Assign"
 msgstr ""
 
 #: tools/editor/property_editor.cpp
+msgid "New Script"
+msgstr ""
+
+#: tools/editor/property_editor.cpp
 msgid "Error loading file: Not a resource!"
 msgstr ""
 
@@ -5938,10 +6159,6 @@ msgid "On"
 msgstr ""
 
 #: tools/editor/property_editor.cpp
-msgid "Set"
-msgstr ""
-
-#: tools/editor/property_editor.cpp
 msgid "Properties:"
 msgstr ""
 
@@ -5951,6 +6168,15 @@ msgstr ""
 
 #: tools/editor/property_editor.cpp
 msgid "Sections:"
+msgstr ""
+
+#: tools/editor/property_selector.cpp
+#, fuzzy
+msgid "Select Property"
+msgstr "Dodaj Setter Lastnost"
+
+#: tools/editor/property_selector.cpp
+msgid "Select Method"
 msgstr ""
 
 #: tools/editor/pvrtc_compress.cpp
@@ -6472,3 +6698,10 @@ msgstr ""
 #: tools/editor/spatial_editor_gizmos.cpp
 msgid "Change Notifier Extents"
 msgstr ""
+
+#~ msgid ""
+#~ "Custom node has no _get_output_port_unsequenced(idx,wmem), but "
+#~ "unsequenced ports were specified."
+#~ msgstr ""
+#~ "Custom node nima _get_output_port_unsequenced(idx,wmem), vendar "
+#~ "nezaporedni porti so bili določeni."

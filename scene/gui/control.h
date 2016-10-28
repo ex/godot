@@ -128,6 +128,9 @@ private:
 		bool ignore_mouse;
 		bool stop_mouse;
 
+		bool block_minimum_size_adjust;
+		bool disable_visibility_clip;
+
 		Control *parent;
 		ObjectID drag_owner;
 		bool modal;
@@ -193,6 +196,7 @@ private:
 	void _unref_font( Ref<Font> p_sc);
 	void _font_changed();
 
+	void _update_canvas_item_transform();
 
 
 friend class Viewport;
@@ -395,6 +399,15 @@ public:
 	virtual bool is_text_field() const;
 
 	Control *get_root_parent_control() const;
+
+
+	void set_block_minimum_size_adjust(bool p_block);
+	bool is_minimum_size_adjust_blocked() const;
+
+	void set_disable_visibility_clip(bool p_ignore);
+	bool is_visibility_clip_disabled() const;
+
+	virtual void get_argument_options(const StringName& p_function,int p_idx,List<String>*r_options) const;
 
 	Control();
 	~Control();

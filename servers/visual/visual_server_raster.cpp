@@ -3629,7 +3629,7 @@ float VisualServerRaster::canvas_item_get_self_opacity(RID p_item, float p_self_
 }
 
 
-void VisualServerRaster::canvas_item_add_line(RID p_item, const Point2& p_from, const Point2& p_to,const Color& p_color,float p_width) {
+void VisualServerRaster::canvas_item_add_line(RID p_item, const Point2& p_from, const Point2& p_to,const Color& p_color,float p_width,bool p_antialiased) {
 	VS_CHANGED;
 	CanvasItem *canvas_item = canvas_item_owner.get( p_item );
 	ERR_FAIL_COND(!canvas_item);
@@ -3640,6 +3640,7 @@ void VisualServerRaster::canvas_item_add_line(RID p_item, const Point2& p_from, 
 	line->from=p_from;
 	line->to=p_to;
 	line->width=p_width;
+	line->antialiased=p_antialiased;
 	canvas_item->rect_dirty=true;
 
 
@@ -7533,10 +7534,10 @@ void VisualServerRaster::_draw_cursors_and_margins() {
 		ERR_CONTINUE( !tex );
 		if (cursors[i].region.has_no_area()) {
 			Point2 size(texture_get_width(tex), texture_get_height(tex));
-			rasterizer->canvas_draw_rect(Rect2(cursors[i].pos, size), 0, Rect2(), tex, Color(1, 1, 1, 1));
+			rasterizer->canvas_draw_rect(Rect2(cursors[i].pos-cursors[i].center, size), 0, Rect2(), tex, Color(1, 1, 1, 1));
 		} else {
 			Point2 size = cursors[i].region.size;
-			rasterizer->canvas_draw_rect(Rect2(cursors[i].pos, size), Rasterizer::CANVAS_RECT_REGION, cursors[i].region, tex, Color(1, 1, 1, 1));
+			rasterizer->canvas_draw_rect(Rect2(cursors[i].pos-cursors[i].center, size), Rasterizer::CANVAS_RECT_REGION, cursors[i].region, tex, Color(1, 1, 1, 1));
 		}
 	};
 
@@ -7609,6 +7610,11 @@ bool VisualServerRaster::has_feature(Features p_feature) const {
 void VisualServerRaster::set_default_clear_color(const Color& p_color) {
 
 	clear_color=p_color;
+}
+
+Color VisualServerRaster::get_default_clear_color() const {
+
+	return clear_color;
 }
 
 void VisualServerRaster::set_boot_image(const Image& p_image, const Color& p_color,bool p_scale) {

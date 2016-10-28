@@ -3,12 +3,13 @@
 # This file is distributed under the same license as the Godot source code.
 #
 # Enes Kaya Öcal <ekayaocal@hotmail.com>, 2016.
+# M. Yavuz Uzun <myavuzuzun@yandex.com>, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
-"PO-Revision-Date: 2016-07-25 11:14+0000\n"
-"Last-Translator: Enes Kaya Öcal <ekayaocal@hotmail.com>\n"
+"PO-Revision-Date: 2016-08-18 00:13+0000\n"
+"Last-Translator: M. Yavuz Uzun <myavuzuzun@yandex.com>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/godot-engine/"
 "godot/tr/>\n"
 "Language: tr\n"
@@ -32,16 +33,22 @@ msgid "step argument is zero!"
 msgstr ""
 
 #: modules/gdscript/gd_functions.cpp
+msgid ""
+"Paths cannot start with '/', absolute paths must start with 'res://', "
+"'user://', or 'local://'"
+msgstr ""
+
+#: modules/gdscript/gd_functions.cpp
 msgid "Not a script with an instance"
 msgstr ""
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Not based on a script"
-msgstr ""
+msgstr "Bir koda bağlı değil"
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Not based on a resource file"
-msgstr ""
+msgstr "Bir kaynak dosyasına bağlı değil"
 
 #: modules/gdscript/gd_functions.cpp
 msgid "Invalid instance dictionary format (missing @path)"
@@ -63,7 +70,7 @@ msgstr ""
 msgid ""
 "A node yielded without working memory, please read the docs on how to yield "
 "properly!"
-msgstr ""
+msgstr "Çalışan hafıza olmadan düğüm yerleştirilmiş, lütfen belgeleri okuyun!"
 
 #: modules/visual_script/visual_script.cpp
 msgid ""
@@ -90,14 +97,12 @@ msgid "Stack overflow with stack depth: "
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Functions:"
-msgstr "Fonksiyon:"
+msgstr "Fonksiyonlar:"
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Variables:"
-msgstr "Değişken"
+msgstr "Değişkenler:"
 
 #: modules/visual_script/visual_script_editor.cpp tools/editor/editor_help.cpp
 msgid "Signals:"
@@ -105,81 +110,141 @@ msgstr "Sinyaller:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Name is not a valid identifier:"
-msgstr ""
+msgstr "İsim doğru bir belirleyici değil:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Name already in use by another func/var/signal:"
-msgstr ""
+msgstr "Ad zaten başka bir fonksiyon/değişken/sinyal tarafından kullanılıyor:"
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Rename Function"
-msgstr "Fonksiyon:"
+msgstr "Fonksiyonu Yeniden İsimlendir"
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Rename Variable"
-msgstr "Değişken"
+msgstr "Değişkeni Yeniden İsimlendir"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Rename Signal"
+msgstr "Sinyali Yeniden İsimlendir"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Add Function"
+msgstr "Fonksiyon Ekle"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Add Variable"
+msgstr "Değişken Ekle"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Add Signal"
+msgstr "Sinyal Ekle"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Remove Function"
+msgstr "Fonksiyonu Kaldır"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Remove Variable"
+msgstr "Değişkeni Kaldır"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Editing Variable:"
+msgstr "Değişken Düzenleniyor:"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Remove Signal"
+msgstr "Sinyali Kaldır"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Editing Signal:"
+msgstr "Sinyal Düzenleniyor:"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Change Expression"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Add Node"
+msgstr "Düğüm Ekle"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a Getter. Hold Shift to drop a generic signature."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a Getter. Hold Shift to drop a generic signature."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a simple reference to the node."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a simple reference to the node."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Meta to drop a Variable Setter."
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Hold Ctrl to drop a Variable Setter."
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 #, fuzzy
-msgid "Add Function"
-msgstr "Fonksiyon:"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Add Variable"
-msgstr "Değişken"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Add Signal"
-msgstr "Sinyaller:"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Remove Function"
-msgstr "Seçimi Kaldır"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Remove Variable"
-msgstr "Değişken"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Editing Variable:"
-msgstr "Değişken"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Remove Signal"
-msgstr "Seçimi Kaldır"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Editing Signal:"
-msgstr "Sinyaller:"
-
-#: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
-msgid "Add Node"
-msgstr "AutoLoad ekle"
+msgid "Add Preload Node"
+msgstr "Düğüm Ekle"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Node(s) From Tree"
-msgstr ""
-
-#: modules/visual_script/visual_script_editor.cpp
-msgid "Add Setter Property"
-msgstr ""
+msgstr "Ağaçtan Düğüm(ler) Ekle"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Add Getter Property"
+msgstr "Alıcı Özellik Ekle"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Add Setter Property"
+msgstr "Düzenleyici Özellik Ekle"
+
+#: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
+msgid "Condition"
+msgstr "Animasyon Yükle"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Sequence"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Switch"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Iterator"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "While"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Return"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp tools/editor/call_dialog.cpp
+msgid "Call"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Get"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+#: tools/editor/property_editor.cpp
+msgid "Set"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
@@ -189,11 +254,11 @@ msgstr ""
 #: tools/editor/plugins/shader_editor_plugin.cpp
 #: tools/editor/project_manager.cpp
 msgid "Edit"
-msgstr ""
+msgstr "Düzenle"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Base Type:"
-msgstr ""
+msgstr "Taban Tipi:"
 
 #: modules/visual_script/visual_script_editor.cpp tools/editor/editor_help.cpp
 msgid "Members:"
@@ -225,18 +290,16 @@ msgid "Edit Signal Arguments:"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Edit Variable:"
-msgstr "Değişken"
+msgstr "Değişkeni Düzenle:"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Change"
-msgstr ""
+msgstr "Değiştir"
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Delete Selected"
-msgstr "Seçili dosyaları sil?"
+msgstr "Seçilenleri Sil"
 
 #: modules/visual_script/visual_script_editor.cpp
 #: tools/editor/plugins/script_text_editor.cpp
@@ -244,8 +307,22 @@ msgid "Toggle Breakpoint"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-msgid "Find Node Tyoe"
+msgid "Find Node Type"
 msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
+msgid "Copy Nodes"
+msgstr "Kaynağı Kopyala"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Cut Nodes"
+msgstr ""
+
+#: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
+msgid "Paste Nodes"
+msgstr "Kaynağı Yapıştır"
 
 #: modules/visual_script/visual_script_flow_control.cpp
 msgid "Input type not iterable: "
@@ -295,12 +372,6 @@ msgid "VariableSet not found in script: "
 msgstr ""
 
 #: modules/visual_script/visual_script_nodes.cpp
-msgid ""
-"Custom node has no _get_output_port_unsequenced(idx,wmem), but unsequenced "
-"ports were specified."
-msgstr ""
-
-#: modules/visual_script/visual_script_nodes.cpp
 msgid "Custom node has no _step() method, can't process graph."
 msgstr ""
 
@@ -308,6 +379,88 @@ msgstr ""
 msgid ""
 "Invalid return value from _step(), must be integer (seq out), or string "
 "(error)."
+msgstr ""
+
+#: modules/visual_script/visual_script_nodes.cpp
+msgid "just pressed"
+msgstr ""
+
+#: modules/visual_script/visual_script_nodes.cpp
+msgid "just released"
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid ""
+"Couldn't read the certficate file. Are the path and password both correct?"
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Error creating the signature object."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Error creating the package signature."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid ""
+"No export templates found.\n"
+"Download and install export templates."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Custom debug package not found."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Custom release package not found."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+#, fuzzy
+msgid "Invalid unique name."
+msgstr "Geçersiz isim."
+
+#: platform/winrt/export/export.cpp
+#, fuzzy
+msgid "Invalid product GUID."
+msgstr "Geçersiz yazı tipi boyutu."
+
+#: platform/winrt/export/export.cpp
+#, fuzzy
+msgid "Invalid publisher GUID."
+msgstr "Geçersiz üst yol"
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid background color."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr ""
+
+#: platform/winrt/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
 msgstr ""
 
 #: scene/2d/animated_sprite.cpp
@@ -452,6 +605,10 @@ msgid ""
 "It only provides navigation data."
 msgstr ""
 
+#: scene/3d/remote_transform.cpp
+msgid "Path property must point to a valid Spatial node to work."
+msgstr ""
+
 #: scene/3d/scenario_fx.cpp
 msgid ""
 "Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
@@ -475,7 +632,7 @@ msgstr "İptal"
 
 #: scene/gui/dialogs.cpp tools/editor/scene_tree_dock.cpp
 msgid "OK"
-msgstr "NoTamam"
+msgstr "Tamam"
 
 #: scene/gui/dialogs.cpp
 msgid "Alert!"
@@ -500,17 +657,18 @@ msgstr "Tüm dosyalar (*)"
 #: scene/gui/file_dialog.cpp tools/editor/editor_file_dialog.cpp
 #: tools/editor/editor_help.cpp tools/editor/editor_node.cpp
 #: tools/editor/filesystem_dock.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 msgid "Open"
-msgstr "Açık"
+msgstr "Aç"
 
 #: scene/gui/file_dialog.cpp
 msgid "Open a File"
-msgstr ""
+msgstr "Bir Dosya Aç"
 
 #: scene/gui/file_dialog.cpp
 msgid "Open File(s)"
-msgstr ""
+msgstr "Dosya(ları) aç"
 
 #: scene/gui/file_dialog.cpp
 msgid "Open a Directory"
@@ -588,7 +746,7 @@ msgstr "Ctrl+"
 #: scene/gui/input_action.cpp tools/editor/project_settings.cpp
 #: tools/editor/settings_config_dialog.cpp
 msgid "Meta+"
-msgstr ""
+msgstr "Meta+"
 
 #: scene/gui/input_action.cpp tools/editor/project_settings.cpp
 msgid "Device"
@@ -1028,7 +1186,7 @@ msgstr "Diziyi Yeniden Boyutlandır"
 
 #: tools/editor/array_property_edit.cpp
 msgid "Change Array Value Type"
-msgstr ""
+msgstr "Dizinin türünü degistir"
 
 #: tools/editor/array_property_edit.cpp
 msgid "Change Array Value"
@@ -1036,7 +1194,8 @@ msgstr ""
 
 #: tools/editor/asset_library_editor_plugin.cpp tools/editor/create_dialog.cpp
 #: tools/editor/editor_help.cpp tools/editor/editor_node.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 #: tools/editor/settings_config_dialog.cpp
 msgid "Search:"
 msgstr "Ara:"
@@ -1047,7 +1206,7 @@ msgstr "Sırala:"
 
 #: tools/editor/asset_library_editor_plugin.cpp
 msgid "Reverse"
-msgstr ""
+msgstr "Tersi"
 
 #: tools/editor/asset_library_editor_plugin.cpp
 #: tools/editor/project_settings.cpp
@@ -1084,10 +1243,6 @@ msgstr ""
 
 #: tools/editor/call_dialog.cpp
 msgid "Method List For '%s':"
-msgstr ""
-
-#: tools/editor/call_dialog.cpp
-msgid "Call"
 msgstr ""
 
 #: tools/editor/call_dialog.cpp
@@ -1209,8 +1364,14 @@ msgid "Method in target Node must be specified!"
 msgstr ""
 
 #: tools/editor/connections_dialog.cpp
-msgid "Connect To Node:"
+msgid ""
+"Target method not found! Specify a valid method or attach a script to target "
+"Node."
 msgstr ""
+
+#: tools/editor/connections_dialog.cpp
+msgid "Connect To Node:"
+msgstr "Düğüme bağlan:"
 
 #: tools/editor/connections_dialog.cpp
 #: tools/editor/editor_autoload_settings.cpp tools/editor/groups_editor.cpp
@@ -1284,10 +1445,25 @@ msgstr ""
 msgid "Create New"
 msgstr "Yeni oluştur"
 
+#: tools/editor/create_dialog.cpp tools/editor/editor_file_dialog.cpp
+#: tools/editor/filesystem_dock.cpp
+msgid "Favorites:"
+msgstr "Favoriler:"
+
+#: tools/editor/create_dialog.cpp tools/editor/editor_file_dialog.cpp
+msgid "Recent:"
+msgstr "Yakın zamanda:"
+
 #: tools/editor/create_dialog.cpp tools/editor/editor_help.cpp
-#: tools/editor/plugins/script_editor_plugin.cpp tools/editor/quick_open.cpp
+#: tools/editor/plugins/script_editor_plugin.cpp
+#: tools/editor/property_selector.cpp tools/editor/quick_open.cpp
 msgid "Matches:"
 msgstr "Eşleşmeler:"
+
+#: tools/editor/create_dialog.cpp tools/editor/editor_help.cpp
+#: tools/editor/property_selector.cpp tools/editor/script_editor_debugger.cpp
+msgid "Description:"
+msgstr "Açıklama:"
 
 #: tools/editor/dependency_editor.cpp
 msgid "Search Replacement For:"
@@ -1358,9 +1534,8 @@ msgid "Remove selected files from the project? (no undo)"
 msgstr "Seçili dosyaları projeden kaldır? (Geri alınamaz)"
 
 #: tools/editor/dependency_editor.cpp
-#, fuzzy
 msgid "Error loading:"
-msgstr "Yüklemede hata:"
+msgstr "Yüklerken hata:"
 
 #: tools/editor/dependency_editor.cpp
 msgid "Scene failed to load due to missing dependencies:"
@@ -1554,14 +1729,6 @@ msgstr ""
 msgid "Move Favorite Down"
 msgstr ""
 
-#: tools/editor/editor_file_dialog.cpp tools/editor/filesystem_dock.cpp
-msgid "Favorites:"
-msgstr "Favoriler:"
-
-#: tools/editor/editor_file_dialog.cpp
-msgid "Recent:"
-msgstr "Yakın zamanda:"
-
 #: tools/editor/editor_file_dialog.cpp
 msgid "Preview:"
 msgstr "Ön izleme:"
@@ -1610,10 +1777,6 @@ msgstr "Arayüz Tema Öğeleri:"
 #: tools/editor/editor_help.cpp
 msgid "Constants:"
 msgstr "Sabitler:"
-
-#: tools/editor/editor_help.cpp tools/editor/script_editor_debugger.cpp
-msgid "Description:"
-msgstr "Açıklama:"
 
 #: tools/editor/editor_help.cpp
 msgid "Method Description:"
@@ -1961,14 +2124,6 @@ msgid "Go to previously opened scene."
 msgstr ""
 
 #: tools/editor/editor_node.cpp
-msgid "Fullscreen Mode"
-msgstr ""
-
-#: tools/editor/editor_node.cpp
-msgid "Distraction Free Mode"
-msgstr ""
-
-#: tools/editor/editor_node.cpp
 msgid "Next tab"
 msgstr ""
 
@@ -2053,6 +2208,10 @@ msgstr ""
 #: tools/editor/editor_node.cpp
 msgid "Quit to Project List"
 msgstr "Proje Listesine Git"
+
+#: tools/editor/editor_node.cpp
+msgid "Distraction Free Mode"
+msgstr ""
 
 #: tools/editor/editor_node.cpp
 msgid "Import assets to the project."
@@ -2213,6 +2372,10 @@ msgid "Editor Layout"
 msgstr "Editör Düzeni"
 
 #: tools/editor/editor_node.cpp
+msgid "Toggle Fullscreen"
+msgstr ""
+
+#: tools/editor/editor_node.cpp
 msgid "Install Export Templates"
 msgstr ""
 
@@ -2234,6 +2397,10 @@ msgstr "Sürekli Güncelle"
 
 #: tools/editor/editor_node.cpp
 msgid "Update Changes"
+msgstr ""
+
+#: tools/editor/editor_node.cpp
+msgid "Disable Update Spinner"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
@@ -2274,6 +2441,10 @@ msgstr "Nesne özellikleri."
 
 #: tools/editor/editor_node.cpp
 msgid "FileSystem"
+msgstr ""
+
+#: tools/editor/editor_node.cpp tools/editor/node_dock.cpp
+msgid "Node"
 msgstr ""
 
 #: tools/editor/editor_node.cpp
@@ -3106,10 +3277,6 @@ msgid "MultiNode Set"
 msgstr ""
 
 #: tools/editor/node_dock.cpp
-msgid "Node"
-msgstr ""
-
-#: tools/editor/node_dock.cpp
 msgid "Groups"
 msgstr ""
 
@@ -3127,34 +3294,34 @@ msgstr ""
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "New Anim"
-msgstr ""
+msgstr "Yeni Animasyon"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "Change Animation Name:"
-msgstr ""
+msgstr "Animasyonun adını değiştir:"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 #: tools/editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Remove Animation"
-msgstr ""
+msgstr "Animasyonu Kaldır"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "ERROR: Invalid animation name!"
-msgstr ""
+msgstr "HATA: Geçersiz animasyon adı!"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "ERROR: Animation name already exists!"
-msgstr ""
+msgstr "HATA: Bu animasyonun adı zaten var!"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 #: tools/editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Rename Animation"
-msgstr ""
+msgstr "Animasyonu Yeniden İsimlendir"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 #: tools/editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Add Animation"
-msgstr ""
+msgstr "Animasyon Ekle"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "Blend Next Changed"
@@ -3166,15 +3333,15 @@ msgstr ""
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "Load Animation"
-msgstr ""
+msgstr "Animasyon Yükle"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "Duplicate Animation"
-msgstr ""
+msgstr "Animasyonu Yeniden Çıkar"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "ERROR: No animation to copy!"
-msgstr ""
+msgstr "HATA: Kopyalamak için bir animasyon yok!"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "ERROR: No animation resource on clipboard!"
@@ -3190,7 +3357,7 @@ msgstr ""
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "ERROR: No animation to edit!"
-msgstr ""
+msgstr "HATA: Düzenlemek için bir animasyon yok!"
 
 #: tools/editor/plugins/animation_player_editor_plugin.cpp
 msgid "Play selected animation backwards from current pos. (A)"
@@ -3648,6 +3815,10 @@ msgstr ""
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Clear Bones"
+msgstr ""
+
+#: tools/editor/plugins/canvas_item_editor_plugin.cpp
+msgid "Show Bones"
 msgstr ""
 
 #: tools/editor/plugins/canvas_item_editor_plugin.cpp
@@ -4390,6 +4561,11 @@ msgid "Close Docs"
 msgstr "Kapat"
 
 #: tools/editor/plugins/script_editor_plugin.cpp
+#, fuzzy
+msgid "Close All"
+msgstr "Kapat"
+
+#: tools/editor/plugins/script_editor_plugin.cpp
 #: tools/editor/plugins/script_text_editor.cpp
 #: tools/editor/plugins/shader_editor_plugin.cpp
 msgid "Find.."
@@ -4495,6 +4671,10 @@ msgstr ""
 #: tools/editor/plugins/script_editor_plugin.cpp
 msgid ""
 "Built-in scripts can only be edited when the scene they belong to is loaded"
+msgstr ""
+
+#: tools/editor/plugins/script_text_editor.cpp
+msgid "Pick Color"
 msgstr ""
 
 #: tools/editor/plugins/script_text_editor.cpp tools/editor/scene_tree_dock.cpp
@@ -4873,6 +5053,10 @@ msgid "Insert Animation Key"
 msgstr ""
 
 #: tools/editor/plugins/spatial_editor_plugin.cpp
+msgid "Focus Origin"
+msgstr ""
+
+#: tools/editor/plugins/spatial_editor_plugin.cpp
 msgid "Focus Selection"
 msgstr ""
 
@@ -5135,6 +5319,10 @@ msgstr ""
 #: tools/editor/plugins/theme_editor_plugin.cpp
 #: tools/editor/plugins/tile_set_editor_plugin.cpp
 msgid "Remove Item"
+msgstr ""
+
+#: tools/editor/plugins/theme_editor_plugin.cpp
+msgid "Theme"
 msgstr ""
 
 #: tools/editor/plugins/theme_editor_plugin.cpp
@@ -5950,6 +6138,11 @@ msgid "Assign"
 msgstr ""
 
 #: tools/editor/property_editor.cpp
+#, fuzzy
+msgid "New Script"
+msgstr "Betiği Çalıştır"
+
+#: tools/editor/property_editor.cpp
 msgid "Error loading file: Not a resource!"
 msgstr ""
 
@@ -5966,10 +6159,6 @@ msgid "On"
 msgstr ""
 
 #: tools/editor/property_editor.cpp
-msgid "Set"
-msgstr ""
-
-#: tools/editor/property_editor.cpp
 msgid "Properties:"
 msgstr ""
 
@@ -5980,6 +6169,16 @@ msgstr ""
 #: tools/editor/property_editor.cpp
 msgid "Sections:"
 msgstr ""
+
+#: tools/editor/property_selector.cpp
+#, fuzzy
+msgid "Select Property"
+msgstr "Düzenleyici Özellik Ekle"
+
+#: tools/editor/property_selector.cpp
+#, fuzzy
+msgid "Select Method"
+msgstr "Bir Düğüm Seç"
 
 #: tools/editor/pvrtc_compress.cpp
 msgid "Could not execute PVRTC tool:"
@@ -6336,7 +6535,7 @@ msgstr "Sınıf Adı:"
 
 #: tools/editor/script_create_dialog.cpp
 msgid "Built-In Script"
-msgstr ""
+msgstr "Gömme Betik"
 
 #: tools/editor/script_create_dialog.cpp
 msgid "Create Node Script"
@@ -6344,7 +6543,7 @@ msgstr "Düğüm Betiği Oluştur"
 
 #: tools/editor/script_editor_debugger.cpp
 msgid "Bytes:"
-msgstr ""
+msgstr "Baytlar:"
 
 #: tools/editor/script_editor_debugger.cpp
 msgid "Warning"

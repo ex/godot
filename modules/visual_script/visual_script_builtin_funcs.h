@@ -57,6 +57,7 @@ public:
 		TYPE_CONVERT,
 		TYPE_OF,
 		TYPE_EXISTS,
+		TEXT_CHAR,
 		TEXT_STR,
 		TEXT_PRINT,
 		TEXT_PRINTERR,
@@ -67,6 +68,11 @@ public:
 		BYTES_TO_VAR,
 		FUNC_MAX
 	};
+
+	static int get_func_argument_count(BuiltinFunc p_func);
+	static String get_func_name(BuiltinFunc p_func);
+	static void exec_func(BuiltinFunc p_func, const Variant** p_inputs, Variant* r_return, Variant::CallError& r_error, String& r_error_str);
+	static BuiltinFunc find_function(const String& p_string);
 
 private:
 	static const char* func_name[FUNC_MAX];

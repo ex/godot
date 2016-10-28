@@ -1168,7 +1168,7 @@ public:
 
 	virtual void canvas_item_attach_viewport(RID p_item, RID p_viewport);
 
-	virtual void canvas_item_add_line(RID p_item, const Point2& p_from, const Point2& p_to,const Color& p_color,float p_width=1.0);
+	virtual void canvas_item_add_line(RID p_item, const Point2& p_from, const Point2& p_to, const Color& p_color, float p_width=1.0, bool p_antialiased=false);
 	virtual void canvas_item_add_rect(RID p_item, const Rect2& p_rect, const Color& p_color);
 	virtual void canvas_item_add_circle(RID p_item, const Point2& p_pos, float p_radius,const Color& p_color);
 	virtual void canvas_item_add_texture_rect(RID p_item, const Rect2& p_rect, RID p_texture,bool p_tile=false,const Color& p_modulate=Color(1,1,1),bool p_transpose=false);
@@ -1283,6 +1283,7 @@ public:
 
 	virtual void set_boot_image(const Image& p_image, const Color& p_color, bool p_scale);
 	virtual void set_default_clear_color(const Color& p_color);
+	virtual Color get_default_clear_color() const;
 
 	VisualServerRaster(Rasterizer *p_rasterizer);
 	~VisualServerRaster();

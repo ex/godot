@@ -511,7 +511,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	}
 
 	set("global/hidpi_mode",0);
-	hints["global/hidpi_mode"]=PropertyInfo(Variant::INT,"global/hidpi_mode",PROPERTY_HINT_ENUM,"Auto,LoDPI,HiDPI",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
+	hints["global/hidpi_mode"]=PropertyInfo(Variant::INT,"global/hidpi_mode",PROPERTY_HINT_ENUM,"Auto,VeryLoDPI,LoDPI,MidDPI,HiDPI",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
 	set("global/show_script_in_scene_tabs",false);
 	set("global/font_size",14);
 	hints["global/font_size"]=PropertyInfo(Variant::INT,"global/font_size",PROPERTY_HINT_RANGE,"10,40,1",PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
@@ -546,8 +546,14 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	hints["text_editor/tab_size"]=PropertyInfo(Variant::INT,"text_editor/tab_size",PROPERTY_HINT_RANGE,"1, 64, 1"); // size of 0 crashes.
 	set("text_editor/draw_tabs", true);
 
+	set("text_editor/line_numbers_zero_padded", false);
+
 	set("text_editor/show_line_numbers", true);
 	set("text_editor/show_breakpoint_gutter", true);
+
+	set("text_editor/show_line_length_guideline", false);
+	set("text_editor/line_length_guideline_column", 80);
+	hints["text_editor/line_length_guideline_column"]=PropertyInfo(Variant::INT,"text_editor/line_length_guideline_column",PROPERTY_HINT_RANGE,"20, 160, 10");
 
 	set("text_editor/trim_trailing_whitespace_on_save", false);
 	set("text_editor/idle_parse_delay",2);
@@ -565,14 +571,15 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	set("text_editor/restore_scripts_on_load",true);
 
 
-	set("scenetree_editor/duplicate_node_name_num_separator",0);
-	hints["scenetree_editor/duplicate_node_name_num_separator"]=PropertyInfo(Variant::INT,"scenetree_editor/duplicate_node_name_num_separator",PROPERTY_HINT_ENUM, "None,Space,Underscore,Dash");
 	//set("scenetree_editor/display_old_action_buttons",false);
 	set("scenetree_editor/start_create_dialog_fully_expanded",false);
 	set("scenetree_editor/draw_relationship_lines",false);
 	set("scenetree_editor/relationship_line_color",Color::html("464646"));
 
-	set("gridmap_editor/pick_distance", 5000.0);
+	set("grid_map/pick_distance", 5000.0);
+
+	set("3d_editor/grid_color",Color(0,1,0,0.2));
+	hints["3d_editor/grid_color"]=PropertyInfo(Variant::COLOR,"3d_editor/grid_color", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT|PROPERTY_USAGE_RESTART_IF_CHANGED);
 
 	set("3d_editor/default_fov",45.0);
 	set("3d_editor/default_z_near",0.1);
@@ -621,6 +628,11 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	hints["file_dialog/display_mode"]=PropertyInfo(Variant::INT,"file_dialog/display_mode",PROPERTY_HINT_ENUM,"Thumbnails,List");
 	set("file_dialog/thumbnail_size", 64);
 	hints["file_dialog/thumbnail_size"]=PropertyInfo(Variant::INT,"file_dialog/thumbnail_size",PROPERTY_HINT_RANGE,"32,128,16");
+
+	set("filesystem_dock/display_mode", 0);
+	hints["filesystem_dock/display_mode"]=PropertyInfo(Variant::INT,"filesystem_dock/display_mode",PROPERTY_HINT_ENUM,"Thumbnails,List");
+	set("filesystem_dock/thumbnail_size", 64);
+	hints["filesystem_dock/thumbnail_size"]=PropertyInfo(Variant::INT,"filesystem_dock/thumbnail_size",PROPERTY_HINT_RANGE,"32,128,16");
 
 	set("animation/autorename_animation_tracks",true);
 	set("animation/confirm_insert_track",true);
@@ -729,6 +741,25 @@ void EditorSettings::notify_changes() {
 	}
 	root->propagate_notification(NOTIFICATION_EDITOR_SETTINGS_CHANGED);
 
+}
+
+void EditorSettings::_add_property_info_bind(const Dictionary& p_info) {
+
+	ERR_FAIL_COND(!p_info.has("name"));
+	ERR_FAIL_COND(!p_info.has("type"));
+
+	PropertyInfo pinfo;
+	pinfo.name = p_info["name"];
+	ERR_FAIL_COND(!props.has(pinfo.name));
+	pinfo.type = Variant::Type(p_info["type"].operator int());
+	ERR_FAIL_INDEX(pinfo.type, Variant::VARIANT_MAX);
+
+	if (p_info.has("hint"))
+		pinfo.hint = PropertyHint(p_info["hint"].operator int());
+	if (p_info.has("hint_string"))
+		pinfo.hint_string = p_info["hint_string"];
+
+	add_property_hint(pinfo);
 }
 
 void EditorSettings::add_property_hint(const PropertyInfo& p_hint) {
@@ -995,11 +1026,41 @@ void EditorSettings::set_optimize_save(bool p_optimize) {
 	optimize_save=p_optimize;
 }
 
+String EditorSettings::get_last_selected_language()
+{
+	Ref<ConfigFile> cf = memnew( ConfigFile );
+	String path = get_project_settings_path().plus_file("project_metadata.cfg");
+	Error err = cf->load(path);
+	if (err != OK) {
+		WARN_PRINTS("Can't load config file: " + path);
+		return "";
+	}
+	Variant last_selected_language = cf->get_value("script_setup", "last_selected_language");
+	if (last_selected_language.get_type() != Variant::STRING)
+		return "";
+	return static_cast<String>(last_selected_language);
+}
+
+void EditorSettings::set_last_selected_language(String p_language)
+{
+	Ref<ConfigFile> cf = memnew( ConfigFile );
+	String path = get_project_settings_path().plus_file("project_metadata.cfg");
+	Error err = cf->load(path);
+	if (err != OK) {
+		WARN_PRINTS("Can't load config file: " + path);
+		return;
+	}
+	cf->set_value("script_setup", "last_selected_language", p_language);
+	cf->save(path);
+}
+
 void EditorSettings::_bind_methods() {
 
 	ObjectTypeDB::bind_method(_MD("erase","property"),&EditorSettings::erase);
 	ObjectTypeDB::bind_method(_MD("get_settings_path"),&EditorSettings::get_settings_path);
 	ObjectTypeDB::bind_method(_MD("get_project_settings_path"),&EditorSettings::get_project_settings_path);
+
+	ObjectTypeDB::bind_method(_MD("add_property_info", "info"),&EditorSettings::_add_property_info_bind);
 
 	ObjectTypeDB::bind_method(_MD("set_favorite_dirs","dirs"),&EditorSettings::set_favorite_dirs);
 	ObjectTypeDB::bind_method(_MD("get_favorite_dirs"),&EditorSettings::get_favorite_dirs);

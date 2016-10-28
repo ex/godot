@@ -78,7 +78,8 @@ class ScriptEditorDebugger;
 class ScriptEditorBase : public Control {
 
 	OBJ_TYPE( ScriptEditorBase, Control );
-
+protected:
+	static void _bind_methods();
 public:
 
 	virtual void apply_code()=0;
@@ -101,6 +102,7 @@ public:
 	virtual void add_callback(const String& p_function,StringArray p_args)=0;
 	virtual void update_settings()=0;
 	virtual void set_debugger_active(bool p_active)=0;
+	virtual bool can_lose_focus_on_node_selection() { return true; }
 
 	virtual void set_tooltip_request_func(String p_method,Object* p_obj)=0;
 	virtual Control *get_edit_menu()=0;
@@ -132,6 +134,7 @@ class ScriptEditor : public VBoxContainer {
 		FILE_SAVE_THEME_AS,
 		FILE_CLOSE,
 		CLOSE_DOCS,
+		CLOSE_ALL,
 		FILE_TOOL_RELOAD,
 		FILE_TOOL_RELOAD_SOFT,
 		DEBUG_NEXT,
@@ -220,6 +223,9 @@ class ScriptEditor : public VBoxContainer {
 
 	void _close_current_tab();
 	void _close_docs_tab();
+	void _close_all_tabs();
+
+	void _ask_close_current_unsaved_tab(ScriptEditorBase *current);
 
 	bool grab_focus_block;
 
@@ -277,6 +283,7 @@ class ScriptEditor : public VBoxContainer {
 	void _help_class_open(const String& p_class);
 	void _help_class_goto(const String& p_desc);
 	void _update_history_arrows();
+	void _save_history();
 	void _go_to_tab(int p_idx);
 	void _update_history_pos(int p_new_pos);
 	void _update_script_colors();
@@ -284,6 +291,8 @@ class ScriptEditor : public VBoxContainer {
 
 	int file_dialog_option;
 	void _file_dialog_action(String p_file);
+
+	static void _open_script_request(const String& p_path);
 
 	static ScriptEditor *script_editor;
 protected:
@@ -297,7 +306,7 @@ public:
 	void apply_scripts() const;
 
 	void ensure_select_current();
-	void edit(const Ref<Script>& p_script);
+	void edit(const Ref<Script>& p_script,bool p_grab_focus=true);
 
 	Dictionary get_state() const;
 	void set_state(const Dictionary& p_state);
@@ -319,6 +328,10 @@ public:
 	virtual void edited_scene_changed();
 
 	void close_builtin_scripts_from_scene(const String& p_scene);
+
+	void goto_help(const String& p_desc) { _help_class_goto(p_desc); }
+
+	bool can_take_away_focus() const;
 
 	ScriptEditorDebugger *get_debugger() { return debugger; }
 	void set_live_auto_reload_running_scripts(bool p_enabled);
