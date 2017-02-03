@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,7 +29,7 @@
 #include "export.h"
 #include "platform/windows/logo.h"
 #include "tools/editor/editor_import_export.h"
-
+#if 0
 void register_windows_exporter() {
 
 	Image img(_windows_logo);
@@ -50,3 +50,4 @@ void register_windows_exporter() {
 
 
 }
+#endif

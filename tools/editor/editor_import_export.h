@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,6 +29,8 @@
 #ifndef EDITOR_IMPORT_EXPORT_H
 #define EDITOR_IMPORT_EXPORT_H
 
+#if 0
+
 #include "resource.h"
 #include "scene/main/node.h"
 #include "scene/resources/texture.h"
@@ -40,7 +42,7 @@ struct EditorProgress;
 
 class EditorImportPlugin : public Reference {
 
-	OBJ_TYPE( EditorImportPlugin, Reference);
+	GDCLASS( EditorImportPlugin, Reference);
 
 protected:
 
@@ -70,7 +72,7 @@ public:
 
 class EditorExportPlugin : public Reference {
 
-	OBJ_TYPE( EditorExportPlugin, Reference);
+	GDCLASS( EditorExportPlugin, Reference);
 
 protected:
 	static void _bind_methods();
@@ -84,7 +86,7 @@ public:
 
 class EditorExportPlatform : public Reference {
 
-	OBJ_TYPE( EditorExportPlatform,Reference );
+	GDCLASS( EditorExportPlatform,Reference );
 
 public:
 
@@ -187,7 +189,7 @@ public:
 
 class EditorExportPlatformPC : public EditorExportPlatform {
 
-	OBJ_TYPE( EditorExportPlatformPC,EditorExportPlatform );
+	GDCLASS( EditorExportPlatformPC,EditorExportPlatform );
 
 public:
 
@@ -247,7 +249,7 @@ public:
 
 
 class EditorImportExport : public Node {
-	OBJ_TYPE(EditorImportExport,Node);
+	GDCLASS(EditorImportExport,Node);
 public:
 
 	enum FileAction {
@@ -321,8 +323,8 @@ protected:
 
 	static EditorImportExport* singleton;
 
-	DVector<String> _get_export_file_list();
-	DVector<String> _get_export_platforms();
+	PoolVector<String> _get_export_file_list();
+	PoolVector<String> _get_export_platforms();
 
 	static void _bind_methods();
 public:
@@ -419,4 +421,5 @@ VARIANT_ENUM_CAST(EditorImportExport::ImageAction);
 VARIANT_ENUM_CAST(EditorImportExport::ScriptAction);
 VARIANT_ENUM_CAST(EditorImportExport::SampleAction);
 
+#endif
 #endif // EDITOR_IMPORT_EXPORT_H

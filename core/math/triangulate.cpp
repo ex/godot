@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -28,19 +28,19 @@
 /*************************************************************************/
 #include "triangulate.h"
 
-float Triangulate::get_area(const Vector<Vector2> &contour)
+real_t Triangulate::get_area(const Vector<Vector2> &contour)
 {
 
   int n = contour.size();
   const Vector2 *c=&contour[0];
 
-  float A=0.0f;
+  real_t A=0.0;
 
   for(int p=n-1,q=0; q<n; p=q++)
   {
     A+= c[p].cross(c[q]);
   }
-  return A*0.5f;
+  return A*0.5;
 }
 
    /*
@@ -48,14 +48,14 @@ float Triangulate::get_area(const Vector<Vector2> &contour)
      defined by A, B, C.
    */
 
-bool Triangulate::is_inside_triangle(float Ax, float Ay,
-		      float Bx, float By,
-		      float Cx, float Cy,
-		      float Px, float Py)
+bool Triangulate::is_inside_triangle(real_t Ax, real_t Ay,
+		      real_t Bx, real_t By,
+		      real_t Cx, real_t Cy,
+		      real_t Px, real_t Py)
 
 {
-  float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
-  float cCROSSap, bCROSScp, aCROSSbp;
+  real_t ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
+  real_t cCROSSap, bCROSScp, aCROSSbp;
 
   ax = Cx - Bx;  ay = Cy - By;
   bx = Ax - Cx;  by = Ay - Cy;
@@ -68,13 +68,13 @@ bool Triangulate::is_inside_triangle(float Ax, float Ay,
   cCROSSap = cx*apy - cy*apx;
   bCROSScp = bx*cpy - by*cpx;
 
-  return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
+  return ((aCROSSbp >= 0.0) && (bCROSScp >= 0.0) && (cCROSSap >= 0.0));
 };
 
-bool Triangulate::snip(const Vector<Vector2> &p_contour,int u,int v,int w,int n,int *V)
+bool Triangulate::snip(const Vector<Vector2> &p_contour,int u,int v,int w,int n,const Vector<int>& V)
 {
   int p;
-  float Ax, Ay, Bx, By, Cx, Cy, Px, Py;
+  real_t Ax, Ay, Bx, By, Cx, Cy, Px, Py;
   const Vector2 *contour=&p_contour[0];
 
   Ax = contour[V[u]].x;
@@ -107,12 +107,12 @@ bool Triangulate::triangulate(const Vector<Vector2> &contour,Vector<int> &result
   if ( n < 3 ) return false;
 
 
-
-  int *V = (int*)alloca(sizeof(int)*n);
+  Vector<int> V;
+  V.resize(n);
 
   /* we want a counter-clockwise polygon in V */
 
-  if ( 0.0f < get_area(contour) )
+  if ( 0.0 < get_area(contour) )
     for (int v=0; v<n; v++) V[v] = v;
   else
     for(int v=0; v<n; v++) V[v] = (n-1)-v;
@@ -122,7 +122,7 @@ bool Triangulate::triangulate(const Vector<Vector2> &contour,Vector<int> &result
   /*  remove nv-2 Vertices, creating 1 triangle every time */
   int count = 2*nv;   /* error detection */
 
-  for(int m=0, v=nv-1; nv>2; )
+  for(int v=nv-1; nv>2; )
   {
     /* if we loop, it is probably a non-simple polygon */
     if (0 >= (count--))
@@ -144,17 +144,9 @@ bool Triangulate::triangulate(const Vector<Vector2> &contour,Vector<int> &result
       a = V[u]; b = V[v]; c = V[w];
 
       /* output Triangle */
-      /*
-      result.push_back( contour[a] );
-      result.push_back( contour[b] );
-      result.push_back( contour[c] );
-*/
-
       result.push_back( a );
       result.push_back( b );
       result.push_back( c );
-
-      m++;
 
       /* remove v from remaining polygon */
       for(s=v,t=v+1;t<nv;s++,t++)
