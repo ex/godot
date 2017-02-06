@@ -103,6 +103,7 @@
 #include "import/resource_importer_csv_translation.h"
 #include "import/resource_importer_wav.h"
 #include "import/resource_importer_obj.h"
+#include "import/resource_importer_scene.h"
 // end
 #include "editor_settings.h"
 #include "io_plugins/editor_texture_import_plugin.h"
@@ -113,7 +114,7 @@
 #include "io_plugins/editor_bitmask_import_plugin.h"
 #include "io_plugins/editor_mesh_import_plugin.h"
 #include "io_plugins/editor_export_scene.h"
-#include "io_plugins/editor_import_collada.h"
+#include "import/editor_import_collada.h"
 #include "io_plugins/editor_scene_importer_fbxconv.h"
 
 #include "plugins/editor_preview_plugins.h"
@@ -307,6 +308,8 @@ void EditorNode::_notification(int p_what) {
 
 		}
 
+		ResourceImporterTexture::get_singleton()->update_imports();
+
 	}
 	if (p_what==NOTIFICATION_ENTER_TREE) {
 
@@ -410,8 +413,10 @@ void EditorNode::_fs_changed() {
 			if (E->get()->get_import_path()!=String()) {
 				//imported resource
 				uint64_t mt = FileAccess::get_modified_time(E->get()->get_import_path());
+				print_line("testing modified: "+E->get()->get_import_path()+" "+itos(mt)+" vs "+itos(E->get()->get_import_last_modified_time()));
 
 				if (mt!=E->get()->get_import_last_modified_time()) {
+					print_line("success");
 					changed.push_back(E->get());
 				}
 
@@ -3303,7 +3308,10 @@ void EditorNode::fix_dependencies(const String& p_for_file) {
 	dependency_fixer->edit(p_for_file);
 }
 
-Error EditorNode::load_scene(const String& p_scene, bool p_ignore_broken_deps,bool p_set_inherited,bool p_clear_errors) {
+
+
+
+Error EditorNode::load_scene(const String& p_scene, bool p_ignore_broken_deps, bool p_set_inherited, bool p_clear_errors, bool p_force_open_imported) {
 
 	if (!is_inside_tree()) {
 		defer_load_scene = p_scene;
@@ -3312,6 +3320,8 @@ Error EditorNode::load_scene(const String& p_scene, bool p_ignore_broken_deps,bo
 
 
 	if(!p_set_inherited) {
+
+
 		for(int i=0;i<editor_data.get_edited_scene_count();i++) {
 
 			if (editor_data.get_scene_path(i)==p_scene) {
@@ -3319,7 +3329,17 @@ Error EditorNode::load_scene(const String& p_scene, bool p_ignore_broken_deps,bo
 				return OK;
 			}
 		}
+
+		if (!p_force_open_imported && FileAccess::exists(p_scene+".import")) {
+			open_imported->set_text(vformat(TTR("Scene '%s' was automatically imported, so it can't be modified.\nTo make changes to it, a new inherited scene can be created."),p_scene.get_file()));
+			open_imported->popup_centered_minsize();
+			new_inherited_button->grab_focus();
+			open_import_request=p_scene;
+			return OK;
+		}
+
 	}
+
 
 
 	if (p_clear_errors)
@@ -4957,6 +4977,19 @@ void EditorNode::_call_build() {
 	}
 }
 
+
+void EditorNode::_inherit_imported(const String& p_action) {
+
+	open_imported->hide();
+	load_scene(open_import_request,true,true);
+
+}
+
+void EditorNode::_open_imported() {
+
+	load_scene(open_import_request,true,false,true,true);
+}
+
 void EditorNode::_bind_methods() {
 
 
@@ -5034,6 +5067,8 @@ void EditorNode::_bind_methods() {
 	ClassDB::bind_method(_MD("get_gui_base"), &EditorNode::get_gui_base);
 	ClassDB::bind_method(_MD("_bottom_panel_switch"), &EditorNode::_bottom_panel_switch);
 
+	ClassDB::bind_method(_MD("_open_imported"), &EditorNode::_open_imported);
+	ClassDB::bind_method(_MD("_inherit_imported"), &EditorNode::_inherit_imported);
 
 	ADD_SIGNAL( MethodInfo("play_pressed") );
 	ADD_SIGNAL( MethodInfo("pause_pressed") );
@@ -5136,6 +5171,16 @@ EditorNode::EditorNode() {
 		Ref<ResourceImporterOBJ> import_obj;
 		import_obj.instance();
 		ResourceFormatImporter::get_singleton()->add_importer(import_obj);
+
+		Ref<ResourceImporterScene> import_scene;
+		import_scene.instance();
+		ResourceFormatImporter::get_singleton()->add_importer(import_scene);
+
+		{
+			Ref<EditorSceneImporterCollada> import_collada;
+			import_collada.instance();
+			import_scene->add_importer(import_collada);
+		}
 
 	}
 
@@ -6345,6 +6390,14 @@ EditorNode::EditorNode() {
 			EditorSettings::get_singleton()->save();
 		}
 	}
+
+	open_imported = memnew( ConfirmationDialog );
+	open_imported->get_ok()->set_text(TTR("Open Anyway"));
+	new_inherited_button=open_imported->add_button("New Inherited",!OS::get_singleton()->get_swap_ok_cancel(),"inherit");
+	open_imported->connect("confirmed",this,"_open_imported");
+	open_imported->connect("custom_action",this,"_inherit_imported");
+	gui_base->add_child(open_imported);
+
 
 
 	//edited_scene=NULL;

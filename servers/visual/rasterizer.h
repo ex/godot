@@ -196,6 +196,8 @@ public:
 
 	virtual RID texture_create_radiance_cubemap(RID p_source,int p_resolution=-1) const=0;
 
+	virtual void texture_set_detect_3d_callback(RID p_texture,VisualServer::TextureDetectCallback p_callback,void* p_userdata)=0;
+	virtual void texture_set_detect_srgb_callback(RID p_texture,VisualServer::TextureDetectCallback p_callback,void* p_userdata)=0;
 
 	virtual void textures_keep_original(bool p_enable)=0;
 
@@ -430,6 +432,9 @@ public:
 	virtual void gi_probe_set_energy(RID p_probe,float p_range)=0;
 	virtual float gi_probe_get_energy(RID p_probe) const=0;
 
+	virtual void gi_probe_set_propagation(RID p_probe,float p_range)=0;
+	virtual float gi_probe_get_propagation(RID p_probe) const=0;
+
 	virtual void gi_probe_set_interior(RID p_probe,bool p_enable)=0;
 	virtual bool gi_probe_is_interior(RID p_probe) const=0;
 
@@ -512,6 +517,7 @@ public:
 	virtual VS::InstanceType get_base_type(RID p_rid) const=0;
 	virtual bool free(RID p_rid)=0;
 
+	virtual bool has_os_feature(const String& p_feature) const=0;
 
 	static RasterizerStorage*base_signleton;
 	RasterizerStorage();

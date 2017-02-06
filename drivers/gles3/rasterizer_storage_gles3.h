@@ -228,6 +228,12 @@ public:
 
 		Image images[6];
 
+		VisualServer::TextureDetectCallback detect_3d;
+		void *detect_3d_ud;
+
+		VisualServer::TextureDetectCallback detect_srgb;
+		void *detect_srgb_ud;
+
 		Texture() {
 
 			using_srgb=false;
@@ -243,6 +249,10 @@ public:
 			total_data_size=0;
 			target=GL_TEXTURE_2D;
 			mipmaps=0;
+			detect_3d=NULL;
+			detect_3d_ud=NULL;
+			detect_srgb=NULL;
+			detect_srgb_ud=NULL;
 
 		}
 
@@ -280,6 +290,10 @@ public:
 	virtual RID texture_create_radiance_cubemap(RID p_source,int p_resolution=-1) const;
 
 	virtual void textures_keep_original(bool p_enable);
+
+	virtual void texture_set_detect_3d_callback(RID p_texture,VisualServer::TextureDetectCallback p_callback,void* p_userdata);
+	virtual void texture_set_detect_srgb_callback(RID p_texture,VisualServer::TextureDetectCallback p_callback,void* p_userdata);
+
 
 	/* SKYBOX API */
 
@@ -907,6 +921,7 @@ public:
 
 		int dynamic_range;
 		float energy;
+		float propagation;
 		bool interior;
 		bool compress;
 
@@ -938,6 +953,9 @@ public:
 
 	virtual void gi_probe_set_energy(RID p_probe,float p_range);
 	virtual float gi_probe_get_energy(RID p_probe) const;
+
+	virtual void gi_probe_set_propagation(RID p_probe,float p_range);
+	virtual float gi_probe_get_propagation(RID p_probe) const;
 
 	virtual void gi_probe_set_interior(RID p_probe,bool p_enable);
 	virtual bool gi_probe_is_interior(RID p_probe) const;
@@ -1237,6 +1255,7 @@ public:
 	void initialize();
 	void finalize();
 
+	virtual bool has_os_feature(const String& p_feature) const;
 
 
 	RasterizerStorageGLES3();

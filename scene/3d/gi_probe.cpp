@@ -64,6 +64,18 @@ float GIProbeData::get_energy() const{
 
 }
 
+void GIProbeData::set_propagation(float p_range) {
+
+	VS::get_singleton()->gi_probe_set_propagation(probe,p_range);
+}
+
+float GIProbeData::get_propagation() const{
+
+	return VS::get_singleton()->gi_probe_get_propagation(probe);
+
+}
+
+
 void GIProbeData::set_interior(bool p_enable) {
 
 	VS::get_singleton()->gi_probe_set_interior(probe,p_enable);
@@ -121,6 +133,9 @@ void GIProbeData::_bind_methods() {
 	ClassDB::bind_method(_MD("set_energy","energy"),&GIProbeData::set_energy);
 	ClassDB::bind_method(_MD("get_energy"),&GIProbeData::get_energy);
 
+	ClassDB::bind_method(_MD("set_propagation","propagation"),&GIProbeData::set_propagation);
+	ClassDB::bind_method(_MD("get_propagation"),&GIProbeData::get_propagation);
+
 	ClassDB::bind_method(_MD("set_interior","interior"),&GIProbeData::set_interior);
 	ClassDB::bind_method(_MD("is_interior"),&GIProbeData::is_interior);
 
@@ -134,6 +149,7 @@ void GIProbeData::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::POOL_INT_ARRAY,"dynamic_data",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_dynamic_data"),_SCS("get_dynamic_data"));
 	ADD_PROPERTY(PropertyInfo(Variant::INT,"dynamic_range",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_dynamic_range"),_SCS("get_dynamic_range"));
 	ADD_PROPERTY(PropertyInfo(Variant::REAL,"energy",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_energy"),_SCS("get_energy"));
+	ADD_PROPERTY(PropertyInfo(Variant::REAL,"propagation",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_propagation"),_SCS("get_propagation"));
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL,"interior",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_interior"),_SCS("is_interior"));
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL,"compress",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_compress"),_SCS("is_compressed"));
 
@@ -212,6 +228,18 @@ void GIProbe::set_energy(float p_energy) {
 float GIProbe::get_energy() const {
 
 	return energy;
+}
+
+void GIProbe::set_propagation(float p_propagation) {
+
+	propagation=p_propagation;
+	if (probe_data.is_valid()) {
+		probe_data->set_propagation(propagation);
+	}
+}
+float GIProbe::get_propagation() const {
+
+	return propagation;
 }
 
 void GIProbe::set_interior(bool p_enable) {
@@ -906,7 +934,7 @@ GIProbe::Baker::MaterialCache GIProbe::_get_material_cache(Ref<Material> p_mater
 
 }
 
-void GIProbe::_plot_mesh(const Transform& p_xform, Ref<Mesh>& p_mesh, Baker *p_baker) {
+void GIProbe::_plot_mesh(const Transform& p_xform, Ref<Mesh>& p_mesh, Baker *p_baker, const Vector<Ref<Material> > &p_materials, const Ref<Material> &p_override_material) {
 
 
 	for(int i=0;i<p_mesh->get_surface_count();i++) {
@@ -914,7 +942,16 @@ void GIProbe::_plot_mesh(const Transform& p_xform, Ref<Mesh>& p_mesh, Baker *p_b
 		if (p_mesh->surface_get_primitive_type(i)!=Mesh::PRIMITIVE_TRIANGLES)
 			continue; //only triangles
 
-		Baker::MaterialCache material = _get_material_cache(p_mesh->surface_get_material(i),p_baker);
+		Ref<Material> src_material;
+
+		if (p_override_material.is_valid()) {
+			src_material=p_override_material;
+		} else if (i<p_materials.size() && p_materials[i].is_valid()) {
+			src_material=p_materials[i];
+		} else {
+			src_material=p_mesh->surface_get_material(i);
+		}
+		Baker::MaterialCache material = _get_material_cache(src_material,p_baker);
 
 		Array a = p_mesh->surface_get_arrays(i);
 
@@ -1009,6 +1046,10 @@ void GIProbe::_find_meshes(Node *p_at_node,Baker *p_baker){
 				Baker::PlotMesh pm;
 				pm.local_xform=xf;
 				pm.mesh=mesh;
+				for(int i=0;i<mesh->get_surface_count();i++) {
+					pm.instance_materials.push_back(mi->get_surface_material(i));
+				}
+				pm.override_material=mi->get_material_override();
 				p_baker->mesh_list.push_back(pm);
 
 			}
@@ -1083,7 +1124,7 @@ void GIProbe::bake(Node *p_from_node, bool p_create_visual_debug){
 
 		print_line("plotting mesh "+itos(pmc++)+"/"+itos(baker.mesh_list.size()));
 
-		_plot_mesh(E->get().local_xform,E->get().mesh,&baker);
+		_plot_mesh(E->get().local_xform,E->get().mesh,&baker,E->get().instance_materials,E->get().override_material);
 	}
 
 	_fixup_plot(0,0,0,0,0,&baker);
@@ -1358,6 +1399,9 @@ void GIProbe::_bind_methods() {
 	ClassDB::bind_method(_MD("set_energy","max"),&GIProbe::set_energy);
 	ClassDB::bind_method(_MD("get_energy"),&GIProbe::get_energy);
 
+	ClassDB::bind_method(_MD("set_propagation","max"),&GIProbe::set_propagation);
+	ClassDB::bind_method(_MD("get_propagation"),&GIProbe::get_propagation);
+
 	ClassDB::bind_method(_MD("set_interior","enable"),&GIProbe::set_interior);
 	ClassDB::bind_method(_MD("is_interior"),&GIProbe::is_interior);
 
@@ -1372,6 +1416,7 @@ void GIProbe::_bind_methods() {
 	ADD_PROPERTY( PropertyInfo(Variant::VECTOR3,"extents"),_SCS("set_extents"),_SCS("get_extents"));
 	ADD_PROPERTY( PropertyInfo(Variant::INT,"dynamic_range",PROPERTY_HINT_RANGE,"1,16,1"),_SCS("set_dynamic_range"),_SCS("get_dynamic_range"));
 	ADD_PROPERTY( PropertyInfo(Variant::REAL,"energy",PROPERTY_HINT_RANGE,"0,16,0.01"),_SCS("set_energy"),_SCS("get_energy"));
+	ADD_PROPERTY( PropertyInfo(Variant::REAL,"propagation",PROPERTY_HINT_RANGE,"0,1,0.01"),_SCS("set_propagation"),_SCS("get_propagation"));
 	ADD_PROPERTY( PropertyInfo(Variant::BOOL,"interior"),_SCS("set_interior"),_SCS("is_interior"));
 	ADD_PROPERTY( PropertyInfo(Variant::BOOL,"compress"),_SCS("set_compress"),_SCS("is_compressed"));
 	ADD_PROPERTY( PropertyInfo(Variant::OBJECT,"data",PROPERTY_HINT_RESOURCE_TYPE,"GIProbeData"),_SCS("set_probe_data"),_SCS("get_probe_data"));
@@ -1389,6 +1434,7 @@ GIProbe::GIProbe() {
 	subdiv=SUBDIV_128;
 	dynamic_range=4;
 	energy=1.0;
+	propagation=1.0;
 	extents=Vector3(10,10,10);
 	color_scan_cell_width=4;
 	bake_texture_size=128;
