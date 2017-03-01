@@ -329,7 +329,7 @@ PropertyInfo VisualScriptBuiltinFunc::get_input_value_port_info(int p_idx) const
 		case LOGIC_CLAMP: {
 			if (p_idx==0)
 				return PropertyInfo(Variant::REAL,"a");
-			else if (p_idx==0)
+			else if (p_idx==0)	// is it ok to test p_idx == 0 twice?
 				return PropertyInfo(Variant::REAL,"min");
 			else
 				return PropertyInfo(Variant::REAL,"max");
@@ -1166,8 +1166,8 @@ VisualScriptNodeInstance* VisualScriptBuiltinFunc::instance(VisualScriptInstance
 
 void VisualScriptBuiltinFunc::_bind_methods() {
 
-	ClassDB::bind_method(_MD("set_func","which"),&VisualScriptBuiltinFunc::set_func);
-	ClassDB::bind_method(_MD("get_func"),&VisualScriptBuiltinFunc::get_func);
+	ClassDB::bind_method(D_METHOD("set_func","which"),&VisualScriptBuiltinFunc::set_func);
+	ClassDB::bind_method(D_METHOD("get_func"),&VisualScriptBuiltinFunc::get_func);
 
 	String cc;
 
@@ -1177,7 +1177,7 @@ void VisualScriptBuiltinFunc::_bind_methods() {
 			cc+=",";
 		cc+=func_name[i];
 	}
-	ADD_PROPERTY(PropertyInfo(Variant::INT,"function",PROPERTY_HINT_ENUM,cc),_SCS("set_func"),_SCS("get_func"));
+	ADD_PROPERTY(PropertyInfo(Variant::INT,"function",PROPERTY_HINT_ENUM,cc),"set_func","get_func");
 }
 
 VisualScriptBuiltinFunc::VisualScriptBuiltinFunc() {

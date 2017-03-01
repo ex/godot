@@ -312,7 +312,7 @@ bool NavigationPolygonEditor::forward_gui_input(const InputEvent& p_event) {
 								return true;
 							}
 						}
-					} if (mb.button_index==BUTTON_RIGHT && mb.pressed && edited_point==-1) {
+					} else if (mb.button_index==BUTTON_RIGHT && mb.pressed && edited_point==-1) {
 
 						int closest_outline=-1;
 						int closest_idx=-1;
@@ -477,10 +477,10 @@ void NavigationPolygonEditor::edit(Node *p_collision_polygon) {
 
 void NavigationPolygonEditor::_bind_methods() {
 
-	ClassDB::bind_method(_MD("_menu_option"),&NavigationPolygonEditor::_menu_option);
-	ClassDB::bind_method(_MD("_canvas_draw"),&NavigationPolygonEditor::_canvas_draw);
-	ClassDB::bind_method(_MD("_node_removed"),&NavigationPolygonEditor::_node_removed);
-	ClassDB::bind_method(_MD("_create_nav"),&NavigationPolygonEditor::_create_nav);
+	ClassDB::bind_method(D_METHOD("_menu_option"),&NavigationPolygonEditor::_menu_option);
+	ClassDB::bind_method(D_METHOD("_canvas_draw"),&NavigationPolygonEditor::_canvas_draw);
+	ClassDB::bind_method(D_METHOD("_node_removed"),&NavigationPolygonEditor::_node_removed);
+	ClassDB::bind_method(D_METHOD("_create_nav"),&NavigationPolygonEditor::_create_nav);
 
 }
 

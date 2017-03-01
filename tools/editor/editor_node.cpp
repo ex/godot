@@ -37,7 +37,7 @@
 #include "servers/physics_2d_server.h"
 #include "scene/resources/packed_scene.h"
 #include "editor_settings.h"
-#include "globals.h"
+#include "global_config.h"
 #include <stdio.h>
 #include "class_db.h"
 #include "os/keyboard.h"
@@ -87,6 +87,7 @@
 #include "plugins/script_editor_plugin.h"
 #include "plugins/script_text_editor.h"
 #include "plugins/path_2d_editor_plugin.h"
+#include "plugins/line_2d_editor_plugin.h"
 #include "plugins/particles_editor_plugin.h"
 #include "plugins/particles_2d_editor_plugin.h"
 #include "plugins/animation_tree_editor_plugin.h"
@@ -338,6 +339,7 @@ void EditorNode::_notification(int p_what) {
 		VisualServer::get_singleton()->viewport_set_disable_environment(get_viewport()->get_viewport_rid(),true);
 
 		_editor_select(EDITOR_3D);
+		_update_debug_options();
 
 /*
 		if (defer_optimize!="") {
@@ -1790,7 +1792,7 @@ void EditorNode::_run(bool p_current,const String& p_custom) {
 	play_custom_scene_button->set_pressed(false);
 	play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom","EditorIcons"));
 
-	String current_filename;
+	String main_scene;
 	String run_filename;
 	String args;
 
@@ -1817,25 +1819,16 @@ void EditorNode::_run(bool p_current,const String& p_custom) {
 
 		}
 
-
-
-		if (run_settings_dialog->get_run_mode()==RunSettingsDialog::RUN_LOCAL_SCENE) {
-
-			run_filename=scene->get_filename();
-		} else {
-			current_filename=scene->get_filename();
-		}
-
+		run_filename=scene->get_filename();
 	} else if (p_custom!="") {
-
-		run_filename=p_custom;
+		run_filename = p_custom;
 	}
 
 	if (run_filename=="") {
 
 		//evidently, run the scene
-		run_filename=GLOBAL_DEF("application/main_scene","");
-		if (run_filename=="") {
+		main_scene=GLOBAL_DEF("application/main_scene","");
+		if (main_scene=="") {
 
 			current_option=-1;
 			//accept->get_cancel()->hide();
@@ -1844,21 +1837,21 @@ void EditorNode::_run(bool p_current,const String& p_custom) {
 			return;
 		}
 
-		if (!FileAccess::exists(run_filename)) {
+		if (!FileAccess::exists(main_scene)) {
 
 			current_option=-1;
 			//accept->get_cancel()->hide();
-			pick_main_scene->set_text(vformat(TTR("Selected scene '%s' does not exist, select a valid one?\nYou can change it later in \"Project Settings\" under the 'application' category."), run_filename));
+			pick_main_scene->set_text(vformat(TTR("Selected scene '%s' does not exist, select a valid one?\nYou can change it later in \"Project Settings\" under the 'application' category."), main_scene));
 			pick_main_scene->popup_centered_minsize();
 			return;
 
 		}
 
-		if (ResourceLoader::get_resource_type(run_filename)!="PackedScene") {
+		if (ResourceLoader::get_resource_type(main_scene)!="PackedScene") {
 
 			current_option=-1;
 			//accept->get_cancel()->hide();
-			pick_main_scene->set_text(vformat(TTR("Selected scene '%s' is not a scene file, select a valid one?\nYou can change it later in \"Project Settings\" under the 'application' category."), run_filename));
+			pick_main_scene->set_text(vformat(TTR("Selected scene '%s' is not a scene file, select a valid one?\nYou can change it later in \"Project Settings\" under the 'application' category."), main_scene));
 			pick_main_scene->popup_centered_minsize();
 			return;
 
@@ -1906,7 +1899,7 @@ void EditorNode::_run(bool p_current,const String& p_custom) {
 
 	args = GlobalConfig::get_singleton()->get("editor/main_run_args");
 
-	Error error = editor_run.run(run_filename,args,breakpoints,current_filename);
+	Error error = editor_run.run(run_filename,args,breakpoints);
 
 	if (error!=OK) {
 
@@ -1924,7 +1917,7 @@ void EditorNode::_run(bool p_current,const String& p_custom) {
 		play_scene_button->set_pressed(true);
 		play_scene_button->set_icon(gui_base->get_icon("Reload","EditorIcons"));
 	} else if (p_custom!="") {
-		run_custom_filename=run_filename;
+		run_custom_filename=p_custom;
 		play_custom_scene_button->set_pressed(true);
 		play_custom_scene_button->set_icon(gui_base->get_icon("Reload","EditorIcons"));
 	} else {
@@ -2207,25 +2200,7 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 
 		case FILE_EXPORT_PROJECT: {
 
-			//project_export_settings->popup_export();
-			/*
-			String target = export_db->get_current_platform();
-			Ref<EditorExporter> exporter = export_db->get_exporter(target);
-			if (exporter.is_null()) {
-				accept->set_text("No exporter for platform '"+target+"' yet.");
-				accept->popup_centered(Size2(300,70));
-				return;
-			}
-
-			String extension = exporter->get_binary_extension();
-			print_line("for target: "+target+" extension: "+extension);
-			file_export_password->set_editable( exporter->requieres_password(file_export_check->is_pressed()));
-
-			file_export->clear_filters();
-			if (extension!="") {
-				file_export->add_filter("*."+extension);
-			}
-			file_export->popup_centered_ratio();*/
+			project_export->popup_export();
 		} break;
 
 		case FILE_EXPORT_MESH_LIBRARY: {
@@ -2603,6 +2578,14 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 			play_custom_scene_button->set_pressed(false);
 			play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom","EditorIcons"));
 			//pause_button->set_pressed(false);
+			if (bool(EDITOR_DEF("run/output/always_close_output_on_stop", true))) {
+				for(int i=0;i<bottom_panel_items.size();i++) {
+					if (bottom_panel_items[i].control==log) {
+						_bottom_panel_switch(false,i);
+						break;
+					}
+				}
+			}
 			emit_signal("stop_pressed");
 
 		} break;
@@ -2674,7 +2657,7 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 			}
 
 			debug_button->get_popup()->set_item_checked( debug_button->get_popup()->get_item_index(RUN_FILE_SERVER),!ischecked);
-
+			EditorSettings::get_singleton()->set_project_metadata("debug_options", "run_file_server", !ischecked);
 		} break;
 		case RUN_LIVE_DEBUG: {
 
@@ -2682,6 +2665,8 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 
 			debug_button->get_popup()->set_item_checked( debug_button->get_popup()->get_item_index(RUN_LIVE_DEBUG),!ischecked);
 			ScriptEditor::get_singleton()->get_debugger()->set_live_debugging(!ischecked);
+			EditorSettings::get_singleton()->set_project_metadata("debug_options", "run_live_debug", !ischecked);
+
 		} break;
 
 		/*case RUN_DEPLOY_DUMB_CLIENTS: {
@@ -2696,6 +2681,7 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 			bool ischecked = debug_button->get_popup()->is_item_checked( debug_button->get_popup()->get_item_index(RUN_DEPLOY_REMOTE_DEBUG));
 			debug_button->get_popup()->set_item_checked( debug_button->get_popup()->get_item_index(RUN_DEPLOY_REMOTE_DEBUG),!ischecked);
 			run_native->set_deploy_debug_remote(!ischecked);
+			EditorSettings::get_singleton()->set_project_metadata("debug_options", "run_deploy_remote_debug", !ischecked);
 
 		} break;
 		case RUN_DEBUG_COLLISONS: {
@@ -2704,6 +2690,8 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 			debug_button->get_popup()->set_item_checked( debug_button->get_popup()->get_item_index(RUN_DEBUG_COLLISONS),!ischecked);
 			run_native->set_debug_collisions(!ischecked);
 			editor_run.set_debug_collisions(!ischecked);
+			EditorSettings::get_singleton()->set_project_metadata("debug_options", "run_debug_collisons", !ischecked);
+
 		} break;
 		case RUN_DEBUG_NAVIGATION: {
 
@@ -2711,6 +2699,8 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 			debug_button->get_popup()->set_item_checked( debug_button->get_popup()->get_item_index(RUN_DEBUG_NAVIGATION),!ischecked);
 			run_native->set_debug_navigation(!ischecked);
 			editor_run.set_debug_navigation(!ischecked);
+			EditorSettings::get_singleton()->set_project_metadata("debug_options", "run_debug_navigation", !ischecked);
+
 		} break;
 		case RUN_RELOAD_SCRIPTS: {
 
@@ -2719,6 +2709,8 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 			debug_button->get_popup()->set_item_checked( debug_button->get_popup()->get_item_index(RUN_RELOAD_SCRIPTS),!ischecked);
 
 			ScriptEditor::get_singleton()->set_live_auto_reload_running_scripts(!ischecked);
+			EditorSettings::get_singleton()->set_project_metadata("debug_options", "run_reload_scripts", !ischecked);
+
 		} break;
 		case SETTINGS_UPDATE_ALWAYS: {
 
@@ -2864,6 +2856,23 @@ void EditorNode::_menu_option_confirm(int p_option,bool p_confirmed) {
 	}
 }
 
+void EditorNode::_update_debug_options() {
+
+	bool check_deploy_remote    = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_deploy_remote_debug", false);
+	bool check_file_server      = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_file_server", false);
+	bool check_debug_collisons  = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_debug_collisons", false);
+	bool check_debug_navigation = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_debug_navigation", false);
+	bool check_live_debug       = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_live_debug", false);
+	bool check_reload_scripts   = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_reload_scripts", false);
+
+	if (check_deploy_remote)    _menu_option_confirm(RUN_DEPLOY_REMOTE_DEBUG, true);
+	if (check_file_server)      _menu_option_confirm(RUN_FILE_SERVER, true);
+	if (check_debug_collisons)  _menu_option_confirm(RUN_DEBUG_COLLISONS, true);
+	if (check_debug_navigation) _menu_option_confirm(RUN_DEBUG_NAVIGATION, true);
+	if (check_live_debug)       _menu_option_confirm(RUN_LIVE_DEBUG, true);
+	if (check_reload_scripts)   _menu_option_confirm(RUN_RELOAD_SCRIPTS, true);
+
+}
 
 Control* EditorNode::get_viewport() {
 
@@ -5062,13 +5071,13 @@ void EditorNode::_bind_methods() {
 
 
 
-//	ClassDB::bind_method(_MD("add_editor_import_plugin", "plugin"), &EditorNode::add_editor_import_plugin);
-	//ClassDB::bind_method(_MD("remove_editor_import_plugin", "plugin"), &EditorNode::remove_editor_import_plugin);
-	ClassDB::bind_method(_MD("get_gui_base"), &EditorNode::get_gui_base);
-	ClassDB::bind_method(_MD("_bottom_panel_switch"), &EditorNode::_bottom_panel_switch);
+//	ClassDB::bind_method(D_METHOD("add_editor_import_plugin", "plugin"), &EditorNode::add_editor_import_plugin);
+	//ClassDB::bind_method(D_METHOD("remove_editor_import_plugin", "plugin"), &EditorNode::remove_editor_import_plugin);
+	ClassDB::bind_method(D_METHOD("get_gui_base"), &EditorNode::get_gui_base);
+	ClassDB::bind_method(D_METHOD("_bottom_panel_switch"), &EditorNode::_bottom_panel_switch);
 
-	ClassDB::bind_method(_MD("_open_imported"), &EditorNode::_open_imported);
-	ClassDB::bind_method(_MD("_inherit_imported"), &EditorNode::_inherit_imported);
+	ClassDB::bind_method(D_METHOD("_open_imported"), &EditorNode::_open_imported);
+	ClassDB::bind_method(D_METHOD("_inherit_imported"), &EditorNode::_inherit_imported);
 
 	ADD_SIGNAL( MethodInfo("play_pressed") );
 	ADD_SIGNAL( MethodInfo("pause_pressed") );
@@ -5200,10 +5209,13 @@ EditorNode::EditorNode() {
 	EditorFileDialog::register_func=_editor_file_dialog_register;
 	EditorFileDialog::unregister_func=_editor_file_dialog_unregister;
 
+	editor_export = memnew( EditorExport );
+	add_child(editor_export);
+
 
 	register_exporters();
 
-	GLOBAL_DEF("editor/main_run_args","$scene");
+	GLOBAL_DEF("editor/main_run_args","");
 
 	ClassDB::set_class_enabled("CollisionShape",true);
 	ClassDB::set_class_enabled("CollisionShape2D",true);
@@ -6120,8 +6132,8 @@ EditorNode::EditorNode() {
 	//gui_base->add_child(optimized_save);
 	//optimized_save->connect("confirmed",this,"_save_optimized");
 
-	//project_export = memnew( ProjectExport(&editor_data) );
-	//gui_base->add_child(project_export);
+	project_export = memnew( ProjectExportDialog );
+	gui_base->add_child(project_export);
 
 	//project_export_settings = memnew( ProjectExportDialog(this) );
 	//gui_base->add_child(project_export_settings);
@@ -6266,6 +6278,7 @@ EditorNode::EditorNode() {
 
 
 
+
 	add_editor_plugin( memnew( AnimationPlayerEditorPlugin(this) ) );
 	add_editor_plugin( memnew( CanvasItemEditorPlugin(this) ) );
 	add_editor_plugin( memnew( SpatialEditorPlugin(this) ) );
@@ -6315,6 +6328,7 @@ EditorNode::EditorNode() {
 	add_editor_plugin( memnew( Path2DEditorPlugin(this) ) );
 	//add_editor_plugin( memnew( PathEditorPlugin(this) ) );
 	//add_editor_plugin( memnew( BakedLightEditorPlugin(this) ) );
+	add_editor_plugin( memnew( Line2DEditorPlugin(this) ) );
 	add_editor_plugin( memnew( Polygon2DEditorPlugin(this) ) );
 	add_editor_plugin( memnew( LightOccluder2DEditorPlugin(this) ) );
 	add_editor_plugin( memnew( NavigationPolygonEditorPlugin(this) ) );

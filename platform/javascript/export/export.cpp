@@ -29,11 +29,11 @@
 #include "version.h"
 #include "export.h"
 #include "tools/editor/editor_settings.h"
-#include "tools/editor/editor_import_export.h"
+#include "tools/editor/editor_export.h"
 #include "tools/editor/editor_node.h"
 #include "io/zip_io.h"
 #include "io/marshalls.h"
-#include "globals.h"
+#include "global_config.h"
 #include "os/file_access.h"
 #include "os/os.h"
 #include "platform/javascript/logo.h"
@@ -417,14 +417,14 @@ EditorExportPlatformJavaScript::~EditorExportPlatformJavaScript() {
 
 }
 
-
+#endif
 void register_javascript_exporter() {
 
 
-	Ref<EditorExportPlatformJavaScript> exporter = Ref<EditorExportPlatformJavaScript>( memnew(EditorExportPlatformJavaScript) );
-	EditorImportExport::get_singleton()->add_export_platform(exporter);
+	//Ref<EditorExportPlatformJavaScript> exporter = Ref<EditorExportPlatformJavaScript>( memnew(EditorExportPlatformJavaScript) );
+	//EditorImportExport::get_singleton()->add_export_platform(exporter);
 
 
 }
 
-#endif
+

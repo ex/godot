@@ -35,7 +35,7 @@
 #include "os/os.h"
 #include "tools/editor/editor_node.h"
 #include "tools/editor/script_editor_debugger.h"
-#include "globals.h"
+#include "global_config.h"
 #include "os/file_access.h"
 #include "scene/main/viewport.h"
 #include "os/keyboard.h"
@@ -241,9 +241,9 @@ void ScriptEditorQuickOpen::_notification(int p_what) {
 
 void ScriptEditorQuickOpen::_bind_methods() {
 
-	ClassDB::bind_method(_MD("_text_changed"),&ScriptEditorQuickOpen::_text_changed);
-	ClassDB::bind_method(_MD("_confirmed"),&ScriptEditorQuickOpen::_confirmed);
-	ClassDB::bind_method(_MD("_sbox_input"),&ScriptEditorQuickOpen::_sbox_input);
+	ClassDB::bind_method(D_METHOD("_text_changed"),&ScriptEditorQuickOpen::_text_changed);
+	ClassDB::bind_method(D_METHOD("_confirmed"),&ScriptEditorQuickOpen::_confirmed);
+	ClassDB::bind_method(D_METHOD("_sbox_input"),&ScriptEditorQuickOpen::_sbox_input);
 
 	ADD_SIGNAL(MethodInfo("goto_line",PropertyInfo(Variant::INT,"line")));
 
@@ -291,6 +291,10 @@ String ScriptEditor::_get_debug_tooltip(const String&p_text,Node *_se) {
 }
 
 void ScriptEditor::_breaked(bool p_breaked,bool p_can_debug) {
+
+	if (bool(EditorSettings::get_singleton()->get("text_editor/external/use_external_editor"))) {
+		return;
+	}
 
 	debug_menu->get_popup()->set_item_disabled( debug_menu->get_popup()->get_item_index(DEBUG_NEXT), !(p_breaked && p_can_debug));
 	debug_menu->get_popup()->set_item_disabled( debug_menu->get_popup()->get_item_index(DEBUG_STEP), !(p_breaked && p_can_debug) );

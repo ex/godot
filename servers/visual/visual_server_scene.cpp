@@ -1556,8 +1556,10 @@ void VisualServerScene::_light_instance_update_shadow(Instance *p_instance,const
 						cull_count--;
 						SWAP(instance_shadow_cull_result[j],instance_shadow_cull_result[cull_count]);
 						j--;
+						continue;
 
 					}
+
 
 					instance->transformed_aabb.project_range_in_plane(Plane(z_vec,0),min,max);
 					if (max>z_max)
@@ -2967,7 +2969,7 @@ void VisualServerScene::_bake_gi_downscale_light(int p_idx, int p_level, const G
 
 	}
 
-	divisor=Math::lerp(8.0,divisor,p_propagate);
+	divisor=Math::lerp((float)8.0,divisor,p_propagate);
 	sum[0]/=divisor;
 	sum[1]/=divisor;
 	sum[2]/=divisor;
@@ -3475,6 +3477,7 @@ void VisualServerScene::_update_dirty_instance(Instance *p_instance) {
 				} else if (p_instance->base_type==VS::INSTANCE_MULTIMESH) {
 					RID mesh = VSG::storage->multimesh_get_mesh(p_instance->base);
 					if (mesh.is_valid()) {
+
 						bool cast_shadows=false;
 
 						int sc = VSG::storage->mesh_get_surface_count(mesh);
@@ -3491,6 +3494,7 @@ void VisualServerScene::_update_dirty_instance(Instance *p_instance) {
 								cast_shadows=true;
 								break;
 							}
+
 						}
 
 						if (!cast_shadows) {
@@ -3537,6 +3541,8 @@ void VisualServerScene::_update_dirty_instance(Instance *p_instance) {
 
 
 void VisualServerScene::update_dirty_instances() {
+
+	VSG::storage->update_dirty_resources();
 
 	while(_instance_update_list.first()) {
 

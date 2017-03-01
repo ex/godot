@@ -27,7 +27,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "visual_server.h"
-#include "globals.h"
+#include "global_config.h"
 #include "method_bind_ext.inc"
 
 VisualServer *VisualServer::singleton=NULL;
@@ -712,7 +712,7 @@ Error VisualServer::_surface_set_data(Array p_arrays,uint32_t p_format,uint32_t 
 			} break;
 			case VS::ARRAY_BONES: {
 
-				ERR_FAIL_COND_V( p_arrays[ai].get_type() != Variant::POOL_INT_ARRAY, ERR_INVALID_PARAMETER );
+				ERR_FAIL_COND_V( p_arrays[ai].get_type() != Variant::POOL_INT_ARRAY && p_arrays[ai].get_type() != Variant::POOL_REAL_ARRAY, ERR_INVALID_PARAMETER );
 
 				PoolVector<int> array = p_arrays[ai];
 
@@ -1566,17 +1566,17 @@ Array VisualServer::mesh_surface_get_arrays(RID p_mesh,int p_surface) const {
 void VisualServer::_bind_methods() {
 
 
-	ClassDB::bind_method(_MD("texture_create"),&VisualServer::texture_create);
-	ClassDB::bind_method(_MD("texture_create_from_image"),&VisualServer::texture_create_from_image,DEFVAL( TEXTURE_FLAGS_DEFAULT ) );
-	//ClassDB::bind_method(_MD("texture_allocate"),&VisualServer::texture_allocate,DEFVAL( TEXTURE_FLAGS_DEFAULT ) );
-	//ClassDB::bind_method(_MD("texture_set_data"),&VisualServer::texture_blit_rect,DEFVAL( CUBEMAP_LEFT ) );
-	//ClassDB::bind_method(_MD("texture_get_rect"),&VisualServer::texture_get_rect );
-	ClassDB::bind_method(_MD("texture_set_flags"),&VisualServer::texture_set_flags );
-	ClassDB::bind_method(_MD("texture_get_flags"),&VisualServer::texture_get_flags );
-	ClassDB::bind_method(_MD("texture_get_width"),&VisualServer::texture_get_width );
-	ClassDB::bind_method(_MD("texture_get_height"),&VisualServer::texture_get_height );
+	ClassDB::bind_method(D_METHOD("texture_create"),&VisualServer::texture_create);
+	ClassDB::bind_method(D_METHOD("texture_create_from_image"),&VisualServer::texture_create_from_image,DEFVAL( TEXTURE_FLAGS_DEFAULT ) );
+	//ClassDB::bind_method(D_METHOD("texture_allocate"),&VisualServer::texture_allocate,DEFVAL( TEXTURE_FLAGS_DEFAULT ) );
+	//ClassDB::bind_method(D_METHOD("texture_set_data"),&VisualServer::texture_blit_rect,DEFVAL( CUBEMAP_LEFT ) );
+	//ClassDB::bind_method(D_METHOD("texture_get_rect"),&VisualServer::texture_get_rect );
+	ClassDB::bind_method(D_METHOD("texture_set_flags"),&VisualServer::texture_set_flags );
+	ClassDB::bind_method(D_METHOD("texture_get_flags"),&VisualServer::texture_get_flags );
+	ClassDB::bind_method(D_METHOD("texture_get_width"),&VisualServer::texture_get_width );
+	ClassDB::bind_method(D_METHOD("texture_get_height"),&VisualServer::texture_get_height );
 
-	ClassDB::bind_method(_MD("texture_set_shrink_all_x2_on_set_data","shrink"),&VisualServer::texture_set_shrink_all_x2_on_set_data );
+	ClassDB::bind_method(D_METHOD("texture_set_shrink_all_x2_on_set_data","shrink"),&VisualServer::texture_set_shrink_all_x2_on_set_data );
 
 
 

@@ -64,6 +64,19 @@ float GIProbeData::get_energy() const{
 
 }
 
+
+void GIProbeData::set_bias(float p_range) {
+
+	VS::get_singleton()->gi_probe_set_bias(probe,p_range);
+}
+
+float GIProbeData::get_bias() const{
+
+	return VS::get_singleton()->gi_probe_get_bias(probe);
+
+}
+
+
 void GIProbeData::set_propagation(float p_range) {
 
 	VS::get_singleton()->gi_probe_set_propagation(probe,p_range);
@@ -115,43 +128,47 @@ RID GIProbeData::get_rid() const {
 
 void GIProbeData::_bind_methods() {
 
-	ClassDB::bind_method(_MD("set_bounds","bounds"),&GIProbeData::set_bounds);
-	ClassDB::bind_method(_MD("get_bounds"),&GIProbeData::get_bounds);
+	ClassDB::bind_method(D_METHOD("set_bounds","bounds"),&GIProbeData::set_bounds);
+	ClassDB::bind_method(D_METHOD("get_bounds"),&GIProbeData::get_bounds);
 
-	ClassDB::bind_method(_MD("set_cell_size","cell_size"),&GIProbeData::set_cell_size);
-	ClassDB::bind_method(_MD("get_cell_size"),&GIProbeData::get_cell_size);
+	ClassDB::bind_method(D_METHOD("set_cell_size","cell_size"),&GIProbeData::set_cell_size);
+	ClassDB::bind_method(D_METHOD("get_cell_size"),&GIProbeData::get_cell_size);
 
-	ClassDB::bind_method(_MD("set_to_cell_xform","to_cell_xform"),&GIProbeData::set_to_cell_xform);
-	ClassDB::bind_method(_MD("get_to_cell_xform"),&GIProbeData::get_to_cell_xform);
+	ClassDB::bind_method(D_METHOD("set_to_cell_xform","to_cell_xform"),&GIProbeData::set_to_cell_xform);
+	ClassDB::bind_method(D_METHOD("get_to_cell_xform"),&GIProbeData::get_to_cell_xform);
 
-	ClassDB::bind_method(_MD("set_dynamic_data","dynamic_data"),&GIProbeData::set_dynamic_data);
-	ClassDB::bind_method(_MD("get_dynamic_data"),&GIProbeData::get_dynamic_data);
+	ClassDB::bind_method(D_METHOD("set_dynamic_data","dynamic_data"),&GIProbeData::set_dynamic_data);
+	ClassDB::bind_method(D_METHOD("get_dynamic_data"),&GIProbeData::get_dynamic_data);
 
-	ClassDB::bind_method(_MD("set_dynamic_range","dynamic_range"),&GIProbeData::set_dynamic_range);
-	ClassDB::bind_method(_MD("get_dynamic_range"),&GIProbeData::get_dynamic_range);
+	ClassDB::bind_method(D_METHOD("set_dynamic_range","dynamic_range"),&GIProbeData::set_dynamic_range);
+	ClassDB::bind_method(D_METHOD("get_dynamic_range"),&GIProbeData::get_dynamic_range);
 
-	ClassDB::bind_method(_MD("set_energy","energy"),&GIProbeData::set_energy);
-	ClassDB::bind_method(_MD("get_energy"),&GIProbeData::get_energy);
+	ClassDB::bind_method(D_METHOD("set_energy","energy"),&GIProbeData::set_energy);
+	ClassDB::bind_method(D_METHOD("get_energy"),&GIProbeData::get_energy);
 
-	ClassDB::bind_method(_MD("set_propagation","propagation"),&GIProbeData::set_propagation);
-	ClassDB::bind_method(_MD("get_propagation"),&GIProbeData::get_propagation);
+	ClassDB::bind_method(D_METHOD("set_bias","bias"),&GIProbeData::set_bias);
+	ClassDB::bind_method(D_METHOD("get_bias"),&GIProbeData::get_bias);
 
-	ClassDB::bind_method(_MD("set_interior","interior"),&GIProbeData::set_interior);
-	ClassDB::bind_method(_MD("is_interior"),&GIProbeData::is_interior);
+	ClassDB::bind_method(D_METHOD("set_propagation","propagation"),&GIProbeData::set_propagation);
+	ClassDB::bind_method(D_METHOD("get_propagation"),&GIProbeData::get_propagation);
 
-	ClassDB::bind_method(_MD("set_compress","compress"),&GIProbeData::set_compress);
-	ClassDB::bind_method(_MD("is_compressed"),&GIProbeData::is_compressed);
+	ClassDB::bind_method(D_METHOD("set_interior","interior"),&GIProbeData::set_interior);
+	ClassDB::bind_method(D_METHOD("is_interior"),&GIProbeData::is_interior);
 
-	ADD_PROPERTY(PropertyInfo(Variant::RECT3,"bounds",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_bounds"),_SCS("get_bounds"));
-	ADD_PROPERTY(PropertyInfo(Variant::REAL,"cell_size",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_cell_size"),_SCS("get_cell_size"));
-	ADD_PROPERTY(PropertyInfo(Variant::TRANSFORM,"to_cell_xform",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_to_cell_xform"),_SCS("get_to_cell_xform"));
+	ClassDB::bind_method(D_METHOD("set_compress","compress"),&GIProbeData::set_compress);
+	ClassDB::bind_method(D_METHOD("is_compressed"),&GIProbeData::is_compressed);
 
-	ADD_PROPERTY(PropertyInfo(Variant::POOL_INT_ARRAY,"dynamic_data",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_dynamic_data"),_SCS("get_dynamic_data"));
-	ADD_PROPERTY(PropertyInfo(Variant::INT,"dynamic_range",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_dynamic_range"),_SCS("get_dynamic_range"));
-	ADD_PROPERTY(PropertyInfo(Variant::REAL,"energy",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_energy"),_SCS("get_energy"));
-	ADD_PROPERTY(PropertyInfo(Variant::REAL,"propagation",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_propagation"),_SCS("get_propagation"));
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL,"interior",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_interior"),_SCS("is_interior"));
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL,"compress",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),_SCS("set_compress"),_SCS("is_compressed"));
+	ADD_PROPERTY(PropertyInfo(Variant::RECT3,"bounds",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_bounds","get_bounds");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL,"cell_size",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_cell_size","get_cell_size");
+	ADD_PROPERTY(PropertyInfo(Variant::TRANSFORM,"to_cell_xform",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_to_cell_xform","get_to_cell_xform");
+
+	ADD_PROPERTY(PropertyInfo(Variant::POOL_INT_ARRAY,"dynamic_data",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_dynamic_data","get_dynamic_data");
+	ADD_PROPERTY(PropertyInfo(Variant::INT,"dynamic_range",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_dynamic_range","get_dynamic_range");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL,"energy",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_energy","get_energy");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL,"bias",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_bias","get_bias");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL,"propagation",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_propagation","get_propagation");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL,"interior",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_interior","is_interior");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL,"compress",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR),"set_compress","is_compressed");
 
 }
 
@@ -228,6 +245,18 @@ void GIProbe::set_energy(float p_energy) {
 float GIProbe::get_energy() const {
 
 	return energy;
+}
+
+void GIProbe::set_bias(float p_bias) {
+
+	bias=p_bias;
+	if (probe_data.is_valid()) {
+		probe_data->set_bias(bias);
+	}
+}
+float GIProbe::get_bias() const {
+
+	return bias;
 }
 
 void GIProbe::set_propagation(float p_propagation) {
@@ -466,7 +495,8 @@ void GIProbe::_plot_face(int p_idx, int p_level,int p_x,int p_y,int p_z, const V
 		int closest_axis;
 		float closest_dot;
 
-		Vector3 normal = Plane(p_vtx[0],p_vtx[1],p_vtx[2]).normal;
+		Plane plane = Plane(p_vtx[0],p_vtx[1],p_vtx[2]);
+		Vector3 normal = plane.normal;
 
 		for(int i=0;i<3;i++) {
 
@@ -478,6 +508,7 @@ void GIProbe::_plot_face(int p_idx, int p_level,int p_x,int p_y,int p_z, const V
 				closest_dot=dot;
 			}
 		}
+
 
 		Vector3 axis;
 		axis[closest_axis]=1.0;
@@ -517,23 +548,22 @@ void GIProbe::_plot_face(int p_idx, int p_level,int p_x,int p_y,int p_z, const V
 				Vector3 ray_from = from + (t1+t2)*0.5 - axis * p_aabb.size[closest_axis];
 				Vector3 ray_to = ray_from + axis * p_aabb.size[closest_axis]*2;
 
+				if (normal.dot(ray_from-ray_to)<0) {
+					SWAP(ray_from,ray_to);
+				}
+
 				Vector3 intersection;
 
-				if (!Geometry::ray_intersects_triangle(ray_from,ray_to,p_vtx[0],p_vtx[1],p_vtx[2],&intersection)) {
-					//no intersect? look in edges
+				if (!plane.intersects_segment(ray_from,ray_to,&intersection)) {
+					if (ABS(plane.distance_to(ray_from)) < ABS(plane.distance_to(ray_to))) {
+						intersection = plane.project(ray_from);
+					} else {
 
-					float closest_dist=1e20;
-					for(int j=0;j<3;j++) {
-						Vector3 c;
-						Vector3 inters;
-						Geometry::get_closest_points_between_segments(p_vtx[j],p_vtx[(j+1)%3],ray_from,ray_to,inters,c);
-						float d=c.distance_to(intersection);
-						if (j==0 || d<closest_dist) {
-							closest_dist=d;
-							intersection=inters;
-						}
+						intersection = plane.project(ray_to);
 					}
 				}
+
+				intersection=Face3(p_vtx[0],p_vtx[1],p_vtx[2]).get_closest_point_to(intersection);
 
 				Vector2 uv = get_uv(intersection,p_vtx,p_uv);
 
@@ -856,6 +886,10 @@ Vector<Color> GIProbe::_get_bake_texture(Image &p_image,const Color& p_color) {
 		return ret;
 	}
 
+	if (p_image.is_compressed()) {
+		print_line("DECOMPRESSING!!!!");
+		p_image.decompress();
+	}
 	p_image.convert(Image::FORMAT_RGBA8);
 	p_image.resize(bake_texture_size,bake_texture_size,Image::INTERPOLATE_CUBIC);
 
@@ -892,13 +926,14 @@ GIProbe::Baker::MaterialCache GIProbe::_get_material_cache(Ref<Material> p_mater
 
 	if (mat.is_valid()) {
 
-
-		Ref<ImageTexture> albedo_tex = mat->get_texture(FixedSpatialMaterial::TEXTURE_ALBEDO);
+		Ref<Texture> albedo_tex = mat->get_texture(FixedSpatialMaterial::TEXTURE_ALBEDO);
 
 		Image img_albedo;
 		if (albedo_tex.is_valid()) {
 
 			img_albedo = albedo_tex->get_data();
+		} else {
+
 		}
 
 		mc.albedo=_get_bake_texture(img_albedo,mat->get_albedo());
@@ -950,6 +985,7 @@ void GIProbe::_plot_mesh(const Transform& p_xform, Ref<Mesh>& p_mesh, Baker *p_b
 			src_material=p_materials[i];
 		} else {
 			src_material=p_mesh->surface_get_material(i);
+
 		}
 		Baker::MaterialCache material = _get_material_cache(src_material,p_baker);
 
@@ -1050,6 +1086,31 @@ void GIProbe::_find_meshes(Node *p_at_node,Baker *p_baker){
 					pm.instance_materials.push_back(mi->get_surface_material(i));
 				}
 				pm.override_material=mi->get_material_override();
+				p_baker->mesh_list.push_back(pm);
+
+			}
+		}
+	}
+
+	if (p_at_node->cast_to<Spatial>()) {
+
+		Spatial *s = p_at_node->cast_to<Spatial>();
+		Array meshes = p_at_node->call("get_meshes");
+		for(int i=0;i<meshes.size();i+=2) {
+
+			Transform mxf = meshes[i];
+			Ref<Mesh> mesh = meshes[i+1];
+			if (!mesh.is_valid())
+				continue;
+
+			Rect3 aabb = mesh->get_aabb();
+
+			Transform xf = get_global_transform().affine_inverse() * (s->get_global_transform() * mxf);
+
+			if (Rect3(-extents,extents*2).intersects(xf.xform(aabb))) {
+				Baker::PlotMesh pm;
+				pm.local_xform=xf;
+				pm.mesh=mesh;
 				p_baker->mesh_list.push_back(pm);
 
 			}
@@ -1208,23 +1269,27 @@ void GIProbe::bake(Node *p_from_node, bool p_create_visual_debug){
 
 	}
 
-	Ref<GIProbeData> probe_data;
-	probe_data.instance();
-	probe_data->set_bounds(Rect3(-extents,extents*2.0));
-	probe_data->set_cell_size(baker.po2_bounds.size[longest_axis]/baker.axis_cell_size[longest_axis]);
-	probe_data->set_dynamic_data(data);
-	probe_data->set_dynamic_range(dynamic_range);
-	probe_data->set_energy(energy);
-	probe_data->set_interior(interior);
-	probe_data->set_compress(compress);
-	probe_data->set_to_cell_xform(baker.to_cell_space);
-
-	set_probe_data(probe_data);
-
-
 	if (p_create_visual_debug) {
-		//_create_debug_mesh(&baker);
+		_create_debug_mesh(&baker);
+	} else {
+
+		Ref<GIProbeData> probe_data;
+		probe_data.instance();
+		probe_data->set_bounds(Rect3(-extents,extents*2.0));
+		probe_data->set_cell_size(baker.po2_bounds.size[longest_axis]/baker.axis_cell_size[longest_axis]);
+		probe_data->set_dynamic_data(data);
+		probe_data->set_dynamic_range(dynamic_range);
+		probe_data->set_energy(energy);
+		probe_data->set_bias(bias);
+		probe_data->set_propagation(propagation);
+		probe_data->set_interior(interior);
+		probe_data->set_compress(compress);
+		probe_data->set_to_cell_xform(baker.to_cell_space);
+
+		set_probe_data(probe_data);
 	}
+
+
 
 
 
@@ -1384,42 +1449,46 @@ PoolVector<Face3> GIProbe::get_faces(uint32_t p_usage_flags) const {
 
 void GIProbe::_bind_methods() {
 
-	ClassDB::bind_method(_MD("set_probe_data","data"),&GIProbe::set_probe_data);
-	ClassDB::bind_method(_MD("get_probe_data"),&GIProbe::get_probe_data);
+	ClassDB::bind_method(D_METHOD("set_probe_data","data"),&GIProbe::set_probe_data);
+	ClassDB::bind_method(D_METHOD("get_probe_data"),&GIProbe::get_probe_data);
 
-	ClassDB::bind_method(_MD("set_subdiv","subdiv"),&GIProbe::set_subdiv);
-	ClassDB::bind_method(_MD("get_subdiv"),&GIProbe::get_subdiv);
+	ClassDB::bind_method(D_METHOD("set_subdiv","subdiv"),&GIProbe::set_subdiv);
+	ClassDB::bind_method(D_METHOD("get_subdiv"),&GIProbe::get_subdiv);
 
-	ClassDB::bind_method(_MD("set_extents","extents"),&GIProbe::set_extents);
-	ClassDB::bind_method(_MD("get_extents"),&GIProbe::get_extents);
+	ClassDB::bind_method(D_METHOD("set_extents","extents"),&GIProbe::set_extents);
+	ClassDB::bind_method(D_METHOD("get_extents"),&GIProbe::get_extents);
 
-	ClassDB::bind_method(_MD("set_dynamic_range","max"),&GIProbe::set_dynamic_range);
-	ClassDB::bind_method(_MD("get_dynamic_range"),&GIProbe::get_dynamic_range);
+	ClassDB::bind_method(D_METHOD("set_dynamic_range","max"),&GIProbe::set_dynamic_range);
+	ClassDB::bind_method(D_METHOD("get_dynamic_range"),&GIProbe::get_dynamic_range);
 
-	ClassDB::bind_method(_MD("set_energy","max"),&GIProbe::set_energy);
-	ClassDB::bind_method(_MD("get_energy"),&GIProbe::get_energy);
+	ClassDB::bind_method(D_METHOD("set_energy","max"),&GIProbe::set_energy);
+	ClassDB::bind_method(D_METHOD("get_energy"),&GIProbe::get_energy);
 
-	ClassDB::bind_method(_MD("set_propagation","max"),&GIProbe::set_propagation);
-	ClassDB::bind_method(_MD("get_propagation"),&GIProbe::get_propagation);
+	ClassDB::bind_method(D_METHOD("set_bias","max"),&GIProbe::set_bias);
+	ClassDB::bind_method(D_METHOD("get_bias"),&GIProbe::get_bias);
 
-	ClassDB::bind_method(_MD("set_interior","enable"),&GIProbe::set_interior);
-	ClassDB::bind_method(_MD("is_interior"),&GIProbe::is_interior);
+	ClassDB::bind_method(D_METHOD("set_propagation","max"),&GIProbe::set_propagation);
+	ClassDB::bind_method(D_METHOD("get_propagation"),&GIProbe::get_propagation);
 
-	ClassDB::bind_method(_MD("set_compress","enable"),&GIProbe::set_compress);
-	ClassDB::bind_method(_MD("is_compressed"),&GIProbe::is_compressed);
+	ClassDB::bind_method(D_METHOD("set_interior","enable"),&GIProbe::set_interior);
+	ClassDB::bind_method(D_METHOD("is_interior"),&GIProbe::is_interior);
 
-	ClassDB::bind_method(_MD("bake","from_node","create_visual_debug"),&GIProbe::bake,DEFVAL(Variant()),DEFVAL(false));
-	ClassDB::bind_method(_MD("debug_bake"),&GIProbe::_debug_bake);
-	ClassDB::set_method_flags(get_class_static(),_SCS("debug_bake"),METHOD_FLAGS_DEFAULT|METHOD_FLAG_EDITOR);
+	ClassDB::bind_method(D_METHOD("set_compress","enable"),&GIProbe::set_compress);
+	ClassDB::bind_method(D_METHOD("is_compressed"),&GIProbe::is_compressed);
 
-	ADD_PROPERTY( PropertyInfo(Variant::INT,"subdiv",PROPERTY_HINT_ENUM,"64,128,256,512"),_SCS("set_subdiv"),_SCS("get_subdiv"));
-	ADD_PROPERTY( PropertyInfo(Variant::VECTOR3,"extents"),_SCS("set_extents"),_SCS("get_extents"));
-	ADD_PROPERTY( PropertyInfo(Variant::INT,"dynamic_range",PROPERTY_HINT_RANGE,"1,16,1"),_SCS("set_dynamic_range"),_SCS("get_dynamic_range"));
-	ADD_PROPERTY( PropertyInfo(Variant::REAL,"energy",PROPERTY_HINT_RANGE,"0,16,0.01"),_SCS("set_energy"),_SCS("get_energy"));
-	ADD_PROPERTY( PropertyInfo(Variant::REAL,"propagation",PROPERTY_HINT_RANGE,"0,1,0.01"),_SCS("set_propagation"),_SCS("get_propagation"));
-	ADD_PROPERTY( PropertyInfo(Variant::BOOL,"interior"),_SCS("set_interior"),_SCS("is_interior"));
-	ADD_PROPERTY( PropertyInfo(Variant::BOOL,"compress"),_SCS("set_compress"),_SCS("is_compressed"));
-	ADD_PROPERTY( PropertyInfo(Variant::OBJECT,"data",PROPERTY_HINT_RESOURCE_TYPE,"GIProbeData"),_SCS("set_probe_data"),_SCS("get_probe_data"));
+	ClassDB::bind_method(D_METHOD("bake","from_node","create_visual_debug"),&GIProbe::bake,DEFVAL(Variant()),DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("debug_bake"),&GIProbe::_debug_bake);
+	ClassDB::set_method_flags(get_class_static(),_scs_create("debug_bake"),METHOD_FLAGS_DEFAULT|METHOD_FLAG_EDITOR);
+
+	ADD_PROPERTY( PropertyInfo(Variant::INT,"subdiv",PROPERTY_HINT_ENUM,"64,128,256,512"),"set_subdiv","get_subdiv");
+	ADD_PROPERTY( PropertyInfo(Variant::VECTOR3,"extents"),"set_extents","get_extents");
+	ADD_PROPERTY( PropertyInfo(Variant::INT,"dynamic_range",PROPERTY_HINT_RANGE,"1,16,1"),"set_dynamic_range","get_dynamic_range");
+	ADD_PROPERTY( PropertyInfo(Variant::REAL,"energy",PROPERTY_HINT_RANGE,"0,16,0.01"),"set_energy","get_energy");
+	ADD_PROPERTY( PropertyInfo(Variant::REAL,"propagation",PROPERTY_HINT_RANGE,"0,1,0.01"),"set_propagation","get_propagation");
+	ADD_PROPERTY( PropertyInfo(Variant::REAL,"bias",PROPERTY_HINT_RANGE,"0,4,0.001"),"set_bias","get_bias");
+	ADD_PROPERTY( PropertyInfo(Variant::BOOL,"interior"),"set_interior","is_interior");
+	ADD_PROPERTY( PropertyInfo(Variant::BOOL,"compress"),"set_compress","is_compressed");
+	ADD_PROPERTY( PropertyInfo(Variant::OBJECT,"data",PROPERTY_HINT_RESOURCE_TYPE,"GIProbeData"),"set_probe_data","get_probe_data");
 
 
 	BIND_CONSTANT( SUBDIV_64 );
@@ -1434,6 +1503,7 @@ GIProbe::GIProbe() {
 	subdiv=SUBDIV_128;
 	dynamic_range=4;
 	energy=1.0;
+	bias=0.4;
 	propagation=1.0;
 	extents=Vector3(10,10,10);
 	color_scan_cell_width=4;

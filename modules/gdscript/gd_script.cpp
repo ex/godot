@@ -27,7 +27,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "gd_script.h"
-#include "globals.h"
+#include "global_config.h"
 #include "global_constants.h"
 #include "gd_compiler.h"
 #include "os/file_access.h"
@@ -63,7 +63,7 @@ bool GDNativeClass::_get(const StringName& p_name,Variant &r_ret) const {
 
 void GDNativeClass::_bind_methods() {
 
-	ClassDB::bind_method(_MD("new"),&GDNativeClass::_new);
+	ClassDB::bind_method(D_METHOD("new"),&GDNativeClass::_new);
 
 }
 
@@ -789,7 +789,7 @@ void GDScript::_bind_methods() {
 
 	ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT,"new",&GDScript::_new,MethodInfo(Variant::OBJECT,"new"));
 
-	ClassDB::bind_method(_MD("get_as_byte_code"),&GDScript::get_as_byte_code);
+	ClassDB::bind_method(D_METHOD("get_as_byte_code"),&GDScript::get_as_byte_code);
 
 }
 
@@ -1517,6 +1517,8 @@ void GDScriptLanguage::init() {
 	}
 
 	_add_global(StaticCString::create("PI"),Math_PI);
+	_add_global(StaticCString::create("INF"),Math_INF);
+	_add_global(StaticCString::create("NAN"),Math_NAN);
 
 	//populate native classes
 
@@ -1909,6 +1911,8 @@ void GDScriptLanguage::get_reserved_words(List<String> *p_words) const  {
 		"bool",
 		"null",
 		"PI",
+		"INF",
+		"NAN",
 		"self",
 		"true",
 		// functions

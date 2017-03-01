@@ -28,7 +28,7 @@
 /*************************************************************************/
 #include "resource_loader.h"
 #include "print_string.h"
-#include "globals.h"
+#include "global_config.h"
 #include "path_remap.h"
 #include "os/file_access.h"
 #include "os/os.h"
@@ -61,6 +61,7 @@ bool ResourceFormatLoader::recognize_path(const String& p_path,const String& p_f
 
 	for (List<String>::Element *E=extensions.front();E;E=E->next()) {
 
+
 		if (E->get().nocasecmp_to(extension)==0)
 			return true;
 	}
@@ -86,11 +87,11 @@ void ResourceLoader::get_recognized_extensions_for_type(const String& p_type,Lis
 
 void ResourceInteractiveLoader::_bind_methods() {
 
-	ClassDB::bind_method(_MD("get_resource"),&ResourceInteractiveLoader::get_resource);
-	ClassDB::bind_method(_MD("poll"),&ResourceInteractiveLoader::poll);
-	ClassDB::bind_method(_MD("wait"),&ResourceInteractiveLoader::wait);
-	ClassDB::bind_method(_MD("get_stage"),&ResourceInteractiveLoader::get_stage);
-	ClassDB::bind_method(_MD("get_stage_count"),&ResourceInteractiveLoader::get_stage_count);
+	ClassDB::bind_method(D_METHOD("get_resource"),&ResourceInteractiveLoader::get_resource);
+	ClassDB::bind_method(D_METHOD("poll"),&ResourceInteractiveLoader::poll);
+	ClassDB::bind_method(D_METHOD("wait"),&ResourceInteractiveLoader::wait);
+	ClassDB::bind_method(D_METHOD("get_stage"),&ResourceInteractiveLoader::get_stage);
+	ClassDB::bind_method(D_METHOD("get_stage_count"),&ResourceInteractiveLoader::get_stage_count);
 }
 
 class ResourceInteractiveLoaderDefault : public ResourceInteractiveLoader {
@@ -191,12 +192,15 @@ RES ResourceLoader::load(const String &p_path, const String& p_type_hint, bool p
 
 	for (int i=0;i<loader_count;i++) {
 
-		if (!loader[i]->recognize_path(local_path,p_type_hint))
+		if (!loader[i]->recognize_path(local_path,p_type_hint)) {
+			print_line("path not recognized");
 			continue;
+		}
 		found=true;
 		RES res = loader[i]->load(local_path,local_path,r_error);
-		if (res.is_null())
+		if (res.is_null()) {
 			continue;
+		}
 		if (!p_no_cache)
 			res->set_path(local_path);
 #ifdef TOOLS_ENABLED

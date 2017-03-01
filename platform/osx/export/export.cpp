@@ -29,12 +29,12 @@
 #include "version.h"
 #include "export.h"
 #include "tools/editor/editor_settings.h"
-#include "tools/editor/editor_import_export.h"
+#include "tools/editor/editor_export.h"
 #include "tools/editor/editor_node.h"
 #include "io/zip_io.h"
 #include "io/marshalls.h"
 #include "io/resource_saver.h"
-#include "globals.h"
+#include "global_config.h"
 #include "os/file_access.h"
 #include "os/os.h"
 #include "platform/osx/logo.h"
@@ -536,14 +536,14 @@ EditorExportPlatformOSX::~EditorExportPlatformOSX() {
 
 }
 
-
+#endif
 void register_osx_exporter() {
 
-
+#if 0
 	Ref<EditorExportPlatformOSX> exporter = Ref<EditorExportPlatformOSX>( memnew(EditorExportPlatformOSX) );
 	EditorImportExport::get_singleton()->add_export_platform(exporter);
-
+#endif
 
 }
 
-#endif
+

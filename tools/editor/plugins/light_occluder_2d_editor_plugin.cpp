@@ -283,7 +283,7 @@ bool LightOccluder2DEditor::forward_gui_input(const InputEvent& p_event) {
 								return true;
 							}
 						}
-					} if (mb.button_index==BUTTON_RIGHT && mb.pressed && edited_point==-1) {
+					} else if (mb.button_index==BUTTON_RIGHT && mb.pressed && edited_point==-1) {
 
 
 
@@ -427,10 +427,10 @@ void LightOccluder2DEditor::_create_poly()  {
 
 void LightOccluder2DEditor::_bind_methods() {
 
-	ClassDB::bind_method(_MD("_menu_option"),&LightOccluder2DEditor::_menu_option);
-	ClassDB::bind_method(_MD("_canvas_draw"),&LightOccluder2DEditor::_canvas_draw);
-	ClassDB::bind_method(_MD("_node_removed"),&LightOccluder2DEditor::_node_removed);
-	ClassDB::bind_method(_MD("_create_poly"),&LightOccluder2DEditor::_create_poly);
+	ClassDB::bind_method(D_METHOD("_menu_option"),&LightOccluder2DEditor::_menu_option);
+	ClassDB::bind_method(D_METHOD("_canvas_draw"),&LightOccluder2DEditor::_canvas_draw);
+	ClassDB::bind_method(D_METHOD("_node_removed"),&LightOccluder2DEditor::_node_removed);
+	ClassDB::bind_method(D_METHOD("_create_poly"),&LightOccluder2DEditor::_create_poly);
 
 }
 

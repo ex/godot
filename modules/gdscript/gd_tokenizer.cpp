@@ -120,6 +120,8 @@ const char* GDTokenizer::token_names[TK_MAX]={
 "'\\n'",
 "PI",
 "_",
+"INF",
+"NAN",
 "Error",
 "EOF",
 "Cursor"};
@@ -901,6 +903,8 @@ void GDTokenizerText::_advance() {
 								{TK_SELF,"self"},
 								{TK_CONST_PI,"PI"},
 								{TK_WILDCARD,"_"},
+								{TK_CONST_INF,"INF"},
+								{TK_CONST_NAN,"NAN"},
 								{TK_ERROR,NULL}
 							};
 
@@ -1169,7 +1173,7 @@ Vector<uint8_t> GDTokenizerBuffer::parse_code_string(const String& p_code) {
 
 
 	Map<StringName,int> identifier_map;
-	HashMap<Variant,int,VariantHasher> constant_map;
+	HashMap<Variant,int,VariantHasher,VariantComparator> constant_map;
 	Map<uint32_t,int> line_map;
 	Vector<uint32_t> token_array;
 

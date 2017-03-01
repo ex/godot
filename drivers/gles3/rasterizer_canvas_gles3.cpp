@@ -382,7 +382,7 @@ void RasterizerCanvasGLES3::_draw_gui_primitive(int p_points, const Vector2 *p_v
 	}
 
 
-	float b[(2+2+4)];
+	float b[(2+2+4)*4];
 
 
 	for(int i=0;i<p_points;i++) {
@@ -646,7 +646,7 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item,Item *curr
 					state.canvas_shader.set_uniform(CanvasShaderGLES3::COLOR_TEXPIXEL_SIZE,texpixel_size);
 
 				}
-				_draw_polygon(polygon->count,polygon->indices.ptr(),polygon->points.ptr(),polygon->uvs.ptr(),polygon->colors.ptr(),polygon->texture,polygon->colors.size()==1);
+				//_draw_polygon(polygon->count,polygon->indices.ptr(),polygon->points.ptr(),polygon->uvs.ptr(),polygon->colors.ptr(),polygon->texture,polygon->colors.size()==1);
 
 			} break;
 			case Item::Command::TYPE_CIRCLE: {
@@ -666,7 +666,7 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item,Item *curr
 					indices[i*3+1]=(i+1)%numpoints;
 					indices[i*3+2]=numpoints;
 				}
-				_draw_polygon(numpoints*3,indices,points,NULL,&circle->color,RID(),true);
+				//_draw_polygon(numpoints*3,indices,points,NULL,&circle->color,RID(),true);
 				//canvas_draw_circle(circle->indices.size(),circle->indices.ptr(),circle->points.ptr(),circle->uvs.ptr(),circle->colors.ptr(),circle->texture,circle->colors.size()==1);
 			} break;
 			case Item::Command::TYPE_TRANSFORM: {
@@ -1010,7 +1010,7 @@ void RasterizerCanvasGLES3::canvas_render_items(Item *p_item_list,int p_z,const 
 		if (unshaded || (state.canvas_item_modulate.a>0.001 && (!shader_cache || shader_cache->canvas_item.light_mode!=RasterizerStorageGLES3::Shader::CanvasItem::LIGHT_MODE_LIGHT_ONLY) && !ci->light_masked ))
 			_canvas_item_render_commands(ci,current_clip,reclip);
 
-		if ((blend_mode==RasterizerStorageGLES3::Shader::CanvasItem::BLEND_MODE_MIX || RasterizerStorageGLES3::Shader::CanvasItem::BLEND_MODE_PMALPHA) && p_light && !unshaded) {
+		if ((blend_mode==RasterizerStorageGLES3::Shader::CanvasItem::BLEND_MODE_MIX || blend_mode==RasterizerStorageGLES3::Shader::CanvasItem::BLEND_MODE_PMALPHA) && p_light && !unshaded) {
 
 			Light *light = p_light;
 			bool light_used=false;
@@ -1459,7 +1459,7 @@ void RasterizerCanvasGLES3::initialize() {
 
 		glGenBuffers(1,&data.primitive_quad_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER,data.primitive_quad_buffer);
-		glBufferData(GL_ARRAY_BUFFER,sizeof(float)*2+sizeof(float)*2+sizeof(float)*4,NULL,GL_DYNAMIC_DRAW); //allocate max size
+		glBufferData(GL_ARRAY_BUFFER,(2+2+4)*4*sizeof(float),NULL,GL_DYNAMIC_DRAW); //allocate max size
 		glBindBuffer(GL_ARRAY_BUFFER,0);
 
 

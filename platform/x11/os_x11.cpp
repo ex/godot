@@ -464,6 +464,9 @@ void OS_X11::finalize() {
 		memdelete(main_loop);
 	main_loop=NULL;
 
+	for (int i = 0; i < get_audio_driver_count(); i++) {
+		AudioDriverManager::get_driver(i)->finish();
+	}
 
 	/*
 	if (debugger_connection_console) {
@@ -475,7 +478,6 @@ void OS_X11::finalize() {
 	memdelete(joypad);
 #endif
 	memdelete(input);
-
 
 	visual_server->finish();
 	memdelete(visual_server);
@@ -512,6 +514,7 @@ void OS_X11::finalize() {
 
 
 	args.clear();
+
 }
 
 
@@ -1238,7 +1241,7 @@ static Property read_property(Display* p_display, Window p_window, Atom p_proper
 
 	}while(bytes_after != 0);
 
-	Property p = {ret, actual_format, nitems, actual_type};
+	Property p = {ret, actual_format, (int)nitems, actual_type};
 
 	return p;
 }

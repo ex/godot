@@ -44,7 +44,7 @@
 #include "packet_peer_udp_winsock.h"
 #include "stream_peer_winsock.h"
 #include "lang_table.h"
-#include "globals.h"
+#include "global_config.h"
 #include "io/marshalls.h"
 #include "joypad.h"
 
@@ -400,14 +400,15 @@ LRESULT OS_Windows::WndProc(HWND hWnd,UINT uMsg, WPARAM	wParam,	LPARAM	lParam) {
 			if (mouse_mode==MOUSE_MODE_CAPTURED) {
 
 				Point2i c(video_mode.width/2,video_mode.height/2);
+				old_x = c.x;
+				old_y = c.y;
+
 				if (Point2i(mm.x,mm.y)==c) {
 					center=c;
 					return 0;
 				}
 
 				Point2i ncenter(mm.x,mm.y);
-				mm.x = old_x + (mm.x-center.x);
-				mm.y = old_y + (mm.y-center.y);
 				center=ncenter;
 				POINT pos = { (int) c.x, (int) c.y };
 				ClientToScreen(hWnd, &pos);
@@ -1092,11 +1093,6 @@ void OS_Windows::initialize(const VideoMode& p_desired,int p_video_driver,int p_
 	RasterizerGLES3::register_config();
 
 	RasterizerGLES3::make_current();
-#else
-	// FIXME: Does DX support still work now that rasterizer is no longer used?
-#ifdef DX9_ENABLED
-	rasterizer = memnew( RasterizerDX9(hWnd) );
-#endif
 #endif
 
 	visual_server = memnew( VisualServerRaster );
@@ -1259,6 +1255,10 @@ void OS_Windows::finalize() {
 
 	main_loop=NULL;
 
+	for (int i = 0; i < get_audio_driver_count(); i++) {
+		AudioDriverManager::get_driver(i)->finish();
+	}
+
 	memdelete(joypad);
 	memdelete(input);
 
@@ -1268,8 +1268,6 @@ void OS_Windows::finalize() {
 	if (gl_context)
 		memdelete(gl_context);
 #endif
-	if (rasterizer)
-		memdelete(rasterizer);
 
 	if (user_proc) {
 		SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)user_proc);
@@ -1288,8 +1286,8 @@ void OS_Windows::finalize() {
 	memdelete(physics_2d_server);
 
 	monitor_info.clear();
-
 }
+
 void OS_Windows::finalize_core() {
 
 	memdelete(process_map);
@@ -1970,10 +1968,10 @@ Error OS_Windows::execute(const String& p_path, const List<String>& p_arguments,
 
 		String argss;
 		argss="\"\""+p_path+"\"";
+		
+		for (const List<String>::Element* E=p_arguments.front(); E; E=E->next()) {
 
-		for(int i=0;i<p_arguments.size();i++) {
-
-			argss+=String(" \"")+p_arguments[i]+"\"";
+			argss+=String(" \"")+E->get()+"\"";
 		}
 
 		//print_line("ARGS: "+argss);
@@ -2395,6 +2393,11 @@ bool OS_Windows::is_vsync_enabled() const{
 	return true;
 }
 
+bool OS_Windows::check_feature_support(const String& p_feature) {
+
+	return VisualServer::get_singleton()->has_os_feature(p_feature);
+
+}
 
 OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 

@@ -30,7 +30,7 @@
 
 #include "os/dir_access.h"
 #include "os/file_access.h"
-#include "globals.h"
+#include "global_config.h"
 #include "io/resource_loader.h"
 #include "os/os.h"
 #include "editor_node.h"
@@ -285,6 +285,39 @@ String FileSystemDock::get_selected_path() const {
 String FileSystemDock::get_current_path() const {
 
 	return path;
+}
+
+void FileSystemDock::navigate_to_path(const String& p_path) {
+	// If the path is a file, do not only go to the directory in the tree, also select the file in the file list.
+	String dir_path="";
+	String file_name="";
+	DirAccess* dirAccess=DirAccess::open("res://");
+	if (dirAccess->file_exists(p_path)) {
+		dir_path=p_path.get_base_dir();
+		file_name=p_path.get_file();
+	} else if (dirAccess->dir_exists(p_path)) {
+		dir_path=p_path;
+	} else {
+		ERR_EXPLAIN(TTR("Cannot navigate to '" + p_path + "' as it has not been found in the file system!"));
+		ERR_FAIL();
+	}
+
+	path=dir_path;
+	_update_tree();
+	tree->ensure_cursor_is_visible();
+
+	if (!file_name.empty()) {
+		_open_pressed(); // Seems to be the only way to get into the file view. This also pushes to history.
+
+		// Focus the given file.
+		for (int i=0; i<files->get_item_count(); i++) {
+			if (files->get_item_text(i) == file_name) {
+				files->select(i,true);
+				files->ensure_current_is_visible();
+				break;
+			}
+		}
+	}
 }
 
 void FileSystemDock::_thumbnail_done(const String& p_path,const Ref<Texture>& p_preview, const Variant& p_udata) {
@@ -1641,37 +1674,37 @@ void FileSystemDock::_file_selected() {
 
 void FileSystemDock::_bind_methods() {
 
-	ClassDB::bind_method(_MD("_update_tree"),&FileSystemDock::_update_tree);
-	ClassDB::bind_method(_MD("_rescan"),&FileSystemDock::_rescan);
-	ClassDB::bind_method(_MD("_favorites_pressed"),&FileSystemDock::_favorites_pressed);
-	//ClassDB::bind_method(_MD("_instance_pressed"),&ScenesDock::_instance_pressed);
-	ClassDB::bind_method(_MD("_open_pressed"),&FileSystemDock::_open_pressed);
-	ClassDB::bind_method(_MD("_dir_rmb_pressed"),&FileSystemDock::_dir_rmb_pressed);
+	ClassDB::bind_method(D_METHOD("_update_tree"),&FileSystemDock::_update_tree);
+	ClassDB::bind_method(D_METHOD("_rescan"),&FileSystemDock::_rescan);
+	ClassDB::bind_method(D_METHOD("_favorites_pressed"),&FileSystemDock::_favorites_pressed);
+	//ClassDB::bind_method(D_METHOD("_instance_pressed"),&ScenesDock::_instance_pressed);
+	ClassDB::bind_method(D_METHOD("_open_pressed"),&FileSystemDock::_open_pressed);
+	ClassDB::bind_method(D_METHOD("_dir_rmb_pressed"),&FileSystemDock::_dir_rmb_pressed);
 
-	ClassDB::bind_method(_MD("_thumbnail_done"),&FileSystemDock::_thumbnail_done);
-	ClassDB::bind_method(_MD("_select_file"), &FileSystemDock::_select_file);
-	ClassDB::bind_method(_MD("_go_to_tree"), &FileSystemDock::_go_to_tree);
-	ClassDB::bind_method(_MD("_go_to_dir"), &FileSystemDock::_go_to_dir);
-	ClassDB::bind_method(_MD("_change_file_display"), &FileSystemDock::_change_file_display);
-	ClassDB::bind_method(_MD("_fw_history"), &FileSystemDock::_fw_history);
-	ClassDB::bind_method(_MD("_bw_history"), &FileSystemDock::_bw_history);
-	ClassDB::bind_method(_MD("_fs_changed"), &FileSystemDock::_fs_changed);
-	ClassDB::bind_method(_MD("_dir_selected"), &FileSystemDock::_dir_selected);
-	ClassDB::bind_method(_MD("_file_option"), &FileSystemDock::_file_option);
-	ClassDB::bind_method(_MD("_folder_option"), &FileSystemDock::_folder_option);
-	ClassDB::bind_method(_MD("_move_operation"), &FileSystemDock::_move_operation);
-	ClassDB::bind_method(_MD("_rename_operation"), &FileSystemDock::_rename_operation);
+	ClassDB::bind_method(D_METHOD("_thumbnail_done"),&FileSystemDock::_thumbnail_done);
+	ClassDB::bind_method(D_METHOD("_select_file"), &FileSystemDock::_select_file);
+	ClassDB::bind_method(D_METHOD("_go_to_tree"), &FileSystemDock::_go_to_tree);
+	ClassDB::bind_method(D_METHOD("_go_to_dir"), &FileSystemDock::_go_to_dir);
+	ClassDB::bind_method(D_METHOD("_change_file_display"), &FileSystemDock::_change_file_display);
+	ClassDB::bind_method(D_METHOD("_fw_history"), &FileSystemDock::_fw_history);
+	ClassDB::bind_method(D_METHOD("_bw_history"), &FileSystemDock::_bw_history);
+	ClassDB::bind_method(D_METHOD("_fs_changed"), &FileSystemDock::_fs_changed);
+	ClassDB::bind_method(D_METHOD("_dir_selected"), &FileSystemDock::_dir_selected);
+	ClassDB::bind_method(D_METHOD("_file_option"), &FileSystemDock::_file_option);
+	ClassDB::bind_method(D_METHOD("_folder_option"), &FileSystemDock::_folder_option);
+	ClassDB::bind_method(D_METHOD("_move_operation"), &FileSystemDock::_move_operation);
+	ClassDB::bind_method(D_METHOD("_rename_operation"), &FileSystemDock::_rename_operation);
 
-	ClassDB::bind_method(_MD("_search_changed"), &FileSystemDock::_search_changed);
+	ClassDB::bind_method(D_METHOD("_search_changed"), &FileSystemDock::_search_changed);
 
-	ClassDB::bind_method(_MD("get_drag_data_fw"), &FileSystemDock::get_drag_data_fw);
-	ClassDB::bind_method(_MD("can_drop_data_fw"), &FileSystemDock::can_drop_data_fw);
-	ClassDB::bind_method(_MD("drop_data_fw"), &FileSystemDock::drop_data_fw);
-	ClassDB::bind_method(_MD("_files_list_rmb_select"),&FileSystemDock::_files_list_rmb_select);
+	ClassDB::bind_method(D_METHOD("get_drag_data_fw"), &FileSystemDock::get_drag_data_fw);
+	ClassDB::bind_method(D_METHOD("can_drop_data_fw"), &FileSystemDock::can_drop_data_fw);
+	ClassDB::bind_method(D_METHOD("drop_data_fw"), &FileSystemDock::drop_data_fw);
+	ClassDB::bind_method(D_METHOD("_files_list_rmb_select"),&FileSystemDock::_files_list_rmb_select);
 
-	ClassDB::bind_method(_MD("_preview_invalidated"),&FileSystemDock::_preview_invalidated);
-	ClassDB::bind_method(_MD("_file_selected"),&FileSystemDock::_file_selected);
-	ClassDB::bind_method(_MD("_file_multi_selected"),&FileSystemDock::_file_multi_selected);
+	ClassDB::bind_method(D_METHOD("_preview_invalidated"),&FileSystemDock::_preview_invalidated);
+	ClassDB::bind_method(D_METHOD("_file_selected"),&FileSystemDock::_file_selected);
+	ClassDB::bind_method(D_METHOD("_file_multi_selected"),&FileSystemDock::_file_multi_selected);
 
 
 	ADD_SIGNAL(MethodInfo("instance", PropertyInfo(Variant::POOL_STRING_ARRAY, "files")));
