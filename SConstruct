@@ -73,6 +73,8 @@ env_base.AppendENVPath('PKG_CONFIG_PATH', os.getenv('PKG_CONFIG_PATH'))
 env_base.global_defaults = global_defaults
 env_base.android_maven_repos = []
 env_base.android_dependencies = []
+env_base.android_gradle_plugins = []
+env_base.android_gradle_classpath = []
 env_base.android_java_dirs = []
 env_base.android_res_dirs = []
 env_base.android_aidl_dirs = []
@@ -96,6 +98,8 @@ env_base.__class__.android_add_default_config = methods.android_add_default_conf
 env_base.__class__.android_add_to_manifest = methods.android_add_to_manifest
 env_base.__class__.android_add_to_permissions = methods.android_add_to_permissions
 env_base.__class__.android_add_to_attributes = methods.android_add_to_attributes
+env_base.__class__.android_add_gradle_plugin = methods.android_add_gradle_plugin
+env_base.__class__.android_add_gradle_classpath = methods.android_add_gradle_classpath
 env_base.__class__.disable_module = methods.disable_module
 
 env_base.__class__.add_source_files = methods.add_source_files
@@ -179,7 +183,7 @@ Help(opts.GenerateHelpText(env_base))  # generate help
 
 # add default include paths
 
-env_base.Append(CPPPATH=['#core', '#core/math', '#tools', '#drivers', '#'])
+env_base.Append(CPPPATH=['#core', '#core/math', '#editor', '#drivers', '#'])
 
 # configure ENV for platform
 env_base.platform_exporters = platform_exporters
@@ -358,7 +362,7 @@ if selected_platform in platform_list:
     SConscript("core/SCsub")
     SConscript("servers/SCsub")
     SConscript("scene/SCsub")
-    SConscript("tools/editor/SCsub")
+    SConscript("editor/SCsub")
     SConscript("drivers/SCsub")
 
     SConscript("modules/SCsub")

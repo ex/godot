@@ -397,7 +397,6 @@ void ShaderGraph::_bind_methods() {
 
 	ADD_SIGNAL(MethodInfo("updated"));
 
-
 #if 0
 	ClassDB::bind_method(D_METHOD("node_add"),&ShaderGraph::node_add );
 	ClassDB::bind_method(D_METHOD("node_remove"),&ShaderGraph::node_remove );
@@ -1470,6 +1469,7 @@ const ShaderGraph::InOutParamInfo ShaderGraph::inout_param_info[]={
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Var1","VAR1.rgb","",SLOT_TYPE_VEC,SLOT_IN},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Var2","VAR2.rgb","",SLOT_TYPE_VEC,SLOT_IN},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"PointCoord","POINT_COORD","",SLOT_TYPE_VEC,SLOT_IN},
+	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Position","POSITION","",SLOT_TYPE_VEC,SLOT_IN},
 	//canvas item fragment out
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Color","COLOR.rgb","",SLOT_TYPE_VEC,SLOT_OUT},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Alpha","COLOR.a","",SLOT_TYPE_SCALAR,SLOT_OUT},
@@ -1490,6 +1490,7 @@ const ShaderGraph::InOutParamInfo ShaderGraph::inout_param_info[]={
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"Var1","VAR1.rgb","",SLOT_TYPE_VEC,SLOT_IN},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"Var2","VAR2.rgb","",SLOT_TYPE_VEC,SLOT_IN},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"PointCoord","POINT_COORD","",SLOT_TYPE_VEC,SLOT_IN},
+	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"Position","POSITION","",SLOT_TYPE_VEC,SLOT_IN},
 	//canvas item light out
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"LightColor","LIGHT.rgb","",SLOT_TYPE_VEC,SLOT_OUT},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"LightAlpha","LIGHT.a","",SLOT_TYPE_SCALAR,SLOT_OUT},
@@ -2076,32 +2077,32 @@ void ShaderGraph::_add_node_code(ShaderType p_type,Node *p_node,const Vector<Str
 
 
 	const char *typestr[4]={"float","vec3","mat4","texture"};
-#define OUTNAME(id,slot) (String(typestr[get_node_output_slot_type(get_mode(),p_type,p_node->type,slot)])+" "+("nd"+itos(id)+"sl"+itos(slot)))
-#define OUTVAR(id,slot) ("nd"+itos(id)+"sl"+itos(slot))
-#define DEF_VEC(slot)\
-	if (p_inputs[slot].ends_with("def")){\
-		Vector3 v = p_node->defaults[slot];\
-		code+=String(typestr[1])+" "+p_inputs[slot]+"=vec3("+v+");\n";\
+#define OUTNAME(id, slot) (String(typestr[get_node_output_slot_type(get_mode(), p_type, p_node->type, slot)]) + " " + ("nd" + itos(id) + "sl" + itos(slot)))
+#define OUTVAR(id, slot) ("nd" + itos(id) + "sl" + itos(slot))
+#define DEF_VEC(slot)                                                              \
+	if (p_inputs[slot].ends_with("def")) {                                         \
+		Vector3 v = p_node->defaults[slot];                                        \
+		code += String(typestr[1]) + " " + p_inputs[slot] + "=vec3(" + v + ");\n"; \
 	}
-#define DEF_SCALAR(slot)\
-	if (p_inputs[slot].ends_with("def")){\
-		double v = p_node->defaults[slot];\
-		code+=String(typestr[0])+" "+p_inputs[slot]+"="+rtos(v)+";\n";\
+#define DEF_SCALAR(slot)                                                           \
+	if (p_inputs[slot].ends_with("def")) {                                         \
+		double v = p_node->defaults[slot];                                         \
+		code += String(typestr[0]) + " " + p_inputs[slot] + "=" + rtos(v) + ";\n"; \
 	}
-#define DEF_COLOR(slot)\
-	if (p_inputs[slot].ends_with("def")){\
-		Color col = p_node->defaults[slot];\
-		code+=String(typestr[1])+" "+p_inputs[slot]+"=vec3("+rtos(col.r)+","+rtos(col.g)+","+rtos(col.b)+");\n";\
+#define DEF_COLOR(slot)                                                                                                              \
+	if (p_inputs[slot].ends_with("def")) {                                                                                           \
+		Color col = p_node->defaults[slot];                                                                                          \
+		code += String(typestr[1]) + " " + p_inputs[slot] + "=vec3(" + rtos(col.r) + "," + rtos(col.g) + "," + rtos(col.b) + ");\n"; \
 	}
-#define DEF_MATRIX(slot) \
-	if (p_inputs[slot].ends_with("def")){\
-		Transform xf = p_node->defaults[slot]; \
-		code+=String(typestr[2])+" "+p_inputs[slot]+"=mat4(\n";\
-		code+="\tvec4(vec3("+rtos(xf.basis.get_axis(0).x)+","+rtos(xf.basis.get_axis(0).y)+","+rtos(xf.basis.get_axis(0).z)+"),0),\n";\
-		code+="\tvec4(vec3("+rtos(xf.basis.get_axis(1).x)+","+rtos(xf.basis.get_axis(1).y)+","+rtos(xf.basis.get_axis(1).z)+"),0),\n";\
-		code+="\tvec4(vec3("+rtos(xf.basis.get_axis(2).x)+","+rtos(xf.basis.get_axis(2).y)+","+rtos(xf.basis.get_axis(2).z)+"),0),\n";\
-		code+="\tvec4(vec3("+rtos(xf.origin.x)+","+rtos(xf.origin.y)+","+rtos(xf.origin.z)+"),1)\n";\
-		code+=");\n";\
+#define DEF_MATRIX(slot)                                                                                                                             \
+	if (p_inputs[slot].ends_with("def")) {                                                                                                           \
+		Transform xf = p_node->defaults[slot];                                                                                                       \
+		code += String(typestr[2]) + " " + p_inputs[slot] + "=mat4(\n";                                                                              \
+		code += "\tvec4(vec3(" + rtos(xf.basis.get_axis(0).x) + "," + rtos(xf.basis.get_axis(0).y) + "," + rtos(xf.basis.get_axis(0).z) + "),0),\n"; \
+		code += "\tvec4(vec3(" + rtos(xf.basis.get_axis(1).x) + "," + rtos(xf.basis.get_axis(1).y) + "," + rtos(xf.basis.get_axis(1).z) + "),0),\n"; \
+		code += "\tvec4(vec3(" + rtos(xf.basis.get_axis(2).x) + "," + rtos(xf.basis.get_axis(2).y) + "," + rtos(xf.basis.get_axis(2).z) + "),0),\n"; \
+		code += "\tvec4(vec3(" + rtos(xf.origin.x) + "," + rtos(xf.origin.y) + "," + rtos(xf.origin.z) + "),1)\n";                                   \
+		code += ");\n";                                                                                                                              \
 	}
 
 	switch(p_node->type) {
