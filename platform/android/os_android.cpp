@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -129,7 +130,7 @@ void OS_Android::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	RasterizerGLES3::make_current();
 
 	visual_server = memnew(VisualServerRaster);
-/*	if (get_render_thread_mode() != RENDER_THREAD_UNSAFE) {
+	/*	if (get_render_thread_mode() != RENDER_THREAD_UNSAFE) {
 
 		visual_server = memnew(VisualServerWrapMT(visual_server, false));
 	};*/
@@ -244,7 +245,7 @@ bool OS_Android::is_mouse_grab_enabled() const {
 	return false;
 }
 
-Point2 OS_Android::get_mouse_pos() const {
+Point2 OS_Android::get_mouse_position() const {
 
 	return Point2();
 }
@@ -343,25 +344,24 @@ void OS_Android::process_joy_event(OS_Android::JoypadEvent p_event) {
 
 	switch (p_event.type) {
 		case JOY_EVENT_BUTTON:
-			last_id = input->joy_button(last_id, p_event.device, p_event.index, p_event.pressed);
+			input->joy_button(p_event.device, p_event.index, p_event->is_pressed());
 			break;
 		case JOY_EVENT_AXIS:
 			InputDefault::JoyAxis value;
 			value.min = -1;
 			value.value = p_event.value;
-			last_id = input->joy_axis(last_id, p_event.device, p_event.index, value);
+			input->joy_axis(p_event.device, p_event.index, value);
 			break;
 		case JOY_EVENT_HAT:
-			last_id = input->joy_hat(last_id, p_event.device, p_event.hat);
+			input->joy_hat(p_event.device, p_event.hat);
 			break;
 		default:
 			return;
 	}
 }
 
-void OS_Android::process_event(InputEvent p_event) {
+void OS_Android::process_event(Ref<InputEvent> p_event) {
 
-	p_event.ID = last_id++;
 	input->parse_input_event(p_event);
 }
 
@@ -374,27 +374,24 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 
 			if (touch.size()) {
 				//end all if exist
-				InputEvent ev;
-				ev.type = InputEvent::MOUSE_BUTTON;
-				ev.ID = last_id++;
-				ev.mouse_button.button_index = BUTTON_LEFT;
-				ev.mouse_button.button_mask = BUTTON_MASK_LEFT;
-				ev.mouse_button.pressed = false;
-				ev.mouse_button.x = touch[0].pos.x;
-				ev.mouse_button.y = touch[0].pos.y;
-				ev.mouse_button.global_x = touch[0].pos.x;
-				ev.mouse_button.global_y = touch[0].pos.y;
-				input->parse_input_event(ev);
+				{
+					Ref<InputEventMouseButton> ev;
+					ev.instance();
+					ev->set_button_index(BUTTON_LEFT);
+					ev->set_button_mask(BUTTON_MASK_LEFT);
+					ev->set_pressed(false);
+					ev->set_pos(touch[0].pos);
+					ev->set_global_pos(touch[0].pos);
+					input->parse_input_event(ev);
+				}
 
 				for (int i = 0; i < touch.size(); i++) {
 
-					InputEvent ev;
-					ev.type = InputEvent::SCREEN_TOUCH;
-					ev.ID = last_id++;
-					ev.screen_touch.index = touch[i].id;
-					ev.screen_touch.pressed = false;
-					ev.screen_touch.x = touch[i].pos.x;
-					ev.screen_touch.y = touch[i].pos.y;
+					Ref<InputEventScreenTouch> ev;
+					ev.instance();
+					ev->set_index(touch[i].id);
+					ev->set_pressed(false);
+					ev->set_pos(touch[i].pos);
 					input->parse_input_event(ev);
 				}
 			}
@@ -407,17 +404,15 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 
 			{
 				//send mouse
-				InputEvent ev;
-				ev.type = InputEvent::MOUSE_BUTTON;
-				ev.ID = last_id++;
-				ev.mouse_button.button_index = BUTTON_LEFT;
-				ev.mouse_button.button_mask = BUTTON_MASK_LEFT;
-				ev.mouse_button.pressed = true;
-				ev.mouse_button.x = touch[0].pos.x;
-				ev.mouse_button.y = touch[0].pos.y;
-				ev.mouse_button.global_x = touch[0].pos.x;
-				ev.mouse_button.global_y = touch[0].pos.y;
-				input->set_mouse_pos(Point2(touch[0].pos.x,touch[0].pos.y));
+				Ref<InputEventMouseButton> ev;
+				ev.instance();
+				ev.type = Ref<InputEvent>::MOUSE_BUTTON;
+				ev->set_button_index(BUTTON_LEFT);
+				ev->set_button_mask(BUTTON_MASK_LEFT);
+				ev->set_pressed(true);
+				ev->set_pos(touch[0].pos);
+				ev->set_global_pos(touch[0].pos);
+				input->set_mouse_position(Point2(touch[0].pos.x, touch[0].pos.y));
 				last_mouse = touch[0].pos;
 				input->parse_input_event(ev);
 			}
@@ -425,13 +420,11 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 			//send touch
 			for (int i = 0; i < touch.size(); i++) {
 
-				InputEvent ev;
-				ev.type = InputEvent::SCREEN_TOUCH;
-				ev.ID = last_id++;
-				ev.screen_touch.index = touch[i].id;
-				ev.screen_touch.pressed = true;
-				ev.screen_touch.x = touch[i].pos.x;
-				ev.screen_touch.y = touch[i].pos.y;
+				Ref<InputEventScreenTouch> ev;
+				ev.instance();
+				ev->set_index(touch[i].id);
+				ev->set_pressed(true);
+				ev->set_pos(touch[i].pos.x);
 				input->parse_input_event(ev);
 			}
 
@@ -440,17 +433,13 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 
 			if (p_points.size()) {
 				//send mouse, should look for point 0?
-				InputEvent ev;
-				ev.type = InputEvent::MOUSE_MOTION;
-				ev.ID = last_id++;
-				ev.mouse_motion.button_mask = BUTTON_MASK_LEFT;
-				ev.mouse_motion.x = p_points[0].pos.x;
-				ev.mouse_motion.y = p_points[0].pos.y;
-				input->set_mouse_pos(Point2(ev.mouse_motion.x, ev.mouse_motion.y));
-				ev.mouse_motion.speed_x = input->get_last_mouse_speed().x;
-				ev.mouse_motion.speed_y = input->get_last_mouse_speed().y;
-				ev.mouse_motion.relative_x = p_points[0].pos.x - last_mouse.x;
-				ev.mouse_motion.relative_y = p_points[0].pos.y - last_mouse.y;
+				Ref<InputEventMouseMotion> ev;
+				ev.instance();
+				ev->set_button_mask(BUTTON_MASK_LEFT);
+				ev->set_pos(p_points[0].pos.x);
+				input->set_mouse_position(Point2(ev.mouse_motion.x, ev.mouse_motion.y));
+				ev->set_speed(input->get_last_mouse_speed());
+				ev->set_relative(p_points[0].pos - last_mouse);
 				last_mouse = p_points[0].pos;
 				input->parse_input_event(ev);
 			}
@@ -473,14 +462,11 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 				if (touch[i].pos == p_points[idx].pos)
 					continue; //no move unncesearily
 
-				InputEvent ev;
-				ev.type = InputEvent::SCREEN_DRAG;
-				ev.ID = last_id++;
-				ev.screen_drag.index = touch[i].id;
-				ev.screen_drag.x = p_points[idx].pos.x;
-				ev.screen_drag.y = p_points[idx].pos.y;
-				ev.screen_drag.relative_x = p_points[idx].pos.x - touch[i].pos.x;
-				ev.screen_drag.relative_y = p_points[idx].pos.y - touch[i].pos.y;
+				Ref<InputEventScreenDrag> ev;
+				ev.instance();
+				ev->set_index(touch[i].id);
+				ev->set_pos(p_points[idx].pos.x);
+				ev->set_relative(p_points[idx].pos - touch[i].pos);
 				input->parse_input_event(ev);
 				touch[i].pos = p_points[idx].pos;
 			}
@@ -490,28 +476,23 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 
 			if (touch.size()) {
 				//end all if exist
-				InputEvent ev;
-				ev.type = InputEvent::MOUSE_BUTTON;
-				ev.ID = last_id++;
-				ev.mouse_button.button_index = BUTTON_LEFT;
-				ev.mouse_button.button_mask = BUTTON_MASK_LEFT;
-				ev.mouse_button.pressed = false;
-				ev.mouse_button.x = touch[0].pos.x;
-				ev.mouse_button.y = touch[0].pos.y;
-				ev.mouse_button.global_x = touch[0].pos.x;
-				ev.mouse_button.global_y = touch[0].pos.y;
-				input->set_mouse_pos(Point2(touch[0].pos.x,touch[0].pos.y));
+				Ref<InputEventMouseButton> ev;
+				ev.instance();
+				ev->set_button_index(BUTTON_LEFT);
+				ev->set_button_mask(BUTTON_MASK_LEFT);
+				ev->set_pressed(false);
+				ev->set_pos(touch[0].pos.x);
+				ev->set_global_pos(touch[0].pos.x);
+				input->set_mouse_position(Point2(touch[0].pos.x, touch[0].pos.y));
 				input->parse_input_event(ev);
 
 				for (int i = 0; i < touch.size(); i++) {
 
-					InputEvent ev;
-					ev.type = InputEvent::SCREEN_TOUCH;
-					ev.ID = last_id++;
-					ev.screen_touch.index = touch[i].id;
-					ev.screen_touch.pressed = false;
-					ev.screen_touch.x = touch[i].pos.x;
-					ev.screen_touch.y = touch[i].pos.y;
+					Ref<InputEventScreenTouch> ev;
+					ev.instance();
+					ev->set_index(touch[i].id);
+					ev->set_pressed(false);
+					ev->set_pos(touch[i].pos);
 					input->parse_input_event(ev);
 				}
 				touch.clear();
@@ -525,13 +506,12 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 			TouchPos tp = p_points[p_pointer];
 			touch.push_back(tp);
 
-			InputEvent ev;
-			ev.type = InputEvent::SCREEN_TOUCH;
-			ev.ID = last_id++;
-			ev.screen_touch.index = tp.id;
-			ev.screen_touch.pressed = true;
-			ev.screen_touch.x = tp.pos.x;
-			ev.screen_touch.y = tp.pos.y;
+			Ref<InputEventScreenTouch> ev;
+			ev.instance();
+
+			ev->set_index(tp.id);
+			ev->set_pressed(true);
+			ev->set_pos(tp.pos);
 			input->parse_input_event(ev);
 
 		} break;
@@ -540,13 +520,11 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 			for (int i = 0; i < touch.size(); i++) {
 				if (touch[i].id == p_pointer) {
 
-					InputEvent ev;
-					ev.type = InputEvent::SCREEN_TOUCH;
-					ev.ID = last_id++;
-					ev.screen_touch.index = touch[i].id;
-					ev.screen_touch.pressed = false;
-					ev.screen_touch.x = touch[i].pos.x;
-					ev.screen_touch.y = touch[i].pos.y;
+					Ref<InputEventScreenTouch> ev;
+					ev.instance();
+					ev->set_index(touch[i].id);
+					ev->set_pressed(false);
+					ev->set_pos(touch[i].pos);
 					input->parse_input_event(ev);
 					touch.remove(i);
 					i--;
@@ -627,8 +605,8 @@ void OS_Android::reload_gfx() {
 
 	if (gfx_init_func)
 		gfx_init_func(gfx_init_ud, use_gl2);
-//	if (rasterizer)
-//		rasterizer->reload_vram();
+	//if (rasterizer)
+	//	rasterizer->reload_vram();
 }
 
 Error OS_Android::shell_open(String p_uri) {
@@ -746,9 +724,9 @@ void OS_Android::native_video_stop() {
 
 void OS_Android::set_context_is_16_bits(bool p_is_16) {
 
-//	use_16bits_fbo = p_is_16;
-//	if (rasterizer)
-//		rasterizer->set_force_16_bits_fbo(p_is_16);
+	//use_16bits_fbo = p_is_16;
+	//if (rasterizer)
+	//	rasterizer->set_force_16_bits_fbo(p_is_16);
 }
 
 void OS_Android::joy_connection_changed(int p_device, bool p_connected, String p_name) {
@@ -774,9 +752,8 @@ OS_Android::OS_Android(GFXInitFunc p_gfx_init_func, void *p_gfx_init_ud, OpenURI
 	gfx_init_func = p_gfx_init_func;
 	gfx_init_ud = p_gfx_init_ud;
 	main_loop = NULL;
-	last_id = 1;
 	gl_extensions = NULL;
-//	rasterizer = NULL;
+	//rasterizer = NULL;
 	use_gl2 = false;
 
 	open_uri_func = p_open_uri_func;

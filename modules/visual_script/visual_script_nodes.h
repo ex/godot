@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -922,7 +923,6 @@ class VisualScriptDeconstruct : public VisualScriptNode {
 
 	void _update_elements();
 	Variant::Type type;
-	InputEvent::Type input_type;
 
 	void _set_elem_cache(const Array &p_elements);
 	Array _get_elem_cache() const;
@@ -950,9 +950,6 @@ public:
 
 	void set_deconstruct_type(Variant::Type p_type);
 	Variant::Type get_deconstruct_type() const;
-
-	void set_deconstruct_input_type(InputEvent::Type p_input_type);
-	InputEvent::Type get_deconstruct_input_type() const;
 
 	virtual VisualScriptNodeInstance *instance(VisualScriptInstance *p_instance);
 

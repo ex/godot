@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -227,11 +228,12 @@ public:
 	VisualScriptSwitch();
 };
 
+#if 0
 class VisualScriptInputFilter : public VisualScriptNode {
 
 	GDCLASS(VisualScriptInputFilter, VisualScriptNode)
 
-	Vector<InputEvent> filters;
+	Vector<Ref<InputEvent>> filters;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
@@ -258,7 +260,7 @@ public:
 
 	VisualScriptInputFilter();
 };
-
+#endif
 class VisualScriptTypeCast : public VisualScriptNode {
 
 	GDCLASS(VisualScriptTypeCast, VisualScriptNode)

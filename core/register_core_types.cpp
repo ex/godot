@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -107,6 +108,20 @@ void register_core_types() {
 	ClassDB::register_class<Reference>();
 	ClassDB::register_class<WeakRef>();
 	ClassDB::register_class<Resource>();
+	ClassDB::register_class<Image>();
+
+	ClassDB::register_virtual_class<InputEvent>();
+	ClassDB::register_virtual_class<InputEventWithModifiers>();
+	ClassDB::register_class<InputEventKey>();
+	ClassDB::register_virtual_class<InputEventMouse>();
+	ClassDB::register_class<InputEventMouseButton>();
+	ClassDB::register_class<InputEventMouseMotion>();
+	ClassDB::register_class<InputEventJoypadButton>();
+	ClassDB::register_class<InputEventJoypadMotion>();
+	ClassDB::register_class<InputEventScreenDrag>();
+	ClassDB::register_class<InputEventScreenTouch>();
+	ClassDB::register_class<InputEventAction>();
+
 	ClassDB::register_class<FuncRef>();
 	ClassDB::register_virtual_class<StreamPeer>();
 	ClassDB::register_class<StreamPeerBuffer>();

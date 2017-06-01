@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -133,7 +134,7 @@ class CustomPropertyEditor : public Popup {
 	void _draw_easing();
 	void _menu_option(int p_which);
 
-	void _drag_easing(const InputEvent &p_ev);
+	void _drag_easing(const Ref<InputEvent> &p_ev);
 
 	void _node_path_selected(NodePath p_path);
 	void show_value_editors(int p_amount);
@@ -271,7 +272,8 @@ public:
 		custom_editor->set_read_only(p_read_only);
 	}
 
-	void set_capitalize_paths(bool p_capitalize);
+	bool is_capitalize_paths_enabled() const;
+	void set_enable_capitalize_paths(bool p_capitalize);
 	void set_autoclear(bool p_enable);
 
 	void set_show_categories(bool p_show);

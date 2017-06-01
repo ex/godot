@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -168,6 +169,7 @@ void ResourceImporterTexture::get_import_options(List<ImportOption> *r_options, 
 
 	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "compress/mode", PROPERTY_HINT_ENUM, "Lossless,Lossy,Video RAM,Uncompressed", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_UPDATE_ALL_IF_MODIFIED), p_preset == PRESET_3D ? 2 : 0));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::REAL, "compress/lossy_quality", PROPERTY_HINT_RANGE, "0,1,0.01"), 0.7));
+	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "compress/hdr_mode", PROPERTY_HINT_ENUM, "Compress,Force RGBE"), 0));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "flags/repeat", PROPERTY_HINT_ENUM, "Disabled,Enabled,Mirrored"), p_preset == PRESET_3D ? 1 : 0));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "flags/filter"), p_preset == PRESET_2D_PIXEL ? false : true));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "flags/mipmaps"), p_preset == PRESET_3D ? true : false));
@@ -175,12 +177,13 @@ void ResourceImporterTexture::get_import_options(List<ImportOption> *r_options, 
 	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "flags/srgb", PROPERTY_HINT_ENUM, "Disable,Enable,Detect"), 2));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "process/fix_alpha_border"), p_preset != PRESET_3D ? true : false));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "process/premult_alpha"), true));
+	r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "process/HDR_as_SRGB"), false));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "stream"), false));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "size_limit", PROPERTY_HINT_RANGE, "0,4096,1"), 0));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "detect_3d"), p_preset == PRESET_DETECT));
 }
 
-void ResourceImporterTexture::_save_stex(const Image &p_image, const String &p_to_path, int p_compress_mode, float p_lossy_quality, Image::CompressMode p_vram_compression, bool p_mipmaps, int p_texture_flags, bool p_streamable, bool p_detect_3d, bool p_detect_srgb) {
+void ResourceImporterTexture::_save_stex(const Ref<Image> &p_image, const String &p_to_path, int p_compress_mode, float p_lossy_quality, Image::CompressMode p_vram_compression, bool p_mipmaps, int p_texture_flags, bool p_streamable, bool p_detect_3d, bool p_detect_srgb, bool p_force_rgbe) {
 
 	FileAccess *f = FileAccess::open(p_to_path, FileAccess::WRITE);
 	f->store_8('G');
@@ -188,8 +191,8 @@ void ResourceImporterTexture::_save_stex(const Image &p_image, const String &p_t
 	f->store_8('S');
 	f->store_8('T'); //godot streamable texture
 
-	f->store_32(p_image.get_width());
-	f->store_32(p_image.get_height());
+	f->store_32(p_image->get_width());
+	f->store_32(p_image->get_height());
 	f->store_32(p_texture_flags);
 
 	uint32_t format = 0;
@@ -203,17 +206,21 @@ void ResourceImporterTexture::_save_stex(const Image &p_image, const String &p_t
 	if (p_detect_srgb)
 		format |= StreamTexture::FORMAT_BIT_DETECT_SRGB;
 
+	if ((p_compress_mode == COMPRESS_LOSSLESS || p_compress_mode == COMPRESS_LOSSY) && p_image->get_format() > Image::FORMAT_RGBA8) {
+		p_compress_mode == COMPRESS_UNCOMPRESSED; //these can't go as lossy
+	}
+
 	switch (p_compress_mode) {
 		case COMPRESS_LOSSLESS: {
 
-			Image image = p_image;
+			Ref<Image> image = p_image->duplicate();
 			if (p_mipmaps) {
-				image.generate_mipmaps();
+				image->generate_mipmaps();
 			} else {
-				image.clear_mipmaps();
+				image->clear_mipmaps();
 			}
 
-			int mmc = image.get_mipmap_count() + 1;
+			int mmc = image->get_mipmap_count() + 1;
 
 			format |= StreamTexture::FORMAT_BIT_LOSSLESS;
 			f->store_32(format);
@@ -222,7 +229,7 @@ void ResourceImporterTexture::_save_stex(const Image &p_image, const String &p_t
 			for (int i = 0; i < mmc; i++) {
 
 				if (i > 0) {
-					image.shrink_x2();
+					image->shrink_x2();
 				}
 
 				PoolVector<uint8_t> data = Image::lossless_packer(image);
@@ -235,14 +242,14 @@ void ResourceImporterTexture::_save_stex(const Image &p_image, const String &p_t
 
 		} break;
 		case COMPRESS_LOSSY: {
-			Image image = p_image;
+			Ref<Image> image = p_image->duplicate();
 			if (p_mipmaps) {
-				image.generate_mipmaps();
+				image->generate_mipmaps();
 			} else {
-				image.clear_mipmaps();
+				image->clear_mipmaps();
 			}
 
-			int mmc = image.get_mipmap_count() + 1;
+			int mmc = image->get_mipmap_count() + 1;
 
 			format |= StreamTexture::FORMAT_BIT_LOSSY;
 			f->store_32(format);
@@ -251,7 +258,7 @@ void ResourceImporterTexture::_save_stex(const Image &p_image, const String &p_t
 			for (int i = 0; i < mmc; i++) {
 
 				if (i > 0) {
-					image.shrink_x2();
+					image->shrink_x2();
 				}
 
 				PoolVector<uint8_t> data = Image::lossy_packer(image, p_lossy_quality);
@@ -264,15 +271,20 @@ void ResourceImporterTexture::_save_stex(const Image &p_image, const String &p_t
 		} break;
 		case COMPRESS_VIDEO_RAM: {
 
-			Image image = p_image;
-			image.generate_mipmaps();
-			image.compress(p_vram_compression);
+			Ref<Image> image = p_image->duplicate();
+			image->generate_mipmaps();
 
-			format |= image.get_format();
+			if (p_force_rgbe && image->get_format() >= Image::FORMAT_R8 && image->get_format() <= Image::FORMAT_RGBE9995) {
+				image->convert(Image::FORMAT_RGBE9995);
+			} else {
+				image->compress(p_vram_compression, p_texture_flags & VS::TEXTURE_FLAG_CONVERT_TO_LINEAR);
+			}
+
+			format |= image->get_format();
 
 			f->store_32(format);
 
-			PoolVector<uint8_t> data = image.get_data();
+			PoolVector<uint8_t> data = image->get_data();
 			int dl = data.size();
 			PoolVector<uint8_t>::Read r = data.read();
 			f->store_buffer(r.ptr(), dl);
@@ -280,17 +292,17 @@ void ResourceImporterTexture::_save_stex(const Image &p_image, const String &p_t
 		} break;
 		case COMPRESS_UNCOMPRESSED: {
 
-			Image image = p_image;
+			Ref<Image> image = p_image->duplicate();
 			if (p_mipmaps) {
-				image.generate_mipmaps();
+				image->generate_mipmaps();
 			} else {
-				image.clear_mipmaps();
+				image->clear_mipmaps();
 			}
 
-			format |= image.get_format();
+			format |= image->get_format();
 			f->store_32(format);
 
-			PoolVector<uint8_t> data = image.get_data();
+			PoolVector<uint8_t> data = image->get_data();
 			int dl = data.size();
 			PoolVector<uint8_t>::Read r = data.read();
 
@@ -315,9 +327,12 @@ Error ResourceImporterTexture::import(const String &p_source_file, const String 
 	bool premult_alpha = p_options["process/premult_alpha"];
 	bool stream = p_options["stream"];
 	int size_limit = p_options["size_limit"];
+	bool force_rgbe = int(p_options["compress/hdr_mode"]) == 1;
+	bool hdr_as_srgb = p_options["process/HDR_as_SRGB"];
 
-	Image image;
-	Error err = ImageLoader::load_image(p_source_file, &image);
+	Ref<Image> image;
+	image.instance();
+	Error err = ImageLoader::load_image(p_source_file, image, NULL, hdr_as_srgb);
 	if (err != OK)
 		return err;
 
@@ -335,28 +350,28 @@ Error ResourceImporterTexture::import(const String &p_source_file, const String 
 	if (srgb == 1)
 		tex_flags |= Texture::FLAG_CONVERT_TO_LINEAR;
 
-	if (size_limit > 0 && (image.get_width() > size_limit || image.get_height() > size_limit)) {
+	if (size_limit > 0 && (image->get_width() > size_limit || image->get_height() > size_limit)) {
 		//limit size
-		if (image.get_width() >= image.get_height()) {
+		if (image->get_width() >= image->get_height()) {
 			int new_width = size_limit;
-			int new_height = image.get_height() * new_width / image.get_width();
+			int new_height = image->get_height() * new_width / image->get_width();
 
-			image.resize(new_width, new_height, Image::INTERPOLATE_CUBIC);
+			image->resize(new_width, new_height, Image::INTERPOLATE_CUBIC);
 		} else {
 
 			int new_height = size_limit;
-			int new_width = image.get_width() * new_height / image.get_height();
+			int new_width = image->get_width() * new_height / image->get_height();
 
-			image.resize(new_width, new_height, Image::INTERPOLATE_CUBIC);
+			image->resize(new_width, new_height, Image::INTERPOLATE_CUBIC);
 		}
 	}
 
 	if (fix_alpha_border) {
-		image.fix_alpha_edges();
+		image->fix_alpha_edges();
 	}
 
 	if (premult_alpha) {
-		image.premultiply_alpha();
+		image->premultiply_alpha();
 	}
 
 	bool detect_3d = p_options["detect_3d"];
@@ -365,16 +380,16 @@ Error ResourceImporterTexture::import(const String &p_source_file, const String 
 	if (compress_mode == COMPRESS_VIDEO_RAM) {
 		//must import in all formats
 		//Android, GLES 2.x
-		_save_stex(image, p_save_path + ".etc.stex", compress_mode, lossy, Image::COMPRESS_ETC, mipmaps, tex_flags, stream, detect_3d, detect_srgb);
+		_save_stex(image, p_save_path + ".etc.stex", compress_mode, lossy, Image::COMPRESS_ETC, mipmaps, tex_flags, stream, detect_3d, detect_srgb, force_rgbe);
 		r_platform_variants->push_back("etc");
 		//_save_stex(image,p_save_path+".etc2.stex",compress_mode,lossy,Image::COMPRESS_ETC2,mipmaps,tex_flags,stream);
 		//r_platform_variants->push_back("etc2");
-		_save_stex(image, p_save_path + ".s3tc.stex", compress_mode, lossy, Image::COMPRESS_S3TC, mipmaps, tex_flags, stream, detect_3d, detect_srgb);
+		_save_stex(image, p_save_path + ".s3tc.stex", compress_mode, lossy, Image::COMPRESS_S3TC, mipmaps, tex_flags, stream, detect_3d, detect_srgb, force_rgbe);
 		r_platform_variants->push_back("s3tc");
 
 	} else {
 		//import normally
-		_save_stex(image, p_save_path + ".stex", compress_mode, lossy, Image::COMPRESS_16BIT /*this is ignored */, mipmaps, tex_flags, stream, detect_3d, detect_srgb);
+		_save_stex(image, p_save_path + ".stex", compress_mode, lossy, Image::COMPRESS_S3TC /*this is ignored */, mipmaps, tex_flags, stream, detect_3d, detect_srgb, force_rgbe);
 	}
 
 	return OK;

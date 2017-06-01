@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -183,6 +184,7 @@ void EditorAssetInstaller::open(const String &p_path, int p_depth) {
 			dir_map[path] = ti;
 			ti->set_text(0, path.get_file() + "/");
 			ti->set_icon(0, get_icon("folder", "FileDialog"));
+			ti->set_metadata(0, String());
 		} else {
 			String file = path.get_file();
 			String extension = file.get_extension().to_lower();
@@ -304,6 +306,7 @@ void EditorAssetInstaller::ok_pressed() {
 		if (EditorNode::get_singleton() != NULL)
 			EditorNode::get_singleton()->show_warning("Package Installed Successfully!", "Success!");
 	}
+	EditorFileSystem::get_singleton()->scan_changes();
 }
 
 void EditorAssetInstaller::_bind_methods() {

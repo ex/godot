@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -130,7 +131,7 @@ bool CollisionPolygonEditor::forward_spatial_gui_input(Camera* p_camera,const In
 
 
 
-			Vector2 gpoint=Point2(mb.x,mb.y);
+			Vector2 gpoint=Point2(mb->get_pos().x,mb->get_pos().y);
 			Vector3 ray_from = p_camera->project_ray_origin(gpoint);
 			Vector3 ray_dir = p_camera->project_ray_normal(gpoint);
 
@@ -155,7 +156,7 @@ bool CollisionPolygonEditor::forward_spatial_gui_input(Camera* p_camera,const In
 
 				case MODE_CREATE: {
 
-					if (mb.button_index==BUTTON_LEFT && mb.pressed) {
+					if (mb->get_button_index()==BUTTON_LEFT && mb->is_pressed()) {
 
 
 						if (!wip_active) {
@@ -185,7 +186,7 @@ bool CollisionPolygonEditor::forward_spatial_gui_input(Camera* p_camera,const In
 								//add wip point
 							}
 						}
-					} else if (mb.button_index==BUTTON_RIGHT && mb.pressed && wip_active) {
+					} else if (mb->get_button_index()==BUTTON_RIGHT && mb->is_pressed() && wip_active) {
 						_wip_close();
 					}
 
@@ -195,10 +196,10 @@ bool CollisionPolygonEditor::forward_spatial_gui_input(Camera* p_camera,const In
 
 				case MODE_EDIT: {
 
-					if (mb.button_index==BUTTON_LEFT) {
-						if (mb.pressed) {
+					if (mb->get_button_index()==BUTTON_LEFT) {
+						if (mb->is_pressed()) {
 
-							if (mb.mod.control) {
+							if (mb->get_control()) {
 
 
 								if (poly.size() < 3) {
@@ -296,7 +297,7 @@ bool CollisionPolygonEditor::forward_spatial_gui_input(Camera* p_camera,const In
 								return true;
 							}
 						}
-					} if (mb.button_index==BUTTON_RIGHT && mb.pressed && edited_point==-1) {
+					} if (mb->get_button_index()==BUTTON_RIGHT && mb->is_pressed() && edited_point==-1) {
 
 
 
@@ -343,7 +344,7 @@ bool CollisionPolygonEditor::forward_spatial_gui_input(Camera* p_camera,const In
 
 			const InputEventMouseMotion &mm=p_event.mouse_motion;
 
-			if (edited_point!=-1 && (wip_active || mm.button_mask&BUTTON_MASK_LEFT)) {
+			if (edited_point!=-1 && (wip_active || mm->get_button_mask()&BUTTON_MASK_LEFT)) {
 
 				Vector2 gpoint = Point2(mm.x,mm.y);
 
@@ -571,25 +572,25 @@ CollisionPolygonEditor::CollisionPolygonEditor(EditorNode *p_editor) {
 	imgeom->set_transform(Transform(Matrix3(),Vector3(0,0,0.00001)));
 
 
-	line_material = Ref<FixedSpatialMaterial>( memnew( FixedSpatialMaterial ));
+	line_material = Ref<SpatialMaterial>( memnew( SpatialMaterial ));
 	line_material->set_flag(Material::FLAG_UNSHADED, true);
 	line_material->set_line_width(3.0);
-	line_material->set_fixed_flag(FixedSpatialMaterial::FLAG_USE_ALPHA, true);
-	line_material->set_fixed_flag(FixedSpatialMaterial::FLAG_USE_COLOR_ARRAY, true);
-	line_material->set_parameter(FixedSpatialMaterial::PARAM_DIFFUSE,Color(1,1,1));
+	line_material->set_fixed_flag(SpatialMaterial::FLAG_USE_ALPHA, true);
+	line_material->set_fixed_flag(SpatialMaterial::FLAG_USE_COLOR_ARRAY, true);
+	line_material->set_parameter(SpatialMaterial::PARAM_DIFFUSE,Color(1,1,1));
 
 
 
 
-	handle_material = Ref<FixedSpatialMaterial>( memnew( FixedSpatialMaterial ));
+	handle_material = Ref<SpatialMaterial>( memnew( SpatialMaterial ));
 	handle_material->set_flag(Material::FLAG_UNSHADED, true);
-	handle_material->set_fixed_flag(FixedSpatialMaterial::FLAG_USE_POINT_SIZE, true);
-	handle_material->set_parameter(FixedSpatialMaterial::PARAM_DIFFUSE,Color(1,1,1));
-	handle_material->set_fixed_flag(FixedSpatialMaterial::FLAG_USE_ALPHA, true);
-	handle_material->set_fixed_flag(FixedSpatialMaterial::FLAG_USE_COLOR_ARRAY, false);
+	handle_material->set_fixed_flag(SpatialMaterial::FLAG_USE_POINT_SIZE, true);
+	handle_material->set_parameter(SpatialMaterial::PARAM_DIFFUSE,Color(1,1,1));
+	handle_material->set_fixed_flag(SpatialMaterial::FLAG_USE_ALPHA, true);
+	handle_material->set_fixed_flag(SpatialMaterial::FLAG_USE_COLOR_ARRAY, false);
 	Ref<Texture> handle=editor->get_gui_base()->get_icon("Editor3DHandle","EditorIcons");
 	handle_material->set_point_size(handle->get_width());
-	handle_material->set_texture(FixedSpatialMaterial::PARAM_DIFFUSE,handle);
+	handle_material->set_texture(SpatialMaterial::PARAM_DIFFUSE,handle);
 
 	pointsm = memnew( MeshInstance );
 	imgeom->add_child(pointsm);

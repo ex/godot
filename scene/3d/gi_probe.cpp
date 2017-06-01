@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -880,11 +881,11 @@ void GIProbe::_fixup_plot(int p_idx, int p_level, int p_x, int p_y, int p_z, Bak
 	}
 }
 
-Vector<Color> GIProbe::_get_bake_texture(Image &p_image, const Color &p_color) {
+Vector<Color> GIProbe::_get_bake_texture(Ref<Image> p_image, const Color &p_color) {
 
 	Vector<Color> ret;
 
-	if (p_image.empty()) {
+	if (p_image.is_null()) {
 
 		ret.resize(bake_texture_size * bake_texture_size);
 		for (int i = 0; i < bake_texture_size * bake_texture_size; i++) {
@@ -894,14 +895,14 @@ Vector<Color> GIProbe::_get_bake_texture(Image &p_image, const Color &p_color) {
 		return ret;
 	}
 
-	if (p_image.is_compressed()) {
+	if (p_image->is_compressed()) {
 		print_line("DECOMPRESSING!!!!");
-		p_image.decompress();
+		p_image->decompress();
 	}
-	p_image.convert(Image::FORMAT_RGBA8);
-	p_image.resize(bake_texture_size, bake_texture_size, Image::INTERPOLATE_CUBIC);
+	p_image->convert(Image::FORMAT_RGBA8);
+	p_image->resize(bake_texture_size, bake_texture_size, Image::INTERPOLATE_CUBIC);
 
-	PoolVector<uint8_t>::Read r = p_image.get_data().read();
+	PoolVector<uint8_t>::Read r = p_image->get_data().read();
 	ret.resize(bake_texture_size * bake_texture_size);
 
 	for (int i = 0; i < bake_texture_size * bake_texture_size; i++) {
@@ -919,7 +920,7 @@ Vector<Color> GIProbe::_get_bake_texture(Image &p_image, const Color &p_color) {
 GIProbe::Baker::MaterialCache GIProbe::_get_material_cache(Ref<Material> p_material, Baker *p_baker) {
 
 	//this way of obtaining materials is inaccurate and also does not support some compressed formats very well
-	Ref<FixedSpatialMaterial> mat = p_material;
+	Ref<SpatialMaterial> mat = p_material;
 
 	Ref<Material> material = mat; //hack for now
 
@@ -931,9 +932,9 @@ GIProbe::Baker::MaterialCache GIProbe::_get_material_cache(Ref<Material> p_mater
 
 	if (mat.is_valid()) {
 
-		Ref<Texture> albedo_tex = mat->get_texture(FixedSpatialMaterial::TEXTURE_ALBEDO);
+		Ref<Texture> albedo_tex = mat->get_texture(SpatialMaterial::TEXTURE_ALBEDO);
 
-		Image img_albedo;
+		Ref<Image> img_albedo;
 		if (albedo_tex.is_valid()) {
 
 			img_albedo = albedo_tex->get_data();
@@ -942,14 +943,14 @@ GIProbe::Baker::MaterialCache GIProbe::_get_material_cache(Ref<Material> p_mater
 
 		mc.albedo = _get_bake_texture(img_albedo, mat->get_albedo());
 
-		Ref<ImageTexture> emission_tex = mat->get_texture(FixedSpatialMaterial::TEXTURE_EMISSION);
+		Ref<ImageTexture> emission_tex = mat->get_texture(SpatialMaterial::TEXTURE_EMISSION);
 
 		Color emission_col = mat->get_emission();
 		emission_col.r *= mat->get_emission_energy();
 		emission_col.g *= mat->get_emission_energy();
 		emission_col.b *= mat->get_emission_energy();
 
-		Image img_emission;
+		Ref<Image> img_emission;
 
 		if (emission_tex.is_valid()) {
 
@@ -959,7 +960,7 @@ GIProbe::Baker::MaterialCache GIProbe::_get_material_cache(Ref<Material> p_mater
 		mc.emission = _get_bake_texture(img_emission, emission_col);
 
 	} else {
-		Image empty;
+		Ref<Image> empty;
 
 		mc.albedo = _get_bake_texture(empty, Color(0.7, 0.7, 0.7));
 		mc.emission = _get_bake_texture(empty, Color(0, 0, 0));
@@ -1365,11 +1366,11 @@ void GIProbe::_create_debug_mesh(Baker *p_baker) {
 	}
 
 	{
-		Ref<FixedSpatialMaterial> fsm;
+		Ref<SpatialMaterial> fsm;
 		fsm.instance();
-		fsm->set_flag(FixedSpatialMaterial::FLAG_SRGB_VERTEX_COLOR, true);
-		fsm->set_flag(FixedSpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
-		fsm->set_flag(FixedSpatialMaterial::FLAG_UNSHADED, true);
+		fsm->set_flag(SpatialMaterial::FLAG_SRGB_VERTEX_COLOR, true);
+		fsm->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
+		fsm->set_flag(SpatialMaterial::FLAG_UNSHADED, true);
 		fsm->set_albedo(Color(1, 1, 1, 1));
 
 		mesh->surface_set_material(0, fsm);

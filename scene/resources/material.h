@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -56,14 +57,40 @@ public:
 	virtual ~Material();
 };
 
-class FixedSpatialMaterial : public Material {
+class ShaderMaterial : public Material {
 
-	GDCLASS(FixedSpatialMaterial, Material)
+	GDCLASS(ShaderMaterial, Material);
+	Ref<Shader> shader;
+
+protected:
+	bool _set(const StringName &p_name, const Variant &p_value);
+	bool _get(const StringName &p_name, Variant &r_ret) const;
+	void _get_property_list(List<PropertyInfo> *p_list) const;
+
+	static void _bind_methods();
+
+	void get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const;
+
+public:
+	void set_shader(const Ref<Shader> &p_shader);
+	Ref<Shader> get_shader() const;
+
+	void set_shader_param(const StringName &p_param, const Variant &p_value);
+	Variant get_shader_param(const StringName &p_param) const;
+
+	ShaderMaterial();
+	~ShaderMaterial();
+};
+
+class SpatialMaterial : public Material {
+
+	GDCLASS(SpatialMaterial, Material)
 
 public:
 	enum TextureParam {
 		TEXTURE_ALBEDO,
-		TEXTURE_SPECULAR,
+		TEXTURE_METALLIC,
+		TEXTURE_ROUGHNESS,
 		TEXTURE_EMISSION,
 		TEXTURE_NORMAL,
 		TEXTURE_RIM,
@@ -73,7 +100,6 @@ public:
 		TEXTURE_HEIGHT,
 		TEXTURE_SUBSURFACE_SCATTERING,
 		TEXTURE_REFRACTION,
-		TEXTURE_REFRACTION_ROUGHNESS,
 		TEXTURE_DETAIL_MASK,
 		TEXTURE_DETAIL_ALBEDO,
 		TEXTURE_DETAIL_NORMAL,
@@ -128,6 +154,7 @@ public:
 		FLAG_ALBEDO_FROM_VERTEX_COLOR,
 		FLAG_SRGB_VERTEX_COLOR,
 		FLAG_USE_POINT_SIZE,
+		FLAG_FIXED_SIZE,
 		FLAG_MAX
 	};
 
@@ -138,25 +165,28 @@ public:
 		DIFFUSE_BURLEY,
 	};
 
-	enum SpecularMode {
-		SPECULAR_MODE_METALLIC,
-		SPECULAR_MODE_SPECULAR,
+	enum BillboardMode {
+		BILLBOARD_DISABLED,
+		BILLBOARD_ENABLED,
+		BILLBOARD_FIXED_Y,
+		BILLBOARD_PARTICLES,
 	};
 
 private:
 	union MaterialKey {
 
 		struct {
-			uint32_t feature_mask : 14;
+			uint32_t feature_mask : 11;
 			uint32_t detail_uv : 1;
 			uint32_t blend_mode : 2;
 			uint32_t depth_draw_mode : 2;
 			uint32_t cull_mode : 2;
-			uint32_t flags : 5;
+			uint32_t flags : 6;
 			uint32_t detail_blend_mode : 2;
 			uint32_t diffuse_mode : 2;
 			uint32_t invalid_key : 1;
 			uint32_t specular_mode : 1;
+			uint32_t billboard_mode : 2;
 		};
 
 		uint32_t key;
@@ -195,7 +225,7 @@ private:
 		}
 		mk.detail_blend_mode = detail_blend_mode;
 		mk.diffuse_mode = diffuse_mode;
-		mk.specular_mode = specular_mode;
+		mk.billboard_mode = billboard_mode;
 
 		return mk;
 	}
@@ -203,7 +233,7 @@ private:
 	struct ShaderNames {
 		StringName albedo;
 		StringName specular;
-		StringName metalness;
+		StringName metallic;
 		StringName roughness;
 		StringName emission;
 		StringName emission_energy;
@@ -222,22 +252,25 @@ private:
 		StringName uv1_offset;
 		StringName uv2_scale;
 		StringName uv2_offset;
+		StringName particle_h_frames;
+		StringName particle_v_frames;
+		StringName particles_anim_loop;
 		StringName texture_names[TEXTURE_MAX];
 	};
 
 	static Mutex *material_mutex;
-	static SelfList<FixedSpatialMaterial>::List dirty_materials;
+	static SelfList<SpatialMaterial>::List dirty_materials;
 	static ShaderNames *shader_names;
 
-	SelfList<FixedSpatialMaterial> element;
+	SelfList<SpatialMaterial> element;
 
 	void _update_shader();
 	_FORCE_INLINE_ void _queue_shader_change();
 	_FORCE_INLINE_ bool _is_shader_dirty() const;
 
 	Color albedo;
-	Color specular;
-	float metalness;
+	float specular;
+	float metallic;
 	float roughness;
 	Color emission;
 	float emission_energy;
@@ -253,6 +286,9 @@ private:
 	float refraction_roughness;
 	float line_width;
 	float point_size;
+	int particles_anim_h_frames;
+	int particles_anim_v_frames;
+	bool particles_anim_loop;
 
 	Vector2 uv1_scale;
 	Vector2 uv1_offset;
@@ -268,7 +304,7 @@ private:
 	CullMode cull_mode;
 	bool flags[FLAG_MAX];
 	DiffuseMode diffuse_mode;
-	SpecularMode specular_mode;
+	BillboardMode billboard_mode;
 
 	bool features[FEATURE_MAX];
 
@@ -284,14 +320,11 @@ public:
 	void set_albedo(const Color &p_albedo);
 	Color get_albedo() const;
 
-	void set_specular_mode(SpecularMode p_mode);
-	SpecularMode get_specular_mode() const;
+	void set_specular(float p_specular);
+	float get_specular() const;
 
-	void set_specular(const Color &p_specular);
-	Color get_specular() const;
-
-	void set_metalness(float p_metalness);
-	float get_metalness() const;
+	void set_metallic(float p_metallic);
+	float get_metallic() const;
 
 	void set_roughness(float p_roughness);
 	float get_roughness() const;
@@ -377,23 +410,34 @@ public:
 	void set_uv2_offset(const Vector2 &p_offset);
 	Vector2 get_uv2_offset() const;
 
+	void set_billboard_mode(BillboardMode p_mode);
+	BillboardMode get_billboard_mode() const;
+
+	void set_particles_anim_h_frames(int p_frames);
+	int get_particles_anim_h_frames() const;
+	void set_particles_anim_v_frames(int p_frames);
+	int get_particles_anim_v_frames() const;
+
+	void set_particles_anim_loop(int p_frames);
+	int get_particles_anim_loop() const;
+
 	static void init_shaders();
 	static void finish_shaders();
 	static void flush_changes();
 
-	FixedSpatialMaterial();
-	virtual ~FixedSpatialMaterial();
+	SpatialMaterial();
+	virtual ~SpatialMaterial();
 };
 
-VARIANT_ENUM_CAST(FixedSpatialMaterial::TextureParam)
-VARIANT_ENUM_CAST(FixedSpatialMaterial::DetailUV)
-VARIANT_ENUM_CAST(FixedSpatialMaterial::Feature)
-VARIANT_ENUM_CAST(FixedSpatialMaterial::BlendMode)
-VARIANT_ENUM_CAST(FixedSpatialMaterial::DepthDrawMode)
-VARIANT_ENUM_CAST(FixedSpatialMaterial::CullMode)
-VARIANT_ENUM_CAST(FixedSpatialMaterial::Flags)
-VARIANT_ENUM_CAST(FixedSpatialMaterial::DiffuseMode)
-VARIANT_ENUM_CAST(FixedSpatialMaterial::SpecularMode)
+VARIANT_ENUM_CAST(SpatialMaterial::TextureParam)
+VARIANT_ENUM_CAST(SpatialMaterial::DetailUV)
+VARIANT_ENUM_CAST(SpatialMaterial::Feature)
+VARIANT_ENUM_CAST(SpatialMaterial::BlendMode)
+VARIANT_ENUM_CAST(SpatialMaterial::DepthDrawMode)
+VARIANT_ENUM_CAST(SpatialMaterial::CullMode)
+VARIANT_ENUM_CAST(SpatialMaterial::Flags)
+VARIANT_ENUM_CAST(SpatialMaterial::DiffuseMode)
+VARIANT_ENUM_CAST(SpatialMaterial::BillboardMode)
 
 //////////////////////
 

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,12 +30,12 @@
 #include "create_dialog.h"
 
 #include "class_db.h"
-#include "editor_node.h"
-#include "print_string.h"
-#include "scene/gui/box_container.h"
 #include "editor_help.h"
+#include "editor_node.h"
 #include "editor_settings.h"
 #include "os/keyboard.h"
+#include "print_string.h"
+#include "scene/gui/box_container.h"
 
 void CreateDialog::popup_create(bool p_dontclear) {
 
@@ -86,14 +87,12 @@ void CreateDialog::popup_create(bool p_dontclear) {
 
 	_update_favorite_list();
 
-
 	// Restore valid window bounds or pop up at default size.
 	if (EditorSettings::get_singleton()->has("interface/dialogs/create_new_node_bounds")) {
-		popup(EditorSettings::get_singleton()->get("interface/dialogs/create_new_node_bounds"));	
+		popup(EditorSettings::get_singleton()->get("interface/dialogs/create_new_node_bounds"));
 	} else {
 		popup_centered_ratio();
 	}
-
 
 	if (p_dontclear)
 		search_box->select_all();
@@ -110,14 +109,15 @@ void CreateDialog::_text_changed(const String &p_newtext) {
 	_update_search();
 }
 
-void CreateDialog::_sbox_input(const InputEvent &p_ie) {
+void CreateDialog::_sbox_input(const Ref<InputEvent> &p_ie) {
 
-	if (p_ie.type == InputEvent::KEY && (p_ie.key.scancode == KEY_UP ||
-												p_ie.key.scancode == KEY_DOWN ||
-												p_ie.key.scancode == KEY_PAGEUP ||
-												p_ie.key.scancode == KEY_PAGEDOWN)) {
+	Ref<InputEventKey> k = p_ie;
+	if (k.is_valid() && (k->get_scancode() == KEY_UP ||
+								k->get_scancode() == KEY_DOWN ||
+								k->get_scancode() == KEY_PAGEUP ||
+								k->get_scancode() == KEY_PAGEDOWN)) {
 
-		search_options->call("_gui_input", p_ie);
+		search_options->call("_gui_input", k);
 		search_box->accept_event();
 	}
 }
@@ -203,7 +203,7 @@ void CreateDialog::_update_search() {
 	}
 
 	List<StringName>::Element *I = type_list.front();
-	TreeItem *to_select = NULL;
+	TreeItem *to_select = search_box->get_text() == base_type ? root : NULL;
 
 	for (; I; I = I->next()) {
 
@@ -213,7 +213,7 @@ void CreateDialog::_update_search() {
 			continue; // do not show editor nodes
 
 		if (!ClassDB::can_instance(type))
-			continue; // cant create what can't be instanced
+			continue; // can't create what can't be instanced
 
 		if (search_box->get_text() == "") {
 			add_type(type, types, root, &to_select);
@@ -316,7 +316,7 @@ void CreateDialog::_confirmed() {
 
 void CreateDialog::_notification(int p_what) {
 
-	switch (p_what)	{
+	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
 			connect("confirmed", this, "_confirmed");
 			favorite->set_icon(get_icon("Favorites", "EditorIcons"));
@@ -489,11 +489,13 @@ void CreateDialog::_favorite_selected() {
 
 void CreateDialog::_history_activated() {
 
+	_history_selected();
 	_confirmed();
 }
 
 void CreateDialog::_favorite_activated() {
 
+	_favorite_selected();
 	_confirmed();
 }
 

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -58,6 +59,7 @@ class TileSetEditor : public Control {
 	void _menu_confirm();
 	void _name_dialog_confirm(const String &name);
 
+	static void _import_node(Node *p_node, Ref<TileSet> p_library);
 	static void _import_scene(Node *p_scene, Ref<TileSet> p_library, bool p_merge);
 
 protected:

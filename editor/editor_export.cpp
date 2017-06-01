@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,13 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "editor_export.h"
+
 #include "editor/editor_file_system.h"
 #include "editor/plugins/script_editor_plugin.h"
 #include "editor_node.h"
 #include "editor_settings.h"
 #include "global_config.h"
 #include "io/config_file.h"
-#include "io/md5.h"
 #include "io/resource_loader.h"
 #include "io/resource_saver.h"
 #include "io/zip_io.h"
@@ -41,6 +42,8 @@
 #include "os/file_access.h"
 #include "script_language.h"
 #include "version.h"
+
+#include "thirdparty/misc/md5.h"
 
 static int _get_pad(int p_alignment, int p_n) {
 
@@ -75,11 +78,14 @@ bool EditorExportPreset::_get(const StringName &p_name, Variant &r_ret) const {
 
 	return false;
 }
+
 void EditorExportPreset::_get_property_list(List<PropertyInfo> *p_list) const {
 
 	for (const List<PropertyInfo>::Element *E = properties.front(); E; E = E->next()) {
 
-		p_list->push_back(E->get());
+		if (platform->get_option_visibility(E->get().name, values)) {
+			p_list->push_back(E->get());
+		}
 	}
 }
 
@@ -204,7 +210,7 @@ EditorExportPreset::EditorExportPreset() {
 
 void EditorExportPlatform::gen_debug_flags(Vector<String> &r_flags, int p_flags) {
 
-	String host = EditorSettings::get_singleton()->get("network/debug_host");
+	String host = EditorSettings::get_singleton()->get("network/debug/remote_host");
 
 	if (p_flags & DEBUG_FLAG_REMOTE_DEBUG_LOCALHOST)
 		host = "localhost";
@@ -315,7 +321,7 @@ Error EditorExportPlatform::_save_zip_file(void *p_userdata, const String &p_pat
 	return OK;
 }
 
-String EditorExportPlatform::find_export_template(String template_file_name) const {
+String EditorExportPlatform::find_export_template(String template_file_name, String *err) const {
 
 	String base_name = itos(VERSION_MAJOR) + "." + itos(VERSION_MINOR) + "-" + _MKSTR(VERSION_STATUS) + "/" + template_file_name;
 	String user_file = EditorSettings::get_singleton()->get_settings_path() + "/templates/" + base_name;
@@ -336,9 +342,20 @@ String EditorExportPlatform::find_export_template(String template_file_name) con
 			return system_file;
 		}
 	}
-	print_line("none,sorry");
 
-	return String(); //not found
+	// Not found
+	if (err) {
+		*err += "No export template found at \"" + user_file + "\"";
+		if (has_system_path)
+			*err += "\n or \"" + system_file + "\".";
+		else
+			*err += ".";
+	}
+	return String(); // not found
+}
+
+bool EditorExportPlatform::exists_export_template(String template_file_name, String *err) const {
+	return find_export_template(template_file_name, err) != "";
 }
 
 Ref<EditorExportPreset> EditorExportPlatform::create_preset() {
@@ -603,7 +620,7 @@ Error EditorExportPlatform::save_zip(const Ref<EditorExportPreset> &p_preset, co
 
 void EditorExportPlatform::gen_export_flags(Vector<String> &r_flags, int p_flags) {
 
-	String host = EditorSettings::get_singleton()->get("network/debug_host");
+	String host = EditorSettings::get_singleton()->get("network/debug/remote_host");
 
 	if (p_flags & DEBUG_FLAG_REMOTE_DEBUG_LOCALHOST)
 		host = "localhost";
@@ -919,19 +936,47 @@ Ref<Texture> EditorExportPlatformPC::get_logo() const {
 
 bool EditorExportPlatformPC::can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
 
-	r_missing_templates = false;
+	String err;
+	bool valid = true;
 
-	if (find_export_template(release_file_32) == String()) {
-		r_missing_templates = true;
-	} else if (find_export_template(debug_file_32) == String()) {
-		r_missing_templates = true;
-	} else if (find_export_template(release_file_64) == String()) {
-		r_missing_templates = true;
-	} else if (find_export_template(debug_file_64) == String()) {
-		r_missing_templates = true;
+	if (use64 && (!exists_export_template(debug_file_64, &err) || !exists_export_template(release_file_64, &err))) {
+		valid = false;
 	}
 
-	return !r_missing_templates;
+	if (!use64 && (!exists_export_template(debug_file_32, &err) || !exists_export_template(release_file_32, &err))) {
+		valid = false;
+	}
+
+	String custom_debug_binary = p_preset->get("custom_template/debug");
+	String custom_release_binary = p_preset->get("custom_template/release");
+
+	if (custom_debug_binary == "" && custom_release_binary == "") {
+		if (!err.empty())
+			r_error = err;
+		return valid;
+	}
+
+	bool dvalid = true;
+	bool rvalid = true;
+
+	if (!FileAccess::exists(custom_debug_binary)) {
+		dvalid = false;
+		err = "Custom debug binary not found.\n";
+	}
+
+	if (!FileAccess::exists(custom_release_binary)) {
+		rvalid = false;
+		err += "Custom release binary not found.\n";
+	}
+
+	if (dvalid || rvalid)
+		valid = true;
+	else
+		valid = false;
+
+	if (!err.empty())
+		r_error = err;
+	return valid;
 }
 
 String EditorExportPlatformPC::get_binary_extension() const {
@@ -1375,8 +1420,8 @@ Vector<StringName> EditorExportPlatform::get_dependencies(bool p_bundles) const 
 
 	Set<StringName> exported;
 
-	if (FileAccess::exists("res://godot.cfg"))
-		exported.insert("res://godot.cfg");
+	if (FileAccess::exists("res://project.godot"))
+		exported.insert("res://project.godot");
 
 	if (EditorImportExport::get_singleton()->get_export_filter()!=EditorImportExport::EXPORT_SELECTED) {
 
@@ -1489,40 +1534,6 @@ Vector<StringName> EditorExportPlatform::get_dependencies(bool p_bundles) const 
 
 	return ret;
 
-}
-
-String EditorExportPlatform::find_export_template(String template_file_name, String *err) const {
-	String user_file = EditorSettings::get_singleton()->get_settings_path()
-		+"/templates/"+template_file_name;
-	String system_file=OS::get_singleton()->get_installed_templates_path();
-	bool has_system_path=(system_file!="");
-	system_file+=template_file_name;
-
-	// Prefer user file
-	if (FileAccess::exists(user_file)) {
-		return user_file;
-	}
-
-	// Now check system file
-	if (has_system_path) {
-		if (FileAccess::exists(system_file)) {
-			return system_file;
-		}
-	}
-
-	// Not found
-	if (err) {
-		*err+="No export template found at \""+user_file+"\"";
-		if (has_system_path)
-			*err+="\n or \""+system_file+"\".";
-		else
-			*err+=".";
-	}
-	return "";
-}
-
-bool EditorExportPlatform::exists_export_template(String template_file_name, String *err) const {
-	return find_export_template(template_file_name,err)!="";
 }
 
 ///////////////////////////////////////
@@ -1730,7 +1741,7 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 			} break; //use default
 		}
 
-		String image_listD_METHOD5;
+		String image_list_md5;
 
 		{
 			MD5_CTX ctx;
@@ -1743,7 +1754,7 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 			}
 
 			MD5Final(&ctx);
-			image_listD_METHOD5=String::md5(ctx.digest);
+			image_list_md5=String::md5(ctx.digest);
 		}
 		//ok see if cached
 		String md5;
@@ -1788,7 +1799,7 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 
 		if (atlas_valid) {
 			//check md5 of list of image /names/
-			if (f->get_line().strip_edges()!=image_listD_METHOD5) {
+			if (f->get_line().strip_edges()!=image_list_md5) {
 				atlas_valid=false;
 				print_line("IMAGE MD5 INVALID!");
 			}
@@ -1807,17 +1818,17 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 
 				if (slices.size()!=10) {
 					atlas_valid=false;
-					print_line("CANT SLICE IN 10");
+					print_line("CAN'T SLICE IN 10");
 					break;
 				}
 				uint64_t mod_time = slices[0].to_int64();
 				uint64_t file_mod_time = FileAccess::get_modified_time(F->get());
 				if (mod_time!=file_mod_time) {
 
-					String imageD_METHOD5 = slices[1];
-					String fileD_METHOD5 = FileAccess::getD_METHOD5(F->get());
+					String image_md5 = slices[1];
+					String file_md5 = FileAccess::get_md5(F->get());
 
-					if (imageD_METHOD5!=fileD_METHOD5) {
+					if (image_md5!=file_md5) {
 						atlas_valid=false;
 						print_line("IMAGE INVALID "+slices[0]);
 						break;
@@ -1852,7 +1863,7 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 
 			for (List<StringName>::Element *F=atlas_images.front();F;F=F->next()) {
 
-				imd->add_source(EditorImportPlugin::validate_source_path(F->get()),FileAccess::getD_METHOD5(F->get()));
+				imd->add_source(EditorImportPlugin::validate_source_path(F->get()),FileAccess::get_md5(F->get()));
 
 			}
 
@@ -1910,7 +1921,7 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 			options["shrink"]=EditorImportExport::get_singleton()->image_export_group_get_shrink(E->get());
 			options["image_format"]=group_format;
 			//f->store_line(options.to_json());
-			f->store_line(image_listD_METHOD5);
+			f->store_line(image_list_md5);
 		}
 
 		//go through all ATEX files
@@ -1946,8 +1957,8 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 				if (f) {
 					//recreating deps..
 					String depline;
-					//depline=String(F->get())+"::"+itos(FileAccess::get_modified_time(F->get()))+"::"+FileAccess::getD_METHOD5(F->get()); name unneccesary by top md5
-					depline=itos(FileAccess::get_modified_time(F->get()))+"::"+FileAccess::getD_METHOD5(F->get());
+					//depline=String(F->get())+"::"+itos(FileAccess::get_modified_time(F->get()))+"::"+FileAccess::get_md5(F->get()); name unnecessary by top md5
+					depline=itos(FileAccess::get_modified_time(F->get()))+"::"+FileAccess::get_md5(F->get());
 					depline+="::"+itos(region.pos.x)+"::"+itos(region.pos.y)+"::"+itos(region.size.x)+"::"+itos(region.size.y);
 					depline+="::"+itos(margin.pos.x)+"::"+itos(margin.pos.y)+"::"+itos(margin.size.x)+"::"+itos(margin.size.y);
 					f->store_line(depline);
@@ -1972,7 +1983,7 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 	}
 
 
-	StringName engine_cfg="res://godot.cfg";
+	StringName engine_cfg="res://project.godot";
 	StringName boot_splash;
 	{
 		String splash=GlobalConfig::get_singleton()->get("application/boot_splash"); //avoid splash from being converted
@@ -2026,7 +2037,7 @@ Error EditorExportPlatform::export_project_files(EditorExportSaveFunction p_func
 
 	{
 
-		//make binary godot.cfg config
+		//make binary project.godot config
 		Map<String,Variant> custom;
 
 
@@ -2097,7 +2108,7 @@ static int _get_pad(int p_alignment, int p_n) {
 
 void EditorExportPlatform::gen_export_flags(Vector<String> &r_flags, int p_flags) {
 
-	String host = EditorSettings::get_singleton()->get("network/debug_host");
+	String host = EditorSettings::get_singleton()->get("network/debug/remote_host");
 
 	if (p_flags&EXPORT_REMOTE_DEBUG_LOCALHOST)
 		host="localhost";
@@ -2423,50 +2434,6 @@ void EditorExportPlatformPC::set_binary_extension(const String& p_extension) {
 
 	binary_extension=p_extension;
 }
-
-bool EditorExportPlatformPC::can_export(String *r_error) const {
-
-	String err;
-	bool valid=true;
-
-	if (use64 && (!exists_export_template(debug_binary64) || !exists_export_template(release_binary64))) {
-		valid=false;
-		err="No 64 bits export templates found.\nDownload and install export templates.\n";
-	}
-
-	if (!use64 && (!exists_export_template(debug_binary32) || !exists_export_template(release_binary32))) {
-		valid=false;
-		err="No 32 bits export templates found.\nDownload and install export templates.\n";
-	}
-
-	if(custom_debug_binary=="" && custom_release_binary=="") {
-		if (r_error) *r_error=err;
-		return valid;
-	}
-
-	bool dvalid = true;
-	bool rvalid = true;
-
-	if(!FileAccess::exists(custom_debug_binary)) {
-		dvalid = false;
-		err = "Custom debug binary not found.\n";
-	}
-
-	if(!FileAccess::exists(custom_release_binary)) {
-		rvalid = false;
-		err = "Custom release binary not found.\n";
-	}
-
-	if (dvalid || rvalid)
-		valid = true;
-	else
-		valid = false;
-
-	if (r_error)
-		*r_error=err;
-	return valid;
-}
-
 
 EditorExportPlatformPC::EditorExportPlatformPC() {
 

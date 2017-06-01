@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -39,7 +40,7 @@
 
 /*
 
-[03:57] <reduz> yessopie, so i dont havemak to rely on unicows
+[03:57] <reduz> yessopie, so i don't havemak to rely on unicows
 [03:58] <yessopie> reduz- yeah, all of the functions fail, and then you can call GetLastError () which will return 120
 [03:58] <drumstick> CategoryApl, hehe, what? :)
 [03:59] <CategoryApl> didn't Verona lead to some trouble

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,21 +30,22 @@
 #ifndef INPUTACTION_H
 #define INPUTACTION_H
 
+#include "os/input_event.h"
 #include "resource.h"
 
 class ShortCut : public Resource {
 
 	GDCLASS(ShortCut, Resource);
 
-	InputEvent shortcut;
+	Ref<InputEvent> shortcut;
 
 protected:
 	static void _bind_methods();
 
 public:
-	void set_shortcut(const InputEvent &p_shortcut);
-	InputEvent get_shortcut() const;
-	bool is_shortcut(const InputEvent &p_Event) const;
+	void set_shortcut(const Ref<InputEvent> &p_shortcut);
+	Ref<InputEvent> get_shortcut() const;
+	bool is_shortcut(const Ref<InputEvent> &p_Event) const;
 	bool is_valid() const;
 
 	String get_as_text() const;

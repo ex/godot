@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -41,7 +42,7 @@ bool EditorResourcePreviewGenerator::handles(const String &p_type) const {
 	if (get_script_instance() && get_script_instance()->has_method("handles")) {
 		return get_script_instance()->call("handles", p_type);
 	}
-	ERR_EXPLAIN("EditorResourcePreviewGenerator::handles needs to be overriden");
+	ERR_EXPLAIN("EditorResourcePreviewGenerator::handles needs to be overridden");
 	ERR_FAIL_V(false);
 }
 Ref<Texture> EditorResourcePreviewGenerator::generate(const RES &p_from) {
@@ -49,7 +50,7 @@ Ref<Texture> EditorResourcePreviewGenerator::generate(const RES &p_from) {
 	if (get_script_instance() && get_script_instance()->has_method("generate")) {
 		return get_script_instance()->call("generate", p_from);
 	}
-	ERR_EXPLAIN("EditorResourcePreviewGenerator::generate needs to be overriden");
+	ERR_EXPLAIN("EditorResourcePreviewGenerator::generate needs to be overridden");
 	ERR_FAIL_V(Ref<Texture>());
 }
 

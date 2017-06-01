@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,6 +32,7 @@
 
 #include "bsp_tree.h"
 #include "geometry.h"
+#include "image.h"
 #include "math_2d.h"
 #include "object.h"
 #include "rid.h"
@@ -105,13 +107,14 @@ public:
 	};
 
 	virtual RID texture_create() = 0;
-	RID texture_create_from_image(const Image &p_image, uint32_t p_flags = TEXTURE_FLAGS_DEFAULT); // helper
+	RID texture_create_from_image(const Ref<Image> &p_image, uint32_t p_flags = TEXTURE_FLAGS_DEFAULT); // helper
 	virtual void texture_allocate(RID p_texture, int p_width, int p_height, Image::Format p_format, uint32_t p_flags = TEXTURE_FLAGS_DEFAULT) = 0;
-	virtual void texture_set_data(RID p_texture, const Image &p_image, CubeMapSide p_cube_side = CUBEMAP_LEFT) = 0;
-	virtual Image texture_get_data(RID p_texture, CubeMapSide p_cube_side = CUBEMAP_LEFT) const = 0;
+	virtual void texture_set_data(RID p_texture, const Ref<Image> &p_image, CubeMapSide p_cube_side = CUBEMAP_LEFT) = 0;
+	virtual Ref<Image> texture_get_data(RID p_texture, CubeMapSide p_cube_side = CUBEMAP_LEFT) const = 0;
 	virtual void texture_set_flags(RID p_texture, uint32_t p_flags) = 0;
 	virtual uint32_t texture_get_flags(RID p_texture) const = 0;
 	virtual Image::Format texture_get_format(RID p_texture) const = 0;
+	virtual uint32_t texture_get_texid(RID p_texture) const = 0;
 	virtual uint32_t texture_get_width(RID p_texture) const = 0;
 	virtual uint32_t texture_get_height(RID p_texture) const = 0;
 	virtual void texture_set_size_override(RID p_texture, int p_width, int p_height) = 0;
@@ -138,10 +141,10 @@ public:
 
 	virtual void textures_keep_original(bool p_enable) = 0;
 
-	/* SKYBOX API */
+	/* SKY API */
 
-	virtual RID skybox_create() = 0;
-	virtual void skybox_set_texture(RID p_skybox, RID p_cube_map, int p_radiance_size) = 0;
+	virtual RID sky_create() = 0;
+	virtual void sky_set_texture(RID p_sky, RID p_cube_map, int p_radiance_size) = 0;
 
 	/* SHADER API */
 
@@ -153,10 +156,7 @@ public:
 		SHADER_MAX
 	};
 
-	virtual RID shader_create(ShaderMode p_mode = SHADER_SPATIAL) = 0;
-
-	virtual void shader_set_mode(RID p_shader, ShaderMode p_mode) = 0;
-	virtual ShaderMode shader_get_mode(RID p_shader) const = 0;
+	virtual RID shader_create() = 0;
 
 	virtual void shader_set_code(RID p_shader, const String &p_code) = 0;
 	virtual String shader_get_code(RID p_shader) const = 0;
@@ -482,22 +482,11 @@ public:
 	virtual void particles_set_explosiveness_ratio(RID p_particles, float p_ratio) = 0;
 	virtual void particles_set_randomness_ratio(RID p_particles, float p_ratio) = 0;
 	virtual void particles_set_custom_aabb(RID p_particles, const Rect3 &p_aabb) = 0;
-	virtual void particles_set_gravity(RID p_particles, const Vector3 &p_gravity) = 0;
+	virtual void particles_set_speed_scale(RID p_particles, float p_scale) = 0;
 	virtual void particles_set_use_local_coordinates(RID p_particles, bool p_enable) = 0;
 	virtual void particles_set_process_material(RID p_particles, RID p_material) = 0;
-
-	enum ParticlesEmissionShape {
-		PARTICLES_EMSSION_POINT,
-		PARTICLES_EMSSION_SPHERE,
-		PARTICLES_EMSSION_BOX,
-		PARTICLES_EMSSION_POINTS,
-		PARTICLES_EMSSION_SEGMENTS,
-	};
-
-	virtual void particles_set_emission_shape(RID p_particles, ParticlesEmissionShape) = 0;
-	virtual void particles_set_emission_sphere_radius(RID p_particles, float p_radius) = 0;
-	virtual void particles_set_emission_box_extents(RID p_particles, const Vector3 &p_extents) = 0;
-	virtual void particles_set_emission_points(RID p_particles, const PoolVector<Vector3> &p_points) = 0;
+	virtual void particles_set_fixed_fps(RID p_particles, int p_fps) = 0;
+	virtual void particles_set_fractional_delta(RID p_particles, bool p_enable) = 0;
 
 	enum ParticlesDrawOrder {
 		PARTICLES_DRAW_ORDER_INDEX,
@@ -507,13 +496,7 @@ public:
 
 	virtual void particles_set_draw_order(RID p_particles, ParticlesDrawOrder p_order) = 0;
 
-	enum ParticlesDrawPassMode {
-		PARTICLES_DRAW_PASS_MODE_QUAD,
-		PARTICLES_DRAW_PASS_MODE_MESH
-	};
-
 	virtual void particles_set_draw_passes(RID p_particles, int p_count) = 0;
-	virtual void particles_set_draw_pass_material(RID p_particles, int p_pass, RID p_material) = 0;
 	virtual void particles_set_draw_pass_mesh(RID p_particles, int p_pass, RID p_mesh) = 0;
 
 	virtual Rect3 particles_get_current_aabb(RID p_particles) = 0;
@@ -606,19 +589,19 @@ public:
 
 		ENV_BG_CLEAR_COLOR,
 		ENV_BG_COLOR,
-		ENV_BG_SKYBOX,
+		ENV_BG_SKY,
 		ENV_BG_CANVAS,
 		ENV_BG_KEEP,
 		ENV_BG_MAX
 	};
 
 	virtual void environment_set_background(RID p_env, EnvironmentBG p_bg) = 0;
-	virtual void environment_set_skybox(RID p_env, RID p_skybox) = 0;
-	virtual void environment_set_skybox_scale(RID p_env, float p_scale) = 0;
+	virtual void environment_set_sky(RID p_env, RID p_sky) = 0;
+	virtual void environment_set_sky_scale(RID p_env, float p_scale) = 0;
 	virtual void environment_set_bg_color(RID p_env, const Color &p_color) = 0;
 	virtual void environment_set_bg_energy(RID p_env, float p_energy) = 0;
 	virtual void environment_set_canvas_max_layer(RID p_env, int p_max_layer) = 0;
-	virtual void environment_set_ambient_light(RID p_env, const Color &p_color, float p_energy = 1.0, float p_skybox_contribution = 0.0) = 0;
+	virtual void environment_set_ambient_light(RID p_env, const Color &p_color, float p_energy = 1.0, float p_sky_contribution = 0.0) = 0;
 
 	//set default SSAO options
 	//set default SSR options
@@ -689,7 +672,7 @@ public:
 		INSTANCE_MAX,
 		/*INSTANCE_BAKED_LIGHT_SAMPLER,*/
 
-		INSTANCE_GEOMETRY_MASK = (1 << INSTANCE_MESH) | (1 << INSTANCE_MULTIMESH) | (1 << INSTANCE_IMMEDIATE)
+		INSTANCE_GEOMETRY_MASK = (1 << INSTANCE_MESH) | (1 << INSTANCE_MULTIMESH) | (1 << INSTANCE_IMMEDIATE) | (1 << INSTANCE_PARTICLES)
 	};
 
 	virtual RID instance_create2(RID p_base, RID p_scenario);
@@ -718,10 +701,7 @@ public:
 	virtual Vector<ObjectID> instances_cull_convex(const Vector<Plane> &p_convex, RID p_scenario = RID()) const = 0;
 
 	enum InstanceFlags {
-		INSTANCE_FLAG_BILLBOARD,
-		INSTANCE_FLAG_BILLBOARD_FIX_Y,
 		INSTANCE_FLAG_CAST_SHADOW,
-		INSTANCE_FLAG_DEPH_SCALE,
 		INSTANCE_FLAG_VISIBLE_IN_ALL_ROOMS,
 		INSTANCE_FLAG_USE_BAKED_LIGHT,
 		INSTANCE_FLAG_MAX
@@ -906,7 +886,7 @@ public:
 	virtual void mesh_add_surface_from_mesh_data(RID p_mesh, const Geometry::MeshData &p_mesh_data);
 	virtual void mesh_add_surface_from_planes(RID p_mesh, const PoolVector<Plane> &p_planes);
 
-	virtual void set_boot_image(const Image &p_image, const Color &p_color, bool p_scale) = 0;
+	virtual void set_boot_image(const Ref<Image> &p_image, const Color &p_color, bool p_scale) = 0;
 	virtual void set_default_clear_color(const Color &p_color) = 0;
 
 	enum Features {

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -102,10 +103,8 @@ MAKE_PTRARG(Rect3);
 MAKE_PTRARG(Basis);
 MAKE_PTRARG(Transform);
 MAKE_PTRARG(Color);
-MAKE_PTRARG(Image);
 MAKE_PTRARG(NodePath);
 MAKE_PTRARG(RID);
-MAKE_PTRARG(InputEvent);
 MAKE_PTRARG(Dictionary);
 MAKE_PTRARG(Array);
 MAKE_PTRARG(PoolByteArray);

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -169,8 +170,8 @@ private:
 	Vector<JoyDeviceMapping> map_db;
 
 	JoyEvent _find_to_event(String p_to);
-	uint32_t _button_event(uint32_t p_last_id, int p_device, int p_index, bool p_pressed);
-	uint32_t _axis_event(uint32_t p_last_id, int p_device, int p_axis, float p_value);
+	void _button_event(int p_device, int p_index, bool p_pressed);
+	void _axis_event(int p_device, int p_axis, float p_value);
 	float _handle_deadzone(int p_device, int p_axis, float p_value);
 
 public:
@@ -195,13 +196,14 @@ public:
 	virtual Vector3 get_magnetometer() const;
 	virtual Vector3 get_gyroscope() const;
 
-	virtual Point2 get_mouse_pos() const;
+	virtual Point2 get_mouse_position() const;
 	virtual Point2 get_last_mouse_speed() const;
 	virtual int get_mouse_button_mask() const;
 
 	virtual void warp_mouse_pos(const Vector2 &p_to);
+	virtual Point2i warp_mouse_motion(const Ref<InputEventMouseMotion> &p_motion, const Rect2 &p_rect);
 
-	virtual void parse_input_event(const InputEvent &p_event);
+	virtual void parse_input_event(const Ref<InputEvent> &p_event);
 
 	void set_gravity(const Vector3 &p_gravity);
 	void set_accelerometer(const Vector3 &p_accel);
@@ -213,7 +215,7 @@ public:
 	virtual void stop_joy_vibration(int p_device);
 
 	void set_main_loop(MainLoop *main_loop);
-	void set_mouse_pos(const Point2 &p_posf);
+	void set_mouse_position(const Point2 &p_posf);
 
 	void action_press(const StringName &p_action);
 	void action_release(const StringName &p_action);
@@ -227,9 +229,9 @@ public:
 	virtual void set_mouse_in_window(bool p_in_window);
 
 	void parse_mapping(String p_mapping);
-	uint32_t joy_button(uint32_t p_last_id, int p_device, int p_button, bool p_pressed);
-	uint32_t joy_axis(uint32_t p_last_id, int p_device, int p_axis, const JoyAxis &p_value);
-	uint32_t joy_hat(uint32_t p_last_id, int p_device, int p_val);
+	void joy_button(int p_device, int p_button, bool p_pressed);
+	void joy_axis(int p_device, int p_axis, const JoyAxis &p_value);
+	void joy_hat(int p_device, int p_val);
 
 	virtual void add_joy_mapping(String p_mapping, bool p_update_existing = false);
 	virtual void remove_joy_mapping(String p_guid);

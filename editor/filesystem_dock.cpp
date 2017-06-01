@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -414,8 +415,9 @@ void FileSystemDock::_update_files(bool p_keep_selection) {
 
 		if (!has_icon("ResizedFolder", "EditorIcons")) {
 			Ref<ImageTexture> folder = get_icon("FolderBig", "EditorIcons");
-			Image img = folder->get_data();
-			img.resize(thumbnail_size, thumbnail_size);
+			Ref<Image> img = folder->get_data();
+			img = img->duplicate();
+			img->resize(thumbnail_size, thumbnail_size);
 			Ref<ImageTexture> resized_folder = Ref<ImageTexture>(memnew(ImageTexture));
 			resized_folder->create_from_image(img, 0);
 			Theme::get_default()->set_icon("ResizedFolder", "EditorIcons", resized_folder);
@@ -425,8 +427,8 @@ void FileSystemDock::_update_files(bool p_keep_selection) {
 
 		if (!has_icon("ResizedFile", "EditorIcons")) {
 			Ref<ImageTexture> file = get_icon("FileBig", "EditorIcons");
-			Image img = file->get_data();
-			img.resize(thumbnail_size, thumbnail_size);
+			Ref<Image> img = file->get_data();
+			img->resize(thumbnail_size, thumbnail_size);
 			Ref<ImageTexture> resized_file = Ref<ImageTexture>(memnew(ImageTexture));
 			resized_file->create_from_image(img, 0);
 			Theme::get_default()->set_icon("ResizedFile", "EditorIcons", resized_file);
@@ -1063,6 +1065,11 @@ void FileSystemDock::_folder_option(int p_option) {
 				child = child->get_next();
 			}
 			break;
+		case FOLDER_SHOW_IN_EXPLORER:
+			String path = item->get_metadata(tree->get_selected_column());
+			String dir = GlobalConfig::get_singleton()->globalize_path(path);
+			OS::get_singleton()->shell_open(String("file://") + dir);
+			return;
 	}
 }
 
@@ -1101,7 +1108,10 @@ void FileSystemDock::_dir_rmb_pressed(const Vector2 &p_pos) {
 	folder_options->add_item(TTR("Expand all"), FOLDER_EXPAND_ALL);
 	folder_options->add_item(TTR("Collapse all"), FOLDER_COLLAPSE_ALL);
 
-	folder_options->set_pos(files->get_global_pos() + p_pos);
+	folder_options->add_separator();
+	folder_options->add_item(TTR("Show In File Manager"), FOLDER_SHOW_IN_EXPLORER);
+
+	folder_options->set_position(tree->get_global_position() + p_pos);
 	folder_options->popup();
 }
 
@@ -1525,7 +1535,7 @@ void FileSystemDock::_files_list_rmb_select(int p_item, const Vector2 &p_pos) {
 		*/
 	}
 
-	file_options->set_pos(files->get_global_pos() + p_pos);
+	file_options->set_position(files->get_global_position() + p_pos);
 	file_options->popup();
 }
 
@@ -1727,6 +1737,7 @@ FileSystemDock::FileSystemDock(EditorNode *p_editor) {
 	file_list_vb->set_v_size_flags(SIZE_EXPAND_FILL);
 
 	path_hb = memnew(HBoxContainer);
+	path_hb->add_child(memnew(Control));
 	file_list_vb->add_child(path_hb);
 
 	button_back = memnew(ToolButton);

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -113,6 +114,8 @@ private:
 	bool orthogonal;
 	float gizmo_scale;
 
+	bool freelook_active;
+
 	struct _RayResult {
 
 		Spatial *item;
@@ -139,7 +142,7 @@ private:
 	Vector3 _get_screen_to_space(const Vector3 &p_vector3);
 
 	void _select_region();
-	bool _gizmo_select(const Vector2 &p_screenpos, bool p_hilite_only = false);
+	bool _gizmo_select(const Vector2 &p_screenpos, bool p_highlight_only = false);
 
 	float get_znear() const;
 	float get_zfar() const;
@@ -167,7 +170,8 @@ private:
 		NAVIGATION_NONE,
 		NAVIGATION_PAN,
 		NAVIGATION_ZOOM,
-		NAVIGATION_ORBIT
+		NAVIGATION_ORBIT,
+		NAVIGATION_LOOK
 	};
 	enum TransformMode {
 		TRANSFORM_NONE,
@@ -202,8 +206,6 @@ private:
 
 	struct Cursor {
 
-		Vector3 cursor_pos;
-
 		Vector3 pos;
 		float x_rot, y_rot, distance;
 		bool region_select;
@@ -216,6 +218,10 @@ private:
 		}
 	} cursor;
 
+	void scale_cursor_distance(real_t scale);
+
+	real_t zoom_indicator_delay;
+
 	RID move_gizmo_instance[3], rotate_gizmo_instance[3];
 
 	String last_message;
@@ -226,10 +232,12 @@ private:
 
 	//
 	void _update_camera();
+	Transform to_camera_transform(const Cursor &p_cursor) const;
 	void _draw();
 
 	void _smouseenter();
-	void _sinput(const InputEvent &p_ie);
+	void _sinput(const Ref<InputEvent> &p_ie);
+	void _update_freelook(real_t delta);
 	SpatialEditor *spatial_editor;
 
 	Camera *previewing;
@@ -241,7 +249,8 @@ private:
 	void _finish_gizmo_instances();
 	void _selection_result_pressed(int);
 	void _selection_menu_hide();
-	void _list_select(InputEventMouseButton b);
+	void _list_select(Ref<InputEventMouseButton> b);
+	Point2i _get_warped_mouse_motion(const Ref<InputEventMouseMotion> &p_ev_mouse_motion) const;
 
 protected:
 	void _notification(int p_what);
@@ -254,6 +263,7 @@ public:
 	void set_state(const Dictionary &p_state);
 	Dictionary get_state() const;
 	void reset();
+	bool is_freelook_active() const { return freelook_active; }
 
 	void focus_selection();
 
@@ -294,11 +304,13 @@ public:
 	};
 
 private:
+	static const unsigned int VIEWPORTS_COUNT = 4;
+
 	EditorNode *editor;
 	EditorSelection *editor_selection;
 
 	Control *viewport_base;
-	SpatialEditorViewport *viewports[4];
+	SpatialEditorViewport *viewports[VIEWPORTS_COUNT];
 	VSplitContainer *shader_split;
 	HSplitContainer *palette_split;
 
@@ -308,10 +320,6 @@ private:
 	bool orthogonal;
 
 	VisualServer::ScenarioDebugMode scenario_debug;
-
-	RID light;
-	RID light_instance;
-	Transform light_transform;
 
 	RID origin;
 	RID origin_instance;
@@ -323,8 +331,8 @@ private:
 	bool grid_enabled;
 
 	Ref<Mesh> move_gizmo[3], rotate_gizmo[3];
-	Ref<FixedSpatialMaterial> gizmo_color[3];
-	Ref<FixedSpatialMaterial> gizmo_hl;
+	Ref<SpatialMaterial> gizmo_color[3];
+	Ref<SpatialMaterial> gizmo_hl;
 
 	int over_gizmo_handle;
 
@@ -333,8 +341,8 @@ private:
 	RID indicators_instance;
 	RID cursor_mesh;
 	RID cursor_instance;
-	Ref<FixedSpatialMaterial> indicator_mat;
-	Ref<FixedSpatialMaterial> cursor_material;
+	Ref<SpatialMaterial> indicator_mat;
+	Ref<SpatialMaterial> cursor_material;
 
 	/*
 	struct Selected {
@@ -371,8 +379,6 @@ private:
 		MENU_VIEW_USE_3_VIEWPORTS,
 		MENU_VIEW_USE_3_VIEWPORTS_ALT,
 		MENU_VIEW_USE_4_VIEWPORTS,
-		MENU_VIEW_USE_DEFAULT_LIGHT,
-		MENU_VIEW_USE_DEFAULT_SRGB,
 		MENU_VIEW_DISPLAY_NORMAL,
 		MENU_VIEW_DISPLAY_WIREFRAME,
 		MENU_VIEW_DISPLAY_OVERDRAW,
@@ -384,7 +390,6 @@ private:
 	};
 
 	Button *tool_button[TOOL_MAX];
-	Button *instance_button;
 
 	MenuButton *transform_menu;
 	MenuButton *view_menu;
@@ -408,16 +413,6 @@ private:
 	SpinBox *settings_fov;
 	SpinBox *settings_znear;
 	SpinBox *settings_zfar;
-	DirectionalLight *settings_dlight;
-	ImmediateGeometry *settings_sphere;
-	Camera *settings_camera;
-	float settings_default_light_rot_x;
-	float settings_default_light_rot_y;
-
-	ViewportContainer *settings_light_base;
-	Viewport *settings_light_vp;
-	ColorPickerButton *settings_ambient_color;
-	Image settings_light_dir_image;
 
 	void _xform_dialog_action();
 	void _menu_item_pressed(int p_option);
@@ -451,14 +446,12 @@ private:
 	SpatialEditorGizmos *gizmos;
 	SpatialEditor();
 
-	void _update_ambient_light_color(const Color &p_color);
-	void _update_default_light_angle();
-	void _default_light_angle_input(const InputEvent &p_event);
+	bool is_any_freelook_active() const;
 
 protected:
 	void _notification(int p_what);
 	//void _gui_input(InputEvent p_event);
-	void _unhandled_key_input(InputEvent p_event);
+	void _unhandled_key_input(Ref<InputEvent> p_event);
 
 	static void _bind_methods();
 
@@ -484,7 +477,7 @@ public:
 
 	void update_transform_gizmo();
 
-	void select_gizmo_hilight_axis(int p_axis);
+	void select_gizmo_highlight_axis(int p_axis);
 	void set_custom_camera(Node *p_camera) { custom_camera = p_camera; }
 
 	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }

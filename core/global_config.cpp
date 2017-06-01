@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -241,7 +242,7 @@ Error GlobalConfig::setup(const String &p_path, const String &p_main_pack) {
 
 	if (FileAccessNetworkClient::get_singleton()) {
 
-		if (_load_settings("res://godot.cfg") == OK || _load_settings_binary("res://godot.cfb") == OK) {
+		if (_load_settings("res://project.godot") == OK || _load_settings_binary("res://godot.cfb") == OK) {
 
 			_load_settings("res://override.cfg");
 		}
@@ -258,7 +259,7 @@ Error GlobalConfig::setup(const String &p_path, const String &p_main_pack) {
 		bool ok = _load_resource_pack(p_main_pack);
 		ERR_FAIL_COND_V(!ok, ERR_CANT_OPEN);
 
-		if (_load_settings("res://godot.cfg") == OK || _load_settings_binary("res://godot.cfb") == OK) {
+		if (_load_settings("res://project.godot") == OK || _load_settings_binary("res://godot.cfb") == OK) {
 			//load override from location of the main pack
 			_load_settings(p_main_pack.get_base_dir().plus_file("override.cfg"));
 		}
@@ -271,7 +272,7 @@ Error GlobalConfig::setup(const String &p_path, const String &p_main_pack) {
 
 		if (_load_resource_pack(exec_path.get_basename() + ".pck")) {
 
-			if (_load_settings("res://godot.cfg") == OK || _load_settings_binary("res://godot.cfb") == OK) {
+			if (_load_settings("res://project.godot") == OK || _load_settings_binary("res://godot.cfb") == OK) {
 				//load override from location of executable
 				_load_settings(exec_path.get_base_dir().plus_file("override.cfg"));
 			}
@@ -282,7 +283,7 @@ Error GlobalConfig::setup(const String &p_path, const String &p_main_pack) {
 
 	//Try to use the filesystem for files, according to OS. (only Android -when reading from pck- and iOS use this)
 	if (OS::get_singleton()->get_resource_dir() != "") {
-		//OS will call Globals->get_resource_path which will be empty if not overriden!
+		//OS will call Globals->get_resource_path which will be empty if not overridden!
 		//if the OS would rather use somewhere else, then it will not be empty.
 
 		resource_path = OS::get_singleton()->get_resource_dir().replace("\\", "/");
@@ -292,14 +293,14 @@ Error GlobalConfig::setup(const String &p_path, const String &p_main_pack) {
 		// data.pck and data.zip are deprecated and no longer supported, apologies.
 		// make sure this is loaded from the resource path
 
-		if (_load_settings("res://godot.cfg") == OK || _load_settings_binary("res://godot.cfb") == OK) {
+		if (_load_settings("res://project.godot") == OK || _load_settings_binary("res://godot.cfb") == OK) {
 			_load_settings("res://override.cfg");
 		}
 
 		return OK;
 	}
 
-	//Nothing was found, try to find a godot.cfg somewhere!
+	//Nothing was found, try to find a project.godot somewhere!
 
 	DirAccess *d = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 	ERR_FAIL_COND_V(!d, ERR_CANT_CREATE);
@@ -313,7 +314,7 @@ Error GlobalConfig::setup(const String &p_path, const String &p_main_pack) {
 	while (true) {
 		//try to load settings in ascending through dirs shape!
 
-		if (_load_settings(current_dir + "/godot.cfg") == OK || _load_settings_binary(current_dir + "/godot.cfb") == OK) {
+		if (_load_settings(current_dir + "/project.godot") == OK || _load_settings_binary(current_dir + "/godot.cfb") == OK) {
 
 			_load_settings(current_dir + "/override.cfg");
 			candidate = current_dir;
@@ -473,7 +474,7 @@ void GlobalConfig::clear(const String &p_name) {
 
 Error GlobalConfig::save() {
 
-	return save_custom(get_resource_path() + "/godot.cfg");
+	return save_custom(get_resource_path() + "/project.godot");
 }
 
 Error GlobalConfig::_save_settings_binary(const String &p_file, const Map<String, List<String> > &props, const CustomMap &p_custom) {
@@ -482,7 +483,7 @@ Error GlobalConfig::_save_settings_binary(const String &p_file, const Map<String
 	FileAccess *file = FileAccess::open(p_file, FileAccess::WRITE, &err);
 	if (err != OK) {
 
-		ERR_EXPLAIN("Coudln't save godot.cfb at " + p_file);
+		ERR_EXPLAIN("Couldn't save godot.cfb at " + p_file);
 		ERR_FAIL_COND_V(err, err)
 	}
 
@@ -547,7 +548,7 @@ Error GlobalConfig::_save_settings_text(const String &p_file, const Map<String, 
 	FileAccess *file = FileAccess::open(p_file, FileAccess::WRITE, &err);
 
 	if (err) {
-		ERR_EXPLAIN("Coudln't save godot.cfg - " + p_file);
+		ERR_EXPLAIN("Couldn't save project.godot - " + p_file);
 		ERR_FAIL_COND_V(err, err)
 	}
 
@@ -657,7 +658,7 @@ Error GlobalConfig::save_custom(const String &p_path, const CustomMap &p_custom,
 		props[category].push_back(name);
 	}
 
-	if (p_path.ends_with(".cfg"))
+	if (p_path.ends_with(".godot"))
 		return _save_settings_text(p_path, props, p_custom);
 	else if (p_path.ends_with(".cfb"))
 		return _save_settings_binary(p_path, props, p_custom);
@@ -673,7 +674,7 @@ Error GlobalConfig::save_custom(const String &p_path, const CustomMap &p_custom,
 	Error err = file->open(dst_file,FileAccess::WRITE);
 	if (err) {
 		memdelete(file);
-		ERR_EXPLAIN("Coudln't save godot.cfg");
+		ERR_EXPLAIN("Couldn't save project.godot");
 		ERR_FAIL_COND_V(err,err)
 	}
 
@@ -845,10 +846,8 @@ GlobalConfig::GlobalConfig() {
 	registering_order = true;
 
 	Array va;
-	InputEvent key;
-	key.type = InputEvent::KEY;
-	InputEvent joyb;
-	joyb.type = InputEvent::JOYPAD_BUTTON;
+	Ref<InputEventKey> key;
+	Ref<InputEventJoypadButton> joyb;
 
 	GLOBAL_DEF("application/name", "");
 	GLOBAL_DEF("application/main_scene", "");
@@ -857,87 +856,106 @@ GlobalConfig::GlobalConfig() {
 	GLOBAL_DEF("application/disable_stderr", false);
 	GLOBAL_DEF("application/use_shared_user_dir", true);
 
-	key.key.scancode = KEY_RETURN;
+	key.instance();
+	key->set_scancode(KEY_RETURN);
 	va.push_back(key);
-	key.key.scancode = KEY_ENTER;
+	key.instance();
+	key->set_scancode(KEY_ENTER);
 	va.push_back(key);
-	key.key.scancode = KEY_SPACE;
+	key.instance();
+	key->set_scancode(KEY_SPACE);
 	va.push_back(key);
-	joyb.joy_button.button_index = JOY_BUTTON_0;
+	joyb.instance();
+	joyb->set_button_index(JOY_BUTTON_0);
 	va.push_back(joyb);
 	GLOBAL_DEF("input/ui_accept", va);
 	input_presets.push_back("input/ui_accept");
 
 	va = Array();
-	key.key.scancode = KEY_SPACE;
+	key.instance();
+	key->set_scancode(KEY_SPACE);
 	va.push_back(key);
-	joyb.joy_button.button_index = JOY_BUTTON_3;
+	joyb.instance();
+	joyb->set_button_index(JOY_BUTTON_3);
 	va.push_back(joyb);
 	GLOBAL_DEF("input/ui_select", va);
 	input_presets.push_back("input/ui_select");
 
 	va = Array();
-	key.key.scancode = KEY_ESCAPE;
+	key.instance();
+	key->set_scancode(KEY_ESCAPE);
 	va.push_back(key);
-	joyb.joy_button.button_index = JOY_BUTTON_1;
+	joyb.instance();
+	joyb->set_button_index(JOY_BUTTON_1);
 	va.push_back(joyb);
 	GLOBAL_DEF("input/ui_cancel", va);
 	input_presets.push_back("input/ui_cancel");
 
 	va = Array();
-	key.key.scancode = KEY_TAB;
+	key.instance();
+	key->set_scancode(KEY_TAB);
 	va.push_back(key);
 	GLOBAL_DEF("input/ui_focus_next", va);
 	input_presets.push_back("input/ui_focus_next");
 
 	va = Array();
-	key.key.scancode = KEY_TAB;
-	key.key.mod.shift = true;
+	key.instance();
+	key->set_scancode(KEY_TAB);
+	key->set_shift(true);
 	va.push_back(key);
 	GLOBAL_DEF("input/ui_focus_prev", va);
 	input_presets.push_back("input/ui_focus_prev");
-	key.key.mod.shift = false;
 
 	va = Array();
-	key.key.scancode = KEY_LEFT;
+	key.instance();
+	key->set_scancode(KEY_LEFT);
 	va.push_back(key);
-	joyb.joy_button.button_index = JOY_DPAD_LEFT;
+	joyb.instance();
+	joyb->set_button_index(JOY_DPAD_LEFT);
 	va.push_back(joyb);
 	GLOBAL_DEF("input/ui_left", va);
 	input_presets.push_back("input/ui_left");
 
 	va = Array();
-	key.key.scancode = KEY_RIGHT;
+	key.instance();
+	key->set_scancode(KEY_RIGHT);
 	va.push_back(key);
-	joyb.joy_button.button_index = JOY_DPAD_RIGHT;
+	joyb.instance();
+	joyb->set_button_index(JOY_DPAD_RIGHT);
 	va.push_back(joyb);
 	GLOBAL_DEF("input/ui_right", va);
 	input_presets.push_back("input/ui_right");
 
 	va = Array();
-	key.key.scancode = KEY_UP;
+	key.instance();
+	key->set_scancode(KEY_UP);
 	va.push_back(key);
-	joyb.joy_button.button_index = JOY_DPAD_UP;
+	joyb.instance();
+	joyb->set_button_index(JOY_DPAD_UP);
 	va.push_back(joyb);
 	GLOBAL_DEF("input/ui_up", va);
 	input_presets.push_back("input/ui_up");
 
 	va = Array();
-	key.key.scancode = KEY_DOWN;
+	key.instance();
+	key->set_scancode(KEY_DOWN);
 	va.push_back(key);
-	joyb.joy_button.button_index = JOY_DPAD_DOWN;
+	joyb.instance();
+	joyb->set_button_index(JOY_DPAD_DOWN);
 	va.push_back(joyb);
 	GLOBAL_DEF("input/ui_down", va);
 	input_presets.push_back("input/ui_down");
 
 	va = Array();
-	key.key.scancode = KEY_PAGEUP;
+	key.instance();
+	key->set_scancode(KEY_PAGEUP);
 	va.push_back(key);
 	GLOBAL_DEF("input/ui_page_up", va);
 	input_presets.push_back("input/ui_page_up");
 
 	va = Array();
-	key.key.scancode = KEY_PAGEDOWN;
+	key.instance();
+	key->set_scancode(KEY_PAGEDOWN);
 	va.push_back(key);
 	GLOBAL_DEF("input/ui_page_down", va);
 	input_presets.push_back("input/ui_page_down");

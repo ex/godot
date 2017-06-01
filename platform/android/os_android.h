@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -94,7 +95,6 @@ private:
 	Vector<TouchPos> touch;
 
 	Point2 last_mouse;
-	unsigned int last_id;
 	GFXInitFunc gfx_init_func;
 	void *gfx_init_ud;
 
@@ -171,7 +171,7 @@ public:
 	virtual void set_mouse_show(bool p_show);
 	virtual void set_mouse_grab(bool p_grab);
 	virtual bool is_mouse_grab_enabled() const;
-	virtual Point2 get_mouse_pos() const;
+	virtual Point2 get_mouse_position() const;
 	virtual int get_mouse_button_state() const;
 	virtual void set_window_title(const String &p_title);
 
@@ -231,7 +231,7 @@ public:
 	void process_gyroscope(const Vector3 &p_gyroscope);
 	void process_touch(int p_what, int p_pointer, const Vector<TouchPos> &p_points);
 	void process_joy_event(JoypadEvent p_event);
-	void process_event(InputEvent p_event);
+	void process_event(Ref<InputEvent> p_event);
 	void init_video_mode(int p_video_width, int p_video_height);
 
 	virtual Error native_video_play(String p_path, float p_volume);

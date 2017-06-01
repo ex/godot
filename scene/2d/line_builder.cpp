@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -515,7 +516,7 @@ void LineBuilder::strip_add_arc(Vector2 center, float angle_delta, Orientation o
 void LineBuilder::new_arc(Vector2 center, Vector2 vbegin, float angle_delta, Color color, Rect2 uv_rect) {
 
 	// Make a standalone arc that doesn't use existing vertices,
-	// with undistorted UVs from withing a square section
+	// with undistorted UVs from within a square section
 
 	float radius = vbegin.length();
 	float angle_step = Math_PI / static_cast<float>(round_precision);

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "editor_texture_import_plugin.h"
+
 #if 0
 #include "editor/editor_node.h"
 #include "editor/editor_settings.h"
@@ -34,12 +36,13 @@
 #include "global_config.h"
 #include "io/image_loader.h"
 #include "io/marshalls.h"
-#include "io/md5.h"
 #include "io/resource_saver.h"
 #include "scene/gui/button_group.h"
 #include "scene/gui/check_button.h"
 #include "scene/gui/margin_container.h"
 #include "scene/io/resource_format_image.h"
+
+#include "thirdparty/misc/md5.h"
 
 static const char *flag_names[]={
 	("Streaming Format"),

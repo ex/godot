@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -56,7 +57,7 @@ class VisualServerRaster : public VisualServer {
 
 	};
 
-	int changes;
+	static int changes;
 	bool draw_extra_frame;
 	RID test_cube;
 
@@ -376,7 +377,7 @@ class VisualServerRaster : public VisualServer {
 
 
 
-	mutable RID_Owner<Rasterizer::CanvasItemMaterial> canvas_item_material_owner;
+	mutable RID_Owner<Rasterizer::ShaderMaterial> canvas_item_material_owner;
 
 
 
@@ -575,6 +576,8 @@ class VisualServerRaster : public VisualServer {
 #endif
 
 public:
+	_FORCE_INLINE_ static void redraw_request() { changes++; }
+
 #define DISPLAY_CHANGED changes++;
 
 #define BIND0R(m_r, m_name) \
@@ -620,11 +623,12 @@ public:
 
 	BIND0R(RID, texture_create)
 	BIND5(texture_allocate, RID, int, int, Image::Format, uint32_t)
-	BIND3(texture_set_data, RID, const Image &, CubeMapSide)
-	BIND2RC(Image, texture_get_data, RID, CubeMapSide)
+	BIND3(texture_set_data, RID, const Ref<Image> &, CubeMapSide)
+	BIND2RC(Ref<Image>, texture_get_data, RID, CubeMapSide)
 	BIND2(texture_set_flags, RID, uint32_t)
 	BIND1RC(uint32_t, texture_get_flags, RID)
 	BIND1RC(Image::Format, texture_get_format, RID)
+	BIND1RC(uint32_t, texture_get_texid, RID)
 	BIND1RC(uint32_t, texture_get_width, RID)
 	BIND1RC(uint32_t, texture_get_height, RID)
 	BIND3(texture_set_size_override, RID, int, int)
@@ -640,17 +644,14 @@ public:
 
 	BIND1(textures_keep_original, bool)
 
-	/* SKYBOX API */
+	/* SKY API */
 
-	BIND0R(RID, skybox_create)
-	BIND3(skybox_set_texture, RID, RID, int)
+	BIND0R(RID, sky_create)
+	BIND3(sky_set_texture, RID, RID, int)
 
 	/* SHADER API */
 
-	BIND1R(RID, shader_create, ShaderMode)
-
-	BIND2(shader_set_mode, RID, ShaderMode)
-	BIND1RC(ShaderMode, shader_get_mode, RID)
+	BIND0R(RID, shader_create)
 
 	BIND2(shader_set_code, RID, const String &)
 	BIND1RC(String, shader_get_code, RID)
@@ -852,19 +853,15 @@ public:
 	BIND2(particles_set_explosiveness_ratio, RID, float)
 	BIND2(particles_set_randomness_ratio, RID, float)
 	BIND2(particles_set_custom_aabb, RID, const Rect3 &)
-	BIND2(particles_set_gravity, RID, const Vector3 &)
+	BIND2(particles_set_speed_scale, RID, float)
 	BIND2(particles_set_use_local_coordinates, RID, bool)
 	BIND2(particles_set_process_material, RID, RID)
-
-	BIND2(particles_set_emission_shape, RID, VS::ParticlesEmissionShape)
-	BIND2(particles_set_emission_sphere_radius, RID, float)
-	BIND2(particles_set_emission_box_extents, RID, const Vector3 &)
-	BIND2(particles_set_emission_points, RID, const PoolVector<Vector3> &)
+	BIND2(particles_set_fixed_fps, RID, int)
+	BIND2(particles_set_fractional_delta, RID, bool)
 
 	BIND2(particles_set_draw_order, RID, VS::ParticlesDrawOrder)
 
 	BIND2(particles_set_draw_passes, RID, int)
-	BIND3(particles_set_draw_pass_material, RID, int, RID)
 	BIND3(particles_set_draw_pass_mesh, RID, int, RID)
 
 	BIND1R(Rect3, particles_get_current_aabb, RID);
@@ -935,8 +932,8 @@ public:
 	BIND0R(RID, environment_create)
 
 	BIND2(environment_set_background, RID, EnvironmentBG)
-	BIND2(environment_set_skybox, RID, RID)
-	BIND2(environment_set_skybox_scale, RID, float)
+	BIND2(environment_set_sky, RID, RID)
+	BIND2(environment_set_sky_scale, RID, float)
 	BIND2(environment_set_bg_color, RID, const Color &)
 	BIND2(environment_set_bg_energy, RID, float)
 	BIND2(environment_set_canvas_max_layer, RID, int)
@@ -1113,7 +1110,7 @@ public:
 
 	/* TESTING */
 
-	virtual void set_boot_image(const Image &p_image, const Color &p_color, bool p_scale);
+	virtual void set_boot_image(const Ref<Image> &p_image, const Color &p_color, bool p_scale);
 	virtual void set_default_clear_color(const Color &p_color);
 
 	virtual bool has_feature(Features p_feature) const;

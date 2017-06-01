@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -61,7 +62,6 @@ public:
 
 	List<String> args;
 	MainLoop *main_loop;
-	unsigned int event_id;
 
 	PhysicsServer *physics_server;
 	Physics2DServer *physics_2d_server;
@@ -83,7 +83,6 @@ public:
 	//          pthread_key_t   current;
 	bool mouse_grab;
 	Point2 mouse_pos;
-	uint32_t last_id;
 
 	id delegate;
 	id window_delegate;
@@ -146,13 +145,13 @@ public:
 	virtual void set_mouse_grab(bool p_grab);
 	virtual bool is_mouse_grab_enabled() const;
 	virtual void warp_mouse_pos(const Point2 &p_to);
-	virtual Point2 get_mouse_pos() const;
+	virtual Point2 get_mouse_position() const;
 	virtual int get_mouse_button_state() const;
 	virtual void set_window_title(const String &p_title);
 
 	virtual Size2 get_window_size() const;
 
-	virtual void set_icon(const Image &p_icon);
+	virtual void set_icon(const Ref<Image> &p_icon);
 
 	virtual MainLoop *get_main_loop() const;
 
@@ -166,7 +165,7 @@ public:
 	virtual void swap_buffers();
 
 	Error shell_open(String p_uri);
-	void push_input(const InputEvent &p_event);
+	void push_input(const Ref<InputEvent> &p_event);
 
 	String get_locale() const;
 

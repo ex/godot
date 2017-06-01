@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -340,7 +341,7 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
                     r = is.read(len);
                     if (r<4) {
 
-			Log.d("GODOT", "**ERROR** Wrong cmdline param lenght.\n");
+			Log.d("GODOT", "**ERROR** Wrong cmdline param length.\n");
                         return new String[0];
                     }
 		    int strlen=((int)(len[3]&0xFF)<<24) | ((int)(len[2]&0xFF)<<16) | ((int)(len[1]&0xFF)<<8) | ((int)(len[0]&0xFF));

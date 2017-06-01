@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -62,11 +63,13 @@ int TabContainer::_get_top_margin() const {
 	return tab_height + content_height;
 }
 
-void TabContainer::_gui_input(const InputEvent &p_event) {
+void TabContainer::_gui_input(const Ref<InputEvent> &p_event) {
 
-	if (p_event.type == InputEvent::MOUSE_BUTTON && p_event.mouse_button.pressed && p_event.mouse_button.button_index == BUTTON_LEFT) {
+	Ref<InputEventMouseButton> mb = p_event;
 
-		Point2 pos(p_event.mouse_button.x, p_event.mouse_button.y);
+	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
+
+		Point2 pos(mb->get_pos().x, mb->get_pos().y);
 		Size2 size = get_size();
 
 		// Click must be on tabs in the tab header area.
@@ -78,11 +81,11 @@ void TabContainer::_gui_input(const InputEvent &p_event) {
 		if (popup && pos.x > size.width - menu->get_width()) {
 			emit_signal("pre_popup_pressed");
 
-			Vector2 popup_pos = get_global_pos();
+			Vector2 popup_pos = get_global_position();
 			popup_pos.x += size.width - popup->get_size().width;
 			popup_pos.y += menu->get_height();
 
-			popup->set_global_pos(popup_pos);
+			popup->set_global_position(popup_pos);
 			popup->popup();
 			return;
 		}

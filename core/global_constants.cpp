@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,6 +30,7 @@
 #include "global_constants.h"
 
 #include "object.h"
+#include "os/input_event.h"
 #include "os/keyboard.h"
 #include "variant.h"
 
@@ -349,20 +351,10 @@ static _GlobalConstant _global_constants[] = {
 	BIND_GLOBAL_CONSTANT(JOY_BUTTON_15),
 	BIND_GLOBAL_CONSTANT(JOY_BUTTON_MAX),
 
-	BIND_GLOBAL_CONSTANT(JOY_SNES_A),
-	BIND_GLOBAL_CONSTANT(JOY_SNES_B),
-	BIND_GLOBAL_CONSTANT(JOY_SNES_X),
-	BIND_GLOBAL_CONSTANT(JOY_SNES_Y),
-
 	BIND_GLOBAL_CONSTANT(JOY_SONY_CIRCLE),
 	BIND_GLOBAL_CONSTANT(JOY_SONY_X),
 	BIND_GLOBAL_CONSTANT(JOY_SONY_SQUARE),
 	BIND_GLOBAL_CONSTANT(JOY_SONY_TRIANGLE),
-
-	BIND_GLOBAL_CONSTANT(JOY_SEGA_B),
-	BIND_GLOBAL_CONSTANT(JOY_SEGA_A),
-	BIND_GLOBAL_CONSTANT(JOY_SEGA_X),
-	BIND_GLOBAL_CONSTANT(JOY_SEGA_Y),
 
 	BIND_GLOBAL_CONSTANT(JOY_XBOX_B),
 	BIND_GLOBAL_CONSTANT(JOY_XBOX_A),
@@ -397,14 +389,11 @@ static _GlobalConstant _global_constants[] = {
 	BIND_GLOBAL_CONSTANT(JOY_AXIS_7),
 	BIND_GLOBAL_CONSTANT(JOY_AXIS_MAX),
 
-	BIND_GLOBAL_CONSTANT(JOY_ANALOG_0_X),
-	BIND_GLOBAL_CONSTANT(JOY_ANALOG_0_Y),
+	BIND_GLOBAL_CONSTANT(JOY_ANALOG_LX),
+	BIND_GLOBAL_CONSTANT(JOY_ANALOG_LY),
 
-	BIND_GLOBAL_CONSTANT(JOY_ANALOG_1_X),
-	BIND_GLOBAL_CONSTANT(JOY_ANALOG_1_Y),
-
-	BIND_GLOBAL_CONSTANT(JOY_ANALOG_2_X),
-	BIND_GLOBAL_CONSTANT(JOY_ANALOG_2_Y),
+	BIND_GLOBAL_CONSTANT(JOY_ANALOG_RX),
+	BIND_GLOBAL_CONSTANT(JOY_ANALOG_RY),
 
 	BIND_GLOBAL_CONSTANT(JOY_ANALOG_L2),
 	BIND_GLOBAL_CONSTANT(JOY_ANALOG_R2),
@@ -414,7 +403,7 @@ static _GlobalConstant _global_constants[] = {
 	BIND_GLOBAL_CONSTANT(OK),
 	BIND_GLOBAL_CONSTANT(FAILED), ///< Generic fail error
 	BIND_GLOBAL_CONSTANT(ERR_UNAVAILABLE), ///< What is requested is unsupported/unavailable
-	BIND_GLOBAL_CONSTANT(ERR_UNCONFIGURED), ///< The object being used hasnt been properly set up yet
+	BIND_GLOBAL_CONSTANT(ERR_UNCONFIGURED), ///< The object being used hasn't been properly set up yet
 	BIND_GLOBAL_CONSTANT(ERR_UNAUTHORIZED), ///< Missing credentials for requested resource
 	BIND_GLOBAL_CONSTANT(ERR_PARAMETER_RANGE_ERROR), ///< Parameter given out of range
 	BIND_GLOBAL_CONSTANT(ERR_OUT_OF_MEMORY), ///< Out of memory
@@ -518,22 +507,20 @@ static _GlobalConstant _global_constants[] = {
 	{ "TYPE_TRANSFORM2D", Variant::TRANSFORM2D },
 	{ "TYPE_PLANE", Variant::PLANE },
 	{ "TYPE_QUAT", Variant::QUAT }, // 10
-	{ "TYPE_RECT3", Variant::RECT3 }, //sorry naming convention fail :( not like it's used often
+	{ "TYPE_RECT3", Variant::RECT3 },
 	{ "TYPE_BASIS", Variant::BASIS },
 	{ "TYPE_TRANSFORM", Variant::TRANSFORM },
 	{ "TYPE_COLOR", Variant::COLOR },
-	{ "TYPE_IMAGE", Variant::IMAGE }, // 15
-	{ "TYPE_NODE_PATH", Variant::NODE_PATH },
+	{ "TYPE_NODE_PATH", Variant::NODE_PATH }, // 15
 	{ "TYPE_RID", Variant::_RID },
 	{ "TYPE_OBJECT", Variant::OBJECT },
-	{ "TYPE_INPUT_EVENT", Variant::INPUT_EVENT },
 	{ "TYPE_DICTIONARY", Variant::DICTIONARY }, // 20
 	{ "TYPE_ARRAY", Variant::ARRAY },
 	{ "TYPE_RAW_ARRAY", Variant::POOL_BYTE_ARRAY },
 	{ "TYPE_INT_ARRAY", Variant::POOL_INT_ARRAY },
 	{ "TYPE_REAL_ARRAY", Variant::POOL_REAL_ARRAY },
-	{ "TYPE_STRING_ARRAY", Variant::POOL_STRING_ARRAY }, // 25
-	{ "TYPE_VECTOR2_ARRAY", Variant::POOL_VECTOR2_ARRAY },
+	{ "TYPE_STRING_ARRAY", Variant::POOL_STRING_ARRAY },
+	{ "TYPE_VECTOR2_ARRAY", Variant::POOL_VECTOR2_ARRAY }, // 25
 	{ "TYPE_VECTOR3_ARRAY", Variant::POOL_VECTOR3_ARRAY },
 	{ "TYPE_COLOR_ARRAY", Variant::POOL_COLOR_ARRAY },
 	{ "TYPE_MAX", Variant::VARIANT_MAX },

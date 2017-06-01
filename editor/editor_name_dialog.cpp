@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,14 +32,16 @@
 #include "class_db.h"
 #include "os/keyboard.h"
 
-void EditorNameDialog::_line_gui_input(const InputEvent &p_event) {
+void EditorNameDialog::_line_gui_input(const Ref<InputEvent> &p_event) {
 
-	if (p_event.type == InputEvent::KEY) {
+	Ref<InputEventKey> k = p_event;
 
-		if (!p_event.key.pressed)
+	if (k.is_valid()) {
+
+		if (!k->is_pressed())
 			return;
 
-		switch (p_event.key.scancode) {
+		switch (k->get_scancode()) {
 			case KEY_ENTER:
 			case KEY_RETURN: {
 
@@ -78,9 +81,11 @@ void EditorNameDialog::_bind_methods() {
 }
 
 EditorNameDialog::EditorNameDialog() {
+	makevb = memnew(VBoxContainer);
+	add_child(makevb);
 	name = memnew(LineEdit);
-	add_child(name);
-	move_child(name, get_label()->get_index() + 1);
+	makevb->add_child(name);
+	makevb->move_child(name, get_label()->get_index() + 1);
 	name->set_margin(MARGIN_TOP, 5);
 	name->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_BEGIN, 5);
 	name->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 5);

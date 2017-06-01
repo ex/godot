@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -68,6 +69,7 @@ public:
 
 		bool s3tc_supported;
 		bool latc_supported;
+		bool rgtc_supported;
 		bool bptc_supported;
 		bool etc_supported;
 		bool etc2_supported;
@@ -239,7 +241,7 @@ public:
 
 		RenderTarget *render_target;
 
-		Image images[6];
+		Ref<Image> images[6];
 
 		VisualServer::TextureDetectCallback detect_3d;
 		void *detect_3d_ud;
@@ -279,15 +281,16 @@ public:
 
 	mutable RID_Owner<Texture> texture_owner;
 
-	Image _get_gl_image_and_format(const Image &p_image, Image::Format p_format, uint32_t p_flags, GLenum &r_gl_format, GLenum &r_gl_internal_format, GLenum &r_type, bool &r_compressed, bool &srgb);
+	Ref<Image> _get_gl_image_and_format(const Ref<Image> &p_image, Image::Format p_format, uint32_t p_flags, GLenum &r_gl_format, GLenum &r_gl_internal_format, GLenum &r_type, bool &r_compressed, bool &srgb);
 
 	virtual RID texture_create();
 	virtual void texture_allocate(RID p_texture, int p_width, int p_height, Image::Format p_format, uint32_t p_flags = VS::TEXTURE_FLAGS_DEFAULT);
-	virtual void texture_set_data(RID p_texture, const Image &p_image, VS::CubeMapSide p_cube_side = VS::CUBEMAP_LEFT);
-	virtual Image texture_get_data(RID p_texture, VS::CubeMapSide p_cube_side = VS::CUBEMAP_LEFT) const;
+	virtual void texture_set_data(RID p_texture, const Ref<Image> &p_image, VS::CubeMapSide p_cube_side = VS::CUBEMAP_LEFT);
+	virtual Ref<Image> texture_get_data(RID p_texture, VS::CubeMapSide p_cube_side = VS::CUBEMAP_LEFT) const;
 	virtual void texture_set_flags(RID p_texture, uint32_t p_flags);
 	virtual uint32_t texture_get_flags(RID p_texture) const;
 	virtual Image::Format texture_get_format(RID p_texture) const;
+	virtual uint32_t texture_get_texid(RID p_texture) const;
 	virtual uint32_t texture_get_width(RID p_texture) const;
 	virtual uint32_t texture_get_height(RID p_texture) const;
 	virtual void texture_set_size_override(RID p_texture, int p_width, int p_height);
@@ -306,19 +309,19 @@ public:
 	virtual void texture_set_detect_3d_callback(RID p_texture, VisualServer::TextureDetectCallback p_callback, void *p_userdata);
 	virtual void texture_set_detect_srgb_callback(RID p_texture, VisualServer::TextureDetectCallback p_callback, void *p_userdata);
 
-	/* SKYBOX API */
+	/* SKY API */
 
-	struct SkyBox : public RID_Data {
+	struct Sky : public RID_Data {
 
-		RID cubemap;
+		RID panorama;
 		GLuint radiance;
 		int radiance_size;
 	};
 
-	mutable RID_Owner<SkyBox> skybox_owner;
+	mutable RID_Owner<Sky> sky_owner;
 
-	virtual RID skybox_create();
-	virtual void skybox_set_texture(RID p_skybox, RID p_cube_map, int p_radiance_size);
+	virtual RID sky_create();
+	virtual void sky_set_texture(RID p_sky, RID p_panorama, int p_radiance_size);
 
 	/* SHADER API */
 
@@ -408,6 +411,7 @@ public:
 			bool uses_vertex;
 			bool uses_discard;
 			bool uses_sss;
+			bool writes_modelview_or_projection;
 
 		} spatial;
 
@@ -433,10 +437,7 @@ public:
 
 	mutable RID_Owner<Shader> shader_owner;
 
-	virtual RID shader_create(VS::ShaderMode p_mode = VS::SHADER_SPATIAL);
-
-	virtual void shader_set_mode(RID p_shader, VS::ShaderMode p_mode);
-	virtual VS::ShaderMode shader_get_mode(RID p_shader) const;
+	virtual RID shader_create();
 
 	virtual void shader_set_code(RID p_shader, const String &p_code);
 	virtual String shader_get_code(RID p_shader) const;
@@ -778,7 +779,7 @@ public:
 
 		Skeleton()
 			: update_list(this) {
-			size=0;
+			size = 0;
 
 			use_2d = false;
 			texture = 0;
@@ -987,7 +988,7 @@ public:
 
 	/* PARTICLES */
 
-	struct Particles : public Instantiable {
+	struct Particles : public GeometryOwner {
 
 		bool emitting;
 		int amount;
@@ -996,27 +997,20 @@ public:
 		float explosiveness;
 		float randomness;
 		Rect3 custom_aabb;
-		Vector3 gravity;
 		bool use_local_coords;
 		RID process_material;
 
-		VS::ParticlesEmissionShape emission_shape;
-		float emission_sphere_radius;
-		Vector3 emission_box_extents;
-		PoolVector<Vector3> emission_points;
-		GLuint emission_point_texture;
-
 		VS::ParticlesDrawOrder draw_order;
-		struct DrawPass {
-			RID mesh;
-			RID material;
-		};
 
-		Vector<DrawPass> draw_passes;
-
-		Rect3 computed_aabb;
+		Vector<RID> draw_passes;
 
 		GLuint particle_buffers[2];
+		GLuint particle_vaos[2];
+
+		GLuint particle_buffer_histories[2];
+		GLuint particle_vao_histories[2];
+		bool particle_valid_histories[2];
+		bool histories_enabled;
 
 		SelfList<Particles> particle_element;
 
@@ -1024,10 +1018,21 @@ public:
 		float prev_phase;
 		uint64_t prev_ticks;
 
-		Transform origin;
+		uint32_t cycle_number;
+
+		float speed_scale;
+
+		int fixed_fps;
+		bool fractional_delta;
+		float frame_remainder;
+
+		bool clear;
+
+		Transform emission_transform;
 
 		Particles()
 			: particle_element(this) {
+			cycle_number = 0;
 			emitting = false;
 			amount = 0;
 			lifetime = 1.0;
@@ -1035,23 +1040,34 @@ public:
 			explosiveness = 0.0;
 			randomness = 0.0;
 			use_local_coords = true;
+			fixed_fps = 0;
+			fractional_delta = false;
+			frame_remainder = 0;
+			histories_enabled = false;
+			speed_scale = 1.0;
+
+			custom_aabb = Rect3(Vector3(-4, -4, -4), Vector3(8, 8, 8));
 
 			draw_order = VS::PARTICLES_DRAW_ORDER_INDEX;
-			emission_shape = VS::PARTICLES_EMSSION_POINT;
-			emission_sphere_radius = 1.0;
-			emission_box_extents = Vector3(1, 1, 1);
-			emission_point_texture = 0;
 			particle_buffers[0] = 0;
 			particle_buffers[1] = 0;
 
 			prev_ticks = 0;
 
+			clear = true;
+
 			glGenBuffers(2, particle_buffers);
+			glGenVertexArrays(2, particle_vaos);
 		}
 
 		~Particles() {
 
 			glDeleteBuffers(2, particle_buffers);
+			glDeleteVertexArrays(2, particle_vaos);
+			if (histories_enabled) {
+				glDeleteBuffers(2, particle_buffer_histories);
+				glDeleteVertexArrays(2, particle_vao_histories);
+			}
 		}
 	};
 
@@ -1070,22 +1086,25 @@ public:
 	virtual void particles_set_explosiveness_ratio(RID p_particles, float p_ratio);
 	virtual void particles_set_randomness_ratio(RID p_particles, float p_ratio);
 	virtual void particles_set_custom_aabb(RID p_particles, const Rect3 &p_aabb);
-	virtual void particles_set_gravity(RID p_particles, const Vector3 &p_gravity);
+	virtual void particles_set_speed_scale(RID p_particles, float p_scale);
 	virtual void particles_set_use_local_coordinates(RID p_particles, bool p_enable);
 	virtual void particles_set_process_material(RID p_particles, RID p_material);
-
-	virtual void particles_set_emission_shape(RID p_particles, VS::ParticlesEmissionShape p_shape);
-	virtual void particles_set_emission_sphere_radius(RID p_particles, float p_radius);
-	virtual void particles_set_emission_box_extents(RID p_particles, const Vector3 &p_extents);
-	virtual void particles_set_emission_points(RID p_particles, const PoolVector<Vector3> &p_points);
+	virtual void particles_set_fixed_fps(RID p_particles, int p_fps);
+	virtual void particles_set_fractional_delta(RID p_particles, bool p_enable);
 
 	virtual void particles_set_draw_order(RID p_particles, VS::ParticlesDrawOrder p_order);
 
 	virtual void particles_set_draw_passes(RID p_particles, int p_count);
-	virtual void particles_set_draw_pass_material(RID p_particles, int p_pass, RID p_material);
 	virtual void particles_set_draw_pass_mesh(RID p_particles, int p_pass, RID p_mesh);
 
+	virtual void particles_request_process(RID p_particles);
 	virtual Rect3 particles_get_current_aabb(RID p_particles);
+	virtual Rect3 particles_get_aabb(RID p_particles) const;
+
+	virtual void _particles_update_histories(Particles *particles);
+
+	virtual void particles_set_emission_transform(RID p_particles, const Transform &p_transform);
+	void _particles_process(Particles *p_particles, float p_delta);
 
 	/* INSTANCE */
 

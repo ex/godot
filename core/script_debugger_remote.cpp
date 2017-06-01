@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -369,7 +370,7 @@ void ScriptDebuggerRemote::_get_output() {
 void ScriptDebuggerRemote::line_poll() {
 
 	//the purpose of this is just processing events every now and then when the script might get too busy
-	//otherwise bugs like infinite loops cant be catched
+	//otherwise bugs like infinite loops can't be caught
 	if (poll_every % 2048 == 0)
 		_poll_events();
 	poll_every++;
@@ -585,9 +586,7 @@ void ScriptDebuggerRemote::_send_object_id(ObjectID p_id) {
 				packet_peer_stream->put_var(E->get().hint);
 				packet_peer_stream->put_var(E->get().hint_string);
 				//only send information that can be sent..
-				if (var.get_type() == Variant::IMAGE) {
-					var = Image();
-				}
+
 				if (var.get_type() >= Variant::DICTIONARY) {
 					var = Array(); //send none for now, may be to big
 				}

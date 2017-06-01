@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -93,6 +94,9 @@ class AStar : public Reference {
 protected:
 	static void _bind_methods();
 
+	virtual float _estimate_cost(int p_from_id, int p_to_id);
+	virtual float _compute_cost(int p_from_id, int p_to_id);
+
 public:
 	int get_available_point_id() const;
 
@@ -101,7 +105,7 @@ public:
 	real_t get_point_weight_scale(int p_id) const;
 	void remove_point(int p_id);
 
-	void connect_points(int p_id, int p_with_id);
+	void connect_points(int p_id, int p_with_id, bool bidirectional = true);
 	void disconnect_points(int p_id, int p_with_id);
 	bool are_points_connected(int p_id, int p_with_id) const;
 

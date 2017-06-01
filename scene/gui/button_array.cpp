@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -286,12 +287,12 @@ void ButtonArray::_notification(int p_what) {
 	}
 }
 
-void ButtonArray::_gui_input(const InputEvent &p_event) {
+void ButtonArray::_gui_input(const Ref<InputEvent> &p_event) {
 
 	if (
-			((orientation == HORIZONTAL && p_event.is_action("ui_left")) ||
-					(orientation == VERTICAL && p_event.is_action("ui_up"))) &&
-			p_event.is_pressed() && selected > 0) {
+			((orientation == HORIZONTAL && p_event->is_action("ui_left")) ||
+					(orientation == VERTICAL && p_event->is_action("ui_up"))) &&
+			p_event->is_pressed() && selected > 0) {
 		set_selected(selected - 1);
 		accept_event();
 		emit_signal("button_selected", selected);
@@ -299,18 +300,20 @@ void ButtonArray::_gui_input(const InputEvent &p_event) {
 	}
 
 	if (
-			((orientation == HORIZONTAL && p_event.is_action("ui_right")) ||
-					(orientation == VERTICAL && p_event.is_action("ui_down"))) &&
-			p_event.is_pressed() && selected < (buttons.size() - 1)) {
+			((orientation == HORIZONTAL && p_event->is_action("ui_right")) ||
+					(orientation == VERTICAL && p_event->is_action("ui_down"))) &&
+			p_event->is_pressed() && selected < (buttons.size() - 1)) {
 		set_selected(selected + 1);
 		accept_event();
 		emit_signal("button_selected", selected);
 		return;
 	}
 
-	if (p_event.type == InputEvent::MOUSE_BUTTON && p_event.mouse_button.pressed && p_event.mouse_button.button_index == BUTTON_LEFT) {
+	Ref<InputEventMouseButton> mb = p_event;
 
-		int ofs = orientation == HORIZONTAL ? p_event.mouse_button.x : p_event.mouse_button.y;
+	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
+
+		int ofs = orientation == HORIZONTAL ? mb->get_pos().x : mb->get_pos().y;
 
 		for (int i = 0; i < buttons.size(); i++) {
 
@@ -323,9 +326,11 @@ void ButtonArray::_gui_input(const InputEvent &p_event) {
 		}
 	}
 
-	if (p_event.type == InputEvent::MOUSE_MOTION) {
+	Ref<InputEventMouseMotion> mm = p_event;
 
-		int ofs = orientation == HORIZONTAL ? p_event.mouse_motion.x : p_event.mouse_motion.y;
+	if (mm.is_valid()) {
+
+		int ofs = orientation == HORIZONTAL ? mm->get_pos().x : mm->get_pos().y;
 		int new_hover = -1;
 		for (int i = 0; i < buttons.size(); i++) {
 

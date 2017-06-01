@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,13 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "core_bind.h"
+
 #include "core/global_config.h"
 #include "geometry.h"
-#include "io/base64.h"
 #include "io/file_access_encrypted.h"
 #include "io/marshalls.h"
 #include "os/keyboard.h"
 #include "os/os.h"
+
+#include "thirdparty/misc/base64.h"
 
 /**
  *  Time constants borrowed from loc_time.h
@@ -162,9 +165,9 @@ _ResourceSaver::_ResourceSaver() {
 
 /////////////////OS
 
-Point2 _OS::get_mouse_pos() const {
+Point2 _OS::get_mouse_position() const {
 
-	return OS::get_singleton()->get_mouse_pos();
+	return OS::get_singleton()->get_mouse_position();
 }
 void _OS::set_window_title(const String &p_title) {
 
@@ -502,7 +505,7 @@ int _OS::get_dynamic_memory_usage() const {
 	return OS::get_singleton()->get_dynamic_memory_usage();
 }
 
-void _OS::set_icon(const Image &p_icon) {
+void _OS::set_icon(const Ref<Image> &p_icon) {
 
 	OS::get_singleton()->set_icon(p_icon);
 }
@@ -953,7 +956,7 @@ _OS *_OS::singleton = NULL;
 
 void _OS::_bind_methods() {
 
-	//ClassDB::bind_method(D_METHOD("get_mouse_pos"),&_OS::get_mouse_pos);
+	//ClassDB::bind_method(D_METHOD("get_mouse_position"),&_OS::get_mouse_position);
 	//ClassDB::bind_method(D_METHOD("is_mouse_grab_enabled"),&_OS::is_mouse_grab_enabled);
 
 	ClassDB::bind_method(D_METHOD("set_clipboard", "clipboard"), &_OS::set_clipboard);
@@ -2366,6 +2369,23 @@ Array _ClassDB::get_property_list(StringName p_class, bool p_no_inheritance) con
 	return ret;
 }
 
+Variant _ClassDB::get_property(Object *p_object, const StringName &p_property) const {
+	Variant ret;
+	ClassDB::get_property(p_object, p_property, ret);
+	return ret;
+}
+
+Error _ClassDB::set_property(Object *p_object, const StringName &p_property, const Variant &p_value) const {
+	Variant ret;
+	bool valid;
+	if (!ClassDB::set_property(p_object, p_property, p_value, &valid)) {
+		return ERR_UNAVAILABLE;
+	} else if (!valid) {
+		return ERR_INVALID_DATA;
+	}
+	return OK;
+}
+
 bool _ClassDB::has_method(StringName p_class, StringName p_method, bool p_no_inheritance) const {
 
 	return ClassDB::has_method(p_class, p_method, p_no_inheritance);
@@ -2438,6 +2458,8 @@ void _ClassDB::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("class_get_signal_list", "class", "no_inheritance"), &_ClassDB::get_signal_list, DEFVAL(false));
 
 	ClassDB::bind_method(D_METHOD("class_get_property_list", "class", "no_inheritance"), &_ClassDB::get_property_list, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("class_get_property:Variant", "object", "property"), &_ClassDB::get_property);
+	ClassDB::bind_method(D_METHOD("class_set_property:Error", "object", "property", "value"), &_ClassDB::set_property);
 
 	ClassDB::bind_method(D_METHOD("class_has_method", "class", "method", "no_inheritance"), &_ClassDB::has_method, DEFVAL(false));
 

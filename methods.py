@@ -1165,7 +1165,7 @@ def update_version():
         print("Using custom revision: " + rev)
     import version
 
-    f = open("core/version.h", "wb")
+    f = open("core/version_generated.h", "wb")
     f.write("#define VERSION_SHORT_NAME " + str(version.short_name) + "\n")
     f.write("#define VERSION_NAME " + str(version.name) + "\n")
     f.write("#define VERSION_MAJOR " + str(version.major) + "\n")
@@ -1353,65 +1353,63 @@ def win32_spawn(sh, escape, cmd, args, spawnenv):
 	return exit_code
 """
 
-
 def android_add_maven_repository(self, url):
-    self.android_maven_repos.append(url)
-
+    if (url not in self.android_maven_repos):
+        self.android_maven_repos.append(url)
 
 def android_add_dependency(self, depline):
-    self.android_dependencies.append(depline)
-
+    if (depline not in self.android_dependencies):
+        self.android_dependencies.append(depline)
 
 def android_add_java_dir(self, subpath):
     base_path = self.Dir(".").abspath + "/modules/" + self.current_module + "/" + subpath
-    self.android_java_dirs.append(base_path)
-
+    if (base_path not in self.android_java_dirs):
+        self.android_java_dirs.append(base_path)
 
 def android_add_res_dir(self, subpath):
     base_path = self.Dir(".").abspath + "/modules/" + self.current_module + "/" + subpath
-    self.android_res_dirs.append(base_path)
-
+    if (base_path not in self.android_res_dirs):
+        self.android_res_dirs.append(base_path)
 
 def android_add_aidl_dir(self, subpath):
     base_path = self.Dir(".").abspath + "/modules/" + self.current_module + "/" + subpath
-    self.android_aidl_dirs.append(base_path)
-
+    if (base_path not in self.android_aidl_dirs):
+        self.android_aidl_dirs.append(base_path)
 
 def android_add_jni_dir(self, subpath):
     base_path = self.Dir(".").abspath + "/modules/" + self.current_module + "/" + subpath
-    self.android_jni_dirs.append(base_path)
+    if (base_path not in self.android_jni_dirs):
+        self.android_jni_dirs.append(base_path)
 
 def android_add_gradle_plugin(self, plugin):
-    self.android_gradle_plugins.append(plugin)
+    if (plugin not in self.android_gradle_plugins):
+        self.android_gradle_plugins.append(plugin)
 
 def android_add_gradle_classpath(self, classpath):
-    self.android_gradle_classpath.append(classpath)
+    if (classpath not in self.android_gradle_classpath):
+        self.android_gradle_classpath.append(classpath)
 
 def android_add_default_config(self, config):
-    self.android_default_config.append(config)
-
+    if (config not in self.android_default_config):
+        self.android_default_config.append(config)
 
 def android_add_to_manifest(self, file):
     base_path = self.Dir(".").abspath + "/modules/" + self.current_module + "/" + file
     f = open(base_path, "rb")
     self.android_manifest_chunk += f.read()
 
-
 def android_add_to_permissions(self, file):
     base_path = self.Dir(".").abspath + "/modules/" + self.current_module + "/" + file
     f = open(base_path, "rb")
     self.android_permission_chunk += f.read()
-
 
 def android_add_to_attributes(self, file):
     base_path = self.Dir(".").abspath + "/modules/" + self.current_module + "/" + file
     f = open(base_path, "rb")
     self.android_appattributes_chunk += f.read()
 
-
 def disable_module(self):
     self.disabled_modules.append(self.current_module)
-
 
 def use_windows_spawn_fix(self, platform=None):
 
@@ -1573,9 +1571,9 @@ def no_verbose(sys, env):
 def detect_visual_c_compiler_version(tools_env):
     # tools_env is the variable scons uses to call tools that execute tasks, SCons's env['ENV'] that executes tasks...
     # (see the SCons documentation for more information on what it does)...
-    # in order for this function to be well encapsulated i choose to force it to recieve SCons's TOOLS env (env['ENV']
+    # in order for this function to be well encapsulated i choose to force it to receive SCons's TOOLS env (env['ENV']
     # and not scons setup environment (env)... so make sure you call the right environment on it or it will fail to detect
-    # the propper vc version that will be called
+    # the proper vc version that will be called
 
     # These is no flag to give to visual c compilers to set the architecture, ie scons bits argument (32,64,ARM etc)
     # There are many different cl.exe files that are run, and each one compiles & links to a different architecture
@@ -1596,34 +1594,69 @@ def detect_visual_c_compiler_version(tools_env):
     vc_chosen_compiler_index = -1
     vc_chosen_compiler_str = ""
 
-    # find() works with -1 so big ifs bellow are needed... the simplest solution, in fact
-    # First test if amd64 and amd64_x86 compilers are present in the path
-    vc_amd64_compiler_detection_index = tools_env["PATH"].find(tools_env["VCINSTALLDIR"] + "BIN\\amd64;")
-    if(vc_amd64_compiler_detection_index > -1):
-        vc_chosen_compiler_index = vc_amd64_compiler_detection_index
-        vc_chosen_compiler_str = "amd64"
+    # Start with Pre VS 2017 checks which uses VCINSTALLDIR:
+    if 'VCINSTALLDIR' in tools_env:
+        # print "Checking VCINSTALLDIR"
 
-    vc_amd64_x86_compiler_detection_index = tools_env["PATH"].find(tools_env["VCINSTALLDIR"] + "BIN\\amd64_x86;")
-    if(vc_amd64_x86_compiler_detection_index > -1
-       and (vc_chosen_compiler_index == -1
-            or vc_chosen_compiler_index > vc_amd64_x86_compiler_detection_index)):
-        vc_chosen_compiler_index = vc_amd64_x86_compiler_detection_index
-        vc_chosen_compiler_str = "amd64_x86"
+        # find() works with -1 so big ifs bellow are needed... the simplest solution, in fact
+        # First test if amd64 and amd64_x86 compilers are present in the path
+        vc_amd64_compiler_detection_index = tools_env["PATH"].find(tools_env["VCINSTALLDIR"] + "BIN\\amd64;")
+        if(vc_amd64_compiler_detection_index > -1):
+            vc_chosen_compiler_index = vc_amd64_compiler_detection_index
+            vc_chosen_compiler_str = "amd64"
 
-    # Now check the 32 bit compilers
-    vc_x86_compiler_detection_index = tools_env["PATH"].find(tools_env["VCINSTALLDIR"] + "BIN;")
-    if(vc_x86_compiler_detection_index > -1
-       and (vc_chosen_compiler_index == -1
-            or vc_chosen_compiler_index > vc_x86_compiler_detection_index)):
-        vc_chosen_compiler_index = vc_x86_compiler_detection_index
-        vc_chosen_compiler_str = "x86"
+        vc_amd64_x86_compiler_detection_index = tools_env["PATH"].find(tools_env["VCINSTALLDIR"] + "BIN\\amd64_x86;")
+        if(vc_amd64_x86_compiler_detection_index > -1
+           and (vc_chosen_compiler_index == -1
+                or vc_chosen_compiler_index > vc_amd64_x86_compiler_detection_index)):
+            vc_chosen_compiler_index = vc_amd64_x86_compiler_detection_index
+            vc_chosen_compiler_str = "amd64_x86"
 
-    vc_x86_amd64_compiler_detection_index = tools_env["PATH"].find(tools_env['VCINSTALLDIR'] + "BIN\\x86_amd64;")
-    if(vc_x86_amd64_compiler_detection_index > -1
-       and (vc_chosen_compiler_index == -1
-            or vc_chosen_compiler_index > vc_x86_amd64_compiler_detection_index)):
-        vc_chosen_compiler_index = vc_x86_amd64_compiler_detection_index
-        vc_chosen_compiler_str = "x86_amd64"
+        # Now check the 32 bit compilers
+        vc_x86_compiler_detection_index = tools_env["PATH"].find(tools_env["VCINSTALLDIR"] + "BIN;")
+        if(vc_x86_compiler_detection_index > -1
+           and (vc_chosen_compiler_index == -1
+                or vc_chosen_compiler_index > vc_x86_compiler_detection_index)):
+            vc_chosen_compiler_index = vc_x86_compiler_detection_index
+            vc_chosen_compiler_str = "x86"
+
+        vc_x86_amd64_compiler_detection_index = tools_env["PATH"].find(tools_env['VCINSTALLDIR'] + "BIN\\x86_amd64;")
+        if(vc_x86_amd64_compiler_detection_index > -1
+           and (vc_chosen_compiler_index == -1
+                or vc_chosen_compiler_index > vc_x86_amd64_compiler_detection_index)):
+            vc_chosen_compiler_index = vc_x86_amd64_compiler_detection_index
+            vc_chosen_compiler_str = "x86_amd64"
+
+    # and for VS 2017 and newer we check VCTOOLSINSTALLDIR:
+    if 'VCTOOLSINSTALLDIR' in tools_env:
+        # print "Checking VCTOOLSINSTALLDIR"
+
+        # Newer versions have a different path available
+        vc_amd64_compiler_detection_index = tools_env["PATH"].upper().find(tools_env['VCTOOLSINSTALLDIR'].upper() + "BIN\\HOSTX64\\X64;")
+        if(vc_amd64_compiler_detection_index > -1):
+            vc_chosen_compiler_index = vc_amd64_compiler_detection_index
+            vc_chosen_compiler_str = "amd64"
+
+        vc_amd64_x86_compiler_detection_index = tools_env["PATH"].upper().find(tools_env['VCTOOLSINSTALLDIR'].upper() + "BIN\\HOSTX64\\X86;")
+        if(vc_amd64_x86_compiler_detection_index > -1
+           and (vc_chosen_compiler_index == -1
+                or vc_chosen_compiler_index > vc_amd64_x86_compiler_detection_index)):
+            vc_chosen_compiler_index = vc_amd64_x86_compiler_detection_index
+            vc_chosen_compiler_str = "amd64_x86"
+
+        vc_x86_compiler_detection_index = tools_env["PATH"].upper().find(tools_env['VCTOOLSINSTALLDIR'].upper() + "BIN\\HOSTX86\\X86;")
+        if(vc_x86_compiler_detection_index > -1
+           and (vc_chosen_compiler_index == -1
+                or vc_chosen_compiler_index > vc_x86_compiler_detection_index)):
+            vc_chosen_compiler_index = vc_x86_compiler_detection_index
+            vc_chosen_compiler_str = "x86"
+
+        vc_x86_amd64_compiler_detection_index = tools_env["PATH"].upper().find(tools_env['VCTOOLSINSTALLDIR'].upper() + "BIN\\HOSTX86\\X64;")
+        if(vc_x86_amd64_compiler_detection_index > -1
+           and (vc_chosen_compiler_index == -1
+                or vc_chosen_compiler_index > vc_x86_amd64_compiler_detection_index)):
+            vc_chosen_compiler_index = vc_x86_amd64_compiler_detection_index
+            vc_chosen_compiler_str = "x86_amd64"
 
     # debug help
     # print vc_amd64_compiler_detection_index

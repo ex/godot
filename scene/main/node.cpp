@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -462,7 +463,7 @@ Node::PauseMode Node::get_pause_mode() const {
 
 void Node::_propagate_pause_owner(Node *p_owner) {
 
-	if (data.pause_mode != PAUSE_MODE_INHERIT)
+	if (this != p_owner && data.pause_mode != PAUSE_MODE_INHERIT)
 		return;
 	data.pause_owner = p_owner;
 	for (int i = 0; i < data.children.size(); i++) {
@@ -2063,10 +2064,14 @@ void Node::set_editable_instance(Node *p_node, bool p_editable) {
 	ERR_FAIL_NULL(p_node);
 	ERR_FAIL_COND(!is_a_parent_of(p_node));
 	NodePath p = get_path_to(p_node);
-	if (!p_editable)
+	if (!p_editable) {
 		data.editable_instances.erase(p);
-	else
+		// Avoid this flag being needlessly saved;
+		// also give more visual feedback if editable children is reenabled
+		set_display_folded(false);
+	} else {
 		data.editable_instances[p] = true;
+	}
 }
 
 bool Node::is_editable_instance(Node *p_node) const {
@@ -2914,6 +2919,7 @@ void Node::_bind_methods() {
 	BIND_CONSTANT(DUPLICATE_SIGNALS);
 	BIND_CONSTANT(DUPLICATE_GROUPS);
 	BIND_CONSTANT(DUPLICATE_SCRIPTS);
+	BIND_CONSTANT(DUPLICATE_USE_INSTANCING);
 
 	ADD_SIGNAL(MethodInfo("renamed"));
 	ADD_SIGNAL(MethodInfo("tree_entered"));
@@ -2932,9 +2938,9 @@ void Node::_bind_methods() {
 	BIND_VMETHOD(MethodInfo("_enter_tree"));
 	BIND_VMETHOD(MethodInfo("_exit_tree"));
 	BIND_VMETHOD(MethodInfo("_ready"));
-	BIND_VMETHOD(MethodInfo("_input", PropertyInfo(Variant::INPUT_EVENT, "event")));
-	BIND_VMETHOD(MethodInfo("_unhandled_input", PropertyInfo(Variant::INPUT_EVENT, "event")));
-	BIND_VMETHOD(MethodInfo("_unhandled_key_input", PropertyInfo(Variant::INPUT_EVENT, "key_event")));
+	BIND_VMETHOD(MethodInfo("_input", PropertyInfo(Variant::OBJECT, "event", PROPERTY_HINT_RESOURCE_TYPE, "InputEvent")));
+	BIND_VMETHOD(MethodInfo("_unhandled_input", PropertyInfo(Variant::OBJECT, "event", PROPERTY_HINT_RESOURCE_TYPE, "InputEvent")));
+	BIND_VMETHOD(MethodInfo("_unhandled_key_input", PropertyInfo(Variant::OBJECT, "event", PROPERTY_HINT_RESOURCE_TYPE, "InputEventKey")));
 
 	//ClassDB::bind_method(D_METHOD("get_child",&Node::get_child,PH("index")));
 	//ClassDB::bind_method(D_METHOD("get_node",&Node::get_node,PH("path")));

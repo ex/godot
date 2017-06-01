@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -26,10 +27,15 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+#include "editor/editor_settings.h"
 #include "gd_compiler.h"
 #include "gd_script.h"
 #include "global_config.h"
 #include "os/file_access.h"
+#ifdef TOOLS_ENABLED
+#include "editor/editor_file_system.h"
+#include "editor/editor_settings.h"
+#endif
 
 void GDScriptLanguage::get_comment_delimiters(List<String> *p_delimiters) const {
 
@@ -49,11 +55,12 @@ Ref<Script> GDScriptLanguage::get_template(const String &p_class_name, const Str
 					   "# var a = 2\n" +
 					   "# var b = \"textvar\"\n\n" +
 					   "func _ready():\n" +
-					   "\t# Called every time the node is added to the scene.\n" +
-					   "\t# Initialization here\n" +
-					   "\tpass\n";
+					   "%TS%# Called every time the node is added to the scene.\n" +
+					   "%TS%# Initialization here\n" +
+					   "%TS%pass\n";
 
 	_template = _template.replace("%BASE%", p_base_class_name);
+	_template = _template.replace("%TS%", _get_indentation());
 
 	Ref<GDScript> script;
 	script.instance();
@@ -1070,7 +1077,7 @@ static bool _guess_identifier_type(GDCompletionContext &context, int p_line, con
 					//return _guess_expression_type(context,context._class->variables[i].expression,context._class->variables[i].line,r_type);
 				}
 
-				//try to guess from assignment in construtor or _ready
+				//try to guess from assignment in constructor or _ready
 				if (_guess_identifier_from_assignment_in_function(context, p_line + 1, p_identifier, "_ready", r_type))
 					return true;
 				if (_guess_identifier_from_assignment_in_function(context, p_line + 1, p_identifier, "_enter_tree", r_type))
@@ -1314,7 +1321,7 @@ static void _find_identifiers(GDCompletionContext &context, int p_line, bool p_o
 
 	static const char *_type_names[Variant::VARIANT_MAX] = {
 		"null", "bool", "int", "float", "String", "Vector2", "Rect2", "Vector3", "Transform2D", "Plane", "Quat", "AABB", "Basis", "Transform",
-		"Color", "Image", "NodePath", "RID", "Object", "InputEvent", "Dictionary", "Array", "RawArray", "IntArray", "FloatArray", "StringArray",
+		"Color", "NodePath", "RID", "Object", "Dictionary", "Array", "RawArray", "IntArray", "FloatArray", "StringArray",
 		"Vector2Array", "Vector3Array", "ColorArray"
 	};
 
@@ -1404,25 +1411,21 @@ static void _make_function_hint(const GDParser::FunctionNode *p_func, int p_argi
 	arghint += ")";
 }
 
+void get_directory_contents(EditorFileSystemDirectory *p_dir, Set<String> &r_list) {
+
+	for (int i = 0; i < p_dir->get_subdir_count(); i++) {
+		get_directory_contents(p_dir->get_subdir(i), r_list);
+	}
+
+	for (int i = 0; i < p_dir->get_file_count(); i++) {
+		r_list.insert("\"" + p_dir->get_file_path(i) + "\"");
+	}
+}
+
 static void _find_type_arguments(GDCompletionContext &context, const GDParser::Node *p_node, int p_line, const StringName &p_method, const GDCompletionIdentifier &id, int p_argidx, Set<String> &result, String &arghint) {
 
 	//print_line("find type arguments?");
-	if (id.type == Variant::INPUT_EVENT && String(p_method) == "is_action" && p_argidx == 0) {
-
-		List<PropertyInfo> pinfo;
-		GlobalConfig::get_singleton()->get_property_list(&pinfo);
-
-		for (List<PropertyInfo>::Element *E = pinfo.front(); E; E = E->next()) {
-			const PropertyInfo &pi = E->get();
-
-			if (!pi.name.begins_with("input/"))
-				continue;
-
-			String name = pi.name.substr(pi.name.find("/") + 1, pi.name.length());
-			result.insert("\"" + name + "\"");
-		}
-
-	} else if (id.type == Variant::OBJECT && id.obj_type != StringName()) {
+	if (id.type == Variant::OBJECT && id.obj_type != StringName()) {
 
 		MethodBind *m = ClassDB::get_method(id.obj_type, p_method);
 		if (!m) {
@@ -1751,6 +1754,10 @@ static void _find_call_arguments(GDCompletionContext &context, const GDParser::N
 		//complete built-in function
 		const GDParser::BuiltInFunctionNode *fn = static_cast<const GDParser::BuiltInFunctionNode *>(op->arguments[0]);
 		MethodInfo mi = GDFunctions::get_info(fn->function);
+
+		if (mi.name == "load" && bool(EditorSettings::get_singleton()->get("text_editor/completion/complete_file_paths"))) {
+			get_directory_contents(EditorFileSystem::get_singleton()->get_filesystem(), result);
+		}
 
 		arghint = _get_visual_datatype(mi.return_val, false) + " " + GDFunctions::get_func_name(fn->function) + String("(");
 		for (int i = 0; i < mi.arguments.size(); i++) {
@@ -2244,54 +2251,8 @@ Error GDScriptLanguage::complete_code(const String &p_code, const String &p_base
 					}
 				} else {
 
-					if (t.type == Variant::INPUT_EVENT) {
-
-						//this is hardcoded otherwise it's not obvious
-						Set<String> exclude;
-
-						for (int i = 0; i < InputEvent::TYPE_MAX; i++) {
-
-							InputEvent ie;
-							ie.type = InputEvent::Type(i);
-							static const char *evnames[] = {
-								"# Common",
-								"# Key",
-								"# MouseMotion",
-								"# MouseButton",
-								"# JoypadMotion",
-								"# JoypadButton",
-								"# ScreenTouch",
-								"# ScreenDrag",
-								"# Action"
-							};
-
-							r_options->push_back(evnames[i]);
-
-							Variant v = ie;
-
-							if (i == 0) {
-								List<MethodInfo> mi;
-								v.get_method_list(&mi);
-								for (List<MethodInfo>::Element *E = mi.front(); E; E = E->next()) {
-									r_options->push_back(E->get().name + "(");
-								}
-							}
-
-							List<PropertyInfo> pi;
-							v.get_property_list(&pi);
-
-							for (List<PropertyInfo>::Element *E = pi.front(); E; E = E->next()) {
-
-								if (i == 0)
-									exclude.insert(E->get().name);
-								else if (exclude.has(E->get().name))
-									continue;
-
-								r_options->push_back(E->get().name);
-							}
-						}
-						return OK;
-					} else {
+					//check InputEvent hint
+					{
 						if (t.value.get_type() == Variant::NIL) {
 							Variant::CallError ce;
 							t.value = Variant::construct(t.type, NULL, 0, ce);
@@ -2373,6 +2334,11 @@ Error GDScriptLanguage::complete_code(const String &p_code, const String &p_base
 			}
 
 		} break;
+		case GDParser::COMPLETION_RESOURCE_PATH: {
+
+			if (EditorSettings::get_singleton()->get("text_editor/completion/complete_file_paths"))
+				get_directory_contents(EditorFileSystem::get_singleton()->get_filesystem(), options);
+		} break;
 	}
 
 	for (Set<String>::Element *E = options.front(); E; E = E->next()) {
@@ -2390,7 +2356,28 @@ Error GDScriptLanguage::complete_code(const String &p_code, const String &p_base
 
 #endif
 
+String GDScriptLanguage::_get_indentation() const {
+#ifdef TOOLS_ENABLED
+	if (SceneTree::get_singleton()->is_editor_hint()) {
+		bool use_space_indentation = EDITOR_DEF("text_editor/indent/type", 0);
+
+		if (use_space_indentation) {
+			int indent_size = EDITOR_DEF("text_editor/indent/size", 4);
+
+			String space_indent = "";
+			for (int i = 0; i < indent_size; i++) {
+				space_indent += " ";
+			}
+			return space_indent;
+		}
+	}
+#endif
+	return "\t";
+}
+
 void GDScriptLanguage::auto_indent_code(String &p_code, int p_from_line, int p_to_line) const {
+
+	String indent = _get_indentation();
 
 	Vector<String> lines = p_code.split("\n");
 	List<int> indent_stack;
@@ -2431,8 +2418,9 @@ void GDScriptLanguage::auto_indent_code(String &p_code, int p_from_line, int p_t
 		if (i >= p_from_line) {
 
 			l = "";
-			for (int j = 0; j < indent_stack.size(); j++)
-				l += "\t";
+			for (int j = 0; j < indent_stack.size(); j++) {
+				l += indent;
+			}
 			l += st;
 
 		} else if (i > p_to_line) {

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -2725,7 +2726,7 @@ class EditorExportAndroid : public EditorExportPlatform {
 
 		Vector<String> string_table;
 
-		String version_name = p_preset->get("version/name");
+		String package_name = p_preset->get("package/name");
 
 		//printf("stirng block len: %i\n",string_block_len);
 		//printf("stirng count: %i\n",string_count);
@@ -2742,7 +2743,7 @@ class EditorExportAndroid : public EditorExportPlatform {
 
 				if (str == "godot-project-name") {
 					//project name
-					str = get_project_name(version_name);
+					str = get_project_name(package_name);
 
 				} else {
 
@@ -2751,7 +2752,7 @@ class EditorExportAndroid : public EditorExportPlatform {
 					if (GlobalConfig::get_singleton()->has(prop)) {
 						str = GlobalConfig::get_singleton()->get(prop);
 					} else {
-						str = get_project_name(version_name);
+						str = get_project_name(package_name);
 					}
 				}
 			}
@@ -3522,7 +3523,7 @@ public:
 
 	EditorExportAndroid() {
 
-		Image img(_android_logo);
+		Ref<Image> img = memnew(Image(_android_logo));
 		logo = Ref<ImageTexture>(memnew(ImageTexture));
 		logo->create_from_image(img);
 
@@ -3530,6 +3531,13 @@ public:
 		device_thread = Thread::create(_device_poll_thread, this);
 		devices_changed = true;
 		quit_request = false;
+	}
+
+	~EditorExportAndroid() {
+		quit_request = true;
+		Thread::wait_to_finish(device_thread);
+		memdelete(device_lock);
+		memdelete(device_thread);
 	}
 };
 

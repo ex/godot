@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,6 +30,7 @@
 #ifdef FREETYPE_ENABLED
 #include "dynamic_font.h"
 #include "os/file_access.h"
+#include "os/os.h"
 
 bool DynamicFontData::CacheID::operator<(CacheID right) const {
 
@@ -98,6 +100,7 @@ DynamicFontData::~DynamicFontData() {
 }
 
 ////////////////////
+HashMap<String, Vector<uint8_t> > DynamicFontAtSize::_fontdata;
 
 Error DynamicFontAtSize::_load() {
 
@@ -106,7 +109,29 @@ Error DynamicFontAtSize::_load() {
 	ERR_EXPLAIN(TTR("Error initializing FreeType."));
 	ERR_FAIL_COND_V(error != 0, ERR_CANT_CREATE);
 
-	if (font->font_path != String()) {
+	// FT_OPEN_STREAM is extremely slow only on Android.
+	if (OS::get_singleton()->get_name() == "Android" && font->font_mem == NULL && font->font_path != String()) {
+		// cache font only once for each font->font_path
+		if (_fontdata.has(font->font_path)) {
+
+			font->set_font_ptr(_fontdata[font->font_path].ptr(), _fontdata[font->font_path].size());
+
+		} else {
+
+			FileAccess *f = FileAccess::open(font->font_path, FileAccess::READ);
+			ERR_FAIL_COND_V(!f, ERR_CANT_OPEN);
+
+			size_t len = f->get_len();
+			_fontdata[font->font_path] = Vector<uint8_t>();
+			Vector<uint8_t> &fontdata = _fontdata[font->font_path];
+			fontdata.resize(len);
+			f->get_buffer(fontdata.ptr(), len);
+			font->set_font_ptr(fontdata.ptr(), len);
+			f->close();
+		}
+	}
+
+	if (font->font_mem == NULL && font->font_path != String()) {
 
 		FileAccess *f = FileAccess::open(font->font_path, FileAccess::READ);
 		ERR_FAIL_COND_V(!f, ERR_CANT_OPEN);
@@ -544,7 +569,7 @@ void DynamicFontAtSize::_update_char(CharType p_char) {
 	//blit to image and texture
 	{
 
-		Image img(tex.texture_size, tex.texture_size, 0, Image::FORMAT_LA8, tex.imgdata);
+		Ref<Image> img = memnew(Image(tex.texture_size, tex.texture_size, 0, Image::FORMAT_LA8, tex.imgdata));
 
 		if (tex.texture.is_null()) {
 			tex.texture.instance();

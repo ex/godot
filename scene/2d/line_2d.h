@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -56,8 +57,8 @@ public:
 	void set_default_color(Color color);
 	Color get_default_color() const;
 
-	void set_gradient(const Ref<ColorRamp> &gradient);
-	Ref<ColorRamp> get_gradient() const;
+	void set_gradient(const Ref<Gradient> &gradient);
+	Ref<Gradient> get_gradient() const;
 
 	void set_texture(const Ref<Texture> &texture);
 	Ref<Texture> get_texture() const;
@@ -96,7 +97,7 @@ private:
 	LineCapMode _end_cap_mode;
 	float _width;
 	Color _default_color;
-	Ref<ColorRamp> _gradient;
+	Ref<Gradient> _gradient;
 	Ref<Texture> _texture;
 	LineTextureMode _texture_mode;
 	float _sharp_limit;

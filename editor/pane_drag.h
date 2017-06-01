@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -38,7 +39,7 @@ class PaneDrag : public Control {
 	bool mouse_over;
 
 protected:
-	void _gui_input(const InputEvent &p_input);
+	void _gui_input(const Ref<InputEvent> &p_input);
 	void _notification(int p_what);
 	virtual Size2 get_minimum_size() const;
 	static void _bind_methods();

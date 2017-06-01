@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,13 +30,14 @@
 #include "ustring.h"
 
 #include "color.h"
-#include "io/md5.h"
-#include "io/sha256.h"
 #include "math_funcs.h"
 #include "os/memory.h"
 #include "print_string.h"
 #include "ucaps.h"
 #include "variant.h"
+
+#include "thirdparty/misc/md5.h"
+#include "thirdparty/misc/sha256.h"
 
 #include <wchar.h>
 
@@ -51,6 +53,8 @@
 #define MAX_DIGITS 6
 #define UPPERCASE(m_c) (((m_c) >= 'a' && (m_c) <= 'z') ? ((m_c) - ('a' - 'A')) : (m_c))
 #define LOWERCASE(m_c) (((m_c) >= 'A' && (m_c) <= 'Z') ? ((m_c) + ('a' - 'A')) : (m_c))
+#define IS_DIGIT(m_d) ((m_d) >= '0' && (m_d) <= '9')
+#define IS_HEX_DIGIT(m_d) (((m_d) >= '0' && (m_d) <= '9') || ((m_d) >= 'a' && (m_d) <= 'f') || ((m_d) >= 'A' && (m_d) <= 'F'))
 
 /** STRING **/
 
@@ -479,6 +483,68 @@ signed char String::casecmp_to(const String &p_str) const {
 	return 0; //should never reach anyway
 }
 
+signed char String::naturalnocasecmp_to(const String &p_str) const {
+
+	const CharType *this_str = c_str();
+	const CharType *that_str = p_str.c_str();
+
+	if (this_str && that_str) {
+
+		while (*this_str == '.' || *that_str == '.') {
+			if (*this_str++ != '.')
+				return 1;
+			if (*that_str++ != '.')
+				return -1;
+			if (!*that_str)
+				return 1;
+			if (!*this_str)
+				return -1;
+		}
+
+		while (*this_str) {
+
+			if (!*that_str)
+				return 1;
+			else if (IS_DIGIT(*this_str)) {
+
+				int64_t this_int, that_int;
+
+				if (!IS_DIGIT(*that_str))
+					return -1;
+
+				/* Compare the numbers */
+				this_int = to_int(this_str);
+				that_int = to_int(that_str);
+
+				if (this_int < that_int)
+					return -1;
+				else if (this_int > that_int)
+					return 1;
+
+				/* Skip */
+				while (IS_DIGIT(*this_str))
+					this_str++;
+				while (IS_DIGIT(*that_str))
+					that_str++;
+			} else if (IS_DIGIT(*that_str))
+				return 1;
+			else {
+				if (_find_upper(*this_str) < _find_upper(*that_str)) //more than
+					return -1;
+				else if (_find_upper(*this_str) > _find_upper(*that_str)) //less than
+					return 1;
+
+				this_str++;
+				that_str++;
+			}
+		}
+		if (*that_str)
+			return -1;
+	}
+
+	return 0;
+}
+
 void String::erase(int p_pos, int p_chars) {
 
 	*this = left(p_pos) + substr(p_pos + p_chars, length() - ((p_pos + p_chars)));
@@ -512,14 +578,16 @@ String String::camelcase_to_underscore(bool lowercase) const {
 
 	for (size_t i = 1; i < this->size(); i++) {
 		bool is_upper = cstr[i] >= A && cstr[i] <= Z;
+		bool is_number = cstr[i] >= '0' && cstr[i] <= '9';
 		bool are_next_2_lower = false;
 		bool was_precedent_upper = cstr[i - 1] >= A && cstr[i - 1] <= Z;
+		bool was_precedent_number = cstr[i - 1] >= '0' && cstr[i - 1] <= '9';
 
 		if (i + 2 < this->size()) {
 			are_next_2_lower = cstr[i + 1] >= a && cstr[i + 1] <= z && cstr[i + 2] >= a && cstr[i + 2] <= z;
 		}
 
-		bool should_split = ((is_upper && !was_precedent_upper) || (was_precedent_upper && is_upper && are_next_2_lower));
+		bool should_split = ((is_upper && !was_precedent_upper && !was_precedent_number) || (was_precedent_upper && is_upper && are_next_2_lower) || (is_number && !was_precedent_number));
 		if (should_split) {
 			new_string += this->substr(start_index, i - start_index) + "_";
 			start_index = i;
@@ -1693,9 +1761,6 @@ bool String::is_numeric() const {
 
 	return true; // TODO: Use the parser below for this instead
 };
-
-#define IS_DIGIT(m_d) ((m_d) >= '0' && (m_d) <= '9')
-#define IS_HEX_DIGIT(m_d) (((m_d) >= '0' && (m_d) <= '9') || ((m_d) >= 'a' && (m_d) <= 'f') || ((m_d) >= 'A' && (m_d) <= 'F'))
 
 template <class C>
 static double built_in_strtod(const C *string, /* A decimal ASCII floating-point number,

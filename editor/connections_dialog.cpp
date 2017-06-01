@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -121,7 +122,7 @@ void ConnectDialog::_tree_node_selected() {
 			continue; // hidden method, not show!
 
 		if (ClassDB::has_method(node->get_type(),"Node") || ClassDB::has_method(node->get_type(),"Control",true))
-			continue; //avoid too much unnecesary stuff
+			continue; //avoid too much unnecessary stuff
 
 		String method=E->get().name+"(";
 		for(int i=0;i<E->get().arguments.size();i++) {
@@ -238,7 +239,6 @@ void ConnectDialog::_add_bind() {
 		case Variant::BASIS: value = Basis(); break;
 		case Variant::TRANSFORM: value = Transform(); break;
 		case Variant::COLOR: value = Color(); break;
-		case Variant::IMAGE: value = Image(); break;
 
 		default: { ERR_FAIL(); } break;
 	}
@@ -326,7 +326,6 @@ ConnectDialog::ConnectDialog() {
 	type_list->add_item("Transform", Variant::TRANSFORM);
 	//type_list->add_separator();
 	type_list->add_item("Color", Variant::COLOR);
-	type_list->add_item("Image", Variant::IMAGE);
 	type_list->select(0);
 
 	Button *add_bind = memnew(Button);
@@ -417,6 +416,10 @@ void ConnectionsDock::_notification(int p_what) {
 
 		//RID ci = get_canvas_item();
 		//get_stylebox("panel","PopupMenu")->draw(ci,Rect2(Point2(),get_size()));
+	}
+
+	if (p_what == EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED) {
+		update_tree();
 	}
 }
 
@@ -766,7 +769,7 @@ void ConnectionsDock::_something_activated() {
 
 		Ref<Script> script = c.target->get_script();
 
-		if (script.is_valid() && ScriptEditor::get_singleton()->script_go_to_method(script, c.method)) {
+		if (script.is_valid() && ScriptEditor::get_singleton()->script_goto_method(script, c.method)) {
 			editor->call("_editor_select", EditorNode::EDITOR_SCRIPT);
 		}
 	}

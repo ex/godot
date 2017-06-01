@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,7 +38,7 @@
 #include "main/input_default.h"
 #include "os/input.h"
 #include "os/os.h"
-#include "power_winrt.h"
+#include "power_uwp.h"
 #include "servers/audio_server.h"
 #include "servers/physics/physics_server_sw.h"
 #include "servers/physics_2d/physics_2d_server_sw.h"
@@ -62,7 +63,7 @@ public:
 			CHAR_EVENT_MESSAGE
 		};
 
-		InputModifierState mod_state;
+		bool alt, shift, control;
 		MessageType type;
 		bool pressed;
 		unsigned int scancode;
@@ -92,9 +93,7 @@ private:
 	bool outside;
 	int old_x, old_y;
 	Point2i center;
-	unsigned int last_id;
 	VisualServer *visual_server;
-	Rasterizer *rasterizer;
 	PhysicsServer *physics_server;
 	Physics2DServer *physics_2d_server;
 	int pressrc;
@@ -107,7 +106,7 @@ private:
 
 	AudioDriverXAudio2 audio_driver;
 
-	PowerWinRT *power_manager;
+	PowerUWP *power_manager;
 
 	MouseMode mouse_mode;
 	bool alt_mem;
@@ -190,7 +189,7 @@ public:
 	void set_mouse_mode(MouseMode p_mode);
 	MouseMode get_mouse_mode() const;
 
-	virtual Point2 get_mouse_pos() const;
+	virtual Point2 get_mouse_position() const;
 	virtual int get_mouse_button_state() const;
 	virtual void set_window_title(const String &p_title);
 
@@ -228,7 +227,7 @@ public:
 	virtual String get_clipboard() const;
 
 	void set_cursor_shape(CursorShape p_shape);
-	void set_icon(const Image &p_icon);
+	void set_icon(const Ref<Image> &p_icon);
 
 	virtual String get_executable_path() const;
 
@@ -236,6 +235,8 @@ public:
 
 	virtual void move_window_to_foreground();
 	virtual String get_data_dir() const;
+
+	virtual bool check_feature_support(const String &p_feature);
 
 	void set_gl_context(ContextEGL *p_context);
 	void screen_size_changed();
@@ -256,7 +257,7 @@ public:
 
 	virtual bool get_swap_ok_cancel() { return true; }
 
-	void input_event(InputEvent &p_event);
+	void input_event(const Ref<InputEvent> &p_event);
 
 	virtual PowerState get_power_state();
 	virtual int get_power_seconds_left();

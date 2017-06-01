@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,6 +30,7 @@
 #ifndef CORE_BIND_H
 #define CORE_BIND_H
 
+#include "image.h"
 #include "io/resource_loader.h"
 #include "io/resource_saver.h"
 #include "os/dir_access.h"
@@ -119,7 +121,7 @@ public:
 		MONTH_DECEMBER
 	};
 
-	Point2 get_mouse_pos() const;
+	Point2 get_mouse_position() const;
 	void set_window_title(const String &p_title);
 	int get_mouse_button_state() const;
 
@@ -225,7 +227,7 @@ public:
 
 	void set_use_file_access_save_and_swap(bool p_enable);
 
-	void set_icon(const Image &p_icon);
+	void set_icon(const Ref<Image> &p_icon);
 
 	int get_exit_code() const;
 	void set_exit_code(int p_code);
@@ -586,6 +588,8 @@ public:
 	Array get_signal_list(StringName p_class, bool p_no_inheritance = false) const;
 
 	Array get_property_list(StringName p_class, bool p_no_inheritance = false) const;
+	Variant get_property(Object *p_object, const StringName &p_property) const;
+	Error set_property(Object *p_object, const StringName &p_property, const Variant &p_value) const;
 
 	bool has_method(StringName p_class, StringName p_method, bool p_no_inheritance = false) const;
 

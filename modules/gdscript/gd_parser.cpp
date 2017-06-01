@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -76,7 +77,7 @@ bool GDParser::_enter_indent_block(BlockNode *p_block) {
 
 		// be more python-like
 		int current = tab_level.back()->get();
-		tab_level.push_back(current + 1);
+		tab_level.push_back(current);
 		return true;
 		//_set_error("newline expected after ':'.");
 		//return false;
@@ -388,6 +389,19 @@ GDParser::Node *GDParser::_parse_expression(Node *p_parent, bool p_static, bool 
 			}
 			tokenizer->advance();
 
+			if (tokenizer->get_token() == GDTokenizer::TK_CURSOR) {
+				completion_cursor = StringName();
+				completion_node = p_parent;
+				completion_type = COMPLETION_RESOURCE_PATH;
+				completion_class = current_class;
+				completion_function = current_function;
+				completion_line = tokenizer->get_token_line();
+				completion_block = current_block;
+				completion_argument = 0;
+				completion_found = true;
+				tokenizer->advance();
+			}
+
 			String path;
 			bool found_constant = false;
 			bool valid = false;
@@ -459,10 +473,10 @@ GDParser::Node *GDParser::_parse_expression(Node *p_parent, bool p_static, bool 
 				_set_error("Expected ')' after 'preload' path");
 				return NULL;
 			}
+			tokenizer->advance();
 
 			ConstantNode *constant = alloc_node<ConstantNode>();
 			constant->value = res;
-			tokenizer->advance();
 
 			expr = constant;
 		} else if (tokenizer->get_token() == GDTokenizer::TK_PR_YIELD) {
@@ -1021,7 +1035,7 @@ GDParser::Node *GDParser::_parse_expression(Node *p_parent, bool p_static, bool 
 		OperatorNode::Operator op;
 		bool valid = true;
 
-//assign, if allowed is only alowed on the first operator
+//assign, if allowed is only allowed on the first operator
 #define _VALIDATE_ASSIGN                  \
 	if (!p_allow_assign) {                \
 		_set_error("Unexpected assign."); \
@@ -1063,7 +1077,7 @@ GDParser::Node *GDParser::_parse_expression(Node *p_parent, bool p_static, bool 
 			case GDTokenizer::TK_OP_BIT_AND: op = OperatorNode::OP_BIT_AND; break;
 			case GDTokenizer::TK_OP_BIT_OR: op = OperatorNode::OP_BIT_OR; break;
 			case GDTokenizer::TK_OP_BIT_XOR: op = OperatorNode::OP_BIT_XOR; break;
-			case GDTokenizer::TK_PR_EXTENDS: op = OperatorNode::OP_EXTENDS; break;
+			case GDTokenizer::TK_PR_IS: op = OperatorNode::OP_IS; break;
 			case GDTokenizer::TK_CF_IF: op = OperatorNode::OP_TERNARY_IF; break;
 			case GDTokenizer::TK_CF_ELSE: op = OperatorNode::OP_TERNARY_ELSE; break;
 			default: valid = false; break;
@@ -1103,7 +1117,7 @@ GDParser::Node *GDParser::_parse_expression(Node *p_parent, bool p_static, bool 
 
 			switch (expression[i].op) {
 
-				case OperatorNode::OP_EXTENDS:
+				case OperatorNode::OP_IS:
 					priority = -1;
 					break; //before anything
 
@@ -1253,7 +1267,7 @@ GDParser::Node *GDParser::_parse_expression(Node *p_parent, bool p_static, bool 
 				// this is not invalid and can really appear
 				// but it becomes invalid anyway because no binary op
 				// can be followed by an unary op in a valid combination,
-				// due to how precedence works, unaries will always dissapear first
+				// due to how precedence works, unaries will always disappear first
 
 				_set_error("Unexpected two consecutive operators after ternary if.");
 				return NULL;
@@ -1263,7 +1277,7 @@ GDParser::Node *GDParser::_parse_expression(Node *p_parent, bool p_static, bool 
 				// this is not invalid and can really appear
 				// but it becomes invalid anyway because no binary op
 				// can be followed by an unary op in a valid combination,
-				// due to how precedence works, unaries will always dissapear first
+				// due to how precedence works, unaries will always disappear first
 
 				_set_error("Unexpected two consecutive operators after ternary else.");
 				return NULL;
@@ -1300,7 +1314,7 @@ GDParser::Node *GDParser::_parse_expression(Node *p_parent, bool p_static, bool 
 				// this is not invalid and can really appear
 				// but it becomes invalid anyway because no binary op
 				// can be followed by an unary op in a valid combination,
-				// due to how precedence works, unaries will always dissapear first
+				// due to how precedence works, unaries will always disappear first
 
 				_set_error("Unexpected two consecutive operators.");
 				return NULL;
@@ -1406,7 +1420,7 @@ GDParser::Node *GDParser::_reduce_expression(Node *p_node, bool p_to_const) {
 				}
 			}
 
-			if (op->op == OperatorNode::OP_EXTENDS) {
+			if (op->op == OperatorNode::OP_IS) {
 				//nothing much
 				return op;
 			}
@@ -2258,7 +2272,16 @@ void GDParser::_parse_block(BlockNode *p_block, bool p_static) {
 	p_block->statements.push_back(nl);
 #endif
 
+	bool is_first_line = true;
+
 	while (true) {
+		if (!is_first_line && tab_level.back()->prev() && tab_level.back()->prev()->get() == indent_level) {
+			// pythonic single-line expression, don't parse future lines
+			tab_level.pop_back();
+			p_block->end_line = tokenizer->get_token_line();
+			return;
+		}
+		is_first_line = false;
 
 		GDTokenizer::Token token = tokenizer->get_token();
 		if (error_set)
@@ -2412,7 +2435,7 @@ void GDParser::_parse_block(BlockNode *p_block, bool p_static) {
 				p_block->sub_blocks.push_back(cf_if->body);
 
 				if (!_enter_indent_block(cf_if->body)) {
-					_set_error("Expected intended block after 'if'");
+					_set_error("Expected indented block after 'if'");
 					p_block->end_line = tokenizer->get_token_line();
 					return;
 				}
@@ -2427,9 +2450,8 @@ void GDParser::_parse_block(BlockNode *p_block, bool p_static) {
 
 				while (true) {
 
-					while (tokenizer->get_token() == GDTokenizer::TK_NEWLINE) {
-						tokenizer->advance();
-					}
+					while (tokenizer->get_token() == GDTokenizer::TK_NEWLINE && _parse_newline())
+						;
 
 					if (tab_level.back()->get() < indent_level) { //not at current indent level
 						p_block->end_line = tokenizer->get_token_line();

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -87,7 +88,7 @@ void register_visual_script_types() {
 	ClassDB::register_class<VisualScriptWhile>();
 	ClassDB::register_class<VisualScriptIterator>();
 	ClassDB::register_class<VisualScriptSequence>();
-	ClassDB::register_class<VisualScriptInputFilter>();
+	//ClassDB::register_class<VisualScriptInputFilter>();
 	ClassDB::register_class<VisualScriptSwitch>();
 
 	ClassDB::register_class<VisualScriptYield>();

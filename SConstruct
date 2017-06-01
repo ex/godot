@@ -145,6 +145,7 @@ opts.Add('extra_suffix', "Custom extra suffix added to the base filename of all 
 opts.Add('unix_global_settings_path', "UNIX-specific path to system-wide settings. Currently only used for templates", '')
 opts.Add('verbose', "Enable verbose output for the compilation (yes/no)", 'yes')
 opts.Add('vsproj', "Generate Visual Studio Project. (yes/no)", 'no')
+opts.Add('warnings', "Set the level of warnings emitted during compilation (extra/all/moderate/no)", 'all')
 
 # Thirdparty libraries
 opts.Add('builtin_enet', "Use the builtin enet library (yes/no)", 'yes')
@@ -271,6 +272,30 @@ if selected_platform in platform_list:
     # must happen after the flags, so when flags are used by configure, stuff happens (ie, ssl on x11)
     detect.configure(env)
 
+    if (env["warnings"] == 'yes'):
+        print("WARNING: warnings=yes is deprecated; assuming warnings=all")
+
+    if (os.name == "nt" and os.getenv("VSINSTALLDIR")): # MSVC, needs to stand out of course
+        disable_nonessential_warnings = ['/wd4267', '/wd4244', '/wd4305', '/wd4800'] # Truncations, narrowing conversions...
+        if (env["warnings"] == 'extra'):
+            env.Append(CCFLAGS=['/Wall']) # Implies /W4
+        elif (env["warnings"] == 'all' or env["warnings"] == 'yes'):
+            env.Append(CCFLAGS=['/W3'] + disable_nonessential_warnings)
+        elif (env["warnings"] == 'moderate'):
+            # C4244 shouldn't be needed here being a level-3 warning, but it is
+            env.Append(CCFLAGS=['/W2'] + disable_nonessential_warnings)
+        else: # 'no'
+            env.Append(CCFLAGS=['/w'])
+    else: # Rest of the world
+        if (env["warnings"] == 'extra'):
+            env.Append(CCFLAGS=['-Wall', '-Wextra'])
+        elif (env["warnings"] == 'all' or env["warnings"] == 'yes'):
+            env.Append(CCFLAGS=['-Wall'])
+        elif (env["warnings"] == 'moderate'):
+            env.Append(CCFLAGS=['-Wall', '-Wno-unused'])
+        else: # 'no'
+            env.Append(CCFLAGS=['-w'])
+
     #env['platform_libsuffix'] = env['LIBSUFFIX']
 
     suffix = "." + selected_platform
@@ -280,7 +305,6 @@ if selected_platform in platform_list:
             print("Tools can only be built with targets 'debug' and 'release_debug'.")
             sys.exit(255)
         suffix += ".opt"
-
         env.Append(CCFLAGS=['-DNDEBUG'])
 
     elif (env["target"] == "release_debug"):
@@ -387,7 +411,7 @@ if selected_platform in platform_list:
         # env['MSVS_VERSION']='9.0'
 
         # Calls a CMD with /C(lose) and /V(delayed environment variable expansion) options.
-        # And runs vcvarsall bat for the propper arhitecture and scons for propper configuration
+        # And runs vcvarsall bat for the proper architecture and scons for proper configuration
         env['MSVSBUILDCOM'] = 'cmd /V /C set "plat=$(PlatformTarget)" ^& (if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64")) ^& set "tools=yes" ^& (if "$(Configuration)"=="release" (set "tools=no")) ^& call "$(VCInstallDir)vcvarsall.bat" !plat! ^& scons platform=windows target=$(Configuration) tools=!tools! -j2'
         env['MSVSREBUILDCOM'] = 'cmd /V /C set "plat=$(PlatformTarget)" ^& (if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64")) ^& set "tools=yes" ^& (if "$(Configuration)"=="release" (set "tools=no")) & call "$(VCInstallDir)vcvarsall.bat" !plat! ^& scons platform=windows target=$(Configuration) tools=!tools! vsproj=yes -j2'
         env['MSVSCLEANCOM'] = 'cmd /V /C set "plat=$(PlatformTarget)" ^& (if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64")) ^& set "tools=yes" ^& (if "$(Configuration)"=="release" (set "tools=no")) ^& call "$(VCInstallDir)vcvarsall.bat" !plat! ^& scons --clean platform=windows target=$(Configuration) tools=!tools! -j2'

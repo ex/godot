@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -341,12 +342,12 @@ void RasterizerGLES2::_draw_primitive(int p_points, const Vector3 *p_vertices, c
 
 /* TEXTURE API */
 
-Image RasterizerGLES2::_get_gl_image_and_format(const Image &p_image, Image::Format p_format, uint32_t p_flags, GLenum &r_gl_format, GLenum &r_gl_internal_format, int &r_gl_components, bool &r_has_alpha_cache, bool &r_compressed) {
+Ref<Image> RasterizerGLES2::_get_gl_image_and_format(const Ref<Image> &p_image, Image::Format p_format, uint32_t p_flags, GLenum &r_gl_format, GLenum &r_gl_internal_format, int &r_gl_components, bool &r_has_alpha_cache, bool &r_compressed) {
 
 	r_has_alpha_cache = false;
 	r_compressed = false;
 	r_gl_format = 0;
-	Image image = p_image;
+	Ref<Image> image = p_image;
 
 	switch (p_format) {
 
@@ -1579,7 +1580,7 @@ Variant RasterizerGLES2::shader_get_default_param(RID p_shader, const StringName
 	Shader *shader = shader_owner.get(p_shader);
 	ERR_FAIL_COND_V(!shader, Variant());
 
-	//update shader params if necesary
+	//update shader params if necessary
 	//make sure the shader is compiled and everything
 	//so the actual parameters can be properly retrieved!
 	if (shader->dirty_list.in_list()) {
@@ -1651,7 +1652,7 @@ Variant RasterizerGLES2::material_get_param(RID p_material, const StringName &p_
 	ERR_FAIL_COND_V(!material, Variant());
 
 	if (material->shader.is_valid()) {
-		//update shader params if necesary
+		//update shader params if necessary
 		//make sure the shader is compiled and everything
 		//so the actual parameters can be properly retrieved!
 		material->shader_cache = shader_owner.get(material->shader);
@@ -5684,7 +5685,7 @@ void RasterizerGLES2::_render(const Geometry *p_geometry, const Material *p_mate
 				};
 
 			} else if (use_attribute_instancing) {
-				//if not, using atributes instead of uniforms can be really fast in forward rendering architectures
+				//if not, using attributes instead of uniforms can be really fast in forward rendering architectures
 				if (s->index_array_len > 0) {
 
 					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s->index_id);
@@ -8699,7 +8700,7 @@ void RasterizerGLES2::_canvas_item_render_commands(CanvasItem *p_item, CanvasIte
 	}
 }
 
-void RasterizerGLES2::_canvas_item_setup_shader_params(CanvasItemMaterial *material, Shader *shader) {
+void RasterizerGLES2::_canvas_item_setup_shader_params(ShaderMaterial *material, Shader *shader) {
 
 	if (canvas_shader.bind())
 		rebind_texpixel_size = true;
@@ -8748,7 +8749,7 @@ void RasterizerGLES2::_canvas_item_setup_shader_params(CanvasItemMaterial *mater
 	uses_texpixel_size = shader->uses_texpixel_size;
 }
 
-void RasterizerGLES2::_canvas_item_setup_shader_uniforms(CanvasItemMaterial *material, Shader *shader) {
+void RasterizerGLES2::_canvas_item_setup_shader_uniforms(ShaderMaterial *material, Shader *shader) {
 
 	//this can be optimized..
 	int tex_id = 1;
@@ -8925,7 +8926,7 @@ void RasterizerGLES2::canvas_render_items(CanvasItem *p_item_list, int p_z, cons
 
 		//begin rect
 		CanvasItem *material_owner = ci->material_owner ? ci->material_owner : ci;
-		CanvasItemMaterial *material = material_owner->material;
+		ShaderMaterial *material = material_owner->material;
 
 		if (material != canvas_last_material || rebind_shader) {
 

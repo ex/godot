@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -115,7 +116,6 @@ void CustomPropertyEditor::_menu_option(int p_which) {
 
 					Set<String> valid_extensions;
 					for (List<String>::Element *E = extensions.front(); E; E = E->next()) {
-						print_line("found: " + E->get());
 						valid_extensions.insert(E->get());
 					}
 
@@ -318,12 +318,12 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 
 			CheckBox *c = checks20[0];
 			c->set_text("True");
-			checks20gc->set_pos(Vector2(4, 4));
+			checks20gc->set_position(Vector2(4, 4));
 			c->set_pressed(v);
 			c->show();
 
 			checks20gc->set_size(checks20gc->get_minimum_size());
-			set_size(checks20gc->get_pos() + checks20gc->get_size() + Vector2(4, 4) * EDSCALE);
+			set_size(checks20gc->get_position() + checks20gc->get_size() + c->get_size() + Vector2(4, 4) * EDSCALE);
 
 		} break;
 		case Variant::INT:
@@ -373,7 +373,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				for (int i = 0; i < options.size(); i++) {
 					menu->add_item(options[i], i);
 				}
-				menu->set_pos(get_pos());
+				menu->set_position(get_position());
 				menu->popup();
 				hide();
 				updating = false;
@@ -422,12 +422,12 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 
 				value_label[0]->set_text(title);
 				value_label[0]->show();
-				value_label[0]->set_pos(Vector2(4, 4) * EDSCALE);
+				value_label[0]->set_position(Vector2(4, 4) * EDSCALE);
 
-				checks20gc->set_pos(Vector2(4, 4) * EDSCALE + Vector2(0, value_label[0]->get_size().height + 4 * EDSCALE));
+				checks20gc->set_position(Vector2(4, 4) * EDSCALE + Vector2(0, value_label[0]->get_size().height + 4 * EDSCALE));
 				checks20gc->set_size(checks20gc->get_minimum_size());
 
-				set_size(Vector2(4, 4) * EDSCALE + checks20gc->get_pos() + checks20gc->get_size());
+				set_size(Vector2(4, 4) * EDSCALE + checks20gc->get_position() + checks20gc->get_size());
 
 			} else if (hint == PROPERTY_HINT_EXP_EASING) {
 
@@ -465,7 +465,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 					if (f & (1 << i))
 						menu->set_item_checked(menu->get_item_index(i), true);
 				}
-				menu->set_pos(get_pos());
+				menu->set_position(get_position());
 				menu->popup();
 				hide();
 				updating = false;
@@ -501,7 +501,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				for (int i = 0; i < options.size(); i++) {
 					menu->add_item(options[i], i);
 				}
-				menu->set_pos(get_pos());
+				menu->set_position(get_position());
 				menu->popup();
 				hide();
 				updating = false;
@@ -609,12 +609,9 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 						type = Variant::Type(Variant::Type(i));
 					}
 				}
-				InputEvent::Type iet = InputEvent::NONE;
-				if (hint_text.find(".") != -1) {
-					iet = InputEvent::Type(int(hint_text.get_slice(".", 1).to_int()));
-				}
+
 				if (type)
-					property_select->select_property_from_basic_type(type, iet, v);
+					property_select->select_property_from_basic_type(type, v);
 
 				updating = false;
 				return false;
@@ -837,15 +834,15 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 
 				value_editor[i]->show();
 				value_label[i]->show();
-				value_label[i]->set_pos(Point2(ofs,y));
+				value_label[i]->set_position(Point2(ofs,y));
 				scroll[i]->set_min(0);
 				scroll[i]->set_max(1.0);
 				scroll[i]->set_page(0);
-				scroll[i]->set_pos(Point2(ofs+15,y+Math::floor((h-scroll[i]->get_minimum_size().height)/2.0)));
+				scroll[i]->set_position(Point2(ofs+15,y+Math::floor((h-scroll[i]->get_minimum_size().height)/2.0)));
 				scroll[i]->set_val(values[i]);
 				scroll[i]->set_size(Size2(120,1));
 				scroll[i]->show();
-				value_editor[i]->set_pos(Point2(ofs+140,y));
+				value_editor[i]->set_position(Point2(ofs+140,y));
 				value_editor[i]->set_size(Size2(40,h));
 				value_editor[i]->set_text( String::num(values[i],2 ));
 
@@ -856,20 +853,12 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			value_label[2]->set_text("B");
 			value_label[3]->set_text("A");
 
-			Size2 new_size = value_editor[3]->get_pos() + value_editor[3]->get_size() + Point2(10,10);
+			Size2 new_size = value_editor[3]->get_position() + value_editor[3]->get_size() + Point2(10,10);
 			set_size( new_size );
 			*/
 
 		} break;
-		case Variant::IMAGE: {
 
-			List<String> names;
-			names.push_back(TTR("New"));
-			names.push_back(TTR("Load"));
-			names.push_back(TTR("Clear"));
-			config_action_buttons(names);
-
-		} break;
 		case Variant::NODE_PATH: {
 
 			List<String> names;
@@ -980,14 +969,11 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				}
 			}
 
-			menu->set_pos(get_pos());
+			menu->set_position(get_position());
 			menu->popup();
 			hide();
 			updating = false;
 			return false;
-
-		} break;
-		case Variant::INPUT_EVENT: {
 
 		} break;
 		case Variant::DICTIONARY: {
@@ -1058,16 +1044,6 @@ void CustomPropertyEditor::_file_selected(String p_file) {
 				break;
 			}
 			v = res.get_ref_ptr();
-			emit_signal("variant_changed");
-			hide();
-		} break;
-		case Variant::IMAGE: {
-
-			Image image;
-			Error err = ImageLoader::load_image(p_file, &image);
-			ERR_EXPLAIN(TTR("Couldn't load image"));
-			ERR_FAIL_COND(err);
-			v = image;
 			emit_signal("variant_changed");
 			hide();
 		} break;
@@ -1387,36 +1363,7 @@ void CustomPropertyEditor::_action_pressed(int p_which) {
 			}
 
 		} break;
-		case Variant::IMAGE: {
 
-			if (p_which == 0) {
-				//new image too difficult
-				ERR_PRINT("New Image Unimplemented");
-
-			} else if (p_which == 1) {
-
-				file->set_access(EditorFileDialog::ACCESS_RESOURCES);
-				file->set_mode(EditorFileDialog::MODE_OPEN_FILE);
-				List<String> extensions;
-				ImageLoader::get_recognized_extensions(&extensions);
-
-				file->clear_filters();
-
-				for (List<String>::Element *E = extensions.front(); E; E = E->next()) {
-
-					file->add_filter("*." + E->get() + " ; " + E->get().to_upper());
-				}
-
-				file->popup_centered_ratio();
-
-			} else if (p_which == 2) {
-
-				v = Image();
-				emit_signal("variant_changed");
-				hide();
-			}
-
-		} break;
 		default: {};
 	}
 }
@@ -1448,11 +1395,13 @@ void CustomPropertyEditor::_scroll_modified(double p_value) {
 	*/
 }
 
-void CustomPropertyEditor::_drag_easing(const InputEvent &p_ev) {
+void CustomPropertyEditor::_drag_easing(const Ref<InputEvent> &p_ev) {
 
-	if (p_ev.type == InputEvent::MOUSE_MOTION && p_ev.mouse_motion.button_mask & BUTTON_MASK_LEFT) {
+	Ref<InputEventMouseMotion> mm = p_ev;
 
-		float rel = p_ev.mouse_motion.relative_x;
+	if (mm.is_valid() && mm->get_button_mask() & BUTTON_MASK_LEFT) {
+
+		float rel = mm->get_relative().x;
 		if (rel == 0)
 			return;
 
@@ -1481,8 +1430,8 @@ void CustomPropertyEditor::_drag_easing(const InputEvent &p_ev) {
 		//emit_signal("variant_changed");
 		emit_signal("variant_changed");
 	}
-	if (p_ev.type == InputEvent::MOUSE_BUTTON && p_ev.mouse_button.button_index == BUTTON_LEFT) {
-	}
+	//	if (p_ev.type == Ref<InputEvent>::MOUSE_BUTTON && p_ev->get_button_index() == BUTTON_LEFT) {
+	//	}
 }
 
 void CustomPropertyEditor::_draw_easing() {
@@ -1756,16 +1705,11 @@ void CustomPropertyEditor::_modified(String p_string) {
 			emit_signal("variant_changed");
 			*/
 		} break;
-		case Variant::IMAGE: {
 
-		} break;
 		case Variant::NODE_PATH: {
 
 			v = NodePath(value_editor[0]->get_text());
 			emit_signal("variant_changed");
-		} break;
-		case Variant::INPUT_EVENT: {
-
 		} break;
 		case Variant::DICTIONARY: {
 
@@ -1867,7 +1811,7 @@ void CustomPropertyEditor::config_action_buttons(const List<String> &p_strings) 
 		if (i < p_strings.size()) {
 			action_buttons[i]->show();
 			action_buttons[i]->set_text(p_strings[i]);
-			action_buttons[i]->set_pos(Point2(m, m + i * (h + m)));
+			action_buttons[i]->set_position(Point2(m, m + i * (h + m)));
 			action_buttons[i]->set_size(Size2(w - m * 2, h));
 			action_buttons[i]->set_flat(true);
 		} else {
@@ -1895,9 +1839,9 @@ void CustomPropertyEditor::config_value_editors(int p_amount, int p_columns, int
 			value_editor[i]->show();
 			value_label[i]->show();
 			value_label[i]->set_text(i < p_strings.size() ? p_strings[i] : String(""));
-			value_editor[i]->set_pos(Point2(m + p_label_w + c * (w + m + p_label_w), m + r * (h + m)));
+			value_editor[i]->set_position(Point2(m + p_label_w + c * (w + m + p_label_w), m + r * (h + m)));
 			value_editor[i]->set_size(Size2(w, h));
-			value_label[i]->set_pos(Point2(m + c * (w + m + p_label_w), m + r * (h + m)));
+			value_label[i]->set_position(Point2(m + c * (w + m + p_label_w), m + r * (h + m)));
 			value_editor[i]->set_editable(!read_only);
 		} else {
 			value_editor[i]->hide();
@@ -2357,15 +2301,6 @@ void PropertyEditor::set_item_text(TreeItem *p_item, int p_type, const String &p
 			//p_item->set_text(1,obj->get(p_name));
 
 		} break;
-		case Variant::IMAGE: {
-
-			Image img = obj->get(p_name);
-			if (img.empty())
-				p_item->set_text(1, "[Image (empty)]");
-			else
-				p_item->set_text(1, "[Image " + itos(img.get_width()) + "x" + itos(img.get_height()) + "-" + String(Image::get_format_name(img.get_format())) + "]");
-
-		} break;
 		case Variant::NODE_PATH: {
 
 			p_item->set_text(1, obj->get(p_name));
@@ -2387,6 +2322,10 @@ void PropertyEditor::set_item_text(TreeItem *p_item, int p_type, const String &p
 				RES res = obj->get(p_name).operator RefPtr();
 				if (res->is_class("Texture")) {
 					int tw = EditorSettings::get_singleton()->get("docks/property_editor/texture_preview_width");
+					Vector2 size(res->call("get_width"), res->call("get_height"));
+					if (size.width < size.height) {
+						tw = MAX((size.width / size.height) * tw, 1);
+					}
 					p_item->set_icon_max_width(1, tw);
 					p_item->set_icon(1, res);
 					p_item->set_text(1, "");
@@ -2426,7 +2365,9 @@ void PropertyEditor::set_item_text(TreeItem *p_item, int p_type, const String &p
 					}
 				}
 
-				if (!res->is_class("Texture")) {
+				if (res->is_class("Script")) {
+					p_item->set_text(1, res->get_path().get_file());
+				} else if (!res->is_class("Texture")) {
 					//texture already previews via itself
 					EditorResourcePreview::get_singleton()->queue_edited_resource_preview(res, this, "_resource_preview_done", p_item->get_instance_ID());
 				}
@@ -2744,6 +2685,10 @@ void PropertyEditor::_notification(int p_what) {
 
 		changing = false;
 	}
+
+	if (p_what == EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED) {
+		update_tree();
+	}
 }
 
 TreeItem *PropertyEditor::get_parent_node(String p_path, HashMap<String, TreeItem *> &item_paths, TreeItem *root) {
@@ -2763,10 +2708,7 @@ TreeItem *PropertyEditor::get_parent_node(String p_path, HashMap<String, TreeIte
 		item = tree->create_item(parent);
 
 		String name = (p_path.find("/") != -1) ? p_path.right(p_path.find_last("/") + 1) : p_path;
-		if (capitalize_paths)
-			item->set_text(0, name.capitalize());
-		else
-			item->set_text(0, name);
+		item->set_text(0, capitalize_paths ? name.capitalize() : name);
 		item->set_tooltip(0, p_path);
 		if (item->get_parent() != root) {
 			item->set_icon(0, get_icon("Folder", "EditorIcons"));
@@ -3399,6 +3341,13 @@ void PropertyEditor::update_tree() {
 					item->set_icon(0, get_icon("ArrayData", "EditorIcons"));
 
 			} break;
+			case Variant::DICTIONARY: {
+
+				item->set_cell_mode(1, TreeItem::CELL_MODE_STRING);
+				item->set_editable(1, false);
+				item->set_text(1, obj->get(p.name).operator String());
+
+			} break;
 
 			case Variant::POOL_INT_ARRAY: {
 
@@ -3578,19 +3527,7 @@ void PropertyEditor::update_tree() {
 					item->set_icon(0, get_icon("Color", "EditorIcons"));
 
 			} break;
-			case Variant::IMAGE: {
 
-				item->set_cell_mode(1, TreeItem::CELL_MODE_CUSTOM);
-				item->set_editable(1, !read_only);
-				Image img = obj->get(p.name);
-				if (img.empty())
-					item->set_text(1, "[Image (empty)]");
-				else
-					item->set_text(1, "[Image " + itos(img.get_width()) + "x" + itos(img.get_height()) + "-" + String(Image::get_format_name(img.get_format())) + "]");
-				if (show_type_icons)
-					item->set_icon(0, get_icon("Image", "EditorIcons"));
-
-			} break;
 			case Variant::NODE_PATH: {
 
 				item->set_cell_mode(1, TreeItem::CELL_MODE_STRING);
@@ -3617,6 +3554,10 @@ void PropertyEditor::update_tree() {
 
 					if (res->is_class("Texture")) {
 						int tw = EditorSettings::get_singleton()->get("docks/property_editor/texture_preview_width");
+						Vector2 size(res->call("get_width"), res->call("get_height"));
+						if (size.width < size.height) {
+							tw = MAX((size.width / size.height) * tw, 1);
+						}
 						item->set_icon_max_width(1, tw);
 						item->set_icon(1, res);
 						item->set_text(1, "");
@@ -3640,7 +3581,9 @@ void PropertyEditor::update_tree() {
 					} else if (res.is_valid()) {
 						item->set_tooltip(1, res->get_name() + " (" + res->get_class() + ")");
 					}
-					if (!res->is_class("Texture")) {
+					if (res->is_class("Script")) {
+						item->set_text(1, res->get_path().get_file());
+					} else if (!res->is_class("Texture")) {
 						//texture already previews via itself
 						EditorResourcePreview::get_singleton()->queue_edited_resource_preview(res, this, "_resource_preview_done", item->get_instance_ID());
 					}
@@ -3846,8 +3789,8 @@ void PropertyEditor::_item_edited() {
 		} break;
 		case Variant::BOOL: {
 
-			_edit_set(name, item->is_checked(1), refresh_all);
 			item->set_tooltip(1, item->is_checked(1) ? "True" : "False");
+			_edit_set(name, item->is_checked(1), refresh_all);
 		} break;
 		case Variant::INT:
 		case Variant::REAL: {
@@ -3906,17 +3849,12 @@ void PropertyEditor::_item_edited() {
 		case Variant::COLOR: {
 			//_edit_set(name,item->get_custom_bg_color(0));
 		} break;
-		case Variant::IMAGE: {
 
-		} break;
 		case Variant::NODE_PATH: {
 			_edit_set(name, NodePath(item->get_text(1)), refresh_all);
 
 		} break;
 
-		case Variant::INPUT_EVENT: {
-
-		} break;
 		case Variant::DICTIONARY: {
 
 		} break;
@@ -3988,7 +3926,7 @@ void PropertyEditor::_custom_editor_request(bool p_arrow) {
 	int hint = d.has("hint") ? d["hint"].operator int() : -1;
 	String hint_text = d.has("hint_text") ? d["hint_text"] : "";
 	Rect2 where = tree->get_custom_popup_rect();
-	custom_editor->set_pos(where.pos);
+	custom_editor->set_position(where.pos);
 
 	if (custom_editor->edit(obj, name, type, v, hint, hint_text)) {
 		custom_editor->popup();
@@ -4096,8 +4034,8 @@ void PropertyEditor::_edit_button(Object *p_item, int p_column, int p_button) {
 			custom_editor->edit(obj, n, (Variant::Type)t, v, h, ht);
 			Rect2 where = tree->get_item_rect(ti, 1);
 			where.pos -= tree->get_scroll();
-			where.pos += tree->get_global_pos();
-			custom_editor->set_pos(where.pos);
+			where.pos += tree->get_global_position();
+			custom_editor->set_position(where.pos);
 			custom_editor->popup();
 
 		} else if (t == Variant::STRING) {
@@ -4109,8 +4047,8 @@ void PropertyEditor::_edit_button(Object *p_item, int p_column, int p_button) {
 
 				Rect2 where = tree->get_item_rect(ti, 1);
 				where.pos -= tree->get_scroll();
-				where.pos += tree->get_global_pos();
-				custom_editor->set_pos(where.pos);
+				where.pos += tree->get_global_position();
+				custom_editor->set_position(where.pos);
 				custom_editor->popup();
 			} else {
 				custom_editor->popup_centered_ratio();
@@ -4286,9 +4224,15 @@ String PropertyEditor::get_selected_path() const {
 		return "";
 }
 
-void PropertyEditor::set_capitalize_paths(bool p_capitalize) {
+bool PropertyEditor::is_capitalize_paths_enabled() const {
+
+	return capitalize_paths;
+}
+
+void PropertyEditor::set_enable_capitalize_paths(bool p_capitalize) {
 
 	capitalize_paths = p_capitalize;
+	update_tree_pending = true;
 }
 
 void PropertyEditor::set_autoclear(bool p_enable) {
@@ -4388,6 +4332,7 @@ PropertyEditor::PropertyEditor() {
 	capitalize_paths = true;
 	autoclear = false;
 	tree->set_column_titles_visible(false);
+	tree->add_constant_override("button_margin", 0);
 
 	keying = false;
 	read_only = false;

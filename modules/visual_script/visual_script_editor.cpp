@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -345,11 +346,9 @@ static Color _color_from_type(Variant::Type p_type) {
 		case Variant::TRANSFORM: color = Color::html("f6a86e"); break;
 
 		case Variant::COLOR: color = Color::html("9dff70"); break;
-		case Variant::IMAGE: color = Color::html("93f1b9"); break;
 		case Variant::NODE_PATH: color = Color::html("6993ec"); break;
 		case Variant::_RID: color = Color::html("69ec9a"); break;
 		case Variant::OBJECT: color = Color::html("79f3e8"); break;
-		case Variant::INPUT_EVENT: color = Color::html("adf18f"); break;
 		case Variant::DICTIONARY: color = Color::html("77edb1"); break;
 
 		case Variant::ARRAY: color = Color::html("e0e0e0"); break;
@@ -450,11 +449,9 @@ void VisualScriptEditor::_update_graph(int p_only_id) {
 		Control::get_icon("MiniBasis", "EditorIcons"),
 		Control::get_icon("MiniTransform", "EditorIcons"),
 		Control::get_icon("MiniColor", "EditorIcons"),
-		Control::get_icon("MiniImage", "EditorIcons"),
 		Control::get_icon("MiniPath", "EditorIcons"),
 		Control::get_icon("MiniRid", "EditorIcons"),
 		Control::get_icon("MiniObject", "EditorIcons"),
-		Control::get_icon("MiniInput", "EditorIcons"),
 		Control::get_icon("MiniDictionary", "EditorIcons"),
 		Control::get_icon("MiniArray", "EditorIcons"),
 		Control::get_icon("MiniRawArray", "EditorIcons"),
@@ -734,11 +731,9 @@ void VisualScriptEditor::_update_members() {
 		Control::get_icon("MiniMatrix3", "EditorIcons"),
 		Control::get_icon("MiniTransform", "EditorIcons"),
 		Control::get_icon("MiniColor", "EditorIcons"),
-		Control::get_icon("MiniImage", "EditorIcons"),
 		Control::get_icon("MiniPath", "EditorIcons"),
 		Control::get_icon("MiniRid", "EditorIcons"),
 		Control::get_icon("MiniObject", "EditorIcons"),
-		Control::get_icon("MiniInput", "EditorIcons"),
 		Control::get_icon("MiniDictionary", "EditorIcons"),
 		Control::get_icon("MiniArray", "EditorIcons"),
 		Control::get_icon("MiniRawArray", "EditorIcons"),
@@ -1016,7 +1011,7 @@ void VisualScriptEditor::_member_button(Object *p_item, int p_column, int p_butt
 				}
 
 				Rect2 pos = members->get_item_rect(ti);
-				new_function_menu->set_pos(members->get_global_pos() + pos.pos + Vector2(0, pos.size.y));
+				new_function_menu->set_position(members->get_global_position() + pos.pos + Vector2(0, pos.size.y));
 				new_function_menu->popup();
 				return;
 			} else if (p_button == 0) {
@@ -1421,9 +1416,11 @@ void VisualScriptEditor::_on_nodes_duplicate() {
 	}
 }
 
-void VisualScriptEditor::_input(const InputEvent &p_event) {
+void VisualScriptEditor::_input(const Ref<InputEvent> &p_event) {
 
-	if (p_event.type == InputEvent::MOUSE_BUTTON && !p_event.mouse_button.pressed && p_event.mouse_button.button_index == BUTTON_LEFT) {
+	Ref<InputEventMouseButton> mb = p_event;
+
+	if (mb.is_valid() && !mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 		revert_on_drag = String(); //so we can still drag functions
 	}
 }
@@ -2152,7 +2149,7 @@ void VisualScriptEditor::goto_line(int p_line, bool p_with_error) {
 			_update_graph();
 			_update_members();
 
-			call_deferred("_center_on_node", p_line); //editor might be just created and size might not exist yet
+			call_deferred("call_deferred", "_center_on_node", p_line); //editor might be just created and size might not exist yet
 
 			return;
 		}
@@ -2160,6 +2157,12 @@ void VisualScriptEditor::goto_line(int p_line, bool p_with_error) {
 }
 
 void VisualScriptEditor::trim_trailing_whitespace() {
+}
+
+void VisualScriptEditor::convert_indent_to_spaces() {
+}
+
+void VisualScriptEditor::convert_indent_to_tabs() {
 }
 
 void VisualScriptEditor::ensure_focus() {
@@ -2189,18 +2192,6 @@ void VisualScriptEditor::get_breakpoints(List<int> *p_breakpoints) {
 			}
 		}
 	}
-}
-
-bool VisualScriptEditor::goto_method(const String &p_method) {
-
-	if (!script->has_function(p_method))
-		return false;
-
-	edited_func = p_method;
-	selected = edited_func;
-	_update_members();
-	_update_graph();
-	return true;
 }
 
 void VisualScriptEditor::add_callback(const String &p_function, PoolStringArray p_args) {
@@ -2516,7 +2507,7 @@ void VisualScriptEditor::_graph_connect_to_empty(const String &p_from, int p_fro
 
 	port_action_pos = p_release_pos;
 	port_action_popup->set_size(Size2(1, 1));
-	port_action_popup->set_pos(graph->get_global_pos() + p_release_pos);
+	port_action_popup->set_position(graph->get_global_position() + p_release_pos);
 	port_action_popup->popup();
 }
 
@@ -2648,7 +2639,7 @@ void VisualScriptEditor::_port_action_menu(int p_option) {
 			} else {
 				n->set_call_mode(VisualScriptPropertySet::CALL_MODE_BASIC_TYPE);
 				n->set_basic_type(tg.type);
-				new_connect_node_select->select_property_from_basic_type(tg.type, tg.ev_type);
+				new_connect_node_select->select_property_from_basic_type(tg.type);
 			}
 		} break;
 		case CREATE_GET: {
@@ -2678,7 +2669,7 @@ void VisualScriptEditor::_port_action_menu(int p_option) {
 			} else {
 				n->set_call_mode(VisualScriptPropertyGet::CALL_MODE_BASIC_TYPE);
 				n->set_basic_type(tg.type);
-				new_connect_node_select->select_property_from_basic_type(tg.type, tg.ev_type);
+				new_connect_node_select->select_property_from_basic_type(tg.type);
 			}
 
 		} break;
@@ -2805,7 +2796,7 @@ void VisualScriptEditor::_default_value_edited(Node *p_button, int p_id, int p_i
 		existing = Variant::construct(pinfo.type, &existingp, 1, ce, false);
 	}
 
-	default_value_edit->set_pos(p_button->cast_to<Control>()->get_global_pos() + Vector2(0, p_button->cast_to<Control>()->get_size().y));
+	default_value_edit->set_position(p_button->cast_to<Control>()->get_global_position() + Vector2(0, p_button->cast_to<Control>()->get_size().y));
 	default_value_edit->set_size(Size2(1, 1));
 	if (default_value_edit->edit(NULL, pinfo.name, pinfo.type, existing, pinfo.hint, pinfo.hint_string)) {
 		if (pinfo.hint == PROPERTY_HINT_MULTILINE_TEXT)

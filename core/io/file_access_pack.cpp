@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -439,13 +440,12 @@ Error DirAccessPack::change_dir(String p_dir) {
 
 String DirAccessPack::get_current_dir() {
 
-	String p;
 	PackedData::PackedDir *pd = current;
-	while (pd->parent) {
+	String p = current->name;
 
-		if (pd != current)
-			p = "/" + p;
-		p = p + pd->name;
+	while (pd->parent) {
+		pd = pd->parent;
+		p = pd->name + "/" + p;
 	}
 
 	return "res://" + p;

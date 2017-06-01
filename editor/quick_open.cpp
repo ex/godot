@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -76,17 +77,18 @@ void EditorQuickOpen::_text_changed(const String &p_newtext) {
 	_update_search();
 }
 
-void EditorQuickOpen::_sbox_input(const InputEvent &p_ie) {
+void EditorQuickOpen::_sbox_input(const Ref<InputEvent> &p_ie) {
 
-	if (p_ie.type == InputEvent::KEY) {
+	Ref<InputEventKey> k = p_ie;
+	if (k.is_valid()) {
 
-		switch (p_ie.key.scancode) {
+		switch (k->get_scancode()) {
 			case KEY_UP:
 			case KEY_DOWN:
 			case KEY_PAGEUP:
 			case KEY_PAGEDOWN: {
 
-				search_options->call("_gui_input", p_ie);
+				search_options->call("_gui_input", k);
 				search_box->accept_event();
 
 				TreeItem *root = search_options->get_root();

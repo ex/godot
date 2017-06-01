@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -942,18 +943,6 @@ static Ref<VisualScriptNode> create_function_call_node(const String &p_name) {
 ////////////////SET//////////////////////
 //////////////////////////////////////////
 
-static const char *event_type_names[InputEvent::TYPE_MAX] = {
-	"None",
-	"Key",
-	"MouseMotion",
-	"MouseButton",
-	"JoypadMotion",
-	"JoypadButton",
-	"ScreenTouch",
-	"ScreenDrag",
-	"Action"
-};
-
 int VisualScriptPropertySet::get_output_sequence_port_count() const {
 
 	return call_mode != CALL_MODE_BASIC_TYPE ? 1 : 0;
@@ -1118,24 +1107,6 @@ Variant::Type VisualScriptPropertySet::get_basic_type() const {
 	return basic_type;
 }
 
-void VisualScriptPropertySet::set_event_type(InputEvent::Type p_type) {
-
-	if (event_type == p_type)
-		return;
-	event_type = p_type;
-	if (call_mode == CALL_MODE_BASIC_TYPE) {
-		_update_cache();
-	}
-	_change_notify();
-	_update_base_type();
-	ports_changed_notify();
-}
-
-InputEvent::Type VisualScriptPropertySet::get_event_type() const {
-
-	return event_type;
-}
-
 void VisualScriptPropertySet::set_base_type(const StringName &p_type) {
 
 	if (base_type == p_type)
@@ -1181,14 +1152,8 @@ void VisualScriptPropertySet::_update_cache() {
 		//not super efficient..
 
 		Variant v;
-		if (basic_type == Variant::INPUT_EVENT) {
-			InputEvent ev;
-			ev.type = event_type;
-			v = ev;
-		} else {
-			Variant::CallError ce;
-			v = Variant::construct(basic_type, NULL, 0, ce);
-		}
+		Variant::CallError ce;
+		v = Variant::construct(basic_type, NULL, 0, ce);
 
 		List<PropertyInfo> pinfo;
 		v.get_property_list(&pinfo);
@@ -1340,12 +1305,6 @@ void VisualScriptPropertySet::_validate_property(PropertyInfo &property) const {
 		}
 	}
 
-	if (property.name == "property/event_type") {
-		if (call_mode != CALL_MODE_BASIC_TYPE || basic_type != Variant::INPUT_EVENT) {
-			property.usage = 0;
-		}
-	}
-
 	if (property.name == "property/node_path") {
 		if (call_mode != CALL_MODE_NODE_PATH) {
 			property.usage = 0;
@@ -1417,9 +1376,6 @@ void VisualScriptPropertySet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_set_type_cache", "type_cache"), &VisualScriptPropertySet::_set_type_cache);
 	ClassDB::bind_method(D_METHOD("_get_type_cache"), &VisualScriptPropertySet::_get_type_cache);
 
-	ClassDB::bind_method(D_METHOD("set_event_type", "event_type"), &VisualScriptPropertySet::set_event_type);
-	ClassDB::bind_method(D_METHOD("get_event_type"), &VisualScriptPropertySet::get_event_type);
-
 	ClassDB::bind_method(D_METHOD("set_property", "property"), &VisualScriptPropertySet::set_property);
 	ClassDB::bind_method(D_METHOD("get_property"), &VisualScriptPropertySet::get_property);
 
@@ -1435,14 +1391,6 @@ void VisualScriptPropertySet::_bind_methods() {
 			bt += ",";
 
 		bt += Variant::get_type_name(Variant::Type(i));
-	}
-
-	String et;
-	for (int i = 0; i < InputEvent::TYPE_MAX; i++) {
-		if (i > 0)
-			et += ",";
-
-		et += event_type_names[i];
 	}
 
 	List<String> script_extensions;
@@ -1462,7 +1410,6 @@ void VisualScriptPropertySet::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "property/base_script", PROPERTY_HINT_FILE, script_ext_hint), "set_base_script", "get_base_script");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "property/type_cache", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "_set_type_cache", "_get_type_cache");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "property/basic_type", PROPERTY_HINT_ENUM, bt), "set_basic_type", "get_basic_type");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "property/event_type", PROPERTY_HINT_ENUM, et), "set_event_type", "get_event_type");
 	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "property/node_path", PROPERTY_HINT_NODE_PATH_TO_EDITED_NODE), "set_base_path", "get_base_path");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "property/property"), "set_property", "get_property");
 
@@ -1573,7 +1520,6 @@ VisualScriptPropertySet::VisualScriptPropertySet() {
 	call_mode = CALL_MODE_SELF;
 	base_type = "Object";
 	basic_type = Variant::NIL;
-	event_type = InputEvent::NONE;
 }
 
 template <VisualScriptPropertySet::CallMode cmode>
@@ -1763,14 +1709,8 @@ void VisualScriptPropertyGet::_update_cache() {
 		//not super efficient..
 
 		Variant v;
-		if (basic_type == Variant::INPUT_EVENT) {
-			InputEvent ev;
-			ev.type = event_type;
-			v = ev;
-		} else {
-			Variant::CallError ce;
-			v = Variant::construct(basic_type, NULL, 0, ce);
-		}
+		Variant::CallError ce;
+		v = Variant::construct(basic_type, NULL, 0, ce);
 
 		List<PropertyInfo> pinfo;
 		v.get_property_list(&pinfo);
@@ -1918,24 +1858,6 @@ Variant::Type VisualScriptPropertyGet::get_basic_type() const {
 	return basic_type;
 }
 
-void VisualScriptPropertyGet::set_event_type(InputEvent::Type p_type) {
-
-	if (event_type == p_type)
-		return;
-	event_type = p_type;
-	if (call_mode == CALL_MODE_BASIC_TYPE) {
-		_update_cache();
-	}
-	_change_notify();
-	_update_base_type();
-	ports_changed_notify();
-}
-
-InputEvent::Type VisualScriptPropertyGet::get_event_type() const {
-
-	return event_type;
-}
-
 void VisualScriptPropertyGet::_set_type_cache(Variant::Type p_type) {
 	type_cache = p_type;
 }
@@ -1961,11 +1883,6 @@ void VisualScriptPropertyGet::_validate_property(PropertyInfo &property) const {
 
 	if (property.name == "property/basic_type") {
 		if (call_mode != CALL_MODE_BASIC_TYPE) {
-			property.usage = 0;
-		}
-	}
-	if (property.name == "property/event_type") {
-		if (call_mode != CALL_MODE_BASIC_TYPE || basic_type != Variant::INPUT_EVENT) {
 			property.usage = 0;
 		}
 	}
@@ -2040,9 +1957,6 @@ void VisualScriptPropertyGet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_set_type_cache", "type_cache"), &VisualScriptPropertyGet::_set_type_cache);
 	ClassDB::bind_method(D_METHOD("_get_type_cache"), &VisualScriptPropertyGet::_get_type_cache);
 
-	ClassDB::bind_method(D_METHOD("set_event_type", "event_type"), &VisualScriptPropertyGet::set_event_type);
-	ClassDB::bind_method(D_METHOD("get_event_type"), &VisualScriptPropertyGet::get_event_type);
-
 	ClassDB::bind_method(D_METHOD("set_property", "property"), &VisualScriptPropertyGet::set_property);
 	ClassDB::bind_method(D_METHOD("get_property"), &VisualScriptPropertyGet::get_property);
 
@@ -2058,14 +1972,6 @@ void VisualScriptPropertyGet::_bind_methods() {
 			bt += ",";
 
 		bt += Variant::get_type_name(Variant::Type(i));
-	}
-
-	String et;
-	for (int i = 0; i < InputEvent::TYPE_MAX; i++) {
-		if (i > 0)
-			et += ",";
-
-		et += event_type_names[i];
 	}
 
 	List<String> script_extensions;
@@ -2085,7 +1991,6 @@ void VisualScriptPropertyGet::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "property/base_script", PROPERTY_HINT_FILE, script_ext_hint), "set_base_script", "get_base_script");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "property/type_cache", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "_set_type_cache", "_get_type_cache");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "property/basic_type", PROPERTY_HINT_ENUM, bt), "set_basic_type", "get_basic_type");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "property/event_type", PROPERTY_HINT_ENUM, et), "set_event_type", "get_event_type");
 	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "property/node_path", PROPERTY_HINT_NODE_PATH_TO_EDITED_NODE), "set_base_path", "get_base_path");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "property/property"), "set_property", "get_property");
 
@@ -2183,7 +2088,6 @@ VisualScriptPropertyGet::VisualScriptPropertyGet() {
 	call_mode = CALL_MODE_SELF;
 	base_type = "Object";
 	basic_type = Variant::NIL;
-	event_type = InputEvent::NONE;
 	type_cache = Variant::NIL;
 }
 

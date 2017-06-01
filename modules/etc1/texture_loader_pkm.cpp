@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -84,7 +85,7 @@ RES ResourceFormatPKM::load(const String &p_path, const String &p_original_path,
 	int width = h.origWidth;
 	int height = h.origHeight;
 
-	Image img(width, height, mipmaps, Image::FORMAT_ETC, src_data);
+	Ref<Image> img = memnew(Image(width, height, mipmaps, Image::FORMAT_ETC, src_data));
 
 	Ref<ImageTexture> texture = memnew(ImageTexture);
 	texture->create_from_image(img);

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -116,12 +117,11 @@ class OS_X11 : public OS_Unix {
 	bool last_mouse_pos_valid;
 	Point2i last_click_pos;
 	uint64_t last_click_ms;
-	unsigned int event_id;
 	uint32_t last_button_state;
 
 	PhysicsServer *physics_server;
 	unsigned int get_mouse_button_state(unsigned int p_x11_state);
-	InputModifierState get_key_modifier_state(unsigned int p_x11_state);
+	void get_key_modifier_state(unsigned int p_x11_state, Ref<InputEventWithModifiers> state);
 	Physics2DServer *physics_2d_server;
 
 	MouseMode mouse_mode;
@@ -202,11 +202,11 @@ public:
 	MouseMode get_mouse_mode() const;
 
 	virtual void warp_mouse_pos(const Point2 &p_to);
-	virtual Point2 get_mouse_pos() const;
+	virtual Point2 get_mouse_position() const;
 	virtual int get_mouse_button_state() const;
 	virtual void set_window_title(const String &p_title);
 
-	virtual void set_icon(const Image &p_icon);
+	virtual void set_icon(const Ref<Image> &p_icon);
 
 	virtual MainLoop *get_main_loop() const;
 

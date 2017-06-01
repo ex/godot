@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Author: Mariano Suligoy                                               */
 /*                                                                       */
@@ -121,7 +122,7 @@ protected:
 public:
 	void _edit_region();
 	void _region_draw();
-	void _region_input(const InputEvent &p_input);
+	void _region_input(const Ref<InputEvent> &p_input);
 	void _scroll_changed(float);
 
 	void edit(Object *p_obj);

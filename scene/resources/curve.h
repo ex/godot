@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -135,7 +136,7 @@ public:
 
 	float get_baked_length() const;
 	Vector2 interpolate_baked(float p_offset, bool p_cubic = false) const;
-	PoolVector2Array get_baked_points() const; //useful for going thru
+	PoolVector2Array get_baked_points() const; //useful for going through
 
 	PoolVector2Array tesselate(int p_max_stages = 5, float p_tolerance = 4) const; //useful for display
 
@@ -203,8 +204,8 @@ public:
 	float get_baked_length() const;
 	Vector3 interpolate_baked(float p_offset, bool p_cubic = false) const;
 	float interpolate_baked_tilt(float p_offset) const;
-	PoolVector3Array get_baked_points() const; //useful for going thru
-	PoolRealArray get_baked_tilts() const; //useful for going thru
+	PoolVector3Array get_baked_points() const; //useful for going through
+	PoolRealArray get_baked_tilts() const; //useful for going through
 
 	PoolVector3Array tesselate(int p_max_stages = 5, float p_tolerance = 4) const; //useful for display
 

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1013,7 +1014,7 @@ int GDCompiler::_parse_expression(CodeGen &codegen, const GDParser::Node *p_expr
 					}
 
 				} break;
-				case GDParser::OperatorNode::OP_EXTENDS: {
+				case GDParser::OperatorNode::OP_IS: {
 
 					ERR_FAIL_COND_V(on->arguments.size() != 2, false);
 
@@ -1539,7 +1540,7 @@ Error GDCompiler::_parse_function(GDScript *p_script, const GDParser::ClassNode 
 			signature += "::0";
 		}
 
-		//funciton and class
+		//function and class
 
 		if (p_class->name) {
 			signature += "::" + String(p_class->name) + "." + String(func_name);
@@ -1660,7 +1661,7 @@ Error GDCompiler::_parse_class(GDScript *p_script, GDScript *p_owner, const GDPa
 					String sub = p_class->extends_class[i];
 					if (script->subclasses.has(sub)) {
 
-						Ref<Script> subclass = script->subclasses[sub]; //avoid reference from dissapearing
+						Ref<Script> subclass = script->subclasses[sub]; //avoid reference from disappearing
 						script = subclass;
 					} else {
 

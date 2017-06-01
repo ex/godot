@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -319,7 +320,7 @@ void JoypadWindows::probe_joypads() {
 	}
 }
 
-unsigned int JoypadWindows::process_joypads(unsigned int p_last_id) {
+void JoypadWindows::process_joypads() {
 
 	HRESULT hr;
 
@@ -337,16 +338,16 @@ unsigned int JoypadWindows::process_joypads(unsigned int p_last_id) {
 			int button_mask = XINPUT_GAMEPAD_DPAD_UP;
 			for (int i = 0; i <= 16; i++) {
 
-				p_last_id = input->joy_button(p_last_id, joy.id, i, joy.state.Gamepad.wButtons & button_mask);
+				input->joy_button(joy.id, i, joy.state.Gamepad.wButtons & button_mask);
 				button_mask = button_mask * 2;
 			}
 
-			p_last_id = input->joy_axis(p_last_id, joy.id, JOY_AXIS_0, axis_correct(joy.state.Gamepad.sThumbLX, true));
-			p_last_id = input->joy_axis(p_last_id, joy.id, JOY_AXIS_1, axis_correct(joy.state.Gamepad.sThumbLY, true, false, true));
-			p_last_id = input->joy_axis(p_last_id, joy.id, JOY_AXIS_2, axis_correct(joy.state.Gamepad.sThumbRX, true));
-			p_last_id = input->joy_axis(p_last_id, joy.id, JOY_AXIS_3, axis_correct(joy.state.Gamepad.sThumbRY, true, false, true));
-			p_last_id = input->joy_axis(p_last_id, joy.id, JOY_AXIS_4, axis_correct(joy.state.Gamepad.bLeftTrigger, true, true));
-			p_last_id = input->joy_axis(p_last_id, joy.id, JOY_AXIS_5, axis_correct(joy.state.Gamepad.bRightTrigger, true, true));
+			input->joy_axis(joy.id, JOY_AXIS_0, axis_correct(joy.state.Gamepad.sThumbLX, true));
+			input->joy_axis(joy.id, JOY_AXIS_1, axis_correct(joy.state.Gamepad.sThumbLY, true, false, true));
+			input->joy_axis(joy.id, JOY_AXIS_2, axis_correct(joy.state.Gamepad.sThumbRX, true));
+			input->joy_axis(joy.id, JOY_AXIS_3, axis_correct(joy.state.Gamepad.sThumbRY, true, false, true));
+			input->joy_axis(joy.id, JOY_AXIS_4, axis_correct(joy.state.Gamepad.bLeftTrigger, true, true));
+			input->joy_axis(joy.id, JOY_AXIS_5, axis_correct(joy.state.Gamepad.bRightTrigger, true, true));
 			joy.last_packet = joy.state.dwPacketNumber;
 		}
 		uint64_t timestamp = input->get_joy_vibration_timestamp(joy.id);
@@ -384,7 +385,7 @@ unsigned int JoypadWindows::process_joypads(unsigned int p_last_id) {
 			continue;
 		}
 
-		p_last_id = post_hat(p_last_id, joy->id, js.rgdwPOV[0]);
+		post_hat(joy->id, js.rgdwPOV[0]);
 
 		for (int j = 0; j < 128; j++) {
 
@@ -392,14 +393,14 @@ unsigned int JoypadWindows::process_joypads(unsigned int p_last_id) {
 
 				if (!joy->last_buttons[j]) {
 
-					p_last_id = input->joy_button(p_last_id, joy->id, j, true);
+					input->joy_button(joy->id, j, true);
 					joy->last_buttons[j] = true;
 				}
 			} else {
 
 				if (joy->last_buttons[j]) {
 
-					p_last_id = input->joy_button(p_last_id, joy->id, j, false);
+					input->joy_button(joy->id, j, false);
 					joy->last_buttons[j] = false;
 				}
 			}
@@ -414,16 +415,16 @@ unsigned int JoypadWindows::process_joypads(unsigned int p_last_id) {
 
 			for (int k = 0; k < count; k++) {
 				if (joy->joy_axis[j] == axes[k]) {
-					p_last_id = input->joy_axis(p_last_id, joy->id, j, axis_correct(values[k]));
+					input->joy_axis(joy->id, j, axis_correct(values[k]));
 					break;
 				};
 			};
 		};
 	}
-	return p_last_id;
+	return;
 }
 
-unsigned int JoypadWindows::post_hat(unsigned int p_last_id, int p_device, DWORD p_dpad) {
+void JoypadWindows::post_hat(int p_device, DWORD p_dpad) {
 
 	int dpad_val = 0;
 
@@ -462,7 +463,7 @@ unsigned int JoypadWindows::post_hat(unsigned int p_last_id, int p_device, DWORD
 
 		dpad_val = (InputDefault::HAT_MASK_LEFT | InputDefault::HAT_MASK_UP);
 	}
-	return input->joy_hat(p_last_id, p_device, dpad_val);
+	input->joy_hat(p_device, dpad_val);
 };
 
 InputDefault::JoyAxis JoypadWindows::axis_correct(int p_val, bool p_xinput, bool p_trigger, bool p_negate) const {

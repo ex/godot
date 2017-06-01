@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -30,7 +31,7 @@
 #define BAKED_LIGHT_BAKER_H
 
 #include "os/thread.h"
-#include "scene/3d/baked_light_instance.h"
+
 #include "scene/3d/light.h"
 #include "scene/3d/mesh_instance.h"
 

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -63,7 +64,7 @@ GotoLineDialog::GotoLineDialog() {
 	set_title(TTR("Go to Line"));
 	Label *l = memnew(Label);
 	l->set_text(TTR("Line Number:"));
-	l->set_pos(Point2(5, 5));
+	l->set_position(Point2(5, 5));
 	add_child(l);
 
 	line = memnew(LineEdit);
@@ -93,17 +94,16 @@ void FindReplaceBar::_notification(int p_what) {
 	}
 }
 
-void FindReplaceBar::_unhandled_input(const InputEvent &p_event) {
+void FindReplaceBar::_unhandled_input(const Ref<InputEvent> &p_event) {
 
-	if (p_event.type == InputEvent::KEY) {
+	Ref<InputEventKey> k = p_event;
+	if (k.is_valid()) {
 
-		const InputEventKey &k = p_event.key;
-
-		if (k.pressed && (text_edit->has_focus() || text_vbc->is_a_parent_of(get_focus_owner()))) {
+		if (k->is_pressed() && (text_edit->has_focus() || text_vbc->is_a_parent_of(get_focus_owner()))) {
 
 			bool accepted = true;
 
-			switch (k.scancode) {
+			switch (k->get_scancode()) {
 
 				case KEY_ESCAPE: {
 
@@ -241,7 +241,7 @@ void FindReplaceBar::_replace_all() {
 	}
 
 	text_edit->set_v_scroll(vsval);
-	set_error(vformat(TTR("Replaced %d Ocurrence(s)."), rc));
+	set_error(vformat(TTR("Replaced %d occurrence(s)."), rc));
 }
 
 void FindReplaceBar::_get_search_from(int &r_line, int &r_col) {
@@ -703,7 +703,7 @@ void FindReplaceDialog::_replace() {
 
 		text_edit->set_v_scroll(vsval);
 		//text_edit->set_h_scroll(hsval);
-		error_label->set_text(vformat(TTR("Replaced %d ocurrence(s)."), rc));
+		error_label->set_text(vformat(TTR("Replaced %d occurrence(s)."), rc));
 
 		//hide();
 	} else {
@@ -956,23 +956,27 @@ FindReplaceDialog::FindReplaceDialog() {
 
 /*** CODE EDITOR ****/
 
-void CodeTextEditor::_text_editor_gui_input(const InputEvent &p_event) {
+void CodeTextEditor::_text_editor_gui_input(const Ref<InputEvent> &p_event) {
 
-	if (p_event.type == InputEvent::MOUSE_BUTTON) {
+	Ref<InputEventMouseButton> mb = p_event;
 
-		const InputEventMouseButton &mb = p_event.mouse_button;
+	if (mb.is_valid()) {
 
-		if (mb.pressed && mb.mod.command) {
+		if (mb->is_pressed() && mb->get_command()) {
 
-			if (mb.button_index == BUTTON_WHEEL_UP) {
+			if (mb->get_button_index() == BUTTON_WHEEL_UP) {
 				_zoom_in();
-			} else if (mb.button_index == BUTTON_WHEEL_DOWN) {
+			} else if (mb->get_button_index() == BUTTON_WHEEL_DOWN) {
 				_zoom_out();
 			}
 		}
-	} else if (p_event.type == InputEvent::KEY) {
+	}
 
-		if (p_event.key.pressed) {
+	Ref<InputEventKey> k = p_event;
+
+	if (k.is_valid()) {
+
+		if (k->is_pressed()) {
 			if (ED_IS_SHORTCUT("script_editor/zoom_in", p_event)) {
 				_zoom_in();
 			}
@@ -1070,7 +1074,8 @@ void CodeTextEditor::update_editor_settings() {
 
 	text_editor->set_auto_brace_completion(EditorSettings::get_singleton()->get("text_editor/completion/auto_brace_complete"));
 	text_editor->set_scroll_pass_end_of_file(EditorSettings::get_singleton()->get("text_editor/cursor/scroll_past_end_of_file"));
-	text_editor->set_tab_size(EditorSettings::get_singleton()->get("text_editor/indent/tab_size"));
+	text_editor->set_indent_using_spaces(EditorSettings::get_singleton()->get("text_editor/indent/type"));
+	text_editor->set_indent_size(EditorSettings::get_singleton()->get("text_editor/indent/size"));
 	text_editor->set_draw_tabs(EditorSettings::get_singleton()->get("text_editor/indent/draw_tabs"));
 	text_editor->set_show_line_numbers(EditorSettings::get_singleton()->get("text_editor/line_numbers/show_line_numbers"));
 	text_editor->set_line_numbers_zero_padded(EditorSettings::get_singleton()->get("text_editor/line_numbers/line_numbers_zero_padded"));

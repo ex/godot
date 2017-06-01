@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1697,7 +1698,7 @@ Collada::Node *Collada::_parse_visual_scene_node(XMLParser &parser) {
 
 			} else if (section != "node") {
 				//usually what defines the type of node
-				//print_line(" dont know what to do with "+section);
+				//print_line(" don't know what to do with "+section);
 				if (section.begins_with("instance_")) {
 
 					if (!node) {
@@ -2444,7 +2445,7 @@ bool Collada::_move_geometry_to_skeletons(VisualScene *p_vscene, Node *p_node, L
 			//p_node->default_transform=Transform(); //this seems to be correct, because bind shape makes the object local to the skeleton
 			p_node->ignore_anim = true; // collada may animate this later, if it does, then this is not supported (redo your original asset and don't animate the base mesh)
 			p_node->parent = sk;
-			//sk->children.push_back(0,p_node); //avoid INFINIT loop
+			//sk->children.push_back(0,p_node); //avoid INFINITE loop
 			p_mgeom->push_back(p_node);
 			return true;
 		}

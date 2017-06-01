@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,6 +30,7 @@
 #ifndef EDITOR_PLUGIN_H
 #define EDITOR_PLUGIN_H
 
+#include "editor/import/editor_import_plugin.h"
 #include "io/config_file.h"
 #include "scene/gui/tool_button.h"
 #include "scene/main/node.h"
@@ -105,9 +107,9 @@ public:
 	void remove_tool_menu_item(const String &p_name);
 
 	virtual Ref<SpatialEditorGizmo> create_spatial_gizmo(Spatial *p_spatial);
-	virtual bool forward_canvas_gui_input(const Transform2D &p_canvas_xform, const InputEvent &p_event);
+	virtual bool forward_canvas_gui_input(const Transform2D &p_canvas_xform, const Ref<InputEvent> &p_event);
 	virtual void forward_draw_over_canvas(const Transform2D &p_canvas_xform, Control *p_canvas);
-	virtual bool forward_spatial_gui_input(Camera *p_camera, const InputEvent &p_event);
+	virtual bool forward_spatial_gui_input(Camera *p_camera, const Ref<InputEvent> &p_event);
 	virtual String get_name() const;
 	virtual bool has_main_screen() const;
 	virtual void make_visible(bool p_visible);
@@ -144,6 +146,8 @@ public:
 
 	virtual void restore_global_state();
 	virtual void save_global_state();
+
+	void add_import_plugin(const Ref<EditorImportPlugin> &p_importer);
 
 	EditorPlugin();
 	virtual ~EditorPlugin();

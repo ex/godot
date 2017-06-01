@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -144,6 +145,7 @@ class CanvasItemEditor : public VBoxContainer {
 		DRAG_ALL,
 		DRAG_ROTATE,
 		DRAG_PIVOT,
+		DRAG_NODE_2D,
 
 	};
 
@@ -320,9 +322,10 @@ class CanvasItemEditor : public VBoxContainer {
 	void _clear_canvas_items();
 	void _visibility_changed(ObjectID p_canvas_item);
 	void _key_move(const Vector2 &p_dir, bool p_snap, KeyMoveMODE p_move_mode);
-	void _list_select(const InputEventMouseButton &b);
+	void _list_select(const Ref<InputEventMouseButton> &b);
 
 	DragType _find_drag_type(const Transform2D &p_xform, const Rect2 &p_local_rect, const Point2 &p_click, Vector2 &r_point);
+	void _prepare_drag(const Point2 &p_click_pos);
 
 	void _popup_callback(int p_op);
 	bool updating_scroll;
@@ -349,9 +352,9 @@ class CanvasItemEditor : public VBoxContainer {
 	int get_item_count();
 	void _keying_changed();
 
-	void _unhandled_key_input(const InputEvent &p_ev);
+	void _unhandled_key_input(const Ref<InputEvent> &p_ev);
 
-	void _viewport_gui_input(const InputEvent &p_event);
+	void _viewport_gui_input(const Ref<InputEvent> &p_event);
 	void _viewport_draw();
 
 	void _focus_selection(int p_op);

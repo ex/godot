@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -40,16 +41,16 @@ void BitMap::create(const Size2 &p_size) {
 	zeromem(bitmask.ptr(), bitmask.size());
 }
 
-void BitMap::create_from_image_alpha(const Image &p_image) {
+void BitMap::create_from_image_alpha(const Ref<Image> &p_image) {
 
-	ERR_FAIL_COND(p_image.empty());
-	Image img = p_image;
-	img.convert(Image::FORMAT_LA8);
-	ERR_FAIL_COND(img.get_format() != Image::FORMAT_LA8);
+	ERR_FAIL_COND(p_image.is_null() || p_image->empty());
+	Ref<Image> img = p_image->duplicate();
+	img->convert(Image::FORMAT_LA8);
+	ERR_FAIL_COND(img->get_format() != Image::FORMAT_LA8);
 
-	create(Size2(img.get_width(), img.get_height()));
+	create(Size2(img->get_width(), img->get_height()));
 
-	PoolVector<uint8_t>::Read r = img.get_data().read();
+	PoolVector<uint8_t>::Read r = img->get_data().read();
 	uint8_t *w = bitmask.ptr();
 
 	for (int i = 0; i < width * height; i++) {

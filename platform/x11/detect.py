@@ -133,7 +133,7 @@ def configure(env):
 
     elif (env["target"] == "debug"):
 
-        env.Prepend(CCFLAGS=['-g2', '-Wall', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
+        env.Prepend(CCFLAGS=['-g2', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
 
     env.ParseConfig('pkg-config x11 --cflags --libs')
     env.ParseConfig('pkg-config xinerama --cflags --libs')
@@ -141,6 +141,15 @@ def configure(env):
     env.ParseConfig('pkg-config xrandr --cflags --libs')
 
     if (env['builtin_openssl'] == 'no'):
+        # Currently not compatible with OpenSSL 1.1.0+
+        # https://github.com/godotengine/godot/issues/8624
+        import subprocess
+        openssl_version = subprocess.check_output(['pkg-config', 'openssl', '--modversion']).strip('\n')
+        if (openssl_version >= "1.1.0"):
+            print("Error: Found system-installed OpenSSL %s, currently only supporting version 1.0.x." % openssl_version)
+            print("Aborting.. You can compile with 'builtin_openssl=yes' to use the bundled version.\n")
+            sys.exit(255)
+
         env.ParseConfig('pkg-config openssl --cflags --libs')
 
     if (env['builtin_libwebp'] == 'no'):
@@ -227,7 +236,7 @@ def configure(env):
         env.Append(LIBS=['dl'])
     # env.Append(CPPFLAGS=['-DMPC_FIXED_POINT'])
 
-# host compiler is default..
+    # host compiler is default..
 
     if (is64 and env["bits"] == "32"):
         env.Append(CPPFLAGS=['-m32'])

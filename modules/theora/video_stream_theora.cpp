@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -30,7 +31,8 @@
 
 #include "global_config.h"
 #include "os/os.h"
-#include "yuv2rgb.h"
+
+#include "thirdparty/misc/yuv2rgb.h"
 
 int VideoStreamPlaybackTheora::buffer_data() {
 
@@ -136,7 +138,7 @@ void VideoStreamPlaybackTheora::video_write(void) {
 		format = Image::FORMAT_RGBA8;
 	}
 
-	Image img(size.x, size.y, 0, Image::FORMAT_RGBA8, frame_data); //zero copy image creation
+	Ref<Image> img = memnew(Image(size.x, size.y, 0, Image::FORMAT_RGBA8, frame_data)); //zero copy image creation
 
 	texture->set_data(img); //zero copy send to visual server
 

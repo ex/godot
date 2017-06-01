@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -532,7 +533,7 @@ bool GDScript::_update_exports() {
 			}
 		}
 	} else {
-		//print_line("unchaged is "+get_path());
+		//print_line("unchanged is "+get_path());
 	}
 
 	if (base_cache.is_valid()) {
@@ -1271,7 +1272,7 @@ void GDInstance::call_multilevel_reversed(const StringName &p_method, const Vari
 
 void GDInstance::notification(int p_notification) {
 
-	//notification is not virutal, it gets called at ALL levels just like in C.
+	//notification is not virtual, it gets called at ALL levels just like in C.
 	Variant value = p_notification;
 	const Variant *args[1] = { &value };
 
@@ -1696,8 +1697,8 @@ void GDScriptLanguage::reload_tool_script(const Ref<Script> &p_script, bool p_so
 #ifdef TOOLS_ENABLED
 
 			while (E->get()->placeholders.size()) {
-
 				Object *obj = E->get()->placeholders.front()->get()->get_owner();
+
 				//save instance info
 				List<Pair<StringName, Variant> > state;
 				if (obj->get_script_instance()) {
@@ -1705,6 +1706,9 @@ void GDScriptLanguage::reload_tool_script(const Ref<Script> &p_script, bool p_so
 					obj->get_script_instance()->get_property_state(state);
 					map[obj->get_instance_ID()] = state;
 					obj->set_script(RefPtr());
+				} else {
+					// no instance found. Let's remove it so we don't loop forever
+					E->get()->placeholders.erase(E->get()->placeholders.front()->get());
 				}
 			}
 #endif
@@ -1808,6 +1812,7 @@ void GDScriptLanguage::get_reserved_words(List<String> *p_words) const {
 		"breakpoint",
 		"class",
 		"extends",
+		"is",
 		"func",
 		"preload",
 		"setget",

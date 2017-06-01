@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -508,7 +509,7 @@ void EditorFileSystem::_scan_new_dir(EditorFileSystemDirectory *p_dir, DirAccess
 			if (f.begins_with(".")) //ignore hidden and . / ..
 				continue;
 
-			if (FileAccess::exists(cd.plus_file(f).plus_file("godot.cfg"))) // skip if another project inside this
+			if (FileAccess::exists(cd.plus_file(f).plus_file("project.godot"))) // skip if another project inside this
 				continue;
 
 			dirs.push_back(f);
@@ -521,8 +522,8 @@ void EditorFileSystem::_scan_new_dir(EditorFileSystemDirectory *p_dir, DirAccess
 
 	da->list_dir_end();
 
-	dirs.sort();
-	files.sort();
+	dirs.sort_custom<NaturalNoCaseComparator>();
+	files.sort_custom<NaturalNoCaseComparator>();
 
 	int total = dirs.size() + files.size();
 	int idx = 0;
@@ -687,7 +688,7 @@ void EditorFileSystem::_scan_fs_changes(EditorFileSystemDirectory *p_dir, const 
 				int idx = p_dir->find_dir_index(f);
 				if (idx == -1) {
 
-					if (FileAccess::exists(cd.plus_file(f).plus_file("godot.cfg"))) // skip if another project inside this
+					if (FileAccess::exists(cd.plus_file(f).plus_file("project.godot"))) // skip if another project inside this
 						continue;
 
 					EditorFileSystemDirectory *efd = memnew(EditorFileSystemDirectory);
@@ -789,7 +790,7 @@ void EditorFileSystem::_scan_fs_changes(EditorFileSystemDirectory *p_dir, const 
 			} else {
 
 				uint64_t import_mt = FileAccess::get_modified_time(path + ".import");
-				print_line(itos(import_mt) + " vs " + itos(p_dir->files[i]->import_modified_time));
+				//print_line(itos(import_mt) + " vs " + itos(p_dir->files[i]->import_modified_time));
 				if (import_mt != p_dir->files[i]->import_modified_time) {
 					print_line("REIMPORT: import modified changed, reimport");
 					reimport = true;

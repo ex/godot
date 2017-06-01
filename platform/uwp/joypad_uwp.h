@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,7 +38,7 @@ ref class JoypadUWP sealed {
 	/* clang-format off */
 internal:
 	void register_events();
-	uint32_t process_controllers(uint32_t p_last_id);
+	void process_controllers();
 	/* clang-format on */
 
 	JoypadUWP();

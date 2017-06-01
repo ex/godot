@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -461,6 +462,59 @@ uint32_t ihash3(uint32_t a) {
 
 MainLoop *test() {
 
+	{
+		float r = 1;
+		float g = 0.5;
+		float b = 0.1;
+
+		const float pow2to9 = 512.0f;
+		const float B = 15.0f;
+		//const float Emax = 31.0f;
+		const float N = 9.0f;
+
+		float sharedexp = 65408.000f; //(( pow2to9  - 1.0f)/ pow2to9)*powf( 2.0f, 31.0f - 15.0f);
+
+		float cRed = MAX(0.0f, MIN(sharedexp, r));
+		float cGreen = MAX(0.0f, MIN(sharedexp, g));
+		float cBlue = MAX(0.0f, MIN(sharedexp, b));
+
+		float cMax = MAX(cRed, MAX(cGreen, cBlue));
+
+		// expp = MAX(-B - 1, log2(maxc)) + 1 + B
+
+		float expp = MAX(-B - 1.0f, floor(Math::log(cMax) / Math_LN2)) + 1.0f + B;
+
+		float sMax = (float)floor((cMax / Math::pow(2.0f, expp - B - N)) + 0.5f);
+
+		float exps = expp + 1.0f;
+
+		if (0.0 <= sMax && sMax < pow2to9) {
+			exps = expp;
+		}
+
+		float sRed = Math::floor((cRed / pow(2.0f, exps - B - N)) + 0.5f);
+		float sGreen = Math::floor((cGreen / pow(2.0f, exps - B - N)) + 0.5f);
+		float sBlue = Math::floor((cBlue / pow(2.0f, exps - B - N)) + 0.5f);
+
+		print_line("R: " + rtos(sRed) + " G: " + rtos(sGreen) + " B: " + rtos(sBlue) + " EXP: " + rtos(exps));
+
+		uint32_t rgbe = (Math::fast_ftoi(sRed) & 0x1FF) | ((Math::fast_ftoi(sGreen) & 0x1FF) << 9) | ((Math::fast_ftoi(sBlue) & 0x1FF) << 18) | ((Math::fast_ftoi(exps) & 0x1F) << 27);
+
+		float rb = rgbe & 0x1ff;
+		float gb = (rgbe >> 9) & 0x1ff;
+		float bb = (rgbe >> 18) & 0x1ff;
+		float eb = (rgbe >> 27);
+		float mb = Math::pow(2, eb - 15.0 - 9.0);
+		;
+		float rd = rb * mb;
+		float gd = gb * mb;
+		float bd = bb * mb;
+
+		print_line("RGBE: " + Color(rd, gd, bd));
+
+		return NULL;
+	}
+
 	print_line("Dvectors: " + itos(MemoryPool::allocs_used));
 	print_line("Mem used: " + itos(MemoryPool::total_memory));
 	print_line("MAx mem used: " + itos(MemoryPool::max_memory));
@@ -601,7 +655,7 @@ MainLoop *test() {
 		print_line(q3);
 
 		print_line("before v: " + v + " a: " + rtos(a));
-		q.get_axis_and_angle(v, a);
+		q.get_axis_angle(v, a);
 		print_line("after v: " + v + " a: " + rtos(a));
 	}
 

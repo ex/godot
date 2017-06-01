@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -76,11 +77,12 @@ public:
 	virtual void start_joy_vibration(int p_device, float p_weak_magnitude, float p_strong_magnitude, float p_duration = 0) = 0;
 	virtual void stop_joy_vibration(int p_device) = 0;
 
-	virtual Point2 get_mouse_pos() const = 0;
+	virtual Point2 get_mouse_position() const = 0;
 	virtual Point2 get_last_mouse_speed() const = 0;
 	virtual int get_mouse_button_mask() const = 0;
 
 	virtual void warp_mouse_pos(const Vector2 &p_to) = 0;
+	virtual Point2i warp_mouse_motion(const Ref<InputEventMouseMotion> &p_motion, const Rect2 &p_rect) = 0;
 
 	virtual Vector3 get_gravity() const = 0;
 	virtual Vector3 get_accelerometer() const = 0;
@@ -102,7 +104,7 @@ public:
 	virtual int get_joy_button_index_from_string(String p_button) = 0;
 	virtual int get_joy_axis_index_from_string(String p_axis) = 0;
 
-	virtual void parse_input_event(const InputEvent &p_event) = 0;
+	virtual void parse_input_event(const Ref<InputEvent> &p_event) = 0;
 
 	Input();
 };

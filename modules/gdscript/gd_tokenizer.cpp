@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -89,6 +90,7 @@ const char *GDTokenizer::token_names[TK_MAX] = {
 	"func",
 	"class",
 	"extends",
+	"is",
 	"onready",
 	"tool",
 	"static",
@@ -117,6 +119,7 @@ const char *GDTokenizer::token_names[TK_MAX] = {
 	"'.'",
 	"'?'",
 	"':'",
+	"'$'",
 	"'\\n'",
 	"PI",
 	"_",
@@ -798,10 +801,8 @@ void GDTokenizerText::_advance() {
 							{ Variant::BASIS, "Basis" },
 							{ Variant::TRANSFORM, "Transform" },
 							{ Variant::COLOR, "Color" },
-							{ Variant::IMAGE, "Image" },
 							{ Variant::_RID, "RID" },
 							{ Variant::OBJECT, "Object" },
-							{ Variant::INPUT_EVENT, "InputEvent" },
 							{ Variant::NODE_PATH, "NodePath" },
 							{ Variant::DICTIONARY, "Dictionary" },
 							{ Variant::ARRAY, "Array" },
@@ -864,6 +865,7 @@ void GDTokenizerText::_advance() {
 								{ TK_PR_FUNCTION, "func" },
 								{ TK_PR_CLASS, "class" },
 								{ TK_PR_EXTENDS, "extends" },
+								{ TK_PR_IS, "is" },
 								{ TK_PR_ONREADY, "onready" },
 								{ TK_PR_TOOL, "tool" },
 								{ TK_PR_STATIC, "static" },

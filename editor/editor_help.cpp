@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -60,14 +61,16 @@ void EditorHelpSearch::_text_changed(const String &p_newtext) {
 	_update_search();
 }
 
-void EditorHelpSearch::_sbox_input(const InputEvent &p_ie) {
+void EditorHelpSearch::_sbox_input(const Ref<InputEvent> &p_ie) {
 
-	if (p_ie.type == InputEvent::KEY && (p_ie.key.scancode == KEY_UP ||
-												p_ie.key.scancode == KEY_DOWN ||
-												p_ie.key.scancode == KEY_PAGEUP ||
-												p_ie.key.scancode == KEY_PAGEDOWN)) {
+	Ref<InputEventKey> k = p_ie;
 
-		search_options->call("_gui_input", p_ie);
+	if (k.is_valid() && (k->get_scancode() == KEY_UP ||
+								k->get_scancode() == KEY_DOWN ||
+								k->get_scancode() == KEY_PAGEUP ||
+								k->get_scancode() == KEY_PAGEDOWN)) {
+
+		search_options->call("_gui_input", k);
 		search_box->accept_event();
 	}
 }
@@ -368,10 +371,12 @@ void EditorHelpIndex::_tree_item_selected() {
 
 void EditorHelpIndex::select_class(const String &p_class) {
 
+	EditorNode *editor = EditorNode::get_singleton();
 	if (!tree_item_map.has(p_class))
 		return;
 	tree_item_map[p_class]->select(0);
 	class_list->ensure_cursor_is_visible();
+	editor->call("_editor_select", EditorNode::EDITOR_SCRIPT); // in case EditorHelpIndex beeen invoked on top of other editor window
 }
 
 void EditorHelpIndex::popup() {
@@ -447,14 +452,16 @@ void EditorHelpIndex::_update_class_list() {
 	}
 }
 
-void EditorHelpIndex::_sbox_input(const InputEvent &p_ie) {
+void EditorHelpIndex::_sbox_input(const Ref<InputEvent> &p_ie) {
 
-	if (p_ie.type == InputEvent::KEY && (p_ie.key.scancode == KEY_UP ||
-												p_ie.key.scancode == KEY_DOWN ||
-												p_ie.key.scancode == KEY_PAGEUP ||
-												p_ie.key.scancode == KEY_PAGEDOWN)) {
+	Ref<InputEventKey> k = p_ie;
 
-		class_list->call("_gui_input", p_ie);
+	if (k.is_valid() && (k->get_scancode() == KEY_UP ||
+								k->get_scancode() == KEY_DOWN ||
+								k->get_scancode() == KEY_PAGEUP ||
+								k->get_scancode() == KEY_PAGEDOWN)) {
+
+		class_list->call("_gui_input", k);
 		search_box->accept_event();
 	}
 }
@@ -498,11 +505,14 @@ EditorHelpIndex::EditorHelpIndex() {
 /// /////////////////////////////////
 DocData *EditorHelp::doc = NULL;
 
-void EditorHelp::_unhandled_key_input(const InputEvent &p_ev) {
+void EditorHelp::_unhandled_key_input(const Ref<InputEvent> &p_ev) {
 
 	if (!is_visible_in_tree())
 		return;
-	if (p_ev.key.mod.control && p_ev.key.scancode == KEY_F) {
+
+	Ref<InputEventKey> k = p_ev;
+
+	if (k.is_valid() && k->get_control() && k->get_scancode() == KEY_F) {
 
 		search->grab_focus();
 		search->select_all();
@@ -597,8 +607,11 @@ void EditorHelp::_class_desc_select(const String &p_select) {
 	}
 }
 
-void EditorHelp::_class_desc_input(const InputEvent &p_input) {
-	if (p_input.type == InputEvent::MOUSE_BUTTON && p_input.mouse_button.pressed && p_input.mouse_button.button_index == 1) {
+void EditorHelp::_class_desc_input(const Ref<InputEvent> &p_input) {
+
+	Ref<InputEventMouseButton> mb = p_input;
+
+	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == 1) {
 		class_desc->set_selection_enabled(false);
 		class_desc->set_selection_enabled(true);
 	}
@@ -779,7 +792,7 @@ Error EditorHelp::_goto_desc(const String &p_class, int p_vscr) {
 		class_desc->set_table_column_expand(1, 1);
 
 		for (int i = 0; i < cd.properties.size(); i++) {
-			property_line[cd.properties[i].name] = class_desc->get_line_count() - 2; //gets overriden if description
+			property_line[cd.properties[i].name] = class_desc->get_line_count() - 2; //gets overridden if description
 
 			class_desc->push_cell();
 			class_desc->push_align(RichTextLabel::ALIGN_RIGHT);
@@ -874,7 +887,7 @@ Error EditorHelp::_goto_desc(const String &p_class, int p_vscr) {
 
 			class_desc->push_cell();
 
-			method_line[methods[i].name] = class_desc->get_line_count() - 2; //gets overriden if description
+			method_line[methods[i].name] = class_desc->get_line_count() - 2; //gets overridden if description
 			class_desc->push_align(RichTextLabel::ALIGN_RIGHT);
 			class_desc->push_font(doc_code_font);
 			_add_type(methods[i].return_type);
@@ -959,7 +972,7 @@ Error EditorHelp::_goto_desc(const String &p_class, int p_vscr) {
 
 		for (int i = 0; i < cd.theme_properties.size(); i++) {
 
-			theme_property_line[cd.theme_properties[i].name] = class_desc->get_line_count() - 2; //gets overriden if description
+			theme_property_line[cd.theme_properties[i].name] = class_desc->get_line_count() - 2; //gets overridden if description
 			class_desc->push_font(doc_code_font);
 			_add_type(cd.theme_properties[i].type);
 			class_desc->push_color(EditorSettings::get_singleton()->get("text_editor/highlighting/text_color"));
@@ -1002,7 +1015,7 @@ Error EditorHelp::_goto_desc(const String &p_class, int p_vscr) {
 
 		for (int i = 0; i < cd.signals.size(); i++) {
 
-			signal_line[cd.signals[i].name] = class_desc->get_line_count() - 2; //gets overriden if description
+			signal_line[cd.signals[i].name] = class_desc->get_line_count() - 2; //gets overridden if description
 			class_desc->push_font(doc_code_font); // monofont
 			//_add_type("void");
 			//class_desc->add_text(" ");
@@ -1775,7 +1788,7 @@ void EditorHelpBit::_bind_methods() {
 void EditorHelpBit::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_ENTER_TREE) {
-		add_style_override("panel", get_stylebox("normal", "TextEdit"));
+		add_style_override("panel", get_stylebox("ScriptPanel", "EditorStyles"));
 	}
 }
 

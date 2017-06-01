@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -89,11 +90,13 @@ public:
 		return "";
 	}
 
-	void add_property(const String &p_name, const Variant &p_value) {
+	void add_property(const String &p_name, const Variant &p_value, const PropertyHint &p_hint, const String p_hint_string) {
 
 		PropertyInfo pinfo;
 		pinfo.name = p_name;
 		pinfo.type = p_value.get_type();
+		pinfo.hint = p_hint;
+		pinfo.hint_string = p_hint_string;
 		props.push_back(pinfo);
 		values[p_name] = p_value;
 	}
@@ -436,7 +439,11 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 		inspected_object->last_edited_id = id;
 
-		inspect_properties->edit(inspected_object);
+		if (tabs->get_current_tab() == 2) {
+			inspect_properties->edit(inspected_object);
+		} else {
+			editor->push_item(inspected_object);
+		}
 
 	} else if (p_msg == "message:video_mem") {
 
@@ -498,13 +505,20 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 			String n = p_data[ofs + i * 2 + 0];
 			Variant v = p_data[ofs + i * 2 + 1];
+			PropertyHint h = PROPERTY_HINT_NONE;
+			String hs = String();
 
 			if (n.begins_with("*")) {
 
 				n = n.substr(1, n.length());
+				h = PROPERTY_HINT_OBJECT_ID;
+				String s = v;
+				s = s.replace("[", "");
+				hs = s.get_slice(":", 0);
+				v = s.get_slice(":", 1).to_int();
 			}
 
-			variables->add_property("members/" + n, v);
+			variables->add_property("members/" + n, v, h, hs);
 		}
 		ofs += mcount * 2;
 
@@ -515,13 +529,20 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 			String n = p_data[ofs + i * 2 + 0];
 			Variant v = p_data[ofs + i * 2 + 1];
+			PropertyHint h = PROPERTY_HINT_NONE;
+			String hs = String();
 
 			if (n.begins_with("*")) {
 
 				n = n.substr(1, n.length());
+				h = PROPERTY_HINT_OBJECT_ID;
+				String s = v;
+				s = s.replace("[", "");
+				hs = s.get_slice(":", 0);
+				v = s.get_slice(":", 1).to_int();
 			}
 
-			variables->add_property("locals/" + n, v);
+			variables->add_property("locals/" + n, v, h, hs);
 		}
 
 		variables->update();
@@ -998,6 +1019,11 @@ void ScriptEditorDebugger::_notification(int p_what) {
 			}
 
 		} break;
+		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
+			tabs->add_style_override("panel", editor->get_gui_base()->get_stylebox("DebuggerPanel", "EditorStyles"));
+			tabs->add_style_override("tab_fg", editor->get_gui_base()->get_stylebox("DebuggerTabFG", "EditorStyles"));
+			tabs->add_style_override("tab_bg", editor->get_gui_base()->get_stylebox("DebuggerTabBG", "EditorStyles"));
+		} break;
 	}
 }
 
@@ -1054,6 +1080,9 @@ void ScriptEditorDebugger::stop() {
 
 	EditorNode::get_singleton()->get_pause_button()->set_pressed(false);
 	EditorNode::get_singleton()->get_pause_button()->set_disabled(true);
+
+	//avoid confusion when stopped debugging but an object is still edited
+	EditorNode::get_singleton()->push_item(NULL);
 
 	if (hide_on_stop) {
 		if (is_visible_in_tree())
@@ -1550,6 +1579,10 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 	editor = p_editor;
 
 	tabs = memnew(TabContainer);
+	tabs->set_tab_align(TabContainer::ALIGN_LEFT);
+	tabs->add_style_override("panel", editor->get_gui_base()->get_stylebox("DebuggerPanel", "EditorStyles"));
+	tabs->add_style_override("tab_fg", editor->get_gui_base()->get_stylebox("DebuggerTabFG", "EditorStyles"));
+	tabs->add_style_override("tab_bg", editor->get_gui_base()->get_stylebox("DebuggerTabBG", "EditorStyles"));
 	tabs->set_v_size_flags(SIZE_EXPAND_FILL);
 	tabs->set_area_as_parent_rect();
 	add_child(tabs);
@@ -1624,8 +1657,9 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		inspector->set_h_size_flags(SIZE_EXPAND_FILL);
 		inspector->hide_top_label();
 		inspector->get_scene_tree()->set_column_title(0, TTR("Variable"));
-		inspector->set_capitalize_paths(false);
+		inspector->set_enable_capitalize_paths(false);
 		inspector->set_read_only(true);
+		inspector->connect("object_id_selected", this, "_scene_tree_property_select_object");
 		sc->add_child(inspector);
 
 		server = TCP_Server::create_ref();

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -231,7 +232,7 @@ PoolAllocator::ID PoolAllocator::alloc(int p_size) {
 	Entry &entry = entry_array[entry_indices[new_entry_indices_pos]];
 
 	entry.len = p_size;
-	entry.pos = (new_entry_indices_pos == 0) ? 0 : entry_end(entry_array[entry_indices[new_entry_indices_pos - 1]]); //alloc either at begining or end of previous
+	entry.pos = (new_entry_indices_pos == 0) ? 0 : entry_end(entry_array[entry_indices[new_entry_indices_pos - 1]]); //alloc either at beginning or end of previous
 	entry.lock = 0;
 	entry.check = (check_count++) & CHECK_MASK;
 	free_mem -= size_to_alloc;

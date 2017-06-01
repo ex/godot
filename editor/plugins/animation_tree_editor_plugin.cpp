@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -260,12 +261,12 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 	Ref<StyleBox> style = get_stylebox("panel", "PopupMenu");
 	Size2 size = get_node_size(edited_node);
 	Point2 popup_pos(pos.x + style->get_margin(MARGIN_LEFT), pos.y + size.y - style->get_margin(MARGIN_BOTTOM));
-	popup_pos += get_global_pos();
+	popup_pos += get_global_position();
 
 	if (renaming_edit) {
 
 		edit_label[0]->set_text(TTR("New name:"));
-		edit_label[0]->set_pos(Point2(5, 5));
+		edit_label[0]->set_position(Point2(5, 5));
 		edit_label[0]->show();
 		edit_line[0]->set_begin(Point2(15, 25));
 		edit_line[0]->set_text(edited_node);
@@ -293,18 +294,18 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 						master_anim_popup->add_item(E->get());
 					}
 
-					master_anim_popup->set_pos(popup_pos);
+					master_anim_popup->set_position(popup_pos);
 					master_anim_popup->popup();
 				} else {
 					property_editor->edit(this, "", Variant::OBJECT, anim_tree->animation_node_get_animation(edited_node), PROPERTY_HINT_RESOURCE_TYPE, "Animation");
-					property_editor->set_pos(popup_pos);
+					property_editor->set_position(popup_pos);
 					property_editor->popup();
 					updating_edit = false;
 				}
 				return;
 			case AnimationTreePlayer::NODE_TIMESCALE:
 				edit_label[0]->set_text(TTR("Scale:"));
-				edit_label[0]->set_pos(Point2(5, 5));
+				edit_label[0]->set_position(Point2(5, 5));
 				edit_label[0]->show();
 				edit_line[0]->set_begin(Point2(15, 25));
 				edit_line[0]->set_text(rtos(anim_tree->timescale_node_get_scale(edited_node)));
@@ -313,13 +314,13 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 				break;
 			case AnimationTreePlayer::NODE_ONESHOT:
 				edit_label[0]->set_text(TTR("Fade In (s):"));
-				edit_label[0]->set_pos(Point2(5, 5));
+				edit_label[0]->set_position(Point2(5, 5));
 				edit_label[0]->show();
 				edit_line[0]->set_begin(Point2(15, 25));
 				edit_line[0]->set_text(rtos(anim_tree->oneshot_node_get_fadein_time(edited_node)));
 				edit_line[0]->show();
 				edit_label[1]->set_text(TTR("Fade Out (s):"));
-				edit_label[1]->set_pos(Point2(5, 55));
+				edit_label[1]->set_position(Point2(5, 55));
 				edit_label[1]->show();
 				edit_line[1]->set_begin(Point2(15, 75));
 				edit_line[1]->set_text(rtos(anim_tree->oneshot_node_get_fadeout_time(edited_node)));
@@ -339,13 +340,13 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 				edit_check->show();
 
 				edit_label[2]->set_text(TTR("Restart (s):"));
-				edit_label[2]->set_pos(Point2(5, 145));
+				edit_label[2]->set_position(Point2(5, 145));
 				edit_label[2]->show();
 				edit_line[2]->set_begin(Point2(15, 165));
 				edit_line[2]->set_text(rtos(anim_tree->oneshot_node_get_autorestart_delay(edited_node)));
 				edit_line[2]->show();
 				edit_label[3]->set_text(TTR("Random Restart (s):"));
-				edit_label[3]->set_pos(Point2(5, 195));
+				edit_label[3]->set_position(Point2(5, 195));
 				edit_label[3]->show();
 				edit_line[3]->set_begin(Point2(15, 215));
 				edit_line[3]->set_text(rtos(anim_tree->oneshot_node_get_autorestart_random_delay(edited_node)));
@@ -366,7 +367,7 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 			case AnimationTreePlayer::NODE_MIX:
 
 				edit_label[0]->set_text(TTR("Amount:"));
-				edit_label[0]->set_pos(Point2(5, 5));
+				edit_label[0]->set_position(Point2(5, 5));
 				edit_label[0]->show();
 				edit_scroll[0]->set_min(0);
 				edit_scroll[0]->set_max(1);
@@ -378,7 +379,7 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 				break;
 			case AnimationTreePlayer::NODE_BLEND2:
 				edit_label[0]->set_text(TTR("Blend:"));
-				edit_label[0]->set_pos(Point2(5, 5));
+				edit_label[0]->set_position(Point2(5, 5));
 				edit_label[0]->show();
 				edit_scroll[0]->set_min(0);
 				edit_scroll[0]->set_max(1);
@@ -393,7 +394,7 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 
 			case AnimationTreePlayer::NODE_BLEND3:
 				edit_label[0]->set_text(TTR("Blend:"));
-				edit_label[0]->set_pos(Point2(5, 5));
+				edit_label[0]->set_position(Point2(5, 5));
 				edit_label[0]->show();
 				edit_scroll[0]->set_min(-1);
 				edit_scroll[0]->set_max(1);
@@ -406,7 +407,7 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 			case AnimationTreePlayer::NODE_BLEND4:
 
 				edit_label[0]->set_text(TTR("Blend 0:"));
-				edit_label[0]->set_pos(Point2(5, 5));
+				edit_label[0]->set_position(Point2(5, 5));
 				edit_label[0]->show();
 				edit_scroll[0]->set_min(0);
 				edit_scroll[0]->set_max(1);
@@ -414,7 +415,7 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 				edit_scroll[0]->set_begin(Point2(15, 25));
 				edit_scroll[0]->show();
 				edit_label[1]->set_text(TTR("Blend 1:"));
-				edit_label[1]->set_pos(Point2(5, 55));
+				edit_label[1]->set_position(Point2(5, 55));
 				edit_label[1]->show();
 				edit_scroll[1]->set_min(0);
 				edit_scroll[1]->set_max(1);
@@ -428,14 +429,14 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 			case AnimationTreePlayer::NODE_TRANSITION: {
 
 				edit_label[0]->set_text(TTR("X-Fade Time (s):"));
-				edit_label[0]->set_pos(Point2(5, 5));
+				edit_label[0]->set_position(Point2(5, 5));
 				edit_label[0]->show();
 				edit_line[0]->set_begin(Point2(15, 25));
 				edit_line[0]->set_text(rtos(anim_tree->transition_node_get_xfade_time(edited_node)));
 				edit_line[0]->show();
 
 				edit_label[1]->set_text(TTR("Current:"));
-				edit_label[1]->set_pos(Point2(5, 55));
+				edit_label[1]->set_position(Point2(5, 55));
 				edit_label[1]->show();
 				edit_option->set_begin(Point2(15, 75));
 
@@ -454,7 +455,7 @@ void AnimationTreeEditor::_popup_edit_dialog() {
 		}
 	}
 
-	edit_dialog->set_pos(popup_pos);
+	edit_dialog->set_position(popup_pos);
 	edit_dialog->popup();
 
 	updating_edit = false;
@@ -726,147 +727,147 @@ void AnimationTreeEditor::_node_edit_property(const StringName& p_node) {
 	property_editor->edit(NULL,ph.name,ph.type,anim_tree->node_get_param(p_node),ph.hint,ph.hint_string);
 
 	Point2 popup_pos=Point2( pos.x+(size.width-property_editor->get_size().width)/2.0,pos.y+(size.y-style->get_margin(MARGIN_BOTTOM))).floor();
-	popup_pos+=get_global_pos();
-	property_editor->set_pos(popup_pos);
+	popup_pos+=get_global_position();
+	property_editor->set_position(popup_pos);
 
 	property_editor->popup();
 
 }
 #endif
 
-void AnimationTreeEditor::_gui_input(InputEvent p_event) {
+void AnimationTreeEditor::_gui_input(Ref<InputEvent> p_event) {
 
-	switch (p_event.type) {
+	Ref<InputEventMouseButton> mb = p_event;
 
-		case InputEvent::MOUSE_BUTTON: {
+	if (mb.is_valid()) {
 
-			if (p_event.mouse_button.pressed) {
+		if (mb->is_pressed()) {
 
-				if (p_event.mouse_button.button_index == 1) {
-					click_pos = Point2(p_event.mouse_button.x, p_event.mouse_button.y);
-					click_motion = click_pos;
-					click_type = _locate_click(click_pos, &click_node, &click_slot);
-					if (click_type != CLICK_NONE) {
+			if (mb->get_button_index() == 1) {
+				click_pos = Point2(mb->get_pos().x, mb->get_pos().y);
+				click_motion = click_pos;
+				click_type = _locate_click(click_pos, &click_node, &click_slot);
+				if (click_type != CLICK_NONE) {
 
-						order.erase(click_node);
-						order.push_back(click_node);
-						update();
-					}
-
-					switch (click_type) {
-						case CLICK_INPUT_SLOT: {
-							click_pos = _get_slot_pos(click_node, true, click_slot);
-						} break;
-						case CLICK_OUTPUT_SLOT: {
-							click_pos = _get_slot_pos(click_node, false, click_slot);
-						} break;
-						case CLICK_PARAMETER: {
-
-							edited_node = click_node;
-							renaming_edit = false;
-							_popup_edit_dialog();
-							//open editor
-							//_node_edit_property(click_node);
-						} break;
-						default: {}
-					}
-				}
-				if (p_event.mouse_button.button_index == 2) {
-
-					if (click_type != CLICK_NONE) {
-						click_type = CLICK_NONE;
-						update();
-					} else {
-						// try to disconnect/remove
-
-						Point2 rclick_pos = Point2(p_event.mouse_button.x, p_event.mouse_button.y);
-						rclick_type = _locate_click(rclick_pos, &rclick_node, &rclick_slot);
-						if (rclick_type == CLICK_INPUT_SLOT || rclick_type == CLICK_OUTPUT_SLOT) {
-
-							node_popup->clear();
-							node_popup->add_item(TTR("Disconnect"), NODE_DISCONNECT);
-							if (anim_tree->node_get_type(rclick_node) == AnimationTreePlayer::NODE_TRANSITION) {
-								node_popup->add_item(TTR("Add Input"), NODE_ADD_INPUT);
-								if (rclick_type == CLICK_INPUT_SLOT) {
-									if (anim_tree->transition_node_has_input_auto_advance(rclick_node, rclick_slot))
-										node_popup->add_item(TTR("Clear Auto-Advance"), NODE_CLEAR_AUTOADVANCE);
-									else
-										node_popup->add_item(TTR("Set Auto-Advance"), NODE_SET_AUTOADVANCE);
-									node_popup->add_item(TTR("Delete Input"), NODE_DELETE_INPUT);
-								}
-							}
-
-							node_popup->set_pos(rclick_pos + get_global_pos());
-							node_popup->popup();
-						}
-
-						if (rclick_type == CLICK_NODE) {
-							node_popup->clear();
-							node_popup->add_item(TTR("Rename"), NODE_RENAME);
-							node_popup->add_item(TTR("Remove"), NODE_ERASE);
-							if (anim_tree->node_get_type(rclick_node) == AnimationTreePlayer::NODE_TRANSITION)
-								node_popup->add_item(TTR("Add Input"), NODE_ADD_INPUT);
-							node_popup->set_pos(rclick_pos + get_global_pos());
-							node_popup->popup();
-						}
-					}
-				}
-			} else {
-
-				if (p_event.mouse_button.button_index == 1 && click_type != CLICK_NONE) {
-
-					switch (click_type) {
-						case CLICK_INPUT_SLOT:
-						case CLICK_OUTPUT_SLOT: {
-
-							Point2 dst_click_pos = Point2(p_event.mouse_button.x, p_event.mouse_button.y);
-							StringName id;
-							int slot;
-							ClickType dst_click_type = _locate_click(dst_click_pos, &id, &slot);
-
-							if (dst_click_type == CLICK_INPUT_SLOT && click_type == CLICK_OUTPUT_SLOT) {
-
-								anim_tree->connect_nodes(click_node, id, slot);
-							}
-							if (click_type == CLICK_INPUT_SLOT && dst_click_type == CLICK_OUTPUT_SLOT) {
-
-								anim_tree->connect_nodes(id, click_node, click_slot);
-							}
-
-						} break;
-						case CLICK_NODE: {
-							Point2 new_pos = anim_tree->node_get_pos(click_node) + (click_motion - click_pos);
-							if (new_pos.x < 5)
-								new_pos.x = 5;
-							if (new_pos.y < 5)
-								new_pos.y = 5;
-							anim_tree->node_set_pos(click_node, new_pos);
-
-						} break;
-						default: {}
-					}
-
-					click_type = CLICK_NONE;
+					order.erase(click_node);
+					order.push_back(click_node);
 					update();
 				}
+
+				switch (click_type) {
+					case CLICK_INPUT_SLOT: {
+						click_pos = _get_slot_pos(click_node, true, click_slot);
+					} break;
+					case CLICK_OUTPUT_SLOT: {
+						click_pos = _get_slot_pos(click_node, false, click_slot);
+					} break;
+					case CLICK_PARAMETER: {
+
+						edited_node = click_node;
+						renaming_edit = false;
+						_popup_edit_dialog();
+						//open editor
+						//_node_edit_property(click_node);
+					} break;
+					default: {}
+				}
+			}
+			if (mb->get_button_index() == 2) {
+
+				if (click_type != CLICK_NONE) {
+					click_type = CLICK_NONE;
+					update();
+				} else {
+					// try to disconnect/remove
+
+					Point2 rclick_pos = Point2(mb->get_pos().x, mb->get_pos().y);
+					rclick_type = _locate_click(rclick_pos, &rclick_node, &rclick_slot);
+					if (rclick_type == CLICK_INPUT_SLOT || rclick_type == CLICK_OUTPUT_SLOT) {
+
+						node_popup->clear();
+						node_popup->add_item(TTR("Disconnect"), NODE_DISCONNECT);
+						if (anim_tree->node_get_type(rclick_node) == AnimationTreePlayer::NODE_TRANSITION) {
+							node_popup->add_item(TTR("Add Input"), NODE_ADD_INPUT);
+							if (rclick_type == CLICK_INPUT_SLOT) {
+								if (anim_tree->transition_node_has_input_auto_advance(rclick_node, rclick_slot))
+									node_popup->add_item(TTR("Clear Auto-Advance"), NODE_CLEAR_AUTOADVANCE);
+								else
+									node_popup->add_item(TTR("Set Auto-Advance"), NODE_SET_AUTOADVANCE);
+								node_popup->add_item(TTR("Delete Input"), NODE_DELETE_INPUT);
+							}
+						}
+
+						node_popup->set_position(rclick_pos + get_global_position());
+						node_popup->popup();
+					}
+
+					if (rclick_type == CLICK_NODE) {
+						node_popup->clear();
+						node_popup->add_item(TTR("Rename"), NODE_RENAME);
+						node_popup->add_item(TTR("Remove"), NODE_ERASE);
+						if (anim_tree->node_get_type(rclick_node) == AnimationTreePlayer::NODE_TRANSITION)
+							node_popup->add_item(TTR("Add Input"), NODE_ADD_INPUT);
+						node_popup->set_position(rclick_pos + get_global_position());
+						node_popup->popup();
+					}
+				}
+			}
+		} else {
+
+			if (mb->get_button_index() == 1 && click_type != CLICK_NONE) {
+
+				switch (click_type) {
+					case CLICK_INPUT_SLOT:
+					case CLICK_OUTPUT_SLOT: {
+
+						Point2 dst_click_pos = Point2(mb->get_pos().x, mb->get_pos().y);
+						StringName id;
+						int slot;
+						ClickType dst_click_type = _locate_click(dst_click_pos, &id, &slot);
+
+						if (dst_click_type == CLICK_INPUT_SLOT && click_type == CLICK_OUTPUT_SLOT) {
+
+							anim_tree->connect_nodes(click_node, id, slot);
+						}
+						if (click_type == CLICK_INPUT_SLOT && dst_click_type == CLICK_OUTPUT_SLOT) {
+
+							anim_tree->connect_nodes(id, click_node, click_slot);
+						}
+
+					} break;
+					case CLICK_NODE: {
+						Point2 new_pos = anim_tree->node_get_pos(click_node) + (click_motion - click_pos);
+						if (new_pos.x < 5)
+							new_pos.x = 5;
+						if (new_pos.y < 5)
+							new_pos.y = 5;
+						anim_tree->node_set_pos(click_node, new_pos);
+
+					} break;
+					default: {}
+				}
+
+				click_type = CLICK_NONE;
+				update();
 			}
 		}
+	}
 
-		case InputEvent::MOUSE_MOTION: {
+	Ref<InputEventMouseMotion> mm = p_event;
 
-			if (p_event.mouse_motion.button_mask & 1 && click_type != CLICK_NONE) {
+	if (mm.is_valid()) {
 
-				click_motion = Point2(p_event.mouse_button.x, p_event.mouse_button.y);
-				update();
-			}
-			if ((p_event.mouse_motion.button_mask & 4 || Input::get_singleton()->is_key_pressed(KEY_SPACE))) {
+		if (mm->get_button_mask() & 1 && click_type != CLICK_NONE) {
 
-				h_scroll->set_value(h_scroll->get_value() - p_event.mouse_motion.relative_x);
-				v_scroll->set_value(v_scroll->get_value() - p_event.mouse_motion.relative_y);
-				update();
-			}
+			click_motion = Point2(mm->get_pos().x, mm->get_pos().y);
+			update();
+		}
+		if ((mm->get_button_mask() & 4 || Input::get_singleton()->is_key_pressed(KEY_SPACE))) {
 
-		} break;
+			h_scroll->set_value(h_scroll->get_value() - mm->get_relative().x);
+			v_scroll->set_value(v_scroll->get_value() - mm->get_relative().y);
+			update();
+		}
 	}
 }
 
@@ -1301,7 +1302,7 @@ AnimationTreeEditor::AnimationTreeEditor() {
 
 	add_menu = memnew(MenuButton);
 	//add_menu->set_
-	add_menu->set_pos(Point2(0, 0));
+	add_menu->set_position(Point2(0, 0));
 	add_menu->set_size(Point2(25, 15));
 	add_child(add_menu);
 
@@ -1323,7 +1324,7 @@ AnimationTreeEditor::AnimationTreeEditor() {
 	p->connect("id_pressed", this, "_add_menu_item");
 
 	play_button = memnew(Button);
-	play_button->set_pos(Point2(25, 0));
+	play_button->set_position(Point2(25, 0));
 	play_button->set_size(Point2(25, 15));
 	add_child(play_button);
 	play_button->set_toggle_mode(true);

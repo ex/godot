@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -92,10 +93,12 @@ private:
 			bool disabled;
 			Ref<Texture> texture;
 			Color color;
+			String tooltip;
 			Button() {
 				id = 0;
 				disabled = false;
 				color = Color(1, 1, 1, 1);
+				tooltip = "";
 			}
 		};
 
@@ -179,7 +182,7 @@ public:
 	void set_icon_max_width(int p_column, int p_max);
 	int get_icon_max_width(int p_column) const;
 
-	void add_button(int p_column, const Ref<Texture> &p_button, int p_id = -1, bool p_disabled = false);
+	void add_button(int p_column, const Ref<Texture> &p_button, int p_id = -1, bool p_disabled = false, const String &p_tooltip = "");
 	int get_button_count(int p_column) const;
 	Ref<Texture> get_button(int p_column, int p_idx) const;
 	int get_button_id(int p_column, int p_idx) const;
@@ -334,14 +337,14 @@ private:
 	void draw_item_rect(const TreeItem::Cell &p_cell, const Rect2i &p_rect, const Color &p_color);
 	int draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 &p_draw_size, TreeItem *p_item);
 	void select_single_item(TreeItem *p_selected, TreeItem *p_current, int p_col, TreeItem *p_prev = NULL, bool *r_in_range = NULL, bool p_force_deselect = false);
-	int propagate_mouse_event(const Point2i &p_pos, int x_ofs, int y_ofs, bool p_doubleclick, TreeItem *p_item, int p_button, const InputModifierState &p_mod);
+	int propagate_mouse_event(const Point2i &p_pos, int x_ofs, int y_ofs, bool p_doubleclick, TreeItem *p_item, int p_button, const Ref<InputEventWithModifiers> &p_mod);
 	void text_editor_enter(String p_text);
 	void _text_editor_modal_close();
 	void value_editor_changed(double p_value);
 
 	void popup_select(int p_option);
 
-	void _gui_input(InputEvent p_event);
+	void _gui_input(Ref<InputEvent> p_event);
 	void _notification(int p_what);
 
 	Size2 get_minimum_size() const;

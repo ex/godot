@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -108,9 +109,13 @@ private:
 	bool quit_on_go_back;
 	uint32_t last_id;
 
+#ifdef TOOLS_ENABLED
 	bool editor_hint;
+#endif
+#ifdef DEBUG_ENABLED
 	bool debug_collisions_hint;
 	bool debug_navigation_hint;
+#endif
 	bool pause;
 	int root_lock;
 
@@ -232,7 +237,7 @@ private:
 	void remove_from_group(const StringName &p_group, Node *p_node);
 
 	void _notify_group_pause(const StringName &p_group, int p_notification);
-	void _call_input_pause(const StringName &p_group, const StringName &p_method, const InputEvent &p_input);
+	void _call_input_pause(const StringName &p_group, const StringName &p_method, const Ref<InputEvent> &p_input);
 	Variant _call_group_flags(const Variant **p_args, int p_argcount, Variant::CallError &r_error);
 	Variant _call_group(const Variant **p_args, int p_argcount, Variant::CallError &r_error);
 
@@ -336,7 +341,7 @@ public:
 	void set_group(const StringName &p_group, const String &p_name, const Variant &p_value);
 
 	virtual void input_text(const String &p_text);
-	virtual void input_event(const InputEvent &p_event);
+	virtual void input_event(const Ref<InputEvent> &p_event);
 	virtual void init();
 
 	virtual bool iteration(float p_time);
@@ -350,13 +355,21 @@ public:
 	void quit();
 
 	void set_input_as_handled();
+	bool is_input_handled();
 	_FORCE_INLINE_ float get_fixed_process_time() const { return fixed_process_time; }
 	_FORCE_INLINE_ float get_idle_process_time() const { return idle_process_time; }
 
+#ifdef TOOLS_ENABLED
 	void set_editor_hint(bool p_enabled);
-	bool is_editor_hint() const;
 
+	bool is_editor_hint() const;
 	bool is_node_being_edited(const Node *p_node) const;
+#else
+	void set_editor_hint(bool p_enabled) {}
+
+	bool is_editor_hint() const { return false; }
+	bool is_node_being_edited(const Node *p_node) const { return false; }
+#endif
 
 	void set_pause(bool p_enabled);
 	bool is_paused() const;
@@ -364,11 +377,19 @@ public:
 	void set_camera(const RID &p_camera);
 	RID get_camera() const;
 
+#ifdef DEBUG_ENABLED
 	void set_debug_collisions_hint(bool p_enabled);
 	bool is_debugging_collisions_hint() const;
 
 	void set_debug_navigation_hint(bool p_enabled);
 	bool is_debugging_navigation_hint() const;
+#else
+	void set_debug_collisions_hint(bool p_enabled) {}
+	bool is_debugging_collisions_hint() const { return false; }
+
+	void set_debug_navigation_hint(bool p_enabled) {}
+	bool is_debugging_navigation_hint() const { return false; }
+#endif
 
 	void set_debug_collisions_color(const Color &p_color);
 	Color get_debug_collisions_color() const;

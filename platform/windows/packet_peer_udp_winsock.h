@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -45,6 +46,7 @@ class PacketPeerUDPWinsock : public PacketPeerUDP {
 	mutable int packet_port;
 	mutable int queue_count;
 	int sockfd;
+	bool sock_blocking;
 	IP::Type sock_type;
 
 	IP_Address peer_addr;
@@ -54,8 +56,7 @@ class PacketPeerUDPWinsock : public PacketPeerUDP {
 
 	static PacketPeerUDP *_create();
 
-	bool blocking;
-	void _set_blocking(bool p_blocking);
+	void _set_sock_blocking(bool p_blocking);
 
 	Error _poll(bool p_wait);
 

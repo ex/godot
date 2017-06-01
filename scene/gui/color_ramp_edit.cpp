@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -41,7 +42,8 @@ ColorRampEdit::ColorRampEdit() {
 	add_child(popup);
 
 	checker = Ref<ImageTexture>(memnew(ImageTexture));
-	checker->create_from_image(Image(checker_bg_png), ImageTexture::FLAG_REPEAT);
+	Ref<Image> img = memnew(Image(checker_bg_png));
+	checker->create_from_image(img, ImageTexture::FLAG_REPEAT);
 }
 
 int ColorRampEdit::_get_point_from_pos(int x) {
@@ -61,7 +63,7 @@ void ColorRampEdit::_show_color_picker() {
 		return;
 	Size2 ms = Size2(350, picker->get_combined_minimum_size().height + 10);
 	picker->set_pick_color(points[grabbed].color);
-	popup->set_pos(get_global_pos() - Vector2(ms.width - get_size().width, ms.height));
+	popup->set_position(get_global_position() - Vector2(ms.width - get_size().width, ms.height));
 	popup->set_size(ms);
 	popup->popup();
 }
@@ -69,9 +71,11 @@ void ColorRampEdit::_show_color_picker() {
 ColorRampEdit::~ColorRampEdit() {
 }
 
-void ColorRampEdit::_gui_input(const InputEvent &p_event) {
+void ColorRampEdit::_gui_input(const Ref<InputEvent> &p_event) {
 
-	if (p_event.type == InputEvent::KEY && p_event.key.pressed && p_event.key.scancode == KEY_DELETE && grabbed != -1) {
+	Ref<InputEventKey> k = p_event;
+
+	if (k.is_valid() && k->is_pressed() && k->get_scancode() == KEY_DELETE && grabbed != -1) {
 
 		points.remove(grabbed);
 		grabbed = -1;
@@ -81,16 +85,17 @@ void ColorRampEdit::_gui_input(const InputEvent &p_event) {
 		accept_event();
 	}
 
+	Ref<InputEventMouseButton> mb = p_event;
 	//Show color picker on double click.
-	if (p_event.type == InputEvent::MOUSE_BUTTON && p_event.mouse_button.button_index == 1 && p_event.mouse_button.doubleclick && p_event.mouse_button.pressed) {
-		grabbed = _get_point_from_pos(p_event.mouse_button.x);
+	if (mb.is_valid() && mb->get_button_index() == 1 && mb->is_doubleclick() && mb->is_pressed()) {
+		grabbed = _get_point_from_pos(mb->get_pos().x);
 		_show_color_picker();
 		accept_event();
 	}
 
 	//Delete point on right click
-	if (p_event.type == InputEvent::MOUSE_BUTTON && p_event.mouse_button.button_index == 2 && p_event.mouse_button.pressed) {
-		grabbed = _get_point_from_pos(p_event.mouse_button.x);
+	if (mb.is_valid() && mb->get_button_index() == 2 && mb->is_pressed()) {
+		grabbed = _get_point_from_pos(mb->get_pos().x);
 		if (grabbed != -1) {
 			points.remove(grabbed);
 			grabbed = -1;
@@ -102,14 +107,14 @@ void ColorRampEdit::_gui_input(const InputEvent &p_event) {
 	}
 
 	//Hold alt key to duplicate selected color
-	if (p_event.type == InputEvent::MOUSE_BUTTON && p_event.mouse_button.button_index == 1 && p_event.mouse_button.pressed && p_event.key.mod.alt) {
+	if (mb.is_valid() && mb->get_button_index() == 1 && mb->is_pressed() && mb->get_alt()) {
 
-		int x = p_event.mouse_button.x;
+		int x = mb->get_pos().x;
 		grabbed = _get_point_from_pos(x);
 
 		if (grabbed != -1) {
 			int total_w = get_size().width - get_size().height - 3;
-			ColorRamp::Point newPoint = points[grabbed];
+			Gradient::Point newPoint = points[grabbed];
 			newPoint.offset = CLAMP(x / float(total_w), 0, 1);
 
 			points.push_back(newPoint);
@@ -126,10 +131,10 @@ void ColorRampEdit::_gui_input(const InputEvent &p_event) {
 		}
 	}
 
-	if (p_event.type == InputEvent::MOUSE_BUTTON && p_event.mouse_button.button_index == 1 && p_event.mouse_button.pressed) {
+	if (mb.is_valid() && mb->get_button_index() == 1 && mb->is_pressed()) {
 
 		update();
-		int x = p_event.mouse_button.x;
+		int x = mb->get_pos().x;
 		int total_w = get_size().width - get_size().height - 3;
 
 		//Check if color selector was clicked.
@@ -147,11 +152,11 @@ void ColorRampEdit::_gui_input(const InputEvent &p_event) {
 		}
 
 		//insert
-		ColorRamp::Point newPoint;
+		Gradient::Point newPoint;
 		newPoint.offset = CLAMP(x / float(total_w), 0, 1);
 
-		ColorRamp::Point prev;
-		ColorRamp::Point next;
+		Gradient::Point prev;
+		Gradient::Point next;
 
 		int pos = -1;
 		for (int i = 0; i < points.size(); i++) {
@@ -194,7 +199,7 @@ void ColorRampEdit::_gui_input(const InputEvent &p_event) {
 		emit_signal("ramp_changed");
 	}
 
-	if (p_event.type == InputEvent::MOUSE_BUTTON && p_event.mouse_button.button_index == 1 && !p_event.mouse_button.pressed) {
+	if (mb.is_valid() && mb->get_button_index() == 1 && !mb->is_pressed()) {
 
 		if (grabbing) {
 			grabbing = false;
@@ -203,15 +208,18 @@ void ColorRampEdit::_gui_input(const InputEvent &p_event) {
 		update();
 	}
 
-	if (p_event.type == InputEvent::MOUSE_MOTION && grabbing) {
+	Ref<InputEventMouseMotion> mm = p_event;
+
+	if (mm.is_valid() && grabbing) {
 
 		int total_w = get_size().width - get_size().height - 3;
 
-		int x = p_event.mouse_motion.x;
+		int x = mm->get_pos().x;
+
 		float newofs = CLAMP(x / float(total_w), 0, 1);
 
 		//Snap to nearest point if holding shift
-		if (p_event.key.mod.shift) {
+		if (mm->get_shift()) {
 			float snap_treshhold = 0.03;
 			float smallest_ofs = snap_treshhold;
 			bool founded = false;
@@ -285,7 +293,7 @@ void ColorRampEdit::_notification(int p_what) {
 		_draw_checker(0, 0, total_w, h);
 
 		//Draw color ramp
-		ColorRamp::Point prev;
+		Gradient::Point prev;
 		prev.offset = 0;
 		if (points.size() == 0)
 			prev.color = Color(0, 0, 0); //Draw black rectangle if we have no points
@@ -294,7 +302,7 @@ void ColorRampEdit::_notification(int p_what) {
 
 		for (int i = -1; i < points.size(); i++) {
 
-			ColorRamp::Point next;
+			Gradient::Point next;
 			//If there is no next point
 			if (i + 1 == points.size()) {
 				if (points.size() == 0)
@@ -402,7 +410,7 @@ void ColorRampEdit::set_ramp(const Vector<float> &p_offsets, const Vector<Color>
 	ERR_FAIL_COND(p_offsets.size() != p_colors.size());
 	points.clear();
 	for (int i = 0; i < p_offsets.size(); i++) {
-		ColorRamp::Point p;
+		Gradient::Point p;
 		p.offset = p_offsets[i];
 		p.color = p_colors[i];
 		points.push_back(p);
@@ -426,14 +434,14 @@ Vector<Color> ColorRampEdit::get_colors() const {
 	return ret;
 }
 
-void ColorRampEdit::set_points(Vector<ColorRamp::Point> &p_points) {
+void ColorRampEdit::set_points(Vector<Gradient::Point> &p_points) {
 	if (points.size() != p_points.size())
 		grabbed = -1;
 	points.clear();
 	points = p_points;
 }
 
-Vector<ColorRamp::Point> &ColorRampEdit::get_points() {
+Vector<Gradient::Point> &ColorRampEdit::get_points() {
 	return points;
 }
 

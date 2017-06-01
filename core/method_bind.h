@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -145,7 +146,7 @@ struct VariantCaster<const T &> {
 // some helpers
 
 VARIANT_ENUM_CAST(Vector3::Axis);
-VARIANT_ENUM_CAST(Image::Format);
+
 VARIANT_ENUM_CAST(Error);
 VARIANT_ENUM_CAST(wchar_t);
 VARIANT_ENUM_CAST(Margin);
@@ -153,7 +154,6 @@ VARIANT_ENUM_CAST(Orientation);
 VARIANT_ENUM_CAST(HAlign);
 VARIANT_ENUM_CAST(Variant::Type);
 VARIANT_ENUM_CAST(Variant::Operator);
-VARIANT_ENUM_CAST(InputEvent::Type);
 
 class MethodBind {
 

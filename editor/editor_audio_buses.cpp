@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -341,7 +342,7 @@ void EditorAudioBus::_effect_edited() {
 	if (effect->get_metadata(0) == Variant()) {
 		Rect2 area = effects->get_item_rect(effect);
 
-		effect_options->set_pos(effects->get_global_pos() + area.pos + Vector2(0, area.size.y));
+		effect_options->set_position(effects->get_global_position() + area.pos + Vector2(0, area.size.y));
 		effect_options->popup();
 		//add effect
 	} else {
@@ -384,16 +385,19 @@ void EditorAudioBus::_effect_add(int p_which) {
 	ur->commit_action();
 }
 
-void EditorAudioBus::_gui_input(const InputEvent &p_event) {
+void EditorAudioBus::_gui_input(const Ref<InputEvent> &p_event) {
 
-	if (p_event.type == InputEvent::KEY && p_event.key.pressed && p_event.key.scancode == KEY_DELETE && !p_event.key.echo) {
+	Ref<InputEventKey> k = p_event;
+	if (k.is_valid() && k->is_pressed() && k->get_scancode() == KEY_DELETE && !k->is_echo()) {
 		accept_event();
 		emit_signal("delete_request");
 	}
-	if (p_event.type == InputEvent::MOUSE_BUTTON && p_event.mouse_button.button_index == 2 && p_event.mouse_button.pressed) {
 
-		Vector2 pos = Vector2(p_event.mouse_button.x, p_event.mouse_button.y);
-		delete_popup->set_pos(get_global_pos() + pos);
+	Ref<InputEventMouseButton> mb = p_event;
+	if (mb.is_valid() && mb->get_button_index() == 2 && mb->is_pressed()) {
+
+		Vector2 pos = Vector2(mb->get_pos().x, mb->get_pos().y);
+		delete_popup->set_position(get_global_position() + pos);
 		delete_popup->popup();
 	}
 }
@@ -419,7 +423,7 @@ Variant EditorAudioBus::get_drag_data(const Point2 &p_point) {
 	c->add_child(p);
 	p->add_style_override("panel", get_stylebox("focus", "Button"));
 	p->set_size(get_size());
-	p->set_pos(-p_point);
+	p->set_position(-p_point);
 	set_drag_preview(c);
 	Dictionary d;
 	d["type"] = "move_audio_bus";
@@ -575,7 +579,7 @@ void EditorAudioBus::_effect_rmb(const Vector2 &p_pos) {
 	if (item->get_metadata(0).get_type() != Variant::INT)
 		return;
 
-	delete_effect_popup->set_pos(get_global_mouse_pos());
+	delete_effect_popup->set_position(get_global_mouse_position());
 	delete_effect_popup->popup();
 }
 
@@ -1104,9 +1108,9 @@ EditorAudioBuses::EditorAudioBuses() {
 
 	file_dialog = memnew(EditorFileDialog);
 	List<String> ext;
-	ResourceLoader::get_recognized_extensions_for_type("AudioServerState", &ext);
+	ResourceLoader::get_recognized_extensions_for_type("AudioBusLayout", &ext);
 	for (List<String>::Element *E = ext.front(); E; E = E->next()) {
-		file_dialog->add_filter("*." + E->get() + "; Audio Bus State");
+		file_dialog->add_filter("*." + E->get() + "; Audio Bus Layout");
 	}
 	add_child(file_dialog);
 	file_dialog->connect("file_selected", this, "_file_dialog_callback");

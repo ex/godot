@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -157,7 +158,7 @@ class TileMapEditor : public VBoxContainer {
 
 	void _text_entered(const String &p_text);
 	void _text_changed(const String &p_text);
-	void _sbox_input(const InputEvent &p_ie);
+	void _sbox_input(const Ref<InputEvent> &p_ie);
 	void _update_palette();
 	void _canvas_draw();
 	void _menu_option(int p_option);
@@ -178,7 +179,7 @@ protected:
 public:
 	HBoxContainer *get_toolbar() const { return toolbar; }
 
-	bool forward_gui_input(const InputEvent &p_event);
+	bool forward_gui_input(const Ref<InputEvent> &p_event);
 	void edit(Node *p_tile_map);
 
 	TileMapEditor(EditorNode *p_editor);
@@ -192,7 +193,7 @@ class TileMapEditorPlugin : public EditorPlugin {
 	TileMapEditor *tile_map_editor;
 
 public:
-	virtual bool forward_canvas_gui_input(const Transform2D &p_canvas_xform, const InputEvent &p_event) { return tile_map_editor->forward_gui_input(p_event); }
+	virtual bool forward_canvas_gui_input(const Transform2D &p_canvas_xform, const Ref<InputEvent> &p_event) { return tile_map_editor->forward_gui_input(p_event); }
 
 	virtual String get_name() const { return "TileMap"; }
 	bool has_main_screen() const { return false; }

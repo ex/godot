@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,6 +30,7 @@
 #include "variant_parser.h"
 
 #include "io/resource_loader.h"
+#include "os/input_event.h"
 #include "os/keyboard.h"
 
 CharType VariantParser::StreamFile::get_char() {
@@ -408,7 +410,7 @@ Error VariantParser::_parse_enginecfg(Stream *p_stream, Vector<String> &strings,
 	Token token;
 	get_token(p_stream, token, line, r_err_str);
 	if (token.type != TK_PARENTHESIS_OPEN) {
-		r_err_str = "Expected '(' in old-style godot.cfg construct";
+		r_err_str = "Expected '(' in old-style project.godot construct";
 		return ERR_PARSE_ERROR;
 	}
 
@@ -419,7 +421,7 @@ Error VariantParser::_parse_enginecfg(Stream *p_stream, Vector<String> &strings,
 		CharType c = p_stream->get_char();
 
 		if (p_stream->is_eof()) {
-			r_err_str = "Unexpected EOF while parsing old-style godot.cfg construct";
+			r_err_str = "Unexpected EOF while parsing old-style project.godot construct";
 			return ERR_PARSE_ERROR;
 		}
 
@@ -503,39 +505,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 		return OK;
 
 	} else if (token.type == TK_IDENTIFIER) {
-		/*
-		VECTOR2,		// 5
-		RECT2,
-		VECTOR3,
-		MATRIX32,
-		PLANE,
-		QUAT,			// 10
-		_AABB, //sorry naming convention fail :( not like it's used often
-		MATRIX3,
-		TRANSFORM,
 
-		// misc types
-		COLOR,
-		IMAGE,			// 15
-		NODE_PATH,
-		_RID,
-		OBJECT,
-		INPUT_EVENT,
-		DICTIONARY,		// 20
-		ARRAY,
-
-		// arrays
-		RAW_ARRAY,
-		INT_ARRAY,
-		REAL_ARRAY,
-		STRING_ARRAY,	// 25
-		VECTOR2_ARRAY,
-		VECTOR3_ARRAY,
-		COLOR_ARRAY,
-
-		VARIANT_MAX
-
-*/
 		String id = token.value;
 		if (id == "true")
 			value = true;
@@ -680,126 +650,6 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			value = Color(args[0], args[1], args[2], args[3]);
 			return OK;
 
-		} else if (id == "Image") {
-
-			//:|
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_PARENTHESIS_OPEN) {
-				r_err_str = "Expected '('";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type == TK_PARENTHESIS_CLOSE) {
-				value = Image(); // just an Image()
-				return OK;
-			} else if (token.type != TK_NUMBER) {
-				r_err_str = "Expected number (width)";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-
-			int width = token.value;
-			if (token.type != TK_COMMA) {
-				r_err_str = "Expected ','";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_NUMBER) {
-				r_err_str = "Expected number (height)";
-				return ERR_PARSE_ERROR;
-			}
-
-			int height = token.value;
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_COMMA) {
-				r_err_str = "Expected ','";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-
-			bool has_mipmaps = false;
-
-			if (token.type == TK_NUMBER) {
-				has_mipmaps = bool(token.value);
-			} else if (token.type == TK_IDENTIFIER && String(token.value) == "true") {
-				has_mipmaps = true;
-			} else if (token.type == TK_IDENTIFIER && String(token.value) == "false") {
-				has_mipmaps = false;
-			} else {
-				r_err_str = "Expected number/true/false (mipmaps)";
-				return ERR_PARSE_ERROR;
-			}
-
-			int mipmaps = token.value;
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_COMMA) {
-				r_err_str = "Expected ','";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_IDENTIFIER) {
-				r_err_str = "Expected identifier (format)";
-				return ERR_PARSE_ERROR;
-			}
-
-			String sformat = token.value;
-
-			Image::Format format = Image::FORMAT_MAX;
-
-			for (int i = 0; i < Image::FORMAT_MAX; i++) {
-				if (Image::get_format_name(format) == sformat) {
-					format = Image::Format(i);
-				}
-			}
-
-			if (format == Image::FORMAT_MAX) {
-				r_err_str = "Unknown image format: " + String(sformat);
-				return ERR_PARSE_ERROR;
-			}
-
-			int len = Image::get_image_data_size(width, height, format, mipmaps);
-
-			PoolVector<uint8_t> buffer;
-			buffer.resize(len);
-
-			if (buffer.size() != len) {
-				r_err_str = "Couldn't allocate image buffer of size: " + itos(len);
-			}
-
-			{
-				PoolVector<uint8_t>::Write w = buffer.write();
-
-				for (int i = 0; i < len; i++) {
-					get_token(p_stream, token, line, r_err_str);
-					if (token.type != TK_COMMA) {
-						r_err_str = "Expected ','";
-						return ERR_PARSE_ERROR;
-					}
-
-					get_token(p_stream, token, line, r_err_str);
-					if (token.type != TK_NUMBER) {
-						r_err_str = "Expected number";
-						return ERR_PARSE_ERROR;
-					}
-
-					w[i] = int(token.value);
-				}
-			}
-
-			Image img(width, height, mipmaps, format, buffer);
-
-			value = img;
-
-			return OK;
-
 		} else if (id == "NodePath") {
 
 			get_token(p_stream, token, line, r_err_str);
@@ -842,6 +692,106 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			if (token.type != TK_PARENTHESIS_CLOSE) {
 				r_err_str = "Expected ')'";
 				return ERR_PARSE_ERROR;
+			}
+
+			return OK;
+		} else if (id == "Object") {
+
+			get_token(p_stream, token, line, r_err_str);
+			if (token.type != TK_PARENTHESIS_OPEN) {
+				r_err_str = "Expected '('";
+				return ERR_PARSE_ERROR;
+			}
+
+			get_token(p_stream, token, line, r_err_str);
+
+			if (token.type != TK_IDENTIFIER) {
+				r_err_str = "Expected identifier with type of object";
+				return ERR_PARSE_ERROR;
+			}
+
+			String type = token.value;
+
+			Object *obj = ClassDB::instance(type);
+
+			if (!obj) {
+				r_err_str = "Can't instance Object() of type: " + type;
+				return ERR_PARSE_ERROR;
+			}
+
+			get_token(p_stream, token, line, r_err_str);
+			if (token.type != TK_COMMA) {
+				r_err_str = "Expected ',' after object type";
+				return ERR_PARSE_ERROR;
+			}
+
+			bool at_key = true;
+			String key;
+			Token token;
+			bool need_comma = false;
+
+			while (true) {
+
+				if (p_stream->is_eof()) {
+					r_err_str = "Unexpected End of File while parsing Object()";
+					return ERR_FILE_CORRUPT;
+				}
+
+				if (at_key) {
+
+					Error err = get_token(p_stream, token, line, r_err_str);
+					if (err != OK)
+						return err;
+
+					if (token.type == TK_PARENTHESIS_CLOSE) {
+
+						return OK;
+					}
+
+					if (need_comma) {
+
+						if (token.type != TK_COMMA) {
+
+							r_err_str = "Expected '}' or ','";
+							return ERR_PARSE_ERROR;
+						} else {
+							need_comma = false;
+							continue;
+						}
+					}
+
+					get_token(p_stream, token, line, r_err_str);
+					if (token.type != TK_STRING) {
+						r_err_str = "Expected property name as string";
+						return ERR_PARSE_ERROR;
+					}
+
+					key = token.value;
+
+					err = get_token(p_stream, token, line, r_err_str);
+
+					if (err != OK)
+						return err;
+					if (token.type != TK_COLON) {
+
+						r_err_str = "Expected ':'";
+						return ERR_PARSE_ERROR;
+					}
+					at_key = false;
+				} else {
+
+					Error err = get_token(p_stream, token, line, r_err_str);
+					if (err != OK)
+						return err;
+
+					Variant v;
+					err = parse_value(token, v, p_stream, line, r_err_str, p_res_parser);
+					if (err)
+						return err;
+					obj->set(key, v);
+					need_comma = true;
+					at_key = true;
+				}
 			}
 
 			return OK;
@@ -911,7 +861,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			}
 
 			return OK;
-
+#ifndef DISABLE_DEPRECATED
 		} else if (id == "InputEvent") {
 
 			get_token(p_stream, token, line, r_err_str);
@@ -929,11 +879,9 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 			String id = token.value;
 
-			InputEvent ie;
+			Ref<InputEvent> ie;
 
 			if (id == "NONE") {
-
-				ie.type = InputEvent::NONE;
 
 				get_token(p_stream, token, line, r_err_str);
 
@@ -944,21 +892,23 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 			} else if (id == "KEY") {
 
+				Ref<InputEventKey> key;
+				key.instance();
+				ie = key;
+
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_COMMA) {
 					r_err_str = "Expected ','";
 					return ERR_PARSE_ERROR;
 				}
 
-				ie.type = InputEvent::KEY;
-
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type == TK_IDENTIFIER) {
 					String name = token.value;
-					ie.key.scancode = find_keycode(name);
+					key->set_scancode(find_keycode(name));
 				} else if (token.type == TK_NUMBER) {
 
-					ie.key.scancode = token.value;
+					key->set_scancode(token.value);
 				} else {
 
 					r_err_str = "Expected string or integer for keycode";
@@ -979,13 +929,13 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 					String mods = token.value;
 
 					if (mods.findn("C") != -1)
-						ie.key.mod.control = true;
+						key->set_control(true);
 					if (mods.findn("A") != -1)
-						ie.key.mod.alt = true;
+						key->set_alt(true);
 					if (mods.findn("S") != -1)
-						ie.key.mod.shift = true;
+						key->set_shift(true);
 					if (mods.findn("M") != -1)
-						ie.key.mod.meta = true;
+						key->set_metakey(true);
 
 					get_token(p_stream, token, line, r_err_str);
 					if (token.type != TK_PARENTHESIS_CLOSE) {
@@ -1001,13 +951,15 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 			} else if (id == "MBUTTON") {
 
+				Ref<InputEventMouseButton> mb;
+				mb.instance();
+				ie = mb;
+
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_COMMA) {
 					r_err_str = "Expected ','";
 					return ERR_PARSE_ERROR;
 				}
-
-				ie.type = InputEvent::MOUSE_BUTTON;
 
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_NUMBER) {
@@ -1015,7 +967,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 					return ERR_PARSE_ERROR;
 				}
 
-				ie.mouse_button.button_index = token.value;
+				mb->set_button_index(token.value);
 
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_PARENTHESIS_CLOSE) {
@@ -1025,13 +977,15 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 			} else if (id == "JBUTTON") {
 
+				Ref<InputEventJoypadButton> jb;
+				jb.instance();
+				ie = jb;
+
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_COMMA) {
 					r_err_str = "Expected ','";
 					return ERR_PARSE_ERROR;
 				}
-
-				ie.type = InputEvent::JOYPAD_BUTTON;
 
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_NUMBER) {
@@ -1039,7 +993,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 					return ERR_PARSE_ERROR;
 				}
 
-				ie.joy_button.button_index = token.value;
+				jb->set_button_index(token.value);
 
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_PARENTHESIS_CLOSE) {
@@ -1049,13 +1003,15 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 			} else if (id == "JAXIS") {
 
+				Ref<InputEventJoypadMotion> jm;
+				jm.instance();
+				ie = jm;
+
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_COMMA) {
 					r_err_str = "Expected ','";
 					return ERR_PARSE_ERROR;
 				}
-
-				ie.type = InputEvent::JOYPAD_MOTION;
 
 				get_token(p_stream, token, line, r_err_str);
 				if (token.type != TK_NUMBER) {
@@ -1063,7 +1019,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 					return ERR_PARSE_ERROR;
 				}
 
-				ie.joy_motion.axis = token.value;
+				jm->set_axis(token.value);
 
 				get_token(p_stream, token, line, r_err_str);
 
@@ -1078,7 +1034,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 					return ERR_PARSE_ERROR;
 				}
 
-				ie.joy_motion.axis_value = token.value;
+				jm->set_axis_value(token.value);
 
 				get_token(p_stream, token, line, r_err_str);
 
@@ -1096,7 +1052,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			value = ie;
 
 			return OK;
-
+#endif
 		} else if (id == "PoolByteArray" || id == "ByteArray") {
 
 			Vector<uint8_t> args;
@@ -1272,151 +1228,10 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			value = arr;
 
 			return OK;
-		} else if (id == "key") { // compatibility with godot.cfg
-
-			Vector<String> params;
-			Error err = _parse_enginecfg(p_stream, params, line, r_err_str);
-			if (err)
-				return err;
-			ERR_FAIL_COND_V(params.size() != 1 && params.size() != 2, ERR_PARSE_ERROR);
-
-			int scode = 0;
-
-			if (params[0].is_numeric()) {
-				scode = params[0].to_int();
-				if (scode < 10) {
-					scode = KEY_0 + scode;
-				}
-			} else
-				scode = find_keycode(params[0]);
-
-			InputEvent ie;
-			ie.type = InputEvent::KEY;
-			ie.key.scancode = scode;
-
-			if (params.size() == 2) {
-				String mods = params[1];
-				if (mods.findn("C") != -1)
-					ie.key.mod.control = true;
-				if (mods.findn("A") != -1)
-					ie.key.mod.alt = true;
-				if (mods.findn("S") != -1)
-					ie.key.mod.shift = true;
-				if (mods.findn("M") != -1)
-					ie.key.mod.meta = true;
-			}
-			value = ie;
-			return OK;
-
-		} else if (id == "mbutton") { // compatibility with godot.cfg
-
-			Vector<String> params;
-			Error err = _parse_enginecfg(p_stream, params, line, r_err_str);
-			if (err)
-				return err;
-			ERR_FAIL_COND_V(params.size() != 2, ERR_PARSE_ERROR);
-
-			InputEvent ie;
-			ie.type = InputEvent::MOUSE_BUTTON;
-			ie.device = params[0].to_int();
-			ie.mouse_button.button_index = params[1].to_int();
-
-			value = ie;
-			return OK;
-		} else if (id == "jbutton") { // compatibility with godot.cfg
-
-			Vector<String> params;
-			Error err = _parse_enginecfg(p_stream, params, line, r_err_str);
-			if (err)
-				return err;
-			ERR_FAIL_COND_V(params.size() != 2, ERR_PARSE_ERROR);
-			InputEvent ie;
-			ie.type = InputEvent::JOYPAD_BUTTON;
-			ie.device = params[0].to_int();
-			ie.joy_button.button_index = params[1].to_int();
-
-			value = ie;
-
-			return OK;
-		} else if (id == "jaxis") { // compatibility with godot.cfg
-
-			Vector<String> params;
-			Error err = _parse_enginecfg(p_stream, params, line, r_err_str);
-			if (err)
-				return err;
-			ERR_FAIL_COND_V(params.size() != 2, ERR_PARSE_ERROR);
-
-			InputEvent ie;
-			ie.type = InputEvent::JOYPAD_MOTION;
-			ie.device = params[0].to_int();
-			int axis = params[1].to_int();
-			ie.joy_motion.axis = axis >> 1;
-			ie.joy_motion.axis_value = axis & 1 ? 1 : -1;
-
-			value = ie;
-
-			return OK;
-		} else if (id == "img") { // compatibility with godot.cfg
-
-			Token token; // FIXME: no need for this declaration? the first argument in line 509 is a Token& token.
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_PARENTHESIS_OPEN) {
-				r_err_str = "Expected '(' in old-style godot.cfg construct";
-				return ERR_PARSE_ERROR;
-			}
-
-			while (true) {
-				CharType c = p_stream->get_char();
-				if (p_stream->is_eof()) {
-					r_err_str = "Unexpected EOF in old style godot.cfg img()";
-					return ERR_PARSE_ERROR;
-				}
-				if (c == ')')
-					break;
-			}
-
-			value = Image();
-
-			return OK;
-
 		} else {
 			r_err_str = "Unexpected identifier: '" + id + "'.";
 			return ERR_PARSE_ERROR;
 		}
-
-		/*
-				VECTOR2,		// 5
-				RECT2,
-				VECTOR3,
-				MATRIX32,
-				PLANE,
-				QUAT,			// 10
-				_AABB, //sorry naming convention fail :( not like it's used often
-				MATRIX3,
-				TRANSFORM,
-
-				// misc types
-				COLOR,
-				IMAGE,			// 15
-				NODE_PATH,
-				_RID,
-				OBJECT,
-				INPUT_EVENT,
-				DICTIONARY,		// 20
-				ARRAY,
-
-				// arrays
-				RAW_ARRAY,
-				INT_ARRAY,
-				REAL_ARRAY,
-				STRING_ARRAY,	// 25
-				VECTOR2_ARRAY,
-				VECTOR3_ARRAY,
-				COLOR_ARRAY,
-
-				VARIANT_MAX
-
-		*/
 
 		return OK;
 
@@ -1885,39 +1700,6 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 			p_store_string_func(p_store_string_ud, "Color( " + rtosfix(c.r) + ", " + rtosfix(c.g) + ", " + rtosfix(c.b) + ", " + rtosfix(c.a) + " )");
 
 		} break;
-		case Variant::IMAGE: {
-
-			Image img = p_variant;
-
-			if (img.empty()) {
-				p_store_string_func(p_store_string_ud, "Image()");
-				break;
-			}
-
-			String imgstr = "Image( ";
-			imgstr += itos(img.get_width());
-			imgstr += ", " + itos(img.get_height());
-			imgstr += ", " + String(img.has_mipmaps() ? "true" : "false");
-			imgstr += ", " + Image::get_format_name(img.get_format());
-
-			String s;
-
-			PoolVector<uint8_t> data = img.get_data();
-			int len = data.size();
-			PoolVector<uint8_t>::Read r = data.read();
-			const uint8_t *ptr = r.ptr();
-			for (int i = 0; i < len; i++) {
-
-				if (i > 0)
-					s += ", ";
-				s += itos(ptr[i]);
-			}
-
-			imgstr += ", ";
-			p_store_string_func(p_store_string_ud, imgstr);
-			p_store_string_func(p_store_string_ud, s);
-			p_store_string_func(p_store_string_ud, " )");
-		} break;
 		case Variant::NODE_PATH: {
 
 			String str = p_variant;
@@ -1929,76 +1711,66 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 
 		case Variant::OBJECT: {
 
-			RES res = p_variant;
-			if (res.is_null()) {
+			Object *obj = p_variant;
+
+			if (!obj) {
 				p_store_string_func(p_store_string_ud, "null");
 				break; // don't save it
 			}
 
-			String res_text;
+			RES res = p_variant;
+			if (res.is_valid()) {
+				//is resource
+				String res_text;
 
-			if (p_encode_res_func) {
+				//try external function
+				if (p_encode_res_func) {
 
-				res_text = p_encode_res_func(p_encode_res_ud, res);
+					res_text = p_encode_res_func(p_encode_res_ud, res);
+				}
+
+				//try path because it's a file
+				if (res_text == String() && res->get_path().is_resource_file()) {
+
+					//external resource
+					String path = res->get_path();
+					res_text = "Resource( \"" + path + "\")";
+				}
+
+				//could come up with some sort of text
+				if (res_text != String()) {
+					p_store_string_func(p_store_string_ud, res_text);
+					break;
+				}
 			}
 
-			if (res_text == String() && res->get_path().is_resource_file()) {
+			//store as generic object
 
-				//external resource
-				String path = res->get_path();
-				res_text = "Resource( \"" + path + "\")";
+			p_store_string_func(p_store_string_ud, "Object(" + obj->get_class() + ",");
+
+			List<PropertyInfo> props;
+			obj->get_property_list(&props);
+			bool first = true;
+			for (List<PropertyInfo>::Element *E = props.front(); E; E = E->next()) {
+
+				if (E->get().usage & PROPERTY_USAGE_STORAGE || E->get().usage & PROPERTY_USAGE_SCRIPT_VARIABLE) {
+					//must be serialized
+
+					if (first) {
+						first = false;
+					} else {
+						p_store_string_func(p_store_string_ud, ",");
+					}
+
+					p_store_string_func(p_store_string_ud, "\"" + E->get().name + "\":");
+					write(obj->get(E->get().name), p_store_string_func, p_store_string_ud, p_encode_res_func, p_encode_res_ud);
+				}
 			}
 
-			if (res_text == String())
-				res_text = "null";
-
-			p_store_string_func(p_store_string_ud, res_text);
+			p_store_string_func(p_store_string_ud, ")\n");
 
 		} break;
-		case Variant::INPUT_EVENT: {
 
-			String str = "InputEvent(";
-
-			InputEvent ev = p_variant;
-			switch (ev.type) {
-				case InputEvent::KEY: {
-
-					str += "KEY," + itos(ev.key.scancode);
-					String mod;
-					if (ev.key.mod.alt)
-						mod += "A";
-					if (ev.key.mod.shift)
-						mod += "S";
-					if (ev.key.mod.control)
-						mod += "C";
-					if (ev.key.mod.meta)
-						mod += "M";
-
-					if (mod != String())
-						str += "," + mod;
-				} break;
-				case InputEvent::MOUSE_BUTTON: {
-
-					str += "MBUTTON," + itos(ev.mouse_button.button_index);
-				} break;
-				case InputEvent::JOYPAD_BUTTON: {
-					str += "JBUTTON," + itos(ev.joy_button.button_index);
-
-				} break;
-				case InputEvent::JOYPAD_MOTION: {
-					str += "JAXIS," + itos(ev.joy_motion.axis) + "," + itos(ev.joy_motion.axis_value);
-				} break;
-				case InputEvent::NONE: {
-					str += "NONE";
-				} break;
-				default: {}
-			}
-
-			str += ")";
-
-			p_store_string_func(p_store_string_ud, str); //will be added later
-
-		} break;
 		case Variant::DICTIONARY: {
 
 			Dictionary dict = p_variant;

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -130,8 +131,6 @@ public:
 		struct EnvironmentRadianceUBO {
 
 			float transform[16];
-			float box_min[4]; //unused for now
-			float box_max[4];
 			float ambient_contribution;
 
 		} env_radiance_data;
@@ -140,8 +139,8 @@ public:
 
 		GLuint brdf_texture;
 
-		GLuint skybox_verts;
-		GLuint skybox_array;
+		GLuint sky_verts;
+		GLuint sky_array;
 
 		GLuint directional_ubo;
 
@@ -328,16 +327,16 @@ public:
 
 		VS::EnvironmentBG bg_mode;
 
-		RID skybox;
-		float skybox_scale;
+		RID sky;
+		float sky_scale;
 
 		Color bg_color;
 		float bg_energy;
-		float skybox_ambient;
+		float sky_ambient;
 
 		Color ambient_color;
 		float ambient_energy;
-		float ambient_skybox_contribution;
+		float ambient_sky_contribution;
 
 		int canvas_max_layer;
 
@@ -392,11 +391,11 @@ public:
 
 		Environment() {
 			bg_mode = VS::ENV_BG_CLEAR_COLOR;
-			skybox_scale = 1.0;
+			sky_scale = 1.0;
 			bg_energy = 1.0;
-			skybox_ambient = 0;
+			sky_ambient = 0;
 			ambient_energy = 1.0;
-			ambient_skybox_contribution = 0.0;
+			ambient_sky_contribution = 0.0;
 			canvas_max_layer = 0;
 
 			ssr_enabled = false;
@@ -454,12 +453,12 @@ public:
 	virtual RID environment_create();
 
 	virtual void environment_set_background(RID p_env, VS::EnvironmentBG p_bg);
-	virtual void environment_set_skybox(RID p_env, RID p_skybox);
-	virtual void environment_set_skybox_scale(RID p_env, float p_scale);
+	virtual void environment_set_sky(RID p_env, RID p_sky);
+	virtual void environment_set_sky_scale(RID p_env, float p_scale);
 	virtual void environment_set_bg_color(RID p_env, const Color &p_color);
 	virtual void environment_set_bg_energy(RID p_env, float p_energy);
 	virtual void environment_set_canvas_max_layer(RID p_env, int p_max_layer);
-	virtual void environment_set_ambient_light(RID p_env, const Color &p_color, float p_energy = 1.0, float p_skybox_contribution = 0.0);
+	virtual void environment_set_ambient_light(RID p_env, const Color &p_color, float p_energy = 1.0, float p_sky_contribution = 0.0);
 
 	virtual void environment_set_dof_blur_near(RID p_env, bool p_enable, float p_distance, float p_transition, float p_far_amount, VS::EnvironmentDOFBlurQuality p_quality);
 	virtual void environment_set_dof_blur_far(RID p_env, bool p_enable, float p_distance, float p_transition, float p_far_amount, VS::EnvironmentDOFBlurQuality p_quality);
@@ -691,8 +690,7 @@ public:
 	_FORCE_INLINE_ void _set_cull(bool p_front, bool p_reverse_cull);
 
 	_FORCE_INLINE_ bool _setup_material(RasterizerStorageGLES3::Material *p_material, bool p_alpha_pass);
-	_FORCE_INLINE_ void _setup_transform(InstanceBase *p_instance, const Transform &p_view_transform, const CameraMatrix &p_projection);
-	_FORCE_INLINE_ void _setup_geometry(RenderList::Element *e);
+	_FORCE_INLINE_ void _setup_geometry(RenderList::Element *e, const Transform &p_view_transform);
 	_FORCE_INLINE_ void _render_geometry(RenderList::Element *e);
 	_FORCE_INLINE_ void _setup_light(RenderList::Element *e, const Transform &p_view_transform);
 
@@ -700,7 +698,7 @@ public:
 
 	_FORCE_INLINE_ void _add_geometry(RasterizerStorageGLES3::Geometry *p_geometry, InstanceBase *p_instance, RasterizerStorageGLES3::GeometryOwner *p_owner, int p_material, bool p_shadow);
 
-	void _draw_skybox(RasterizerStorageGLES3::SkyBox *p_skybox, const CameraMatrix &p_projection, const Transform &p_transform, bool p_vflip, float p_scale);
+	void _draw_sky(RasterizerStorageGLES3::Sky *p_sky, const CameraMatrix &p_projection, const Transform &p_transform, bool p_vflip, float p_scale, float p_energy);
 
 	void _setup_environment(Environment *env, const CameraMatrix &p_cam_projection, const Transform &p_cam_transform);
 	void _setup_directional_light(int p_index, const Transform &p_camera_inverse_transformm, bool p_use_shadows);

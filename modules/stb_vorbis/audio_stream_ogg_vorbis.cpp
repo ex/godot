@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,7 +30,8 @@
 #include "audio_stream_ogg_vorbis.h"
 
 #include "os/file_access.h"
-#include "thirdparty/stb_vorbis/stb_vorbis.c"
+
+#include "thirdparty/misc/stb_vorbis.c"
 
 void AudioStreamPlaybackOGGVorbis::_mix_internal(AudioFrame *p_buffer, int p_frames) {
 
@@ -41,6 +43,7 @@ void AudioStreamPlaybackOGGVorbis::_mix_internal(AudioFrame *p_buffer, int p_fra
 
 		int mixed = stb_vorbis_get_samples_float_interleaved(ogg_stream, 2, (float *)p_buffer, todo * 2);
 		todo -= mixed;
+		frames_mixed += mixed;
 
 		if (todo) {
 			//end of file!
@@ -65,8 +68,8 @@ float AudioStreamPlaybackOGGVorbis::get_stream_sampling_rate() {
 
 void AudioStreamPlaybackOGGVorbis::start(float p_from_pos) {
 
-	seek_pos(p_from_pos);
 	active = true;
+	seek_pos(p_from_pos);
 	loops = 0;
 	_begin_resample();
 }
@@ -94,7 +97,12 @@ void AudioStreamPlaybackOGGVorbis::seek_pos(float p_time) {
 	if (!active)
 		return;
 
-	stb_vorbis_seek(ogg_stream, uint32_t(p_time * vorbis_stream->sample_rate));
+	if (p_time >= get_length()) {
+		p_time = 0;
+	}
+	frames_mixed = uint32_t(vorbis_stream->sample_rate * p_time);
+
+	stb_vorbis_seek(ogg_stream, frames_mixed);
 }
 
 float AudioStreamPlaybackOGGVorbis::get_length() const {
@@ -180,7 +188,7 @@ void AudioStreamOGGVorbis::set_data(const PoolVector<uint8_t> &p_data) {
 			//does this work? (it's less mem..)
 			//decode_mem_size = ogg_alloc.alloc_buffer_length_in_bytes + info.setup_memory_required + info.temp_memory_required + info.max_frame_size;
 
-			//print_line("succeded "+itos(ogg_alloc.alloc_buffer_length_in_bytes)+" setup "+itos(info.setup_memory_required)+" setup temp "+itos(info.setup_temp_memory_required)+" temp "+itos(info.temp_memory_required)+" maxframe"+itos(info.max_frame_size));
+			//print_line("succeeded "+itos(ogg_alloc.alloc_buffer_length_in_bytes)+" setup "+itos(info.setup_memory_required)+" setup temp "+itos(info.setup_temp_memory_required)+" temp "+itos(info.temp_memory_required)+" maxframe"+itos(info.max_frame_size));
 
 			length = stb_vorbis_stream_length_in_seconds(ogg_stream);
 			stb_vorbis_close(ogg_stream);

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -275,38 +276,6 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 				(*r_len) += 4 * 4;
 
 		} break;
-		case Variant::IMAGE: {
-
-			ERR_FAIL_COND_V(len < (int)5 * 4, ERR_INVALID_DATA);
-			Image::Format fmt = (Image::Format)decode_uint32(&buf[0]);
-			ERR_FAIL_INDEX_V(fmt, Image::FORMAT_MAX, ERR_INVALID_DATA);
-			uint32_t mipmaps = decode_uint32(&buf[4]);
-			uint32_t w = decode_uint32(&buf[8]);
-			uint32_t h = decode_uint32(&buf[12]);
-			uint32_t datalen = decode_uint32(&buf[16]);
-
-			Image img;
-			if (datalen > 0) {
-				len -= 5 * 4;
-				ERR_FAIL_COND_V(len < datalen, ERR_INVALID_DATA);
-				PoolVector<uint8_t> data;
-				data.resize(datalen);
-				PoolVector<uint8_t>::Write wr = data.write();
-				copymem(&wr[0], &buf[20], datalen);
-				wr = PoolVector<uint8_t>::Write();
-
-				img = Image(w, h, mipmaps, fmt, data);
-			}
-
-			r_variant = img;
-			if (r_len) {
-				if (datalen % 4)
-					(*r_len) += 4 - datalen % 4;
-
-				(*r_len) += 4 * 5 + datalen;
-			}
-
-		} break;
 		case Variant::NODE_PATH: {
 
 			ERR_FAIL_COND_V(len < 4, ERR_INVALID_DATA);
@@ -395,66 +364,6 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 		case Variant::OBJECT: {
 
 			r_variant = (Object *)NULL;
-		} break;
-		case Variant::INPUT_EVENT: {
-
-			InputEvent ie;
-
-			ie.type = decode_uint32(&buf[0]);
-			ie.device = decode_uint32(&buf[4]);
-
-			if (r_len)
-				(*r_len) += 12;
-
-			switch (ie.type) {
-
-				case InputEvent::KEY: {
-
-					uint32_t mods = decode_uint32(&buf[12]);
-					if (mods & KEY_MASK_SHIFT)
-						ie.key.mod.shift = true;
-					if (mods & KEY_MASK_CTRL)
-						ie.key.mod.control = true;
-					if (mods & KEY_MASK_ALT)
-						ie.key.mod.alt = true;
-					if (mods & KEY_MASK_META)
-						ie.key.mod.meta = true;
-					ie.key.scancode = decode_uint32(&buf[16]);
-
-					if (r_len)
-						(*r_len) += 8;
-
-				} break;
-				case InputEvent::MOUSE_BUTTON: {
-
-					ie.mouse_button.button_index = decode_uint32(&buf[12]);
-					if (r_len)
-						(*r_len) += 4;
-
-				} break;
-				case InputEvent::JOYPAD_BUTTON: {
-
-					ie.joy_button.button_index = decode_uint32(&buf[12]);
-					if (r_len)
-						(*r_len) += 4;
-				} break;
-				case InputEvent::SCREEN_TOUCH: {
-
-					ie.screen_touch.index = decode_uint32(&buf[12]);
-					if (r_len)
-						(*r_len) += 4;
-				} break;
-				case InputEvent::JOYPAD_MOTION: {
-
-					ie.joy_motion.axis = decode_uint32(&buf[12]);
-					ie.joy_motion.axis_value = decode_float(&buf[16]);
-					if (r_len)
-						(*r_len) += 8;
-				} break;
-			}
-
-			r_variant = ie;
-
 		} break;
 		case Variant::DICTIONARY: {
 
@@ -861,7 +770,7 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 			} else {
 
 				if (buf) {
-					encode_double(p_variant.operator float(), buf);
+					encode_float(p_variant.operator float(), buf);
 				}
 
 				r_len += 4;
@@ -1077,30 +986,6 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 			r_len += 4 * 4;
 
 		} break;
-		case Variant::IMAGE: {
-
-			Image image = p_variant;
-			PoolVector<uint8_t> data = image.get_data();
-
-			if (buf) {
-
-				encode_uint32(image.get_format(), &buf[0]);
-				encode_uint32(image.has_mipmaps(), &buf[4]);
-				encode_uint32(image.get_width(), &buf[8]);
-				encode_uint32(image.get_height(), &buf[12]);
-				int ds = data.size();
-				encode_uint32(ds, &buf[16]);
-				PoolVector<uint8_t>::Read r = data.read();
-				copymem(&buf[20], &r[0], ds);
-			}
-
-			int pad = 0;
-			if (data.size() % 4)
-				pad = 4 - data.size() % 4;
-
-			r_len += data.size() + 5 * 4 + pad;
-
-		} break;
 		/*case Variant::RESOURCE: {
 
 			ERR_EXPLAIN("Can't marshallize resources");
@@ -1109,83 +994,6 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len) {
 		case Variant::_RID:
 		case Variant::OBJECT: {
 
-		} break;
-		case Variant::INPUT_EVENT: {
-
-			InputEvent ie = p_variant;
-
-			if (buf) {
-
-				encode_uint32(ie.type, &buf[0]);
-				encode_uint32(ie.device, &buf[4]);
-				encode_uint32(0, &buf[8]);
-			}
-
-			int llen = 12;
-
-			switch (ie.type) {
-
-				case InputEvent::KEY: {
-
-					if (buf) {
-
-						uint32_t mods = 0;
-						if (ie.key.mod.shift)
-							mods |= KEY_MASK_SHIFT;
-						if (ie.key.mod.control)
-							mods |= KEY_MASK_CTRL;
-						if (ie.key.mod.alt)
-							mods |= KEY_MASK_ALT;
-						if (ie.key.mod.meta)
-							mods |= KEY_MASK_META;
-
-						encode_uint32(mods, &buf[llen]);
-						encode_uint32(ie.key.scancode, &buf[llen + 4]);
-					}
-					llen += 8;
-
-				} break;
-				case InputEvent::MOUSE_BUTTON: {
-
-					if (buf) {
-
-						encode_uint32(ie.mouse_button.button_index, &buf[llen]);
-					}
-					llen += 4;
-				} break;
-				case InputEvent::JOYPAD_BUTTON: {
-
-					if (buf) {
-
-						encode_uint32(ie.joy_button.button_index, &buf[llen]);
-					}
-					llen += 4;
-				} break;
-				case InputEvent::SCREEN_TOUCH: {
-
-					if (buf) {
-
-						encode_uint32(ie.screen_touch.index, &buf[llen]);
-					}
-					llen += 4;
-				} break;
-				case InputEvent::JOYPAD_MOTION: {
-
-					if (buf) {
-
-						int axis = ie.joy_motion.axis;
-						encode_uint32(axis, &buf[llen]);
-						encode_float(ie.joy_motion.axis_value, &buf[llen + 4]);
-					}
-					llen += 8;
-				} break;
-			}
-
-			if (buf)
-				encode_uint32(llen, &buf[8]);
-			r_len += llen;
-
-			// not supported
 		} break;
 		case Variant::DICTIONARY: {
 

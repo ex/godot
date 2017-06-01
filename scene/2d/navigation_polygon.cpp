@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,9 +28,11 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "navigation_polygon.h"
+
 #include "core_string_names.h"
 #include "navigation2d.h"
-#include "triangulator.h"
+
+#include "thirdparty/misc/triangulator.h"
 
 void NavigationPolygon::set_vertices(const PoolVector<Vector2> &p_vertices) {
 

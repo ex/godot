@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -113,7 +114,7 @@ protected:
 public:
 	static EditorResourcePreview *get_singleton();
 
-	//callback funtion is callback(String p_path,Ref<Texture> preview,Variant udata) preview null if could not load
+	//callback function is callback(String p_path,Ref<Texture> preview,Variant udata) preview null if could not load
 	void queue_resource_preview(const String &p_res, Object *p_receiver, const StringName &p_receiver_func, const Variant &p_userdata);
 	void queue_edited_resource_preview(const Ref<Resource> &p_path, Object *p_receiver, const StringName &p_receiver_func, const Variant &p_userdata);
 

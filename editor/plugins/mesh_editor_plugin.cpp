@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -32,10 +33,10 @@
 void MeshEditor::_gui_input(InputEvent p_event) {
 
 
-	if (p_event.type==InputEvent::MOUSE_MOTION && p_event.mouse_motion.button_mask&BUTTON_MASK_LEFT) {
+	if (p_event.type==InputEvent::MOUSE_MOTION && p_event->get_button_mask()&BUTTON_MASK_LEFT) {
 
-		rot_x-=p_event.mouse_motion.relative_y*0.01;
-		rot_y-=p_event.mouse_motion.relative_x*0.01;
+		rot_x-=p_event->get_relative().y*0.01;
+		rot_y-=p_event->get_relative().x*0.01;
 		if (rot_x<-Math_PI/2)
 			rot_x=-Math_PI/2;
 		else if (rot_x>Math_PI/2) {
