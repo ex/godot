@@ -523,8 +523,8 @@ uniform int reflection_count;
 layout(location=0) out vec4 diffuse_buffer;
 layout(location=1) out vec4 specular_buffer;
 layout(location=2) out vec4 normal_mr_buffer;
-#if defined (ENABLE_SSS_MOTION)
-layout(location=3) out vec4 motion_ssr_buffer;
+#if defined(ENABLE_SSS)
+layout(location=3) out float sss_buffer;
 #endif
 
 #else
@@ -623,15 +623,66 @@ float GTR1(float NdotH, float a)
 
 void light_compute(vec3 N, vec3 L,vec3 V,vec3 B, vec3 T,vec3 light_color,vec3 diffuse_color,  float specular_blob_intensity, float roughness, float rim,float rim_tint, float clearcoat, float clearcoat_gloss,float anisotropy,inout vec3 diffuse, inout vec3 specular) {
 
-	float dotNL = max(dot(N,L), 0.0 );
-	float dotNV = max(dot(N,V), 0.0 );
+#if defined(USE_LIGHT_SHADER_CODE)
+//light is written by the light shader
 
+
+LIGHT_SHADER_CODE
+
+
+#else
+
+	float dotNL = max(dot(N,L), 0.0 );
+
+#if defined(DIFFUSE_HALF_LAMBERT)
+
+	float hl = dot(N,L) * 0.5 + 0.5;
+	diffuse += hl * light_color * diffuse_color;
+
+#elif defined(DIFFUSE_OREN_NAYAR)
+
+	{
+		float LdotV = dot(L, V);
+		float NdotL = dot(L, N);
+		float NdotV = dot(N, V);
+
+		float s = LdotV - NdotL * NdotV;
+		float t = mix(1.0, max(NdotL, NdotV), step(0.0, s));
+
+		float sigma2 = roughness * roughness;
+		vec3 A = 1.0 + sigma2 * (diffuse_color / (sigma2 + 0.13) + 0.5 / (sigma2 + 0.33));
+		float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+		diffuse += diffuse_color * max(0.0, NdotL) * (A + vec3(B) * s / t) / M_PI;
+	}
+
+#elif defined(DIFFUSE_BURLEY)
+
+	{
+		float NdotL = dot(L, N);
+		float NdotV = dot(N, V);
+		float VdotH = dot(N, normalize(L+V));
+		float energyBias = mix(roughness, 0.0, 0.5);
+		float energyFactor = mix(roughness, 1.0, 1.0 / 1.51);
+		float fd90 = energyBias + 2.0 * VdotH * VdotH * roughness;
+		float f0 = 1.0;
+		float lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
+		float viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+
+		diffuse+= light_color * diffuse_color * lightScatter * viewScatter * energyFactor;
+	}
+#else
+	//lambert
+	diffuse += dotNL * light_color * diffuse_color;
+#endif
+
+
+	float dotNV = max(dot(N,V), 0.0 );
 #if defined(LIGHT_USE_RIM)
 	float rim_light = pow(1.0-dotNV,(1.0-roughness)*16.0);
 	diffuse += rim_light * rim * mix(vec3(1.0),diffuse_color,rim_tint) * light_color;
 #endif
 
-	diffuse += dotNL * light_color * diffuse_color;
 
 	if (roughness > 0.0) {
 
@@ -685,6 +736,7 @@ void light_compute(vec3 N, vec3 L,vec3 V,vec3 B, vec3 T,vec3 light_color,vec3 di
 	}
 
 
+#endif //defined(USE_LIGHT_SHADER_CODE)
 }
 
 
@@ -968,7 +1020,7 @@ void reflection_process(int idx, vec3 vertex, vec3 normal,vec3 binormal, vec3 ta
 
 #ifdef USE_GI_PROBES
 
-uniform mediump sampler3D gi_probe1; //texunit:-11
+uniform mediump sampler3D gi_probe1; //texunit:-10
 uniform highp mat4 gi_probe_xform1;
 uniform highp vec3 gi_probe_bounds1;
 uniform highp vec3 gi_probe_cell_size1;
@@ -976,7 +1028,7 @@ uniform highp float gi_probe_multiplier1;
 uniform highp float gi_probe_bias1;
 uniform bool gi_probe_blend_ambient1;
 
-uniform mediump sampler3D gi_probe2; //texunit:-10
+uniform mediump sampler3D gi_probe2; //texunit:-11
 uniform highp mat4 gi_probe_xform2;
 uniform highp vec3 gi_probe_bounds2;
 uniform highp vec3 gi_probe_cell_size2;
@@ -1219,7 +1271,7 @@ void main() {
 	bool discard_=false;
 #endif
 
-#if defined (ENABLE_SSS_MOTION)
+#if defined (ENABLE_SSS)
 	float sss_strength=0.0;
 #endif
 
@@ -1293,7 +1345,7 @@ FRAGMENT_SHADER_CODE
 			{ //read radiance from dual paraboloid
 
 				vec3 ref_vec = reflect(-eye_vec,normal); //2.0 * ndotv * normal - view; // reflect(v, n);
-				ref_vec=normalize((radiance_inverse_xform * vec4(ref_vec,0.0)).xyz);				
+				ref_vec=normalize((radiance_inverse_xform * vec4(ref_vec,0.0)).xyz);
 				vec3 radiance = textureDualParabolod(radiance_map,ref_vec,lod) * bg_energy;
 				specular_light = radiance;
 
@@ -1507,14 +1559,7 @@ FRAGMENT_SHADER_CODE
 
 
 
-#if defined(USE_LIGHT_SHADER_CODE)
-//light is written by the light shader
-{
 
-LIGHT_SHADER_CODE
-
-}
-#endif
 
 #ifdef RENDER_DEPTH
 //nothing happens, so a tree-ssa optimizer will result in no fragment shader :)
@@ -1566,13 +1611,13 @@ LIGHT_SHADER_CODE
 #endif //ENABLE_AO
 
 	diffuse_buffer=vec4(emission+diffuse_light+ambient_light,ambient_scale);
-	specular_buffer=vec4(specular_light,max(specular.r,max(specular.g,specular.b)));
+	specular_buffer=vec4(specular_light,metallic);
 
 
 	normal_mr_buffer=vec4(normalize(normal)*0.5+0.5,roughness);
 
-#if defined (ENABLE_SSS_MOTION)
-	motion_ssr_buffer = vec4(vec3(0.0),sss_strength);
+#if defined (ENABLE_SSS)
+	sss_buffer = sss_strength;
 #endif
 
 #else
