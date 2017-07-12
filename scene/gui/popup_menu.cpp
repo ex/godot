@@ -884,7 +884,7 @@ void PopupMenu::activate_item(int p_item) {
 	while (pop) {
 		// We close all parents that are chained together,
 		// with hide_on_item_selection enabled
-		if (hide_on_item_selection && pop->is_hide_on_item_selection()) {
+		if ((items[p_item].checkable && hide_on_checkable_item_selection && pop->is_hide_on_checkable_item_selection()) || (!items[p_item].checkable && hide_on_item_selection && pop->is_hide_on_item_selection())) {
 			pop->hide();
 			next = next->get_parent();
 			pop = next->cast_to<PopupMenu>();
@@ -895,8 +895,8 @@ void PopupMenu::activate_item(int p_item) {
 		}
 	}
 	// Hides popup by default; unless otherwise specified
-	// by using set_hide_on_item_selection
-	if (hide_on_item_selection) {
+	// by using set_hide_on_item_selection and set_hide_on_checkable_item_selection
+	if ((items[p_item].checkable && hide_on_checkable_item_selection) || (!items[p_item].checkable && hide_on_item_selection)) {
 		hide();
 	}
 }
@@ -1019,6 +1019,16 @@ bool PopupMenu::is_hide_on_item_selection() {
 	return hide_on_item_selection;
 }
 
+void PopupMenu::set_hide_on_checkable_item_selection(bool p_enabled) {
+
+	hide_on_checkable_item_selection = p_enabled;
+}
+
+bool PopupMenu::is_hide_on_checkable_item_selection() {
+
+	return hide_on_checkable_item_selection;
+}
+
 String PopupMenu::get_tooltip(const Point2 &p_pos) const {
 
 	int over = _get_mouse_over(p_pos);
@@ -1086,7 +1096,7 @@ void PopupMenu::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_item_ID", "idx"), &PopupMenu::get_item_ID);
 	ClassDB::bind_method(D_METHOD("get_item_index", "id"), &PopupMenu::get_item_index);
 	ClassDB::bind_method(D_METHOD("get_item_accelerator", "idx"), &PopupMenu::get_item_accelerator);
-	ClassDB::bind_method(D_METHOD("get_item_metadata", "idx"), &PopupMenu::get_item_metadata);
+	ClassDB::bind_method(D_METHOD("get_item_metadata:Variant", "idx"), &PopupMenu::get_item_metadata);
 	ClassDB::bind_method(D_METHOD("is_item_disabled", "idx"), &PopupMenu::is_item_disabled);
 	ClassDB::bind_method(D_METHOD("get_item_submenu", "idx"), &PopupMenu::get_item_submenu);
 	ClassDB::bind_method(D_METHOD("is_item_separator", "idx"), &PopupMenu::is_item_separator);
@@ -1107,10 +1117,14 @@ void PopupMenu::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_hide_on_item_selection", "enable"), &PopupMenu::set_hide_on_item_selection);
 	ClassDB::bind_method(D_METHOD("is_hide_on_item_selection"), &PopupMenu::is_hide_on_item_selection);
 
+	ClassDB::bind_method(D_METHOD("set_hide_on_checkable_item_selection", "enable"), &PopupMenu::set_hide_on_checkable_item_selection);
+	ClassDB::bind_method(D_METHOD("is_hide_on_checkable_item_selection"), &PopupMenu::is_hide_on_checkable_item_selection);
+
 	ClassDB::bind_method(D_METHOD("_submenu_timeout"), &PopupMenu::_submenu_timeout);
 
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "items", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "_set_items", "_get_items");
 	ADD_PROPERTYNO(PropertyInfo(Variant::BOOL, "hide_on_item_selection"), "set_hide_on_item_selection", "is_hide_on_item_selection");
+	ADD_PROPERTYNO(PropertyInfo(Variant::BOOL, "hide_on_checkable_item_selection"), "set_hide_on_checkable_item_selection", "is_hide_on_checkable_item_selection");
 
 	ADD_SIGNAL(MethodInfo("id_pressed", PropertyInfo(Variant::INT, "ID")));
 	ADD_SIGNAL(MethodInfo("index_pressed", PropertyInfo(Variant::INT, "index")));
@@ -1128,6 +1142,7 @@ PopupMenu::PopupMenu() {
 	set_focus_mode(FOCUS_ALL);
 	set_as_toplevel(true);
 	set_hide_on_item_selection(true);
+	set_hide_on_checkable_item_selection(true);
 
 	submenu_timer = memnew(Timer);
 	submenu_timer->set_wait_time(0.3);

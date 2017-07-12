@@ -289,16 +289,17 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 #endif
 
 	strings.push_back(vertex_code0.get_data());
+
 	if (cc) {
-		code_globals = cc->vertex_globals.ascii();
-		strings.push_back(code_globals.get_data());
+		material_string = cc->uniforms.ascii();
+		strings.push_back(material_string.get_data());
 	}
 
 	strings.push_back(vertex_code1.get_data());
 
 	if (cc) {
-		material_string = cc->uniforms.ascii();
-		strings.push_back(material_string.get_data());
+		code_globals = cc->vertex_globals.ascii();
+		strings.push_back(code_globals.get_data());
 	}
 
 	strings.push_back(vertex_code2.get_data());
@@ -361,6 +362,8 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 		ERR_FAIL_V(NULL);
 	}
 
+	//_display_error_with_code("pepo", strings);
+
 	/* FRAGMENT SHADER */
 
 	strings.resize(strings_base_size);
@@ -385,15 +388,15 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 
 	strings.push_back(fragment_code0.get_data());
 	if (cc) {
-		code_globals = cc->fragment_globals.ascii();
-		strings.push_back(code_globals.get_data());
+		material_string = cc->uniforms.ascii();
+		strings.push_back(material_string.get_data());
 	}
 
 	strings.push_back(fragment_code1.get_data());
 
 	if (cc) {
-		material_string = cc->uniforms.ascii();
-		strings.push_back(material_string.get_data());
+		code_globals = cc->fragment_globals.ascii();
+		strings.push_back(code_globals.get_data());
 	}
 
 	strings.push_back(fragment_code2.get_data());
@@ -413,7 +416,8 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	strings.push_back(fragment_code4.get_data());
 
 #ifdef DEBUG_SHADER
-	DEBUG_PRINT("\nFragment Code:\n\n" + String(code_string.get_data()));
+	DEBUG_PRINT("\nFragment Globals:\n\n" + String(code_globals.get_data()));
+	DEBUG_PRINT("\nFragment Code:\n\n" + String(code_string2.get_data()));
 	for (int i = 0; i < strings.size(); i++) {
 
 		//print_line("frag strings "+itos(i)+":"+String(strings[i]));
@@ -615,21 +619,21 @@ void ShaderGLES3::setup(const char **p_conditional_defines, int p_conditional_co
 		String material_tag = "\nMATERIAL_UNIFORMS";
 		String code_tag = "\nVERTEX_SHADER_CODE";
 		String code = vertex_code;
-		int cpos = code.find(globals_tag);
+		int cpos = code.find(material_tag);
 		if (cpos == -1) {
 			vertex_code0 = code.ascii();
 		} else {
 			vertex_code0 = code.substr(0, cpos).ascii();
-			code = code.substr(cpos + globals_tag.length(), code.length());
+			code = code.substr(cpos + material_tag.length(), code.length());
 
-			cpos = code.find(material_tag);
+			cpos = code.find(globals_tag);
 
 			if (cpos == -1) {
 				vertex_code1 = code.ascii();
 			} else {
 
 				vertex_code1 = code.substr(0, cpos).ascii();
-				String code2 = code.substr(cpos + material_tag.length(), code.length());
+				String code2 = code.substr(cpos + globals_tag.length(), code.length());
 
 				cpos = code2.find(code_tag);
 				if (cpos == -1) {
@@ -649,14 +653,14 @@ void ShaderGLES3::setup(const char **p_conditional_defines, int p_conditional_co
 		String code_tag = "\nFRAGMENT_SHADER_CODE";
 		String light_code_tag = "\nLIGHT_SHADER_CODE";
 		String code = fragment_code;
-		int cpos = code.find(globals_tag);
+		int cpos = code.find(material_tag);
 		if (cpos == -1) {
 			fragment_code0 = code.ascii();
 		} else {
 			fragment_code0 = code.substr(0, cpos).ascii();
 			//print_line("CODE0:\n"+String(fragment_code0.get_data()));
-			code = code.substr(cpos + globals_tag.length(), code.length());
-			cpos = code.find(material_tag);
+			code = code.substr(cpos + material_tag.length(), code.length());
+			cpos = code.find(globals_tag);
 
 			if (cpos == -1) {
 				fragment_code1 = code.ascii();
@@ -665,7 +669,7 @@ void ShaderGLES3::setup(const char **p_conditional_defines, int p_conditional_co
 				fragment_code1 = code.substr(0, cpos).ascii();
 				//print_line("CODE1:\n"+String(fragment_code1.get_data()));
 
-				String code2 = code.substr(cpos + material_tag.length(), code.length());
+				String code2 = code.substr(cpos + globals_tag.length(), code.length());
 				cpos = code2.find(light_code_tag);
 
 				if (cpos == -1) {

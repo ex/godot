@@ -191,9 +191,9 @@ Error ResourceInteractiveLoaderBinary::parse_variant(Variant &r_v) {
 		case VARIANT_RECT3: {
 
 			Rect3 v;
-			v.pos.x = f->get_real();
-			v.pos.y = f->get_real();
-			v.pos.z = f->get_real();
+			v.position.x = f->get_real();
+			v.position.y = f->get_real();
+			v.position.z = f->get_real();
 			v.size.x = f->get_real();
 			v.size.y = f->get_real();
 			v.size.z = f->get_real();
@@ -689,6 +689,7 @@ Error ResourceInteractiveLoaderBinary::poll() {
 
 		f->close();
 		resource = res;
+		resource->set_as_translation_remapped(translation_remapped);
 		error = ERR_FILE_EOF;
 
 	} else {
@@ -704,6 +705,11 @@ int ResourceInteractiveLoaderBinary::get_stage() const {
 int ResourceInteractiveLoaderBinary::get_stage_count() const {
 
 	return external_resources.size() + internal_resources.size();
+}
+
+void ResourceInteractiveLoaderBinary::set_translation_remapped(bool p_remapped) {
+
+	translation_remapped = p_remapped;
 }
 
 static void save_ustring(FileAccess *f, const String &p_string) {
@@ -920,6 +926,7 @@ ResourceInteractiveLoaderBinary::ResourceInteractiveLoaderBinary() {
 	endian_swap = false;
 	use_real64 = false;
 	error = OK;
+	translation_remapped = false;
 }
 
 ResourceInteractiveLoaderBinary::~ResourceInteractiveLoaderBinary() {
@@ -1327,9 +1334,9 @@ void ResourceFormatSaverBinaryInstance::write_variant(const Variant &p_property,
 
 			f->store_32(VARIANT_RECT3);
 			Rect3 val = p_property;
-			f->store_real(val.pos.x);
-			f->store_real(val.pos.y);
-			f->store_real(val.pos.z);
+			f->store_real(val.position.x);
+			f->store_real(val.position.y);
+			f->store_real(val.position.z);
 			f->store_real(val.size.x);
 			f->store_real(val.size.y);
 			f->store_real(val.size.z);

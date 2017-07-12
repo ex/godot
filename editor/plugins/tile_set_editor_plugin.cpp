@@ -53,6 +53,7 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 
 		Sprite *mi = child->cast_to<Sprite>();
 		Ref<Texture> texture = mi->get_texture();
+		Ref<Texture> normal_map = mi->get_normal_map();
 		Ref<ShaderMaterial> material = mi->get_material();
 
 		if (texture.is_null())
@@ -67,6 +68,7 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 		}
 
 		p_library->tile_set_texture(id, texture);
+		p_library->tile_set_normal_map(id, normal_map);
 		p_library->tile_set_material(id, material);
 
 		p_library->tile_set_modulate(id, mi->get_modulate());
@@ -88,9 +90,10 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 			phys_offset += -s / 2;
 		}
 
-		Vector<Ref<Shape2D> > collisions;
+		Vector<TileSet::ShapeData> collisions;
 		Ref<NavigationPolygon> nav_poly;
 		Ref<OccluderPolygon2D> occluder;
+		bool found_collisions = false;
 
 		for (int j = 0; j < mi->get_child_count(); j++) {
 
@@ -104,24 +107,36 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 
 			if (!child2->cast_to<StaticBody2D>())
 				continue;
+
+			found_collisions = true;
+
 			StaticBody2D *sb = child2->cast_to<StaticBody2D>();
-			int shape_count = sb->get_shape_count();
-			if (shape_count == 0)
-				continue;
-			for (int shape_index = 0; shape_index < shape_count; ++shape_index) {
-				Ref<Shape2D> collision = sb->get_shape(shape_index);
-				if (collision.is_valid()) {
-					collisions.push_back(collision);
+
+			List<uint32_t> shapes;
+			sb->get_shape_owners(&shapes);
+
+			for (List<uint32_t>::Element *E = shapes.front(); E; E = E->next()) {
+				if (sb->is_shape_owner_disabled(E->get())) continue;
+
+				Transform2D shape_transform = sb->shape_owner_get_transform(E->get());
+				bool one_way = sb->is_shape_owner_one_way_collision_enabled(E->get());
+
+				shape_transform.set_origin(shape_transform.get_origin() - phys_offset);
+
+				for (int k = 0; k < sb->shape_owner_get_shape_count(E->get()); k++) {
+
+					Ref<Shape2D> shape = sb->shape_owner_get_shape(E->get(), k);
+					TileSet::ShapeData shape_data;
+					shape_data.shape = shape;
+					shape_data.shape_transform = shape_transform;
+					shape_data.one_way_collision = one_way;
+					collisions.push_back(shape_data);
 				}
 			}
 		}
 
-		if (collisions.size()) {
-
+		if (found_collisions) {
 			p_library->tile_set_shapes(id, collisions);
-			p_library->tile_set_shape_offset(id, -phys_offset);
-		} else {
-			p_library->tile_set_shape_offset(id, Vector2());
 		}
 
 		p_library->tile_set_texture_offset(id, mi->get_offset());

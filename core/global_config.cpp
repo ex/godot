@@ -39,6 +39,8 @@
 #include "os/os.h"
 #include "variant_parser.h"
 
+#include <zlib.h>
+
 #define FORMAT_VERSION 3
 
 GlobalConfig *GlobalConfig::singleton = NULL;
@@ -833,7 +835,7 @@ void GlobalConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_singleton", "name"), &GlobalConfig::get_singleton_object);
 	ClassDB::bind_method(D_METHOD("load_resource_pack", "pack"), &GlobalConfig::_load_resource_pack);
 	ClassDB::bind_method(D_METHOD("property_can_revert", "name"), &GlobalConfig::property_can_revert);
-	ClassDB::bind_method(D_METHOD("property_get_revert", "name"), &GlobalConfig::property_get_revert);
+	ClassDB::bind_method(D_METHOD("property_get_revert:Variant", "name"), &GlobalConfig::property_get_revert);
 
 	ClassDB::bind_method(D_METHOD("save_custom", "file"), &GlobalConfig::_save_custom_bnd);
 }
@@ -967,6 +969,12 @@ GlobalConfig::GlobalConfig() {
 	custom_prop_info["physics/2d/thread_model"] = PropertyInfo(Variant::INT, "physics/2d/thread_model", PROPERTY_HINT_ENUM, "Single-Unsafe,Single-Safe,Multi-Threaded");
 
 	GLOBAL_DEF("debug/profiler/max_functions", 16384);
+
+	GLOBAL_DEF("compression/zstd/compression_level", 3);
+	custom_prop_info["compression/zstd/compression_level"] = PropertyInfo(Variant::INT, "compression/zstd/compression_level", PROPERTY_HINT_RANGE, "1,22,1");
+	GLOBAL_DEF("compression/zlib/compression_level", Z_DEFAULT_COMPRESSION);
+	custom_prop_info["compression/zlib/compression_level"] = PropertyInfo(Variant::INT, "compression/zlib/compression_level", PROPERTY_HINT_RANGE, "-1,9,1");
+
 	using_datapack = false;
 }
 

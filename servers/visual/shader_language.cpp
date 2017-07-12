@@ -1357,11 +1357,8 @@ const ShaderLanguage::BuiltinFuncDef ShaderLanguage::builtin_func_defs[] = {
 	{ "tanh", TYPE_FLOAT, { TYPE_FLOAT, TYPE_VOID } },
 	//builtins - exponential
 	{ "pow", TYPE_FLOAT, { TYPE_FLOAT, TYPE_FLOAT, TYPE_VOID } },
-	{ "pow", TYPE_VEC2, { TYPE_VEC2, TYPE_FLOAT, TYPE_VOID } },
 	{ "pow", TYPE_VEC2, { TYPE_VEC2, TYPE_VEC2, TYPE_VOID } },
-	{ "pow", TYPE_VEC3, { TYPE_VEC3, TYPE_FLOAT, TYPE_VOID } },
 	{ "pow", TYPE_VEC3, { TYPE_VEC3, TYPE_VEC3, TYPE_VOID } },
-	{ "pow", TYPE_VEC4, { TYPE_VEC4, TYPE_FLOAT, TYPE_VOID } },
 	{ "pow", TYPE_VEC4, { TYPE_VEC4, TYPE_VEC4, TYPE_VOID } },
 	{ "exp", TYPE_FLOAT, { TYPE_FLOAT, TYPE_VOID } },
 	{ "exp", TYPE_VEC2, { TYPE_VEC2, TYPE_VOID } },
@@ -2549,12 +2546,14 @@ ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, cons
 
 					} break;
 
-					default: {}
+					default: {
+						ok = false;
+					}
 				}
 
 				if (!ok) {
 
-					_set_error("Invalid member for expression: ." + ident);
+					_set_error("Invalid member for " + get_datatype_name(dt) + " expression: ." + ident);
 					return NULL;
 				}
 

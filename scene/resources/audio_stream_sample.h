@@ -53,7 +53,6 @@ class AudioStreamPlaybackSample : public AudioStreamPlayback {
 		int32_t last_nibble;
 		int32_t loop_pos;
 		int32_t window_ofs;
-		const uint8_t *ptr;
 	} ima_adpcm[2];
 
 	int64_t offset;
@@ -84,7 +83,7 @@ public:
 
 class AudioStreamSample : public AudioStream {
 	GDCLASS(AudioStreamSample, AudioStream)
-	RES_BASE_EXTENSION("smp")
+	RES_BASE_EXTENSION("sample")
 
 public:
 	enum Format {

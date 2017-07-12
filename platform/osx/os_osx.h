@@ -30,21 +30,21 @@
 #ifndef OS_OSX_H
 #define OS_OSX_H
 
+#include "drivers/alsa/audio_driver_alsa.h"
+#include "drivers/rtaudio/audio_driver_rtaudio.h"
 #include "drivers/unix/os_unix.h"
 #include "joypad_osx.h"
 #include "main/input_default.h"
 #include "os/input.h"
-#include "power_osx.h"
-#include "servers/visual_server.h"
-// #include "servers/visual/visual_server_wrap_mt.h"
-#include "drivers/alsa/audio_driver_alsa.h"
-#include "drivers/rtaudio/audio_driver_rtaudio.h"
 #include "platform/osx/audio_driver_osx.h"
+#include "power_osx.h"
 #include "servers/audio_server.h"
 #include "servers/physics_2d/physics_2d_server_sw.h"
 #include "servers/physics_2d/physics_2d_server_wrap_mt.h"
 #include "servers/physics_server.h"
 #include "servers/visual/rasterizer.h"
+#include "servers/visual/visual_server_wrap_mt.h"
+#include "servers/visual_server.h"
 #include <ApplicationServices/ApplicationServices.h>
 
 //bitch
@@ -96,6 +96,7 @@ public:
 	CursorShape cursor_shape;
 	MouseMode mouse_mode;
 
+	String title;
 	bool minimized;
 	bool maximized;
 	bool zoomed;
@@ -115,6 +116,8 @@ public:
 		else
 			return 1.0;
 	}
+
+	void _update_window();
 
 	float display_scale;
 
@@ -199,6 +202,9 @@ public:
 	virtual bool is_window_maximized() const;
 	virtual void request_attention();
 	virtual String get_joy_guid(int p_device) const;
+
+	virtual void set_borderless_window(int p_borderless);
+	virtual bool get_borderless_window();
 
 	virtual PowerState get_power_state();
 	virtual int get_power_seconds_left();

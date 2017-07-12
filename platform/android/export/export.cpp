@@ -36,7 +36,8 @@
 #include "io/zip_io.h"
 #include "os/file_access.h"
 #include "os/os.h"
-#include "platform/android/logo.h"
+#include "platform/android/logo.gen.h"
+#include "platform/android/run_icon.gen.h"
 #include "version.h"
 #include <string.h>
 #if 0
@@ -1714,7 +1715,7 @@ Error EditorExportPlatformAndroid::run(int p_device, int p_flags) {
 		args.push_back("--remove-all");
 		err = OS::get_singleton()->execute(adb,args,true,NULL,NULL,&rv);
 
-		int port = GlobalConfig::get_singleton()->get("network/debug/remote_port");
+		int port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
 		args.clear();
 		args.push_back("reverse");
 		args.push_back("tcp:"+itos(port));
@@ -2042,6 +2043,7 @@ class EditorExportAndroid : public EditorExportPlatform {
 	GDCLASS(EditorExportAndroid, EditorExportPlatform)
 
 	Ref<ImageTexture> logo;
+	Ref<ImageTexture> run_icon;
 
 	struct Device {
 
@@ -2993,7 +2995,7 @@ public:
 			args.push_back("--remove-all");
 			err = OS::get_singleton()->execute(adb, args, true, NULL, NULL, &rv);
 
-			int port = GlobalConfig::get_singleton()->get("network/debug/remote_port");
+			int port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
 			args.clear();
 			args.push_back("reverse");
 			args.push_back("tcp:" + itos(port));
@@ -3034,6 +3036,10 @@ public:
 		}
 		device_lock->unlock();
 		return OK;
+	}
+
+	virtual Ref<Texture> get_run_icon() const {
+		return run_icon;
 	}
 
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
@@ -3524,8 +3530,12 @@ public:
 	EditorExportAndroid() {
 
 		Ref<Image> img = memnew(Image(_android_logo));
-		logo = Ref<ImageTexture>(memnew(ImageTexture));
+		logo.instance();
 		logo->create_from_image(img);
+
+		img = Ref<Image>(memnew(Image(_android_run_icon)));
+		run_icon.instance();
+		run_icon->create_from_image(img);
 
 		device_lock = Mutex::create();
 		device_thread = Thread::create(_device_poll_thread, this);

@@ -313,6 +313,13 @@ void ScriptEditor::_goto_script_line(REF p_script, int p_line) {
 
 	editor->push_item(p_script.ptr());
 
+	if (bool(EditorSettings::get_singleton()->get("text_editor/external/use_external_editor"))) {
+
+		Ref<Script> script = p_script->cast_to<Script>();
+		if (!script.is_null() && script->get_path().is_resource_file())
+			edit(p_script, p_line, 0);
+	}
+
 	int selected = tab_container->get_current_tab();
 	if (selected < 0 || selected >= tab_container->get_child_count())
 		return;
@@ -502,9 +509,8 @@ void ScriptEditor::_close_tab(int p_idx, bool p_save) {
 		if (p_save) {
 			apply_scripts();
 		}
-		if (current->get_edit_menu()) {
-			memdelete(current->get_edit_menu());
-		}
+		current->clear_edit_menu();
+
 	} else {
 		EditorHelp *help = tab_container->get_child(selected)->cast_to<EditorHelp>();
 		_add_recent_script(help->get_class());
@@ -866,6 +872,14 @@ void ScriptEditor::_menu_option(int p_option) {
 				debugger->set_hide_on_stop(visible);
 			debug_menu->get_popup()->set_item_checked(debug_menu->get_popup()->get_item_index(DEBUG_SHOW_KEEP_OPEN), !visible);
 		} break;
+		case DEBUG_WITH_EXTERNAL_EDITOR: {
+			bool debug_with_external_editor = !debug_menu->get_popup()->is_item_checked(debug_menu->get_popup()->get_item_index(DEBUG_WITH_EXTERNAL_EDITOR));
+			debugger->set_debug_with_external_editor(debug_with_external_editor);
+			debug_menu->get_popup()->set_item_checked(debug_menu->get_popup()->get_item_index(DEBUG_WITH_EXTERNAL_EDITOR), debug_with_external_editor);
+		} break;
+		case TOGGLE_SCRIPTS_PANEL: {
+			list_split->set_visible(!list_split->is_visible());
+		}
 	}
 
 	int selected = tab_container->get_current_tab();
@@ -1545,13 +1559,10 @@ bool ScriptEditor::edit(const Ref<Script> &p_script, int p_line, int p_col, bool
 
 	bool open_dominant = EditorSettings::get_singleton()->get("text_editor/files/open_dominant_script_on_scene_change");
 
-	Error err = p_script->get_language()->open_in_external_editor(p_script, p_line >= 0 ? p_line : 0, p_col);
-	if (err == OK)
-		return false;
-	if (err != ERR_UNAVAILABLE)
-		WARN_PRINT("Couldn't open in custom external text editor");
-
-	if (p_script->get_path().is_resource_file() && bool(EditorSettings::get_singleton()->get("text_editor/external/use_external_editor"))) {
+	if ((debugger->get_dump_stack_script() != p_script || debugger->get_debug_with_external_editor()) &&
+			p_script->get_language()->open_in_external_editor(p_script, p_line >= 0 ? p_line : 0, p_col) == OK &&
+			p_script->get_path().is_resource_file() &&
+			bool(EditorSettings::get_singleton()->get("text_editor/external/use_external_editor"))) {
 
 		String path = EditorSettings::get_singleton()->get("text_editor/external/exec_path");
 		String flags = EditorSettings::get_singleton()->get("text_editor/external/exec_flags");
@@ -1876,6 +1887,9 @@ void ScriptEditor::set_window_layout(Ref<ConfigFile> p_layout) {
 	for (int i = 0; i < helps.size(); i++) {
 
 		String path = helps[i];
+		if (path == "") { // invalid, skip
+			continue;
+		}
 		_help_class_open(path);
 	}
 
@@ -2171,13 +2185,15 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 
 	script_list = memnew(ItemList);
 	list_split->add_child(script_list);
-	script_list->set_custom_minimum_size(Size2(0, 0));
+	script_list->set_custom_minimum_size(Size2(150 * EDSCALE, 100)); //need to give a bit of limit to avoid it from disappearing
+	script_list->set_v_size_flags(SIZE_EXPAND_FILL);
 	script_split->set_split_offset(140);
-	list_split->set_split_offset(500);
+	//list_split->set_split_offset(500);
 
 	members_overview = memnew(ItemList);
 	list_split->add_child(members_overview);
-	members_overview->set_custom_minimum_size(Size2(0, 0));
+	members_overview->set_custom_minimum_size(Size2(0, 100)); //need to give a bit of limit to avoid it from disappearing
+	members_overview->set_v_size_flags(SIZE_EXPAND_FILL);
 
 	tab_container = memnew(TabContainer);
 	tab_container->add_style_override("panel", p_editor->get_gui_base()->get_stylebox("ScriptPanel", "EditorStyles"));
@@ -2222,6 +2238,8 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_docs", TTR("Close Docs")), CLOSE_DOCS);
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_file", TTR("Close"), KEY_MASK_CMD | KEY_W), FILE_CLOSE);
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/close_all", TTR("Close All")), CLOSE_ALL);
+	file_menu->get_popup()->add_separator();
+	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/toggle_scripts_panel", TTR("Toggle Scripts Panel"), KEY_MASK_CMD | KEY_BACKSLASH), TOGGLE_SCRIPTS_PANEL);
 	file_menu->get_popup()->connect("id_pressed", this, "_menu_option");
 
 	script_search_menu = memnew(MenuButton);
@@ -2244,6 +2262,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	debug_menu->get_popup()->add_separator();
 	//debug_menu->get_popup()->add_check_item("Show Debugger",DEBUG_SHOW);
 	debug_menu->get_popup()->add_check_shortcut(ED_SHORTCUT("debugger/keep_debugger_open", TTR("Keep Debugger Open")), DEBUG_SHOW_KEEP_OPEN);
+	debug_menu->get_popup()->add_check_shortcut(ED_SHORTCUT("debugger/debug_with_exteral_editor", TTR("Debug with external editor")), DEBUG_WITH_EXTERNAL_EDITOR);
 	debug_menu->get_popup()->connect("id_pressed", this, "_menu_option");
 
 	debug_menu->get_popup()->set_item_disabled(debug_menu->get_popup()->get_item_index(DEBUG_NEXT), true);

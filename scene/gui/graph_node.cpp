@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "graph_node.h"
-#include "method_bind_ext.inc"
+#include "method_bind_ext.gen.inc"
 
 bool GraphNode::_set(const StringName &p_name, const Variant &p_value) {
 
@@ -581,8 +581,6 @@ void GraphNode::_gui_input(const Ref<InputEvent> &p_ev) {
 
 		ERR_EXPLAIN("GraphNode must be the child of a GraphEdit node.");
 		ERR_FAIL_COND(get_parent_control() == NULL);
-
-		print_line("INPUT EVENT BUTTON");
 
 		if (mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 

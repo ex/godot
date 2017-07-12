@@ -621,7 +621,7 @@ bool Body2DSW::sleep_test(real_t p_step) {
 	else if (!can_sleep)
 		return false;
 
-	if (Math::abs(angular_velocity) < get_space()->get_body_angular_velocity_sleep_treshold() && Math::abs(linear_velocity.length_squared()) < get_space()->get_body_linear_velocity_sleep_treshold() * get_space()->get_body_linear_velocity_sleep_treshold()) {
+	if (Math::abs(angular_velocity) < get_space()->get_body_angular_velocity_sleep_threshold() && Math::abs(linear_velocity.length_squared()) < get_space()->get_body_linear_velocity_sleep_threshold() * get_space()->get_body_linear_velocity_sleep_threshold()) {
 
 		still_time += p_step;
 
@@ -676,8 +676,6 @@ Body2DSW::Body2DSW()
 	area_linear_damp = 0;
 	contact_count = 0;
 	gravity_scale = 1.0;
-	using_one_way_cache = false;
-	one_way_collision_max_depth = 0.1;
 	first_integration = false;
 
 	still_time = 0;

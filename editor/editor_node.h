@@ -140,6 +140,8 @@ private:
 		FILE_RUN_SCRIPT,
 		FILE_OPEN_PREV,
 		FILE_CLOSE,
+		FILE_CLOSE_ALL_AND_QUIT,
+		FILE_CLOSE_ALL_AND_RUN_PROJECT_MANAGER,
 		FILE_QUIT,
 		FILE_EXTERNAL_OPEN_SCENE,
 		EDIT_UNDO,
@@ -233,6 +235,8 @@ private:
 	//main tabs
 
 	Tabs *scene_tabs;
+	Panel *tab_preview_panel;
+	TextureRect *tab_preview;
 	int tab_closing;
 
 	bool exiting;
@@ -294,6 +298,7 @@ private:
 
 	//CallDialog *call_dialog;
 	ConfirmationDialog *confirmation;
+	ConfirmationDialog *save_confirmation;
 	ConfirmationDialog *import_confirmation;
 	ConfirmationDialog *open_recent_confirmation;
 	ConfirmationDialog *pick_main_scene;
@@ -396,6 +401,7 @@ private:
 	Vector<EditorPlugin *> editor_plugins;
 	EditorPlugin *editor_plugin_screen;
 	EditorPluginList *editor_plugins_over;
+	EditorPluginList *editor_plugins_force_input_forwarding;
 
 	EditorHistory editor_history;
 	EditorData editor_data;
@@ -424,6 +430,9 @@ private:
 	String external_file;
 	List<String> previous_scenes;
 	bool opening_prev;
+
+	Tree *_tpl_tree;
+	TextEdit *_tpl_text;
 
 	void _dialog_action(String p_file);
 
@@ -462,6 +471,9 @@ private:
 	void _vp_resized();
 
 	void _save_scene(String p_file, int idx = -1);
+	void _save_all_scenes();
+	int _next_unsaved_scene();
+	void _discard_changes(const String &p_str = String());
 
 	void _instance_request(const Vector<String> &p_files);
 
@@ -520,6 +532,7 @@ private:
 	bool _find_and_save_resource(RES p_res, Map<RES, bool> &processed, int32_t flags);
 	bool _find_and_save_edited_subresources(Object *obj, Map<RES, bool> &processed, int32_t flags);
 	void _save_edited_subresources(Node *scene, Map<RES, bool> &processed, int32_t flags);
+	void _mark_unsaved_scenes();
 
 	void _find_node_types(Node *p_node, int &count_2d, int &count_3d);
 	void _save_scene_with_preview(String p_file);
@@ -556,6 +569,11 @@ private:
 	void _dock_popup_exit();
 	void _scene_tab_changed(int p_tab);
 	void _scene_tab_closed(int p_tab);
+	void _scene_tab_hover(int p_tab);
+	void _scene_tab_exit();
+	void _scene_tab_input(const Ref<InputEvent> &p_input);
+	void _reposition_active_tab(int idx_to);
+	void _thumbnail_done(const String &p_path, const Ref<Texture> &p_preview, const Variant &p_udata);
 	void _scene_tab_script_edited(int p_tab);
 
 	Dictionary _get_main_scene_state();
@@ -622,6 +640,8 @@ private:
 	void _dim_timeout();
 	void _check_gui_base_size();
 
+	void _license_tree_selected();
+
 protected:
 	void _notification(int p_what);
 	static void _bind_methods();
@@ -641,6 +661,7 @@ public:
 
 	EditorPlugin *get_editor_plugin_screen() { return editor_plugin_screen; }
 	EditorPluginList *get_editor_plugins_over() { return editor_plugins_over; }
+	EditorPluginList *get_editor_plugins_force_input_forwarding() { return editor_plugins_force_input_forwarding; }
 	PropertyEditor *get_property_editor() { return property_editor; }
 	VBoxContainer *get_property_editor_vb() { return prop_editor_vb; }
 
@@ -817,8 +838,9 @@ public:
 	void make_visible(bool p_visible);
 	void edit(Object *p_object);
 	bool forward_gui_input(const Transform2D &p_canvas_xform, const Ref<InputEvent> &p_event);
-	bool forward_spatial_gui_input(Camera *p_camera, const Ref<InputEvent> &p_event);
+	bool forward_spatial_gui_input(Camera *p_camera, const Ref<InputEvent> &p_event, bool serve_when_force_input_enabled);
 	void forward_draw_over_canvas(const Transform2D &p_canvas_xform, Control *p_canvas);
+	void add_plugin(EditorPlugin *p_plugin);
 	void clear();
 	bool empty();
 

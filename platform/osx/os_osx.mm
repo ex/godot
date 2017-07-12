@@ -53,6 +53,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 101200
+#define NSWindowStyleMaskBorderless NSBorderlessWindowMask
+#endif
+
 static NSRect convertRectToBacking(NSRect contentRect) {
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
@@ -365,7 +369,7 @@ static int button_mask = 0;
 
 - (void)rightMouseUp:(NSEvent *)event {
 
-	button_mask |= BUTTON_MASK_RIGHT;
+	button_mask &= ~BUTTON_MASK_RIGHT;
 
 	Ref<InputEventMouseButton> mb;
 	mb.instance();
@@ -409,14 +413,14 @@ static int button_mask = 0;
 	if ((int)[event buttonNumber] != 2)
 		return;
 
-	button_mask |= BUTTON_MASK_MIDDLE;
+	button_mask &= ~BUTTON_MASK_MIDDLE;
 
 	Ref<InputEventMouseButton> mb;
 	mb.instance();
 
 	get_key_modifier_state([event modifierFlags], mb);
 	mb->set_button_index(BUTTON_MIDDLE);
-	mb->set_pressed(true);
+	mb->set_pressed(false);
 	mb->set_position(Vector2(mouse_x, mouse_y));
 	mb->set_global_position(Vector2(mouse_x, mouse_y));
 	mb->set_button_mask(button_mask);
@@ -813,10 +817,16 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	// Don't use accumulation buffer support; it's not accelerated
 	// Aux buffers probably aren't accelerated either
 
-	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | (p_desired.resizable ? NSResizableWindowMask : 0);
+	unsigned int styleMask;
+
+	if (p_desired.borderless_window) {
+		styleMask = NSWindowStyleMaskBorderless;
+	} else {
+		styleMask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | (p_desired.resizable ? NSResizableWindowMask : 0);
+	}
 
 	window_object = [[GodotWindow alloc]
-			initWithContentRect:NSMakeRect(0, 0, p_desired.width / display_scale, p_desired.height / display_scale)
+			initWithContentRect:NSMakeRect(0, 0, p_desired.width, p_desired.height)
 					  styleMask:styleMask
 						backing:NSBackingStoreBuffered
 						  defer:NO];
@@ -825,8 +835,8 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 
 	window_view = [[GodotContentView alloc] init];
 
-	window_size.width = p_desired.width;
-	window_size.height = p_desired.height;
+	window_size.width = p_desired.width * display_scale;
+	window_size.height = p_desired.height * display_scale;
 
 	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6 && display_scale > 1) {
 		[window_view setWantsBestResolutionOpenGLSurface:YES];
@@ -911,6 +921,8 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 
 	[NSApp activateIgnoringOtherApps:YES];
 
+	_update_window();
+
 	[window_object makeKeyAndOrderFront:nil];
 
 	if (p_desired.fullscreen)
@@ -932,12 +944,10 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	//visual_server = memnew( VisualServerRaster(rasterizer) );
 
 	visual_server = memnew(VisualServerRaster);
-	// FIXME: Reimplement threaded rendering? Or remove?
-	/*
-	if (get_render_thread_mode()!=RENDER_THREAD_UNSAFE) {
-		visual_server =memnew(VisualServerWrapMT(visual_server,get_render_thread_mode()==RENDER_SEPARATE_THREAD));
+	if (get_render_thread_mode() != RENDER_THREAD_UNSAFE) {
+
+		visual_server = memnew(VisualServerWrapMT(visual_server, get_render_thread_mode() == RENDER_SEPARATE_THREAD));
 	}
-*/
 	visual_server->init();
 	visual_server->cursor_set_visible(false, 0);
 
@@ -972,7 +982,8 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 			displayScale = [[screenArray objectAtIndex:i] backingScaleFactor];
 		}
 
-		NSRect nsrect = [[screenArray objectAtIndex:i] visibleFrame];
+		// Note: Use frame to get the whole screen size
+		NSRect nsrect = [[screenArray objectAtIndex:i] frame];
 		Rect2 rect = Rect2(nsrect.origin.x, nsrect.origin.y, nsrect.size.width, nsrect.size.height);
 		rect.position *= displayScale;
 		rect.size *= displayScale;
@@ -1127,6 +1138,7 @@ int OS_OSX::get_mouse_button_state() const {
 }
 
 void OS_OSX::set_window_title(const String &p_title) {
+	title = p_title;
 
 	[window_object setTitle:[NSString stringWithUTF8String:p_title.utf8().get_data()]];
 }
@@ -1290,6 +1302,31 @@ Size2 OS_OSX::get_screen_size(int p_screen) const {
 	return screens[p_screen].size;
 };
 
+void OS_OSX::_update_window() {
+	bool borderless_full = false;
+
+	if (get_borderless_window()) {
+		NSRect frameRect = [window_object frame];
+		NSRect screenRect = [[window_object screen] frame];
+
+		// Check if our window covers up the screen
+		if (frameRect.origin.x <= screenRect.origin.x && frameRect.origin.y <= frameRect.origin.y &&
+				frameRect.size.width >= screenRect.size.width && frameRect.size.height >= screenRect.size.height) {
+			borderless_full = true;
+		}
+	}
+
+	if (borderless_full) {
+		// If the window covers up the screen set the level to above the main menu and hide on deactivate
+		[window_object setLevel:NSMainMenuWindowLevel + 1];
+		[window_object setHidesOnDeactivate:YES];
+	} else {
+		// Reset these when our window is not a borderless window that covers up the screen
+		[window_object setLevel:NSNormalWindowLevel];
+		[window_object setHidesOnDeactivate:NO];
+	}
+}
+
 Point2 OS_OSX::get_window_position() const {
 
 	Size2 wp([window_object frame].origin.x, [window_object frame].origin.y);
@@ -1302,6 +1339,8 @@ void OS_OSX::set_window_position(const Point2 &p_position) {
 	Point2 size = p_position;
 	size /= display_scale;
 	[window_object setFrame:NSMakeRect(size.x, size.y, [window_object frame].size.width, [window_object frame].size.height) display:YES];
+
+	_update_window();
 };
 
 Size2 OS_OSX::get_window_size() const {
@@ -1313,17 +1352,22 @@ void OS_OSX::set_window_size(const Size2 p_size) {
 
 	Size2 size = p_size;
 
-	// NSRect used by setFrame includes the title bar, so add it to our size.y
-	CGFloat menuBarHeight = [[[NSApplication sharedApplication] mainMenu] menuBarHeight];
-	if (menuBarHeight != 0.f) {
-		size.y += menuBarHeight;
+	if (get_borderless_window() == false) {
+		// NSRect used by setFrame includes the title bar, so add it to our size.y
+		CGFloat menuBarHeight = [[[NSApplication sharedApplication] mainMenu] menuBarHeight];
+		if (menuBarHeight != 0.f) {
+			size.y += menuBarHeight;
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= 101104
-	} else {
-		size.y += [[NSStatusBar systemStatusBar] thickness];
+		} else {
+			size.y += [[NSStatusBar systemStatusBar] thickness];
 #endif
+		}
 	}
+
 	NSRect frame = [window_object frame];
 	[window_object setFrame:NSMakeRect(frame.origin.x, frame.origin.y, size.x, size.y) display:YES];
+
+	_update_window();
 };
 
 void OS_OSX::set_window_fullscreen(bool p_enabled) {
@@ -1403,6 +1447,35 @@ void OS_OSX::move_window_to_foreground() {
 void OS_OSX::request_attention() {
 
 	[NSApp requestUserAttention:NSCriticalRequest];
+}
+
+void OS_OSX::set_borderless_window(int p_borderless) {
+
+	// OrderOut prevents a lose focus bug with the window
+	[window_object orderOut:nil];
+
+	if (p_borderless) {
+		[window_object setStyleMask:NSWindowStyleMaskBorderless];
+	} else {
+		[window_object setStyleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask];
+
+		// Force update of the window styles
+		NSRect frameRect = [window_object frame];
+		[window_object setFrame:NSMakeRect(frameRect.origin.x, frameRect.origin.y, frameRect.size.width + 1, frameRect.size.height) display:NO];
+		[window_object setFrame:frameRect display:NO];
+
+		// Restore the window title
+		[window_object setTitle:[NSString stringWithUTF8String:title.utf8().get_data()]];
+	}
+
+	_update_window();
+
+	[window_object makeKeyAndOrderFront:nil];
+}
+
+bool OS_OSX::get_borderless_window() {
+
+	return [window_object styleMask] == NSWindowStyleMaskBorderless;
 }
 
 String OS_OSX::get_executable_path() const {

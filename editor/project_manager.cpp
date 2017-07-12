@@ -49,6 +49,7 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tool_button.h"
 #include "version.h"
+#include "version_hash.gen.h"
 
 class NewProjectDialog : public ConfirmationDialog {
 
@@ -914,8 +915,9 @@ void ProjectManager::_on_project_created(const String &dir) {
 		_update_scroll_pos(dir);
 	} else {
 		_load_recent_projects();
-		scroll->connect("draw", this, "_update_scroll_pos", varray(dir), CONNECT_ONESHOT);
+		_update_scroll_pos(dir);
 	}
+	_open_project();
 }
 
 void ProjectManager::_update_scroll_pos(const String &dir) {
@@ -1243,7 +1245,10 @@ ProjectManager::ProjectManager() {
 	top_hb->add_child(ccl);
 	top_hb->add_spacer();
 	l = memnew(Label);
-	l->set_text("v" VERSION_MKSTRING);
+	String hash = String(VERSION_HASH);
+	if (hash.length() != 0)
+		hash = "." + hash.left(7);
+	l->set_text("v" VERSION_MKSTRING "" + hash);
 	//l->add_font_override("font",get_font("bold","Fonts"));
 	l->set_align(Label::ALIGN_CENTER);
 	top_hb->add_child(l);

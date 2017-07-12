@@ -64,6 +64,7 @@ void image_decompress_squish(Image *p_image) {
 	} else if (p_image->get_format() == Image::FORMAT_RGTC_RG) {
 		squish_flags = squish::kBc5;
 	} else {
+		print_line("wtf askd to decompress.. " + itos(p_image->get_format()));
 		ERR_FAIL_COND(true);
 		return;
 	}
@@ -79,7 +80,7 @@ void image_decompress_squish(Image *p_image) {
 	p_image->create(p_image->get_width(), p_image->get_height(), p_image->has_mipmaps(), target_format, data);
 }
 
-void image_compress_squish(Image *p_image, bool p_srgb) {
+void image_compress_squish(Image *p_image, Image::CompressSource p_source) {
 
 	if (p_image->get_format() >= Image::FORMAT_DXT1)
 		return; //do not compress, already compressed
@@ -96,9 +97,14 @@ void image_compress_squish(Image *p_image, bool p_srgb) {
 
 		p_image->convert(Image::FORMAT_RGBA8); //still uses RGBA to convert
 
-		if (p_srgb && (dc == Image::DETECTED_R || dc == Image::DETECTED_RG)) {
+		if (p_source == Image::COMPRESS_SOURCE_SRGB && (dc == Image::DETECTED_R || dc == Image::DETECTED_RG)) {
 			//R and RG do not support SRGB
 			dc = Image::DETECTED_RGB;
+		}
+
+		if (p_source == Image::COMPRESS_SOURCE_NORMAL) {
+			//R and RG do not support SRGB
+			dc = Image::DETECTED_RG;
 		}
 
 		switch (dc) {

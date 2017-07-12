@@ -29,7 +29,7 @@
 /*************************************************************************/
 #include "tile_map.h"
 #include "io/marshalls.h"
-#include "method_bind_ext.inc"
+#include "method_bind_ext.gen.inc"
 #include "os/os.h"
 #include "servers/physics_2d_server.h"
 
@@ -441,35 +441,38 @@ void TileMap::_update_dirty_quadrants() {
 					rect.position.y -= center.y;
 			}
 
+			Ref<Texture> normal_map = tile_set->tile_get_normal_map(c.id);
 			Color modulate = tile_set->tile_get_modulate(c.id);
 			Color self_modulate = get_self_modulate();
 			modulate = Color(modulate.r * self_modulate.r, modulate.g * self_modulate.g,
 					modulate.b * self_modulate.b, modulate.a * self_modulate.a);
 			if (r == Rect2()) {
-				tex->draw_rect(canvas_item, rect, false, modulate, c.transpose);
+				tex->draw_rect(canvas_item, rect, false, modulate, c.transpose, normal_map);
 			} else {
-				tex->draw_rect_region(canvas_item, rect, r, modulate, c.transpose);
+				tex->draw_rect_region(canvas_item, rect, r, modulate, c.transpose, normal_map);
 			}
 
-			Vector<Ref<Shape2D> > shapes = tile_set->tile_get_shapes(c.id);
+			Vector<TileSet::ShapeData> shapes = tile_set->tile_get_shapes(c.id);
 
 			for (int i = 0; i < shapes.size(); i++) {
 
-				Ref<Shape2D> shape = shapes[i];
+				Ref<Shape2D> shape = shapes[i].shape;
 				if (shape.is_valid()) {
-
-					Vector2 shape_ofs = tile_set->tile_get_shape_offset(c.id);
 					Transform2D xform;
 					xform.set_origin(offset.floor());
 
-					_fix_cell_transform(xform, c, shape_ofs + center_ofs, s);
+					_fix_cell_transform(xform, c, center_ofs, s);
+
+					xform *= shapes[i].shape_transform;
 
 					if (debug_canvas_item.is_valid()) {
 						vs->canvas_item_add_set_transform(debug_canvas_item, xform);
 						shape->draw(debug_canvas_item, debug_collision_color);
 					}
 					ps->body_add_shape(q.body, shape->get_rid(), xform);
-					ps->body_set_shape_metadata(q.body, shape_idx++, Vector2(E->key().x, E->key().y));
+					ps->body_set_shape_metadata(q.body, shape_idx, Vector2(E->key().x, E->key().y));
+					ps->body_set_shape_as_one_way_collision(q.body, shape_idx, shapes[i].one_way_collision);
+					shape_idx++;
 				}
 			}
 
@@ -587,7 +590,7 @@ Map<TileMap::PosKey, TileMap::Quadrant>::Element *TileMap::_create_quadrant(cons
 	//q.canvas_item = VisualServer::get_singleton()->canvas_item_create();
 	q.body = Physics2DServer::get_singleton()->body_create(use_kinematic ? Physics2DServer::BODY_MODE_KINEMATIC : Physics2DServer::BODY_MODE_STATIC);
 	Physics2DServer::get_singleton()->body_attach_object_instance_ID(q.body, get_instance_ID());
-	Physics2DServer::get_singleton()->body_set_layer_mask(q.body, collision_layer);
+	Physics2DServer::get_singleton()->body_set_collision_layer(q.body, collision_layer);
 	Physics2DServer::get_singleton()->body_set_collision_mask(q.body, collision_mask);
 	Physics2DServer::get_singleton()->body_set_param(q.body, Physics2DServer::BODY_PARAM_FRICTION, friction);
 	Physics2DServer::get_singleton()->body_set_param(q.body, Physics2DServer::BODY_PARAM_BOUNCE, bounce);
@@ -863,7 +866,7 @@ void TileMap::set_collision_layer(uint32_t p_layer) {
 	for (Map<PosKey, Quadrant>::Element *E = quadrant_map.front(); E; E = E->next()) {
 
 		Quadrant &q = E->get();
-		Physics2DServer::get_singleton()->body_set_layer_mask(q.body, collision_layer);
+		Physics2DServer::get_singleton()->body_set_collision_layer(q.body, collision_layer);
 	}
 }
 
@@ -1286,7 +1289,7 @@ void TileMap::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "collision_use_kinematic", PROPERTY_HINT_NONE, ""), "set_collision_use_kinematic", "get_collision_use_kinematic");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "collision_friction", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_collision_friction", "get_collision_friction");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "collision_bounce", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_collision_bounce", "get_collision_bounce");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_layers", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_collision_layer", "get_collision_layer");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_layer", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_collision_layer", "get_collision_layer");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_mask", PROPERTY_HINT_LAYERS_2D_PHYSICS), "set_collision_mask", "get_collision_mask");
 
 	ADD_GROUP("Occluder", "occluder_");

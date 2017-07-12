@@ -42,7 +42,7 @@ Error QuickHull::build(const Vector<Vector3> &p_points, Geometry::MeshData &r_me
 	for (int i = 0; i < p_points.size(); i++) {
 
 		if (i == 0) {
-			aabb.pos = p_points[i];
+			aabb.position = p_points[i];
 		} else {
 			aabb.expand_to(p_points[i]);
 		}
@@ -58,7 +58,7 @@ Error QuickHull::build(const Vector<Vector3> &p_points, Geometry::MeshData &r_me
 
 	for (int i = 0; i < p_points.size(); i++) {
 
-		Vector3 sp = p_points[i].snapped(0.0001);
+		Vector3 sp = p_points[i].snapped(Vector3(0.0001, 0.0001, 0.0001));
 		if (valid_cache.has(sp)) {
 			valid_points[i] = false;
 			//print_line("INVALIDATED: "+itos(i));

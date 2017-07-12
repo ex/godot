@@ -218,7 +218,7 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 		mtx.xform(rect.position + Vector2(0, rect.size.y / 2)) + Vector2(-4, 0)
 	};
 
-	Ref<InputEventMouseButton> mb;
+	Ref<InputEventMouseButton> mb = p_input;
 	if (mb.is_valid()) {
 
 		if (mb->get_button_index() == BUTTON_LEFT) {
@@ -792,6 +792,7 @@ TextureRegionEditor::TextureRegionEditor(EditorNode *p_editor) {
 	hb_tools->add_child(snap_mode_button);
 	snap_mode_button->set_text(TTR("<None>"));
 	PopupMenu *p = snap_mode_button->get_popup();
+	p->set_hide_on_checkable_item_selection(false);
 	p->add_item(TTR("<None>"), 0);
 	p->add_item(TTR("Pixel Snap"), 1);
 	p->add_item(TTR("Grid Snap"), 2);

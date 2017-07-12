@@ -6,11 +6,21 @@ layout(location=4) in vec2 uv_in;
 
 out vec2 uv_interp;
 
+#ifdef USE_BLUR_SECTION
+
+uniform vec4 blur_section;
+
+#endif
 
 void main() {
 
 	uv_interp = uv_in;
 	gl_Position = vertex_attrib;
+#ifdef USE_BLUR_SECTION
+
+	uv_interp = blur_section.xy + uv_interp * blur_section.zw;
+	gl_Position.xy = (blur_section.xy + (gl_Position.xy * 0.5 + 0.5) * blur_section.zw) * 2.0 - 1.0;
+#endif
 }
 
 [fragment]
@@ -89,7 +99,7 @@ uniform highp float auto_exposure_grey;
 #endif
 
 uniform float glow_bloom;
-uniform float glow_hdr_treshold;
+uniform float glow_hdr_threshold;
 uniform float glow_hdr_scale;
 
 #endif
@@ -252,7 +262,7 @@ void main() {
 	frag_color*=exposure;
 
 	float luminance = max(frag_color.r,max(frag_color.g,frag_color.b));
-	float feedback = max( smoothstep(glow_hdr_treshold,glow_hdr_treshold+glow_hdr_scale,luminance), glow_bloom );
+	float feedback = max( smoothstep(glow_hdr_threshold,glow_hdr_threshold+glow_hdr_scale,luminance), glow_bloom );
 
 	frag_color *= feedback;
 
@@ -275,4 +285,3 @@ void main() {
 
 
 }
-

@@ -38,7 +38,7 @@ void MeshDataTool::clear() {
 	format = 0;
 }
 
-Error MeshDataTool::create_from_surface(const Ref<Mesh> &p_mesh, int p_surface) {
+Error MeshDataTool::create_from_surface(const Ref<ArrayMesh> &p_mesh, int p_surface) {
 
 	ERR_FAIL_COND_V(p_mesh.is_null(), ERR_INVALID_PARAMETER);
 
@@ -179,7 +179,7 @@ Error MeshDataTool::create_from_surface(const Ref<Mesh> &p_mesh, int p_surface) 
 	return OK;
 }
 
-Error MeshDataTool::commit_to_surface(const Ref<Mesh> &p_mesh) {
+Error MeshDataTool::commit_to_surface(const Ref<ArrayMesh> &p_mesh) {
 
 	ERR_FAIL_COND_V(p_mesh.is_null(), ERR_INVALID_PARAMETER);
 	Array arr;
@@ -309,7 +309,7 @@ Error MeshDataTool::commit_to_surface(const Ref<Mesh> &p_mesh) {
 	if (w.size())
 		arr[Mesh::ARRAY_WEIGHTS] = w;
 
-	Ref<Mesh> ncmesh = p_mesh;
+	Ref<ArrayMesh> ncmesh = p_mesh;
 	int sc = ncmesh->get_surface_count();
 	ncmesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, arr);
 	ncmesh->surface_set_material(sc, material);
@@ -554,7 +554,7 @@ void MeshDataTool::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_vertex_weights", "idx"), &MeshDataTool::get_vertex_weights);
 
 	ClassDB::bind_method(D_METHOD("set_vertex_meta", "idx", "meta"), &MeshDataTool::set_vertex_meta);
-	ClassDB::bind_method(D_METHOD("get_vertex_meta", "idx"), &MeshDataTool::get_vertex_meta);
+	ClassDB::bind_method(D_METHOD("get_vertex_meta:Variant", "idx"), &MeshDataTool::get_vertex_meta);
 
 	ClassDB::bind_method(D_METHOD("get_vertex_edges", "idx"), &MeshDataTool::get_vertex_edges);
 	ClassDB::bind_method(D_METHOD("get_vertex_faces", "idx"), &MeshDataTool::get_vertex_faces);
@@ -563,13 +563,13 @@ void MeshDataTool::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_edge_faces", "idx", "faces"), &MeshDataTool::get_edge_faces);
 
 	ClassDB::bind_method(D_METHOD("set_edge_meta", "idx", "meta"), &MeshDataTool::set_edge_meta);
-	ClassDB::bind_method(D_METHOD("get_edge_meta", "idx"), &MeshDataTool::get_edge_meta);
+	ClassDB::bind_method(D_METHOD("get_edge_meta:Variant", "idx"), &MeshDataTool::get_edge_meta);
 
 	ClassDB::bind_method(D_METHOD("get_face_vertex", "idx", "vertex"), &MeshDataTool::get_face_vertex);
 	ClassDB::bind_method(D_METHOD("get_face_edge", "idx", "edge"), &MeshDataTool::get_face_edge);
 
 	ClassDB::bind_method(D_METHOD("set_face_meta", "idx", "meta"), &MeshDataTool::set_face_meta);
-	ClassDB::bind_method(D_METHOD("get_face_meta", "idx"), &MeshDataTool::get_face_meta);
+	ClassDB::bind_method(D_METHOD("get_face_meta:Variant", "idx"), &MeshDataTool::get_face_meta);
 
 	ClassDB::bind_method(D_METHOD("get_face_normal", "idx"), &MeshDataTool::get_face_normal);
 
