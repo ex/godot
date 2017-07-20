@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "rasterizer_storage_gles3.h"
-#include "global_config.h"
+#include "project_settings.h"
 #include "rasterizer_canvas_gles3.h"
 #include "rasterizer_scene_gles3.h"
 
@@ -4866,6 +4866,7 @@ RID RasterizerStorageGLES3::gi_probe_create() {
 	gip->energy = 1.0;
 	gip->propagation = 1.0;
 	gip->bias = 0.4;
+	gip->normal_bias = 0.4;
 	gip->interior = false;
 	gip->compress = false;
 	gip->version = 1;
@@ -4972,6 +4973,14 @@ void RasterizerStorageGLES3::gi_probe_set_bias(RID p_probe, float p_range) {
 	gip->bias = p_range;
 }
 
+void RasterizerStorageGLES3::gi_probe_set_normal_bias(RID p_probe, float p_range) {
+
+	GIProbe *gip = gi_probe_owner.getornull(p_probe);
+	ERR_FAIL_COND(!gip);
+
+	gip->normal_bias = p_range;
+}
+
 void RasterizerStorageGLES3::gi_probe_set_propagation(RID p_probe, float p_range) {
 
 	GIProbe *gip = gi_probe_owner.getornull(p_probe);
@@ -5025,6 +5034,14 @@ float RasterizerStorageGLES3::gi_probe_get_bias(RID p_probe) const {
 	ERR_FAIL_COND_V(!gip, 0);
 
 	return gip->bias;
+}
+
+float RasterizerStorageGLES3::gi_probe_get_normal_bias(RID p_probe) const {
+
+	const GIProbe *gip = gi_probe_owner.getornull(p_probe);
+	ERR_FAIL_COND_V(!gip, 0);
+
+	return gip->normal_bias;
 }
 
 float RasterizerStorageGLES3::gi_probe_get_propagation(RID p_probe) const {
@@ -6831,8 +6848,8 @@ void RasterizerStorageGLES3::initialize() {
 	}
 
 	config.shrink_textures_x2 = false;
-	config.use_fast_texture_filter = int(GlobalConfig::get_singleton()->get("rendering/quality/use_nearest_mipmap_filter"));
-	config.use_anisotropic_filter = config.extensions.has("GL_EXT_texture_filter_anisotropic");
+	config.use_fast_texture_filter = int(ProjectSettings::get_singleton()->get("rendering/quality/filters/use_nearest_mipmap_filter"));
+	config.use_anisotropic_filter = config.extensions.has("rendering/quality/filters/anisotropic_filter_level");
 
 	config.s3tc_supported = config.extensions.has("GL_EXT_texture_compression_dxt1") || config.extensions.has("GL_EXT_texture_compression_s3tc") || config.extensions.has("WEBGL_compressed_texture_s3tc");
 	config.etc_supported = config.extensions.has("GL_OES_compressed_ETC1_RGB8_texture");
@@ -6855,7 +6872,7 @@ void RasterizerStorageGLES3::initialize() {
 	config.use_anisotropic_filter = config.extensions.has("GL_EXT_texture_filter_anisotropic");
 	if (config.use_anisotropic_filter) {
 		glGetFloatv(_GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &config.anisotropic_level);
-		config.anisotropic_level = MIN(int(GlobalConfig::get_singleton()->get("rendering/quality/anisotropic_filter_level")), config.anisotropic_level);
+		config.anisotropic_level = MIN(int(ProjectSettings::get_singleton()->get("rendering/quality/anisotropic_filter_level")), config.anisotropic_level);
 	}
 
 	frame.clear_request = false;
@@ -6966,7 +6983,7 @@ void RasterizerStorageGLES3::initialize() {
 
 	{
 		//transform feedback buffers
-		uint32_t xf_feedback_size = GLOBAL_DEF("rendering/buffers/blend_shape_max_buffer_size_kb", 4096);
+		uint32_t xf_feedback_size = GLOBAL_DEF("rendering/limits/buffers/blend_shape_max_buffer_size_kb", 4096);
 		for (int i = 0; i < 2; i++) {
 
 			glGenBuffers(1, &resources.transform_feedback_buffers[i]);
@@ -6992,7 +7009,7 @@ void RasterizerStorageGLES3::initialize() {
 	frame.current_rt = NULL;
 	config.keep_original_textures = false;
 	config.generate_wireframes = false;
-	config.use_texture_array_environment = GLOBAL_DEF("rendering/quality/texture_array_environments", true);
+	config.use_texture_array_environment = GLOBAL_GET("rendering/quality/reflections/texture_array_reflections");
 }
 
 void RasterizerStorageGLES3::finalize() {

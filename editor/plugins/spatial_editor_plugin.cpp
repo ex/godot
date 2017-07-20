@@ -36,7 +36,7 @@
 #include "editor/editor_settings.h"
 #include "editor/plugins/animation_player_editor_plugin.h"
 #include "editor/spatial_editor_gizmos.h"
-#include "global_config.h"
+#include "project_settings.h"
 #include "os/keyboard.h"
 #include "print_string.h"
 #include "scene/3d/camera.h"
@@ -1717,11 +1717,11 @@ void SpatialEditorViewport::_notification(int p_what) {
 
 		//update shadow atlas if changed
 
-		int shadowmap_size = GlobalConfig::get_singleton()->get("rendering/shadow_atlas/size");
-		int atlas_q0 = GlobalConfig::get_singleton()->get("rendering/shadow_atlas/quadrant_0_subdiv");
-		int atlas_q1 = GlobalConfig::get_singleton()->get("rendering/shadow_atlas/quadrant_1_subdiv");
-		int atlas_q2 = GlobalConfig::get_singleton()->get("rendering/shadow_atlas/quadrant_2_subdiv");
-		int atlas_q3 = GlobalConfig::get_singleton()->get("rendering/shadow_atlas/quadrant_3_subdiv");
+		int shadowmap_size = ProjectSettings::get_singleton()->get("rendering/quality/shadow_atlas/size");
+		int atlas_q0 = ProjectSettings::get_singleton()->get("rendering/quality/shadow_atlas/quadrant_0_subdiv");
+		int atlas_q1 = ProjectSettings::get_singleton()->get("rendering/quality/shadow_atlas/quadrant_1_subdiv");
+		int atlas_q2 = ProjectSettings::get_singleton()->get("rendering/quality/shadow_atlas/quadrant_2_subdiv");
+		int atlas_q3 = ProjectSettings::get_singleton()->get("rendering/quality/shadow_atlas/quadrant_3_subdiv");
 
 		viewport->set_shadow_atlas_size(shadowmap_size);
 		viewport->set_shadow_atlas_quadrant_subdiv(0, Viewport::ShadowAtlasQuadrantSubdiv(atlas_q0));
@@ -1731,10 +1731,10 @@ void SpatialEditorViewport::_notification(int p_what) {
 
 		//update msaa if changed
 
-		int msaa_mode = GlobalConfig::get_singleton()->get("rendering/quality/msaa");
+		int msaa_mode = ProjectSettings::get_singleton()->get("rendering/quality/filters/msaa");
 		viewport->set_msaa(Viewport::MSAA(msaa_mode));
 
-		bool hdr = GlobalConfig::get_singleton()->get("rendering/quality/hdr");
+		bool hdr = ProjectSettings::get_singleton()->get("rendering/quality/depth/hdr");
 		viewport->set_hdr(hdr);
 
 		bool show_info = view_menu->get_popup()->is_item_checked(view_menu->get_popup()->get_item_index(VIEW_INFORMATION));
@@ -1834,7 +1834,7 @@ void SpatialEditorViewport::_draw() {
 
 	if (previewing) {
 
-		Size2 ss = Size2(GlobalConfig::get_singleton()->get("display/width"), GlobalConfig::get_singleton()->get("display/height"));
+		Size2 ss = Size2(ProjectSettings::get_singleton()->get("display/window/size/width"), ProjectSettings::get_singleton()->get("display/window/size/height"));
 		float aspect = ss.aspect();
 		Size2 s = get_size();
 
@@ -2022,6 +2022,15 @@ void SpatialEditorViewport::_menu_option(int p_option) {
 			bool current = view_menu->get_popup()->is_item_checked(idx);
 			current = !current;
 			viewport->set_as_audio_listener(current);
+			view_menu->get_popup()->set_item_checked(idx, current);
+
+		} break;
+		case VIEW_AUDIO_DOPPLER: {
+
+			int idx = view_menu->get_popup()->get_item_index(VIEW_AUDIO_DOPPLER);
+			bool current = view_menu->get_popup()->is_item_checked(idx);
+			current = !current;
+			camera->set_doppler_tracking(current ? Camera::DOPPLER_TRACKING_IDLE_STEP : Camera::DOPPLER_TRACKING_DISABLED);
 			view_menu->get_popup()->set_item_checked(idx, current);
 
 		} break;
@@ -2237,6 +2246,13 @@ void SpatialEditorViewport::set_state(const Dictionary &p_state) {
 		viewport->set_as_audio_listener(listener);
 		view_menu->get_popup()->set_item_checked(idx, listener);
 	}
+	if (p_state.has("doppler")) {
+		bool doppler = p_state["doppler"];
+
+		int idx = view_menu->get_popup()->get_item_index(VIEW_AUDIO_DOPPLER);
+		camera->set_doppler_tracking(doppler ? Camera::DOPPLER_TRACKING_IDLE_STEP : Camera::DOPPLER_TRACKING_DISABLED);
+		view_menu->get_popup()->set_item_checked(idx, doppler);
+	}
 
 	if (p_state.has("previewing")) {
 		Node *pv = EditorNode::get_singleton()->get_edited_scene()->get_node(p_state["previewing"]);
@@ -2395,6 +2411,7 @@ SpatialEditorViewport::SpatialEditorViewport(SpatialEditor *p_spatial_editor, Ed
 	view_menu->get_popup()->set_item_checked(view_menu->get_popup()->get_item_index(VIEW_ENVIRONMENT), true);
 	view_menu->get_popup()->add_separator();
 	view_menu->get_popup()->add_check_shortcut(ED_SHORTCUT("spatial_editor/view_audio_listener", TTR("Audio Listener")), VIEW_AUDIO_LISTENER);
+	view_menu->get_popup()->add_check_shortcut(ED_SHORTCUT("spatial_editor/view_audio_doppler", TTR("Doppler Enable")), VIEW_AUDIO_DOPPLER);
 	view_menu->get_popup()->set_item_checked(view_menu->get_popup()->get_item_index(VIEW_GIZMOS), true);
 
 	view_menu->get_popup()->add_separator();

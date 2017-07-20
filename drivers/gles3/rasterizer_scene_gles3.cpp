@@ -29,8 +29,8 @@
 /*************************************************************************/
 #include "rasterizer_scene_gles3.h"
 
-#include "global_config.h"
 #include "os/os.h"
+#include "project_settings.h"
 #include "rasterizer_canvas_gles3.h"
 
 #ifndef GLES_OVER_GL
@@ -761,7 +761,7 @@ bool RasterizerSceneGLES3::reflection_probe_instance_postprocess_step(RID p_inst
 	storage->shaders.cubemap_filter.set_conditional(CubemapFilterShaderGLES3::LOW_QUALITY, rpi->probe_ptr->update_mode == VS::REFLECTION_PROBE_UPDATE_ALWAYS);
 	for (int i = 0; i < 2; i++) {
 
-		storage->shaders.cubemap_filter.set_uniform(CubemapFilterShaderGLES3::Z_FLIP, i > 0);
+		storage->shaders.cubemap_filter.set_uniform(CubemapFilterShaderGLES3::Z_FLIP, i == 0);
 		storage->shaders.cubemap_filter.set_uniform(CubemapFilterShaderGLES3::ROUGHNESS, rpi->render_step / 5.0);
 
 		uint32_t local_width = width, local_height = height;
@@ -1834,12 +1834,14 @@ void RasterizerSceneGLES3::_setup_light(RenderList::Element *e, const Transform 
 
 		GIProbeInstance *gipi = gi_probe_instance_owner.getptr(ridp[0]);
 
+		float bias_scale = e->instance->baked_light ? 1 : 0;
 		glActiveTexture(GL_TEXTURE0 + storage->config.max_texture_image_units - 9);
 		glBindTexture(GL_TEXTURE_3D, gipi->tex_cache);
 		state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_XFORM1, gipi->transform_to_data * p_view_transform);
 		state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_BOUNDS1, gipi->bounds);
 		state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_MULTIPLIER1, gipi->probe ? gipi->probe->dynamic_range * gipi->probe->energy : 0.0);
-		state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_BIAS1, gipi->probe ? gipi->probe->bias : 0.0);
+		state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_BIAS1, gipi->probe ? gipi->probe->bias * bias_scale : 0.0);
+		state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_NORMAL_BIAS1, gipi->probe ? gipi->probe->normal_bias * bias_scale : 0.0);
 		state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_BLEND_AMBIENT1, gipi->probe ? !gipi->probe->interior : false);
 		state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_CELL_SIZE1, gipi->cell_size_cache);
 		if (gi_probe_count > 1) {
@@ -1852,7 +1854,8 @@ void RasterizerSceneGLES3::_setup_light(RenderList::Element *e, const Transform 
 			state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_BOUNDS2, gipi2->bounds);
 			state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_CELL_SIZE2, gipi2->cell_size_cache);
 			state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_MULTIPLIER2, gipi2->probe ? gipi2->probe->dynamic_range * gipi2->probe->energy : 0.0);
-			state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_BIAS2, gipi2->probe ? gipi2->probe->bias : 0.0);
+			state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_BIAS2, gipi2->probe ? gipi2->probe->bias * bias_scale : 0.0);
+			state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_NORMAL_BIAS2, gipi2->probe ? gipi2->probe->normal_bias * bias_scale : 0.0);
 			state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE_BLEND_AMBIENT2, gipi2->probe ? !gipi2->probe->interior : false);
 			state.scene_shader.set_uniform(SceneShaderGLES3::GI_PROBE2_ENABLED, true);
 		} else {
@@ -2889,7 +2892,7 @@ void RasterizerSceneGLES3::_setup_reflections(RID *p_reflection_probe_cull_resul
 		reflection_ubo.atlas_clamp[0] = float(x) / reflection_atlas->size;
 		reflection_ubo.atlas_clamp[1] = float(y) / reflection_atlas->size;
 		reflection_ubo.atlas_clamp[2] = float(width) / reflection_atlas->size;
-		reflection_ubo.atlas_clamp[3] = float(height / 2) / reflection_atlas->size;
+		reflection_ubo.atlas_clamp[3] = float(height) / reflection_atlas->size;
 
 		Transform proj = (p_camera_inverse_transform * rpi->transform).inverse();
 		store_transform(proj, reflection_ubo.local_matrix);
@@ -4156,7 +4159,7 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 		glDrawBuffers(1, &gldb);
 	}
 
-	if (env && env->bg_mode == VS::ENV_BG_SKY && !storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT] && state.debug_draw != VS::VIEWPORT_DEBUG_DRAW_OVERDRAW) {
+	if (env && env->bg_mode == VS::ENV_BG_SKY && (!storage->frame.current_rt || (!storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT] && state.debug_draw != VS::VIEWPORT_DEBUG_DRAW_OVERDRAW))) {
 
 		/*
 		if (use_mrt) {
@@ -4175,7 +4178,7 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 		_render_mrts(env, p_cam_projection);
 	} else {
 		//FIXME: check that this is possible to use
-		if (state.used_screen_texture) {
+		if (storage->frame.current_rt && state.used_screen_texture) {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, storage->frame.current_rt->buffers.fbo);
 			glReadBuffer(GL_COLOR_ATTACHMENT0);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, storage->frame.current_rt->effects.mip_maps[0].sizes[0].fbo);
@@ -4189,7 +4192,7 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 		}
 	}
 
-	if (state.used_screen_texture) {
+	if (storage->frame.current_rt && state.used_screen_texture) {
 		glActiveTexture(GL_TEXTURE0 + storage->config.max_texture_image_units - 7);
 		glBindTexture(GL_TEXTURE_2D, storage->frame.current_rt->effects.mip_maps[0].color);
 	}
@@ -4199,7 +4202,7 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_SCISSOR_TEST);
 
-	render_list.sort_by_depth(true);
+	render_list.sort_by_reverse_depth(true);
 
 	if (state.directional_light_count == 0) {
 		directional_light = NULL;
@@ -4635,7 +4638,7 @@ void RasterizerSceneGLES3::initialize() {
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(State::EnvironmentRadianceUBO), &state.env_radiance_ubo, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	render_list.max_elements = GLOBAL_DEF("rendering/gles3/max_renderable_elements", (int)RenderList::DEFAULT_MAX_ELEMENTS);
+	render_list.max_elements = GLOBAL_DEF("rendering/limits/rendering/max_renderable_elements", (int)RenderList::DEFAULT_MAX_ELEMENTS);
 	if (render_list.max_elements > 1000000)
 		render_list.max_elements = 1000000;
 	if (render_list.max_elements < 1024)
@@ -4709,7 +4712,7 @@ void RasterizerSceneGLES3::initialize() {
 	{
 		//directional light shadow
 		directional_shadow.light_count = 0;
-		directional_shadow.size = nearest_power_of_2(GLOBAL_DEF("rendering/shadows/directional_shadow_size", 4096));
+		directional_shadow.size = nearest_power_of_2(GLOBAL_GET("rendering/quality/directional_shadow/size"));
 		glGenFramebuffers(1, &directional_shadow.fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, directional_shadow.fbo);
 		glGenTextures(1, &directional_shadow.depth);
@@ -4776,8 +4779,6 @@ void RasterizerSceneGLES3::initialize() {
 		state.scene_shader.add_custom_define("#define MAX_SKELETON_BONES " + itos(state.max_skeleton_bones) + "\n");
 	}
 
-	GLOBAL_DEF("rendering/gles3/shadow_filter_mode", 1);
-	GlobalConfig::get_singleton()->set_custom_property_info("rendering/gles3/shadow_filter_mode", PropertyInfo(Variant::INT, "rendering/gles3/shadow_filter_mode", PROPERTY_HINT_ENUM, "Disabled,PCF5,PCF13"));
 	shadow_filter_mode = SHADOW_FILTER_NEAREST;
 
 	{ //reflection cubemaps
@@ -4841,7 +4842,7 @@ void RasterizerSceneGLES3::initialize() {
 
 	{
 
-		uint32_t immediate_buffer_size = GLOBAL_DEF("rendering/buffers/immediate_buffer_size_kb", 2048);
+		uint32_t immediate_buffer_size = GLOBAL_DEF("rendering/limits/buffers/immediate_buffer_size_kb", 2048);
 
 		glGenBuffers(1, &state.immediate_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, state.immediate_buffer);
@@ -4868,13 +4869,13 @@ void RasterizerSceneGLES3::initialize() {
 	state.tonemap_shader.init();
 
 	{
-		GLOBAL_DEF("rendering/ssurf_scattering/quality", 1);
-		GlobalConfig::get_singleton()->set_custom_property_info("rendering/ssurf_scattering/quality", PropertyInfo(Variant::INT, "rendering/ssurf_scattering/quality", PROPERTY_HINT_ENUM, "Low,Medium,High"));
-		GLOBAL_DEF("rendering/ssurf_scattering/max_size", 1.0);
-		GlobalConfig::get_singleton()->set_custom_property_info("rendering/ssurf_scattering/max_size", PropertyInfo(Variant::INT, "rendering/ssurf_scattering/max_size", PROPERTY_HINT_RANGE, "0.01,8,0.01"));
-		GLOBAL_DEF("rendering/ssurf_scattering/follow_surface", false);
+		GLOBAL_DEF("rendering/quality/subsurface_scattering/quality", 1);
+		ProjectSettings::get_singleton()->set_custom_property_info("rendering/quality/subsurface_scattering/quality", PropertyInfo(Variant::INT, "rendering/quality/subsurface_scattering/quality", PROPERTY_HINT_ENUM, "Low,Medium,High"));
+		GLOBAL_DEF("rendering/quality/subsurface_scattering/scale", 1.0);
+		ProjectSettings::get_singleton()->set_custom_property_info("rendering/quality/subsurface_scattering/scale", PropertyInfo(Variant::INT, "rendering/quality/subsurface_scattering/scale", PROPERTY_HINT_RANGE, "0.01,8,0.01"));
+		GLOBAL_DEF("rendering/quality/subsurface_scattering/follow_surface", false);
 
-		GLOBAL_DEF("rendering/reflections/high_quality_vct_gi", true);
+		GLOBAL_DEF("rendering/quality/voxel_cone_tracing/high_quality", true);
 	}
 
 	exposure_shrink_size = 243;
@@ -4913,12 +4914,12 @@ void RasterizerSceneGLES3::initialize() {
 
 void RasterizerSceneGLES3::iteration() {
 
-	shadow_filter_mode = ShadowFilterMode(int(GlobalConfig::get_singleton()->get("rendering/gles3/shadow_filter_mode")));
-	subsurface_scatter_follow_surface = GlobalConfig::get_singleton()->get("rendering/ssurf_scattering/follow_surface");
-	subsurface_scatter_quality = SubSurfaceScatterQuality(int(GlobalConfig::get_singleton()->get("rendering/ssurf_scattering/quality")));
-	subsurface_scatter_size = GlobalConfig::get_singleton()->get("rendering/ssurf_scattering/max_size");
+	shadow_filter_mode = ShadowFilterMode(int(ProjectSettings::get_singleton()->get("rendering/quality/shadows/filter_mode")));
+	subsurface_scatter_follow_surface = ProjectSettings::get_singleton()->get("rendering/quality/subsurface_scattering/follow_surface");
+	subsurface_scatter_quality = SubSurfaceScatterQuality(int(ProjectSettings::get_singleton()->get("rendering/quality/subsurface_scattering/quality")));
+	subsurface_scatter_size = ProjectSettings::get_singleton()->get("rendering/quality/subsurface_scattering/scale");
 
-	state.scene_shader.set_conditional(SceneShaderGLES3::VCT_QUALITY_HIGH, GlobalConfig::get_singleton()->get("rendering/reflections/high_quality_vct_gi"));
+	state.scene_shader.set_conditional(SceneShaderGLES3::VCT_QUALITY_HIGH, ProjectSettings::get_singleton()->get("rendering/quality/voxel_cone_tracing/high_quality"));
 }
 
 void RasterizerSceneGLES3::finalize() {

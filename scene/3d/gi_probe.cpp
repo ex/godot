@@ -95,6 +95,16 @@ float GIProbeData::get_bias() const {
 	return VS::get_singleton()->gi_probe_get_bias(probe);
 }
 
+void GIProbeData::set_normal_bias(float p_range) {
+
+	VS::get_singleton()->gi_probe_set_normal_bias(probe, p_range);
+}
+
+float GIProbeData::get_normal_bias() const {
+
+	return VS::get_singleton()->gi_probe_get_normal_bias(probe);
+}
+
 void GIProbeData::set_propagation(float p_range) {
 
 	VS::get_singleton()->gi_probe_set_propagation(probe, p_range);
@@ -158,6 +168,9 @@ void GIProbeData::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_bias", "bias"), &GIProbeData::set_bias);
 	ClassDB::bind_method(D_METHOD("get_bias"), &GIProbeData::get_bias);
 
+	ClassDB::bind_method(D_METHOD("set_normal_bias", "bias"), &GIProbeData::set_normal_bias);
+	ClassDB::bind_method(D_METHOD("get_normal_bias"), &GIProbeData::get_normal_bias);
+
 	ClassDB::bind_method(D_METHOD("set_propagation", "propagation"), &GIProbeData::set_propagation);
 	ClassDB::bind_method(D_METHOD("get_propagation"), &GIProbeData::get_propagation);
 
@@ -175,6 +188,7 @@ void GIProbeData::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "dynamic_range", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_dynamic_range", "get_dynamic_range");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "energy", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_energy", "get_energy");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "bias", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_bias", "get_bias");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "normal_bias", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_normal_bias", "get_normal_bias");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "propagation", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_propagation", "get_propagation");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "interior", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_interior", "is_interior");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "compress", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_compress", "is_compressed");
@@ -263,6 +277,18 @@ void GIProbe::set_bias(float p_bias) {
 float GIProbe::get_bias() const {
 
 	return bias;
+}
+
+void GIProbe::set_normal_bias(float p_normal_bias) {
+
+	normal_bias = p_normal_bias;
+	if (probe_data.is_valid()) {
+		probe_data->set_normal_bias(normal_bias);
+	}
+}
+float GIProbe::get_normal_bias() const {
+
+	return normal_bias;
 }
 
 void GIProbe::set_propagation(float p_propagation) {
@@ -1261,6 +1287,7 @@ void GIProbe::bake(Node *p_from_node, bool p_create_visual_debug) {
 		probe_data->set_dynamic_range(dynamic_range);
 		probe_data->set_energy(energy);
 		probe_data->set_bias(bias);
+		probe_data->set_normal_bias(normal_bias);
 		probe_data->set_propagation(propagation);
 		probe_data->set_interior(interior);
 		probe_data->set_compress(compress);
@@ -1416,8 +1443,8 @@ PoolVector<Face3> GIProbe::get_faces(uint32_t p_usage_flags) const {
 
 void GIProbe::_bind_methods() {
 
-	ClassDB::bind_method(D_METHOD("set_probe_data", "data"), &GIProbe::set_probe_data);
-	ClassDB::bind_method(D_METHOD("get_probe_data"), &GIProbe::get_probe_data);
+	ClassDB::bind_method(D_METHOD("set_probe_data", "data:GIProbeData"), &GIProbe::set_probe_data);
+	ClassDB::bind_method(D_METHOD("get_probe_data:GIProbeData"), &GIProbe::get_probe_data);
 
 	ClassDB::bind_method(D_METHOD("set_subdiv", "subdiv"), &GIProbe::set_subdiv);
 	ClassDB::bind_method(D_METHOD("get_subdiv"), &GIProbe::get_subdiv);
@@ -1434,6 +1461,9 @@ void GIProbe::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_bias", "max"), &GIProbe::set_bias);
 	ClassDB::bind_method(D_METHOD("get_bias"), &GIProbe::get_bias);
 
+	ClassDB::bind_method(D_METHOD("set_normal_bias", "max"), &GIProbe::set_normal_bias);
+	ClassDB::bind_method(D_METHOD("get_normal_bias"), &GIProbe::get_normal_bias);
+
 	ClassDB::bind_method(D_METHOD("set_propagation", "max"), &GIProbe::set_propagation);
 	ClassDB::bind_method(D_METHOD("get_propagation"), &GIProbe::get_propagation);
 
@@ -1443,7 +1473,7 @@ void GIProbe::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_compress", "enable"), &GIProbe::set_compress);
 	ClassDB::bind_method(D_METHOD("is_compressed"), &GIProbe::is_compressed);
 
-	ClassDB::bind_method(D_METHOD("bake", "from_node", "create_visual_debug"), &GIProbe::bake, DEFVAL(Variant()), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("bake", "from_node:Node", "create_visual_debug"), &GIProbe::bake, DEFVAL(Variant()), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("debug_bake"), &GIProbe::_debug_bake);
 	ClassDB::set_method_flags(get_class_static(), _scs_create("debug_bake"), METHOD_FLAGS_DEFAULT | METHOD_FLAG_EDITOR);
 
@@ -1453,6 +1483,7 @@ void GIProbe::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "energy", PROPERTY_HINT_RANGE, "0,16,0.01"), "set_energy", "get_energy");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "propagation", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_propagation", "get_propagation");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "bias", PROPERTY_HINT_RANGE, "0,4,0.001"), "set_bias", "get_bias");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "normal_bias", PROPERTY_HINT_RANGE, "0,4,0.001"), "set_normal_bias", "get_normal_bias");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "interior"), "set_interior", "is_interior");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "compress"), "set_compress", "is_compressed");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "data", PROPERTY_HINT_RESOURCE_TYPE, "GIProbeData"), "set_probe_data", "get_probe_data");
@@ -1468,7 +1499,8 @@ GIProbe::GIProbe() {
 	subdiv = SUBDIV_128;
 	dynamic_range = 4;
 	energy = 1.0;
-	bias = 1.8;
+	bias = 0.0;
+	normal_bias = 0.8;
 	propagation = 1.0;
 	extents = Vector3(10, 10, 10);
 	color_scan_cell_width = 4;

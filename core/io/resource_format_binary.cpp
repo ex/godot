@@ -28,7 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "resource_format_binary.h"
-#include "global_config.h"
+#include "project_settings.h"
+#include "image.h"
 #include "io/file_access_compressed.h"
 #include "io/marshalls.h"
 #include "os/dir_access.h"
@@ -54,7 +55,6 @@ enum {
 	VARIANT_TRANSFORM = 17,
 	VARIANT_MATRIX32 = 18,
 	VARIANT_COLOR = 20,
-	//VARIANT_IMAGE = 21, - no longer variant type
 	VARIANT_NODE_PATH = 22,
 	VARIANT_RID = 23,
 	VARIANT_OBJECT = 24,
@@ -70,7 +70,13 @@ enum {
 	VARIANT_VECTOR2_ARRAY = 37,
 	VARIANT_INT64 = 40,
 	VARIANT_DOUBLE = 41,
-
+#ifndef DISABLE_DEPRECATED
+	VARIANT_IMAGE = 21, // - no longer variant type
+	IMAGE_ENCODING_EMPTY = 0,
+	IMAGE_ENCODING_RAW = 1,
+	IMAGE_ENCODING_LOSSLESS = 2,
+	IMAGE_ENCODING_LOSSY = 3,
+#endif
 	OBJECT_EMPTY = 0,
 	OBJECT_EXTERNAL_RESOURCE = 1,
 	OBJECT_INTERNAL_RESOURCE = 2,
@@ -311,7 +317,7 @@ Error ResourceInteractiveLoaderBinary::parse_variant(Variant &r_v) {
 
 					if (path.find("://") == -1 && path.is_rel_path()) {
 						// path is relative to file being loaded, so convert to a resource path
-						path = GlobalConfig::get_singleton()->localize_path(res_path.get_base_dir().plus_file(path));
+						path = ProjectSettings::get_singleton()->localize_path(res_path.get_base_dir().plus_file(path));
 					}
 
 					if (remaps.find(path)) {
@@ -340,7 +346,7 @@ Error ResourceInteractiveLoaderBinary::parse_variant(Variant &r_v) {
 
 						if (path.find("://") == -1 && path.is_rel_path()) {
 							// path is relative to file being loaded, so convert to a resource path
-							path = GlobalConfig::get_singleton()->localize_path(res_path.get_base_dir().plus_file(path));
+							path = ProjectSettings::get_singleton()->localize_path(res_path.get_base_dir().plus_file(path));
 						}
 
 						RES res = ResourceLoader::load(path, type);
@@ -541,7 +547,69 @@ Error ResourceInteractiveLoaderBinary::parse_variant(Variant &r_v) {
 			w = PoolVector<Color>::Write();
 			r_v = array;
 		} break;
+#ifndef DISABLE_DEPRECATED
+		case VARIANT_IMAGE: {
+			uint32_t encoding = f->get_32();
+			if (encoding == IMAGE_ENCODING_EMPTY) {
+				r_v = Ref<Image>();
+				break;
+			} else if (encoding == IMAGE_ENCODING_RAW) {
+				uint32_t width = f->get_32();
+				uint32_t height = f->get_32();
+				uint32_t mipmaps = f->get_32();
+				uint32_t format = f->get_32();
+				const uint32_t format_version_shift = 24;
+				const uint32_t format_version_mask = format_version_shift - 1;
 
+				uint32_t format_version = format >> format_version_shift;
+
+				const uint32_t current_version = 0;
+				if (format_version > current_version) {
+
+					ERR_PRINT("Format version for encoded binary image is too new");
+					return ERR_PARSE_ERROR;
+				}
+
+				Image::Format fmt = Image::Format(format & format_version_mask); //if format changes, we can add a compatibility bit on top
+
+				uint32_t datalen = f->get_32();
+
+				PoolVector<uint8_t> imgdata;
+				imgdata.resize(datalen);
+				PoolVector<uint8_t>::Write w = imgdata.write();
+				f->get_buffer(w.ptr(), datalen);
+				_advance_padding(datalen);
+				w = PoolVector<uint8_t>::Write();
+
+				Ref<Image> image;
+				image.instance();
+				image->create(width, height, mipmaps, fmt, imgdata);
+				r_v = image;
+
+			} else {
+				//compressed
+				PoolVector<uint8_t> data;
+				data.resize(f->get_32());
+				PoolVector<uint8_t>::Write w = data.write();
+				f->get_buffer(w.ptr(), data.size());
+				w = PoolVector<uint8_t>::Write();
+
+				Ref<Image> image;
+
+				if (encoding == IMAGE_ENCODING_LOSSY && Image::lossy_unpacker) {
+
+					image = Image::lossy_unpacker(data);
+				} else if (encoding == IMAGE_ENCODING_LOSSLESS && Image::lossless_unpacker) {
+
+					image = Image::lossless_unpacker(data);
+				}
+				_advance_padding(data.size());
+
+				r_v = image;
+			}
+
+		} break;
+#endif
 		default: {
 			ERR_FAIL_V(ERR_FILE_CORRUPT);
 		} break;
@@ -949,7 +1017,7 @@ Ref<ResourceInteractiveLoader> ResourceFormatLoaderBinary::load_interactive(cons
 	}
 
 	Ref<ResourceInteractiveLoaderBinary> ria = memnew(ResourceInteractiveLoaderBinary);
-	ria->local_path = GlobalConfig::get_singleton()->localize_path(p_path);
+	ria->local_path = ProjectSettings::get_singleton()->localize_path(p_path);
 	ria->res_path = ria->local_path;
 	//ria->set_local_path( Globals::get_singleton()->localize_path(p_path) );
 	ria->open(f);
@@ -997,7 +1065,7 @@ void ResourceFormatLoaderBinary::get_dependencies(const String &p_path, List<Str
 	ERR_FAIL_COND(!f);
 
 	Ref<ResourceInteractiveLoaderBinary> ria = memnew(ResourceInteractiveLoaderBinary);
-	ria->local_path = GlobalConfig::get_singleton()->localize_path(p_path);
+	ria->local_path = ProjectSettings::get_singleton()->localize_path(p_path);
 	ria->res_path = ria->local_path;
 	//ria->set_local_path( Globals::get_singleton()->localize_path(p_path) );
 	ria->get_dependencies(f, p_dependencies, p_add_types);
@@ -1084,7 +1152,7 @@ Error ResourceFormatLoaderBinary::rename_dependencies(const String &p_path, cons
 		}
 
 		Ref<ResourceInteractiveLoaderBinary> ria = memnew(ResourceInteractiveLoaderBinary);
-		ria->local_path = GlobalConfig::get_singleton()->localize_path(p_path);
+		ria->local_path = ProjectSettings::get_singleton()->localize_path(p_path);
 		ria->res_path = ria->local_path;
 		ria->remaps = p_map;
 		//ria->set_local_path( Globals::get_singleton()->localize_path(p_path) );
@@ -1213,7 +1281,7 @@ String ResourceFormatLoaderBinary::get_resource_type(const String &p_path) const
 	}
 
 	Ref<ResourceInteractiveLoaderBinary> ria = memnew(ResourceInteractiveLoaderBinary);
-	ria->local_path = GlobalConfig::get_singleton()->localize_path(p_path);
+	ria->local_path = ProjectSettings::get_singleton()->localize_path(p_path);
 	ria->res_path = ria->local_path;
 	//ria->set_local_path( Globals::get_singleton()->localize_path(p_path) );
 	String r = ria->recognize(f);
@@ -1644,7 +1712,6 @@ void ResourceFormatSaverBinaryInstance::_find_resources(const Variant &p_variant
 			get_string_index(np.get_property());
 
 		} break;
-
 		default: {}
 	}
 }
@@ -1917,7 +1984,7 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 
 Error ResourceFormatSaverBinary::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
 
-	String local_path = GlobalConfig::get_singleton()->localize_path(p_path);
+	String local_path = ProjectSettings::get_singleton()->localize_path(p_path);
 	ResourceFormatSaverBinaryInstance saver;
 	return saver.save(local_path, p_resource, p_flags);
 }
