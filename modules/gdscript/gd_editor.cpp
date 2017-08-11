@@ -30,8 +30,8 @@
 #include "editor/editor_settings.h"
 #include "gd_compiler.h"
 #include "gd_script.h"
-#include "project_settings.h"
 #include "os/file_access.h"
+#include "project_settings.h"
 #ifdef TOOLS_ENABLED
 #include "editor/editor_file_system.h"
 #include "editor/editor_settings.h"
@@ -157,7 +157,7 @@ Script *GDScriptLanguage::create_script() const {
 bool GDScriptLanguage::debug_break_parse(const String &p_file, int p_line, const String &p_error) {
 	//break because of parse error
 
-	if (ScriptDebugger::get_singleton() && Thread::get_caller_ID() == Thread::get_main_ID()) {
+	if (ScriptDebugger::get_singleton() && Thread::get_caller_id() == Thread::get_main_id()) {
 
 		_debug_parse_err_line = p_line;
 		_debug_parse_err_file = p_file;
@@ -171,7 +171,7 @@ bool GDScriptLanguage::debug_break_parse(const String &p_file, int p_line, const
 
 bool GDScriptLanguage::debug_break(const String &p_error, bool p_allow_continue) {
 
-	if (ScriptDebugger::get_singleton() && Thread::get_caller_ID() == Thread::get_main_ID()) {
+	if (ScriptDebugger::get_singleton() && Thread::get_caller_id() == Thread::get_main_id()) {
 
 		_debug_parse_err_line = -1;
 		_debug_parse_err_file = "";
@@ -1334,8 +1334,8 @@ static void _find_identifiers(GDCompletionContext &context, int p_line, bool p_o
 
 	static const char *_type_names[Variant::VARIANT_MAX] = {
 		"null", "bool", "int", "float", "String", "Vector2", "Rect2", "Vector3", "Transform2D", "Plane", "Quat", "AABB", "Basis", "Transform",
-		"Color", "NodePath", "RID", "Object", "Dictionary", "Array", "RawArray", "IntArray", "FloatArray", "StringArray",
-		"Vector2Array", "Vector3Array", "ColorArray"
+		"Color", "NodePath", "RID", "Object", "Dictionary", "Array", "PoolByteArray", "PoolIntArray", "PoolRealArray", "PoolStringArray",
+		"PoolVector2Array", "PoolVector3Array", "PoolColorArray"
 	};
 
 	for (int i = 0; i < Variant::VARIANT_MAX; i++) {

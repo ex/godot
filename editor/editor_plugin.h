@@ -98,7 +98,7 @@ public:
 		DOCK_SLOT_MAX
 	};
 
-	//TODO: send a resoucre for editing to the editor node?
+	//TODO: send a resource for editing to the editor node?
 
 	void add_control_to_container(CustomControlContainer p_location, Control *p_control);
 	ToolButton *add_control_to_bottom_panel(Control *p_control, const String &p_title);
@@ -118,7 +118,7 @@ public:
 	bool is_input_event_forwarding_always_enabled() { return input_event_forwarding_always_enabled; }
 
 	Node *get_edited_scene_root();
-	Array get_opened_scenes_list() const;
+	Array get_open_scenes() const;
 	ScriptEditor *get_script_editor();
 
 	void notify_main_screen_changed(const String &screen_name);

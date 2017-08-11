@@ -805,7 +805,12 @@ void OS_Windows::process_key_events() {
 
 				k->set_pressed(ke.uMsg == WM_KEYDOWN);
 
-				k->set_scancode(KeyMappingWindows::get_keysym(ke.wParam));
+				if ((ke.lParam & (1 << 24)) && (ke.wParam == VK_RETURN)) {
+					// Special case for Numpad Enter key
+					k->set_scancode(KEY_KP_ENTER);
+				} else {
+					k->set_scancode(KeyMappingWindows::get_keysym(ke.wParam));
+				}
 
 				if (i + 1 < key_event_pos && key_event_buffer[i + 1].uMsg == WM_CHAR) {
 					k->set_unicode(key_event_buffer[i + 1].wParam);
@@ -1187,10 +1192,6 @@ void OS_Windows::finalize() {
 
 	main_loop = NULL;
 
-	for (int i = 0; i < get_audio_driver_count(); i++) {
-		AudioDriverManager::get_driver(i)->finish();
-	}
-
 	memdelete(joypad);
 	memdelete(input);
 
@@ -1569,12 +1570,16 @@ Error OS_Windows::close_dynamic_library(void *p_library_handle) {
 	return OK;
 }
 
-Error OS_Windows::get_dynamic_library_symbol_handle(void *p_library_handle, const String p_name, void *&p_symbol_handle) {
+Error OS_Windows::get_dynamic_library_symbol_handle(void *p_library_handle, const String p_name, void *&p_symbol_handle, bool p_optional) {
 	char *error;
 	p_symbol_handle = (void *)GetProcAddress((HMODULE)p_library_handle, p_name.utf8().get_data());
 	if (!p_symbol_handle) {
-		ERR_EXPLAIN("Can't resolve symbol " + p_name + ". Error: " + String::num(GetLastError()));
-		ERR_FAIL_V(ERR_CANT_RESOLVE);
+		if (!p_optional) {
+			ERR_EXPLAIN("Can't resolve symbol " + p_name + ". Error: " + String::num(GetLastError()));
+			ERR_FAIL_V(ERR_CANT_RESOLVE);
+		} else {
+			return ERR_CANT_RESOLVE;
+		}
 	}
 	return OK;
 }
@@ -1943,7 +1948,7 @@ Error OS_Windows::kill(const ProcessID &p_pid) {
 	return ret != 0 ? OK : FAILED;
 };
 
-int OS_Windows::get_process_ID() const {
+int OS_Windows::get_process_id() const {
 	return _getpid();
 }
 

@@ -83,12 +83,12 @@ void OSIPhone::set_data_dir(String p_dir) {
 	memdelete(da);
 };
 
-void OSIPhone::set_unique_ID(String p_ID) {
+void OSIPhone::set_unique_id(String p_ID) {
 
 	unique_ID = p_ID;
 };
 
-String OSIPhone::get_unique_ID() const {
+String OSIPhone::get_unique_id() const {
 
 	return unique_ID;
 };
@@ -109,7 +109,6 @@ void OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_
 
 	RasterizerGLES3::register_config();
 	RasterizerGLES3::make_current();
-	RasterizerStorageGLES3::system_fbo = gl_view_base_fb;
 
 	visual_server = memnew(VisualServerRaster());
 	/*
@@ -120,7 +119,10 @@ void OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_
 	*/
 
 	visual_server->init();
-	visual_server->cursor_set_visible(false, 0);
+	//	visual_server->cursor_set_visible(false, 0);
+
+	// reset this to what it should be, it will have been set to 0 after visual_server->init() is called
+	RasterizerStorageGLES3::system_fbo = gl_view_base_fb;
 
 	audio_driver = memnew(AudioDriverIphone);
 	audio_driver->set_singleton();
@@ -222,11 +224,9 @@ void OSIPhone::mouse_button(int p_idx, int p_x, int p_y, bool p_pressed, bool p_
 
 		Ref<InputEventMouseButton> ev;
 		ev.instance();
-		// swaped it for tilted screen
-		//ev->get_pos().x = ev.mouse_button.global_x = video_mode.height - p_y;
-		//ev->get_pos().y = ev.mouse_button.global_y = p_x;
-		ev->set_position(Vector2(video_mode.height - p_y, p_x));
-		ev->set_global_position(Vector2(video_mode.height - p_y, p_x));
+
+		ev->set_position(Vector2(p_x, p_y));
+		ev->set_global_position(Vector2(p_x, p_y));
 
 		//mouse_list.pressed[p_idx] = p_pressed;
 
@@ -434,7 +434,8 @@ bool OSIPhone::can_draw() const {
 
 int OSIPhone::set_base_framebuffer(int p_fb) {
 
-	RasterizerStorageGLES3::system_fbo = gl_view_base_fb;
+	// gl_view_base_fb has not been updated yet
+	RasterizerStorageGLES3::system_fbo = p_fb;
 
 	return 0;
 };

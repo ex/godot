@@ -999,7 +999,7 @@ GIProbe::Baker::MaterialCache GIProbe::_get_material_cache(Ref<Material> p_mater
 	return mc;
 }
 
-void GIProbe::_plot_mesh(const Transform &p_xform, Ref<ArrayMesh> &p_mesh, Baker *p_baker, const Vector<Ref<Material> > &p_materials, const Ref<Material> &p_override_material) {
+void GIProbe::_plot_mesh(const Transform &p_xform, Ref<Mesh> &p_mesh, Baker *p_baker, const Vector<Ref<Material> > &p_materials, const Ref<Material> &p_override_material) {
 
 	for (int i = 0; i < p_mesh->get_surface_count(); i++) {
 
@@ -1093,7 +1093,7 @@ void GIProbe::_find_meshes(Node *p_at_node, Baker *p_baker) {
 
 	MeshInstance *mi = p_at_node->cast_to<MeshInstance>();
 	if (mi && mi->get_flag(GeometryInstance::FLAG_USE_BAKED_LIGHT)) {
-		Ref<ArrayMesh> mesh = mi->get_mesh();
+		Ref<Mesh> mesh = mi->get_mesh();
 		if (mesh.is_valid()) {
 
 			Rect3 aabb = mesh->get_aabb();
@@ -1120,7 +1120,7 @@ void GIProbe::_find_meshes(Node *p_at_node, Baker *p_baker) {
 		for (int i = 0; i < meshes.size(); i += 2) {
 
 			Transform mxf = meshes[i];
-			Ref<ArrayMesh> mesh = meshes[i + 1];
+			Ref<Mesh> mesh = meshes[i + 1];
 			if (!mesh.is_valid())
 				continue;
 
@@ -1443,8 +1443,8 @@ PoolVector<Face3> GIProbe::get_faces(uint32_t p_usage_flags) const {
 
 void GIProbe::_bind_methods() {
 
-	ClassDB::bind_method(D_METHOD("set_probe_data", "data:GIProbeData"), &GIProbe::set_probe_data);
-	ClassDB::bind_method(D_METHOD("get_probe_data:GIProbeData"), &GIProbe::get_probe_data);
+	ClassDB::bind_method(D_METHOD("set_probe_data", "data"), &GIProbe::set_probe_data);
+	ClassDB::bind_method(D_METHOD("get_probe_data"), &GIProbe::get_probe_data);
 
 	ClassDB::bind_method(D_METHOD("set_subdiv", "subdiv"), &GIProbe::set_subdiv);
 	ClassDB::bind_method(D_METHOD("get_subdiv"), &GIProbe::get_subdiv);
@@ -1473,7 +1473,7 @@ void GIProbe::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_compress", "enable"), &GIProbe::set_compress);
 	ClassDB::bind_method(D_METHOD("is_compressed"), &GIProbe::is_compressed);
 
-	ClassDB::bind_method(D_METHOD("bake", "from_node:Node", "create_visual_debug"), &GIProbe::bake, DEFVAL(Variant()), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("bake", "from_node", "create_visual_debug"), &GIProbe::bake, DEFVAL(Variant()), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("debug_bake"), &GIProbe::_debug_bake);
 	ClassDB::set_method_flags(get_class_static(), _scs_create("debug_bake"), METHOD_FLAGS_DEFAULT | METHOD_FLAG_EDITOR);
 

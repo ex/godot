@@ -32,13 +32,13 @@
 #include "editor/editor_node.h"
 #include "editor/editor_settings.h"
 #include "editor/script_editor_debugger.h"
-#include "project_settings.h"
 #include "io/resource_loader.h"
 #include "io/resource_saver.h"
 #include "os/file_access.h"
 #include "os/input.h"
 #include "os/keyboard.h"
 #include "os/os.h"
+#include "project_settings.h"
 #include "scene/main/viewport.h"
 
 /*** SCRIPT EDITOR ****/
@@ -211,9 +211,11 @@ void ScriptEditorQuickOpen::_confirmed() {
 
 void ScriptEditorQuickOpen::_notification(int p_what) {
 
-	if (p_what == NOTIFICATION_ENTER_TREE) {
+	switch (p_what) {
+		case NOTIFICATION_ENTER_TREE: {
 
-		connect("confirmed", this, "_confirmed");
+			connect("confirmed", this, "_confirmed");
+		} break;
 	}
 }
 
@@ -518,6 +520,9 @@ void ScriptEditor::_close_tab(int p_idx, bool p_save) {
 		_add_recent_script(help->get_class());
 	}
 
+	// roll back to previous tab
+	_history_back();
+
 	//remove from history
 	history.resize(history_pos + 1);
 
@@ -793,10 +798,10 @@ Ref<Script> ScriptEditor::_get_current_script() {
 	}
 }
 
-Array ScriptEditor::_get_opened_script_list() const {
+Array ScriptEditor::_get_open_scripts() const {
 
 	Array ret;
-	Vector<Ref<Script> > scripts = get_opened_scripts();
+	Vector<Ref<Script> > scripts = get_open_scripts();
 	int scrits_amount = scripts.size();
 	for (int idx_script = 0; idx_script < scrits_amount; idx_script++) {
 		ret.push_back(scripts[idx_script]);
@@ -1061,58 +1066,73 @@ void ScriptEditor::_tab_changed(int p_which) {
 
 void ScriptEditor::_notification(int p_what) {
 
-	if (p_what == NOTIFICATION_ENTER_TREE) {
+	switch (p_what) {
 
-		editor->connect("play_pressed", this, "_editor_play");
-		editor->connect("pause_pressed", this, "_editor_pause");
-		editor->connect("stop_pressed", this, "_editor_stop");
-		editor->connect("script_add_function_request", this, "_add_callback");
-		editor->connect("resource_saved", this, "_res_saved_callback");
-		script_list->connect("item_selected", this, "_script_selected");
-		members_overview->connect("item_selected", this, "_members_overview_selected");
-		script_split->connect("dragged", this, "_script_split_dragged");
-		autosave_timer->connect("timeout", this, "_autosave_scripts");
-		{
-			float autosave_time = EditorSettings::get_singleton()->get("text_editor/files/autosave_interval_secs");
-			if (autosave_time > 0) {
-				autosave_timer->set_wait_time(autosave_time);
-				autosave_timer->start();
-			} else {
-				autosave_timer->stop();
+		case NOTIFICATION_ENTER_TREE: {
+
+			editor->connect("play_pressed", this, "_editor_play");
+			editor->connect("pause_pressed", this, "_editor_pause");
+			editor->connect("stop_pressed", this, "_editor_stop");
+			editor->connect("script_add_function_request", this, "_add_callback");
+			editor->connect("resource_saved", this, "_res_saved_callback");
+			script_list->connect("item_selected", this, "_script_selected");
+			members_overview->connect("item_selected", this, "_members_overview_selected");
+			script_split->connect("dragged", this, "_script_split_dragged");
+			autosave_timer->connect("timeout", this, "_autosave_scripts");
+			{
+				float autosave_time = EditorSettings::get_singleton()->get("text_editor/files/autosave_interval_secs");
+				if (autosave_time > 0) {
+					autosave_timer->set_wait_time(autosave_time);
+					autosave_timer->start();
+				} else {
+					autosave_timer->stop();
+				}
 			}
-		}
 
-		EditorSettings::get_singleton()->connect("settings_changed", this, "_editor_settings_changed");
-		help_search->set_icon(get_icon("HelpSearch", "EditorIcons"));
-		site_search->set_icon(get_icon("Instance", "EditorIcons"));
-		class_search->set_icon(get_icon("ClassList", "EditorIcons"));
+			EditorSettings::get_singleton()->connect("settings_changed", this, "_editor_settings_changed");
+			help_search->set_icon(get_icon("HelpSearch", "EditorIcons"));
+			site_search->set_icon(get_icon("Instance", "EditorIcons"));
+			class_search->set_icon(get_icon("ClassList", "EditorIcons"));
 
-		script_forward->set_icon(get_icon("Forward", "EditorIcons"));
-		script_back->set_icon(get_icon("Back", "EditorIcons"));
-	}
+			script_forward->set_icon(get_icon("Forward", "EditorIcons"));
+			script_back->set_icon(get_icon("Back", "EditorIcons"));
+		} break;
 
-	if (p_what == NOTIFICATION_READY) {
+		case NOTIFICATION_READY: {
 
-		get_tree()->connect("tree_changed", this, "_tree_changed");
-		editor->connect("request_help", this, "_request_help");
-		editor->connect("request_help_search", this, "_help_search");
-		editor->connect("request_help_index", this, "_help_index");
-	}
+			get_tree()->connect("tree_changed", this, "_tree_changed");
+			editor->connect("request_help", this, "_request_help");
+			editor->connect("request_help_search", this, "_help_search");
+			editor->connect("request_help_index", this, "_help_index");
+		} break;
 
-	if (p_what == NOTIFICATION_EXIT_TREE) {
+		case NOTIFICATION_EXIT_TREE: {
 
-		editor->disconnect("play_pressed", this, "_editor_play");
-		editor->disconnect("pause_pressed", this, "_editor_pause");
-		editor->disconnect("stop_pressed", this, "_editor_stop");
-	}
+			editor->disconnect("play_pressed", this, "_editor_play");
+			editor->disconnect("pause_pressed", this, "_editor_pause");
+			editor->disconnect("stop_pressed", this, "_editor_stop");
+		} break;
 
-	if (p_what == MainLoop::NOTIFICATION_WM_FOCUS_IN) {
+		case MainLoop::NOTIFICATION_WM_FOCUS_IN: {
 
-		_test_script_times_on_disk();
-		_update_modified_scripts_for_external_editor();
-	}
+			_test_script_times_on_disk();
+			_update_modified_scripts_for_external_editor();
+		} break;
 
-	if (p_what == NOTIFICATION_PROCESS) {
+		case NOTIFICATION_PROCESS: {
+		} break;
+
+		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
+
+			tab_container->add_style_override("panel", editor->get_gui_base()->get_stylebox("ScriptPanel", "EditorStyles"));
+
+			Ref<StyleBox> sb = editor->get_gui_base()->get_stylebox("panel", "TabContainer")->duplicate();
+			sb->set_default_margin(MARGIN_TOP, 0);
+			add_style_override("panel", sb);
+		} break;
+
+		default:
+			break;
 	}
 }
 
@@ -1159,7 +1179,7 @@ void ScriptEditor::notify_script_close(const Ref<Script> &p_script) {
 }
 
 void ScriptEditor::notify_script_changed(const Ref<Script> &p_script) {
-	emit_signal("script_changed", p_script);
+	emit_signal("editor_script_changed", p_script);
 }
 
 static const Node *_find_node_with_script(const Node *p_node, const RefPtr &p_script) {
@@ -1316,7 +1336,8 @@ void ScriptEditor::ensure_focus_current() {
 
 	int cidx = tab_container->get_current_tab();
 	if (cidx < 0 || cidx >= tab_container->get_tab_count())
-		;
+		return;
+
 	Control *c = tab_container->get_child(cidx)->cast_to<Control>();
 	if (!c)
 		return;
@@ -1406,6 +1427,11 @@ struct _ScriptEditorItemData {
 };
 
 void ScriptEditor::_update_members_overview_visibility() {
+
+	int selected = tab_container->get_current_tab();
+	if (selected < 0 || selected >= tab_container->get_child_count())
+		return;
+
 	Node *current = tab_container->get_child(tab_container->get_current_tab());
 	ScriptEditorBase *se = current->cast_to<ScriptEditorBase>();
 	if (!se) {
@@ -1422,6 +1448,10 @@ void ScriptEditor::_update_members_overview_visibility() {
 
 void ScriptEditor::_update_members_overview() {
 	members_overview->clear();
+
+	int selected = tab_container->get_current_tab();
+	if (selected < 0 || selected >= tab_container->get_child_count())
+		return;
 
 	Node *current = tab_container->get_child(tab_container->get_current_tab());
 	ScriptEditorBase *se = current->cast_to<ScriptEditorBase>();
@@ -2104,7 +2134,7 @@ void ScriptEditor::_history_back() {
 	}
 }
 
-Vector<Ref<Script> > ScriptEditor::get_opened_scripts() const {
+Vector<Ref<Script> > ScriptEditor::get_open_scripts() const {
 
 	Vector<Ref<Script> > out_scripts = Vector<Ref<Script> >();
 
@@ -2213,10 +2243,10 @@ void ScriptEditor::_bind_methods() {
 	ClassDB::bind_method("_unhandled_input", &ScriptEditor::_unhandled_input);
 
 	ClassDB::bind_method(D_METHOD("get_current_script"), &ScriptEditor::_get_current_script);
-	ClassDB::bind_method(D_METHOD("get_opened_scripts_list"), &ScriptEditor::_get_opened_script_list);
+	ClassDB::bind_method(D_METHOD("get_open_scripts"), &ScriptEditor::_get_open_scripts);
 
-	ADD_SIGNAL(MethodInfo("script_changed", PropertyInfo(Variant::OBJECT, "script:Script")));
-	ADD_SIGNAL(MethodInfo("script_close", PropertyInfo(Variant::STRING, "script:String")));
+	ADD_SIGNAL(MethodInfo("editor_script_changed", PropertyInfo(Variant::OBJECT, "script:Script")));
+	ADD_SIGNAL(MethodInfo("script_close", PropertyInfo(Variant::OBJECT, "script:Script")));
 }
 
 ScriptEditor::ScriptEditor(EditorNode *p_editor) {

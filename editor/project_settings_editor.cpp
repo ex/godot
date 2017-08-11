@@ -140,7 +140,7 @@ void ProjectSettingsEditor::_action_edited() {
 		add_at = "input/" + old_name;
 
 		message->set_text(TTR("Invalid action (anything goes but '/' or ':')."));
-		message->popup_centered(Size2(300, 100));
+		message->popup_centered(Size2(300, 100) * EDSCALE);
 		return;
 	}
 
@@ -152,7 +152,7 @@ void ProjectSettingsEditor::_action_edited() {
 		add_at = "input/" + old_name;
 
 		message->set_text(vformat(TTR("Action '%s' already exists!"), new_name));
-		message->popup_centered(Size2(300, 100));
+		message->popup_centered(Size2(300, 100) * EDSCALE);
 		return;
 	}
 
@@ -399,7 +399,7 @@ void ProjectSettingsEditor::_add_item(int p_item, Ref<InputEvent> p_exiting_even
 			device_index->add_item(TTR("Button 7"));
 			device_index->add_item(TTR("Button 8"));
 			device_index->add_item(TTR("Button 9"));
-			device_input->popup_centered_minsize(Size2(350, 95));
+			device_input->popup_centered_minsize(Size2(350, 95) * EDSCALE);
 
 			Ref<InputEventMouseButton> mb = p_exiting_event;
 			if (mb.is_valid()) {
@@ -420,7 +420,7 @@ void ProjectSettingsEditor::_add_item(int p_item, Ref<InputEvent> p_exiting_even
 				String desc = _axis_names[i];
 				device_index->add_item(TTR("Axis") + " " + itos(i / 2) + " " + (i & 1 ? "+" : "-") + desc);
 			}
-			device_input->popup_centered_minsize(Size2(350, 95));
+			device_input->popup_centered_minsize(Size2(350, 95) * EDSCALE);
 
 			Ref<InputEventJoypadMotion> jm = p_exiting_event;
 			if (jm.is_valid()) {
@@ -441,7 +441,7 @@ void ProjectSettingsEditor::_add_item(int p_item, Ref<InputEvent> p_exiting_even
 
 				device_index->add_item(itos(i) + ": " + String(_button_names[i]));
 			}
-			device_input->popup_centered_minsize(Size2(350, 95));
+			device_input->popup_centered_minsize(Size2(350, 95) * EDSCALE);
 
 			Ref<InputEventJoypadButton> jb = p_exiting_event;
 			if (jb.is_valid()) {
@@ -835,13 +835,13 @@ void ProjectSettingsEditor::_action_add() {
 	String action = action_name->get_text();
 	if (action.find("/") != -1 || action.find(":") != -1 || action == "") {
 		message->set_text(TTR("Invalid action (anything goes but '/' or ':')."));
-		message->popup_centered(Size2(300, 100));
+		message->popup_centered(Size2(300, 100) * EDSCALE);
 		return;
 	}
 
 	if (ProjectSettings::get_singleton()->has("input/" + action)) {
 		message->set_text(vformat(TTR("Action '%s' already exists!"), action));
-		message->popup_centered(Size2(300, 100));
+		message->popup_centered(Size2(300, 100) * EDSCALE);
 		return;
 	}
 
@@ -879,7 +879,7 @@ void ProjectSettingsEditor::_save() {
 
 	Error err = ProjectSettings::get_singleton()->save();
 	message->set_text(err != OK ? TTR("Error saving settings.") : TTR("Settings saved OK."));
-	message->popup_centered(Size2(300, 100));
+	message->popup_centered(Size2(300, 100) * EDSCALE);
 }
 
 void ProjectSettingsEditor::_settings_prop_edited(const String &p_name) {
@@ -1534,14 +1534,14 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 
 	VBoxContainer *vbc = memnew(VBoxContainer);
 	input_base->add_child(vbc);
-	vbc->set_anchor_and_margin(MARGIN_TOP, ANCHOR_BEGIN, 5);
-	vbc->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, 5);
-	vbc->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_BEGIN, 5);
-	vbc->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 5);
+	vbc->set_anchor_and_margin(MARGIN_TOP, ANCHOR_BEGIN, 0);
+	vbc->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, 0);
+	vbc->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_BEGIN, 0);
+	vbc->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 0);
 
 	l = memnew(Label);
 	vbc->add_child(l);
-	l->set_position(Point2(6, 5));
+	l->set_position(Point2(6, 5) * EDSCALE);
 	l->set_text(TTR("Action:"));
 
 	hbc = memnew(HBoxContainer);
@@ -1554,7 +1554,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 
 	add = memnew(Button);
 	hbc->add_child(add);
-	add->set_custom_minimum_size(Size2(150, 0));
+	add->set_custom_minimum_size(Size2(150, 0) * EDSCALE);
 	add->set_text(TTR("Add"));
 	add->connect("pressed", this, "_action_add");
 
@@ -1632,6 +1632,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 
 	//translations
 	TabContainer *translations = memnew(TabContainer);
+	translations->add_style_override("panel", memnew(StyleBoxEmpty));
 	translations->set_tab_align(TabContainer::ALIGN_LEFT);
 	translations->set_name(TTR("Localization"));
 	tab_container->add_child(translations);
@@ -1648,7 +1649,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 		Button *addtr = memnew(Button(TTR("Add..")));
 		addtr->connect("pressed", this, "_translation_file_open");
 		thb->add_child(addtr);
-		MarginContainer *tmc = memnew(MarginContainer);
+		VBoxContainer *tmc = memnew(VBoxContainer);
 		tvb->add_child(tmc);
 		tmc->set_v_size_flags(SIZE_EXPAND_FILL);
 		translation_list = memnew(Tree);
@@ -1672,7 +1673,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 		Button *addtr = memnew(Button(TTR("Add..")));
 		addtr->connect("pressed", this, "_translation_res_file_open");
 		thb->add_child(addtr);
-		MarginContainer *tmc = memnew(MarginContainer);
+		VBoxContainer *tmc = memnew(VBoxContainer);
 		tvb->add_child(tmc);
 		tmc->set_v_size_flags(SIZE_EXPAND_FILL);
 		translation_remap = memnew(Tree);
@@ -1694,7 +1695,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 		addtr->connect("pressed", this, "_translation_res_option_file_open");
 		translation_res_option_add_button = addtr;
 		thb->add_child(addtr);
-		tmc = memnew(MarginContainer);
+		tmc = memnew(VBoxContainer);
 		tvb->add_child(tmc);
 		tmc->set_v_size_flags(SIZE_EXPAND_FILL);
 		translation_remap_options = memnew(Tree);

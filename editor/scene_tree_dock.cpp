@@ -37,9 +37,9 @@
 #include "editor/plugins/spatial_editor_plugin.h"
 #include "editor_node.h"
 #include "editor_settings.h"
-#include "project_settings.h"
 #include "multi_node_edit.h"
 #include "os/keyboard.h"
+#include "project_settings.h"
 #include "scene/main/viewport.h"
 #include "scene/resources/packed_scene.h"
 #include "script_editor_debugger.h"
@@ -786,7 +786,7 @@ void SceneTreeDock::_notification(int p_what) {
 			button_create_script->set_icon(get_icon("ScriptCreate", "EditorIcons"));
 			button_clear_script->set_icon(get_icon("ScriptRemove", "EditorIcons"));
 
-			filter_icon->set_texture(get_icon("Search", "EditorIcons"));
+			filter->add_icon_override("right_icon", get_icon("Search", "EditorIcons"));
 
 			EditorNode::get_singleton()->get_editor_selection()->connect("selection_changed", this, "_selection_changed");
 
@@ -1369,8 +1369,8 @@ void SceneTreeDock::_delete_confirm() {
 			editor_data->get_undo_redo().add_undo_reference(n);
 
 			ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
-			editor_data->get_undo_redo().add_do_method(sed, "live_debug_remove_and_keep_node", edited_scene->get_path_to(n), n->get_instance_ID());
-			editor_data->get_undo_redo().add_undo_method(sed, "live_debug_restore_node", n->get_instance_ID(), edited_scene->get_path_to(n->get_parent()), n->get_index());
+			editor_data->get_undo_redo().add_do_method(sed, "live_debug_remove_and_keep_node", edited_scene->get_path_to(n), n->get_instance_id());
+			editor_data->get_undo_redo().add_undo_method(sed, "live_debug_restore_node", n->get_instance_id(), edited_scene->get_path_to(n->get_parent()), n->get_index());
 		}
 	}
 	editor_data->get_undo_redo().commit_action();
@@ -1824,7 +1824,7 @@ void SceneTreeDock::_add_children_to_popup(Object *p_obj, int p_depth) {
 		int index = menu->get_item_count();
 		menu->add_icon_item(icon, E->get().name.capitalize(), EDIT_SUBRESOURCE_BASE + subresources.size());
 		menu->set_item_h_offset(index, p_depth * 10 * EDSCALE);
-		subresources.push_back(obj->get_instance_ID());
+		subresources.push_back(obj->get_instance_id());
 
 		_add_children_to_popup(obj, p_depth + 1);
 	}
@@ -1885,7 +1885,7 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 		if (is_external) {
 			bool is_inherited = selection[0]->get_scene_inherited_state() != NULL;
 			bool is_top_level = selection[0]->get_owner() == NULL;
-			if (is_inherited) {
+			if (is_inherited && is_top_level) {
 				menu->add_separator();
 				menu->add_item(TTR("Clear Inheritance"), TOOL_SCENE_CLEAR_INHERITANCE);
 				menu->add_icon_item(get_icon("Load", "EditorIcons"), TTR("Open in Editor"), TOOL_SCENE_OPEN_INHERITED);
@@ -2021,11 +2021,8 @@ SceneTreeDock::SceneTreeDock(EditorNode *p_editor, Node *p_scene_root, EditorSel
 	vbc->add_child(filter_hbc);
 	filter = memnew(LineEdit);
 	filter->set_h_size_flags(SIZE_EXPAND_FILL);
+	filter->set_placeholder(TTR("Filter nodes"));
 	filter_hbc->add_child(filter);
-	filter_icon = memnew(TextureRect);
-	filter_icon->set_custom_minimum_size(Size2(24 * EDSCALE, 0));
-	filter_hbc->add_child(filter_icon);
-	filter_icon->set_stretch_mode(TextureRect::STRETCH_KEEP_CENTERED);
 	filter->connect("text_changed", this, "_filter_changed");
 
 	tb = memnew(ToolButton);

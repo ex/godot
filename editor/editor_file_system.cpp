@@ -137,14 +137,14 @@ EditorFileSystemDirectory *EditorFileSystemDirectory::get_parent() {
 void EditorFileSystemDirectory::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_subdir_count"), &EditorFileSystemDirectory::get_subdir_count);
-	ClassDB::bind_method(D_METHOD("get_subdir:EditorFileSystemDirectory", "idx"), &EditorFileSystemDirectory::get_subdir);
+	ClassDB::bind_method(D_METHOD("get_subdir", "idx"), &EditorFileSystemDirectory::get_subdir);
 	ClassDB::bind_method(D_METHOD("get_file_count"), &EditorFileSystemDirectory::get_file_count);
 	ClassDB::bind_method(D_METHOD("get_file", "idx"), &EditorFileSystemDirectory::get_file);
 	ClassDB::bind_method(D_METHOD("get_file_path", "idx"), &EditorFileSystemDirectory::get_file_path);
 	ClassDB::bind_method(D_METHOD("get_file_type", "idx"), &EditorFileSystemDirectory::get_file_type);
 	ClassDB::bind_method(D_METHOD("get_name"), &EditorFileSystemDirectory::get_name);
 	ClassDB::bind_method(D_METHOD("get_path"), &EditorFileSystemDirectory::get_path);
-	ClassDB::bind_method(D_METHOD("get_parent:EditorFileSystemDirectory"), &EditorFileSystemDirectory::get_parent);
+	ClassDB::bind_method(D_METHOD("get_parent"), &EditorFileSystemDirectory::get_parent);
 	ClassDB::bind_method(D_METHOD("find_file_index", "name"), &EditorFileSystemDirectory::find_file_index);
 	ClassDB::bind_method(D_METHOD("find_dir_index", "name"), &EditorFileSystemDirectory::find_dir_index);
 }
@@ -512,6 +512,8 @@ void EditorFileSystem::_scan_new_dir(EditorFileSystemDirectory *p_dir, DirAccess
 
 			if (FileAccess::exists(cd.plus_file(f).plus_file("project.godot"))) // skip if another project inside this
 				continue;
+			if (FileAccess::exists(cd.plus_file(f).plus_file(".gdignore"))) // skip if another project inside this
+				continue;
 
 			dirs.push_back(f);
 
@@ -690,6 +692,8 @@ void EditorFileSystem::_scan_fs_changes(EditorFileSystemDirectory *p_dir, const 
 				if (idx == -1) {
 
 					if (FileAccess::exists(cd.plus_file(f).plus_file("project.godot"))) // skip if another project inside this
+						continue;
+					if (FileAccess::exists(cd.plus_file(f).plus_file(".gdignore"))) // skip if another project inside this
 						continue;
 
 					EditorFileSystemDirectory *efd = memnew(EditorFileSystemDirectory);
@@ -1239,7 +1243,7 @@ void EditorFileSystem::_reimport_file(const String &p_file) {
 	String importer_name;
 
 	if (FileAccess::exists(p_file + ".import")) {
-
+		//use existing
 		Ref<ConfigFile> cf;
 		cf.instance();
 		Error err = cf->load(p_file + ".import");
@@ -1254,6 +1258,7 @@ void EditorFileSystem::_reimport_file(const String &p_file) {
 	}
 
 	Ref<ResourceImporter> importer;
+	bool load_default = false;
 	//find the importer
 	if (importer_name != "") {
 		importer = ResourceFormatImporter::get_singleton()->get_importer_by_name(importer_name);
@@ -1262,6 +1267,7 @@ void EditorFileSystem::_reimport_file(const String &p_file) {
 	if (importer.is_null()) {
 		//not found by name, find by extension
 		importer = ResourceFormatImporter::get_singleton()->get_importer_by_extension(p_file.get_extension());
+		load_default = true;
 		if (importer.is_null()) {
 			ERR_PRINT("BUG: File queued for import, but can't be imported!");
 			ERR_FAIL();
@@ -1275,6 +1281,17 @@ void EditorFileSystem::_reimport_file(const String &p_file) {
 	for (List<ResourceImporter::ImportOption>::Element *E = opts.front(); E; E = E->next()) {
 		if (!params.has(E->get().option.name)) { //this one is not present
 			params[E->get().option.name] = E->get().default_value;
+		}
+	}
+
+	if (load_default && ProjectSettings::get_singleton()->get("importer_defaults/" + importer->get_importer_name())) {
+		//use defaults if exist
+		Dictionary d = ProjectSettings::get_singleton()->get("importer_defaults/" + importer->get_importer_name());
+		List<Variant> v;
+		d.get_key_list(&v);
+
+		for (List<Variant>::Element *E = v.front(); E; E = E->next()) {
+			params[E->get()] = d[E->get()];
 		}
 	}
 
@@ -1386,13 +1403,13 @@ void EditorFileSystem::reimport_files(const Vector<String> &p_files) {
 
 void EditorFileSystem::_bind_methods() {
 
-	ClassDB::bind_method(D_METHOD("get_filesystem:EditorFileSystemDirectory"), &EditorFileSystem::get_filesystem);
+	ClassDB::bind_method(D_METHOD("get_filesystem"), &EditorFileSystem::get_filesystem);
 	ClassDB::bind_method(D_METHOD("is_scanning"), &EditorFileSystem::is_scanning);
 	ClassDB::bind_method(D_METHOD("get_scanning_progress"), &EditorFileSystem::get_scanning_progress);
 	ClassDB::bind_method(D_METHOD("scan"), &EditorFileSystem::scan);
 	ClassDB::bind_method(D_METHOD("scan_sources"), &EditorFileSystem::scan_changes);
 	ClassDB::bind_method(D_METHOD("update_file", "path"), &EditorFileSystem::update_file);
-	ClassDB::bind_method(D_METHOD("get_filesystem_path:EditorFileSystemDirectory", "path"), &EditorFileSystem::get_filesystem_path);
+	ClassDB::bind_method(D_METHOD("get_filesystem_path", "path"), &EditorFileSystem::get_filesystem_path);
 	ClassDB::bind_method(D_METHOD("get_file_type", "path"), &EditorFileSystem::get_file_type);
 
 	ADD_SIGNAL(MethodInfo("filesystem_changed"));

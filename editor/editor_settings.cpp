@@ -30,7 +30,6 @@
 #include "editor_settings.h"
 
 #include "editor_node.h"
-#include "project_settings.h"
 #include "io/compression.h"
 #include "io/config_file.h"
 #include "io/file_access_memory.h"
@@ -41,6 +40,7 @@
 #include "os/file_access.h"
 #include "os/keyboard.h"
 #include "os/os.h"
+#include "project_settings.h"
 #include "scene/main/node.h"
 #include "scene/main/scene_tree.h"
 #include "scene/main/viewport.h"
@@ -216,17 +216,43 @@ Variant _EDITOR_DEF(const String &p_var, const Variant &p_default) {
 	return p_default;
 }
 
+static Dictionary _get_builtin_script_templates() {
+	Dictionary templates;
+
+	//No Comments
+	templates["no_comments.gd"] =
+			"extends %BASE%\n"
+			"\n"
+			"func _ready():\n"
+			"%TS%pass\n";
+
+	//Empty
+	templates["empty.gd"] =
+			"extends %BASE%"
+			"\n"
+			"\n";
+
+	return templates;
+}
+
 static void _create_script_templates(const String &p_path) {
 
-	FileAccess *file = FileAccess::open(p_path.plus_file("no_comments.gd"), FileAccess::WRITE);
-	ERR_FAIL_COND(!file);
-	String script = String("extends %BASE%\n\nfunc _ready():\n%TS%pass\n");
-	file->store_string(script);
-	file->close();
-	file->reopen(p_path.plus_file("empty.gd"), FileAccess::WRITE);
-	script = "extends %BASE%\n\n";
-	file->store_string(script);
-	file->close();
+	Dictionary templates = _get_builtin_script_templates();
+	List<Variant> keys;
+	templates.get_key_list(&keys);
+	FileAccess *file = FileAccess::create(FileAccess::ACCESS_FILESYSTEM);
+
+	DirAccess *dir = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
+	dir->change_dir(p_path);
+	for (int i = 0; i < keys.size(); i++) {
+		if (!dir->file_exists(keys[i])) {
+			file->reopen(p_path.plus_file((String)keys[i]), FileAccess::WRITE);
+			ERR_FAIL_COND(!file);
+			file->store_string(templates[keys[i]]);
+			file->close();
+		}
+	}
+
 	memdelete(file);
 }
 
@@ -308,10 +334,10 @@ void EditorSettings::create() {
 
 		if (dir->change_dir("script_templates") != OK) {
 			dir->make_dir("script_templates");
-			_create_script_templates(dir->get_current_dir() + "/script_templates");
 		} else {
 			dir->change_dir("..");
 		}
+		_create_script_templates(dir->get_current_dir() + "/script_templates");
 
 		if (dir->change_dir("tmp") != OK) {
 			dir->make_dir("tmp");
@@ -638,6 +664,10 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	set("editors/3d/warped_mouse_panning", true);
 
 	set("editors/3d/freelook_base_speed", 1);
+
+	set("editors/3d/freelook_activation_modifier", 0);
+	hints["editors/3d/freelook_activation_modifier"] = PropertyInfo(Variant::INT, "editors/3d/freelook_activation_modifier", PROPERTY_HINT_ENUM, "None,Shift,Alt,Meta,Ctrl");
+
 	set("editors/3d/freelook_modifier_speed_factor", 5.0);
 
 	set("editors/2d/bone_width", 5);

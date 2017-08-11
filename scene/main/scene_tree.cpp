@@ -540,6 +540,7 @@ bool SceneTree::iteration(float p_time) {
 	_notify_group_pause("fixed_process_internal", Node::NOTIFICATION_INTERNAL_FIXED_PROCESS);
 	_notify_group_pause("fixed_process", Node::NOTIFICATION_FIXED_PROCESS);
 	_flush_ugc();
+	MessageQueue::get_singleton()->flush(); //small little hack
 	_flush_transform_notifications();
 	call_group_flags(GROUP_CALL_REALTIME, "_viewports", "update_worlds");
 	root_lock--;
@@ -566,6 +567,8 @@ bool SceneTree::idle(float p_time) {
 
 	emit_signal("idle_frame");
 
+	MessageQueue::get_singleton()->flush(); //small little hack
+
 	_flush_transform_notifications();
 
 	_notify_group_pause("idle_process_internal", Node::NOTIFICATION_INTERNAL_PROCESS);
@@ -581,6 +584,7 @@ bool SceneTree::idle(float p_time) {
 	}
 
 	_flush_ugc();
+	MessageQueue::get_singleton()->flush(); //small little hack
 	_flush_transform_notifications(); //transforms after world update, to avoid unnecessary enter/exit notifications
 	call_group_flags(GROUP_CALL_REALTIME, "_viewports", "update_worlds");
 
@@ -1106,7 +1110,7 @@ static void _fill_array(Node *p_node, Array &array, int p_level) {
 	array.push_back(p_level);
 	array.push_back(p_node->get_name());
 	array.push_back(p_node->get_class());
-	array.push_back(p_node->get_instance_ID());
+	array.push_back(p_node->get_instance_id());
 	for (int i = 0; i < p_node->get_child_count(); i++) {
 
 		_fill_array(p_node->get_child(i), array, p_level + 1);
@@ -1141,7 +1145,7 @@ void SceneTree::queue_delete(Object *p_object) {
 	_THREAD_SAFE_METHOD_
 	ERR_FAIL_NULL(p_object);
 	p_object->_is_queued_for_deletion = true;
-	delete_queue.push_back(p_object->get_instance_ID());
+	delete_queue.push_back(p_object->get_instance_id());
 }
 
 int SceneTree::get_node_count() const {
@@ -1153,7 +1157,7 @@ void SceneTree::_update_root_rect() {
 
 	if (stretch_mode == STRETCH_MODE_DISABLED) {
 
-		root->set_size(last_screen_size);
+		root->set_size((last_screen_size / stretch_shrink).floor());
 		root->set_attach_to_screen_rect(Rect2(Point2(), last_screen_size));
 		root->set_size_override_stretch(false);
 		root->set_size_override(false, Size2());
@@ -1177,7 +1181,7 @@ void SceneTree::_update_root_rect() {
 	} else if (viewport_aspect < video_mode_aspect) {
 		// screen ratio is smaller vertically
 
-		if (stretch_aspect == STRETCH_ASPECT_KEEP_HEIGHT) {
+		if (stretch_aspect == STRETCH_ASPECT_KEEP_HEIGHT || stretch_aspect == STRETCH_ASPECT_EXPAND) {
 
 			//will stretch horizontally
 			viewport_size.x = desired_res.y * video_mode_aspect;
@@ -1192,7 +1196,7 @@ void SceneTree::_update_root_rect() {
 		}
 	} else {
 		//screen ratio is smaller horizontally
-		if (stretch_aspect == STRETCH_ASPECT_KEEP_WIDTH) {
+		if (stretch_aspect == STRETCH_ASPECT_KEEP_WIDTH || stretch_aspect == STRETCH_ASPECT_EXPAND) {
 
 			//will stretch horizontally
 			viewport_size.x = desired_res.x;
@@ -1213,12 +1217,11 @@ void SceneTree::_update_root_rect() {
 	Size2 margin;
 	Size2 offset;
 	//black bars and margin
-	if (screen_size.x < video_mode.x) {
+	if (stretch_aspect != STRETCH_ASPECT_EXPAND && screen_size.x < video_mode.x) {
 		margin.x = Math::round((video_mode.x - screen_size.x) / 2.0);
 		VisualServer::get_singleton()->black_bars_set_margins(margin.x, 0, margin.x, 0);
 		offset.x = Math::round(margin.x * viewport_size.y / screen_size.y);
-	} else if (screen_size.y < video_mode.y) {
-
+	} else if (stretch_aspect != STRETCH_ASPECT_EXPAND && screen_size.y < video_mode.y) {
 		margin.y = Math::round((video_mode.y - screen_size.y) / 2.0);
 		VisualServer::get_singleton()->black_bars_set_margins(0, margin.y, 0, margin.y);
 		offset.y = Math::round(margin.y * viewport_size.x / screen_size.x);
@@ -1231,15 +1234,15 @@ void SceneTree::_update_root_rect() {
 	switch (stretch_mode) {
 		case STRETCH_MODE_2D: {
 
-			root->set_size(screen_size);
+			root->set_size((screen_size / stretch_shrink).floor());
 			root->set_attach_to_screen_rect(Rect2(margin, screen_size));
 			root->set_size_override_stretch(true);
-			root->set_size_override(true, viewport_size);
+			root->set_size_override(true, (viewport_size / stretch_shrink).floor());
 
 		} break;
 		case STRETCH_MODE_VIEWPORT: {
 
-			root->set_size(viewport_size);
+			root->set_size((viewport_size / stretch_shrink).floor());
 			root->set_attach_to_screen_rect(Rect2(margin, screen_size));
 			root->set_size_override_stretch(false);
 			root->set_size_override(false, Size2());
@@ -1248,11 +1251,12 @@ void SceneTree::_update_root_rect() {
 	}
 }
 
-void SceneTree::set_screen_stretch(StretchMode p_mode, StretchAspect p_aspect, const Size2 p_minsize) {
+void SceneTree::set_screen_stretch(StretchMode p_mode, StretchAspect p_aspect, const Size2 p_minsize, int p_shrink) {
 
 	stretch_mode = p_mode;
 	stretch_aspect = p_aspect;
 	stretch_min = p_minsize;
+	stretch_shrink = p_shrink;
 	_update_root_rect();
 }
 
@@ -2179,7 +2183,7 @@ void SceneTree::_bind_methods() {
 
 	//ClassDB::bind_method(D_METHOD("call_group","call_flags","group","method","arg1","arg2"),&SceneMainLoop::_call_group,DEFVAL(Variant()),DEFVAL(Variant()));
 
-	ClassDB::bind_method(D_METHOD("get_root:Viewport"), &SceneTree::get_root);
+	ClassDB::bind_method(D_METHOD("get_root"), &SceneTree::get_root);
 	ClassDB::bind_method(D_METHOD("has_group", "name"), &SceneTree::has_group);
 
 	ClassDB::bind_method(D_METHOD("set_auto_accept_quit", "enabled"), &SceneTree::set_auto_accept_quit);
@@ -2201,13 +2205,13 @@ void SceneTree::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_input_as_handled"), &SceneTree::set_input_as_handled);
 	ClassDB::bind_method(D_METHOD("is_input_handled"), &SceneTree::is_input_handled);
 
-	ClassDB::bind_method(D_METHOD("create_timer:SceneTreeTimer", "time_sec", "pause_mode_process"), &SceneTree::create_timer, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("create_timer", "time_sec", "pause_mode_process"), &SceneTree::create_timer, DEFVAL(true));
 
 	ClassDB::bind_method(D_METHOD("get_node_count"), &SceneTree::get_node_count);
 	ClassDB::bind_method(D_METHOD("get_frame"), &SceneTree::get_frame);
 	ClassDB::bind_method(D_METHOD("quit"), &SceneTree::quit);
 
-	ClassDB::bind_method(D_METHOD("set_screen_stretch", "mode", "aspect", "minsize"), &SceneTree::set_screen_stretch);
+	ClassDB::bind_method(D_METHOD("set_screen_stretch", "mode", "aspect", "minsize", "shrink"), &SceneTree::set_screen_stretch, DEFVAL(1));
 
 	ClassDB::bind_method(D_METHOD("queue_delete", "obj"), &SceneTree::queue_delete);
 
@@ -2229,22 +2233,22 @@ void SceneTree::_bind_methods() {
 
 	ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "call_group", &SceneTree::_call_group, mi2);
 
-	ClassDB::bind_method(D_METHOD("notify_group", "call_flags", "group", "notification"), &SceneTree::notify_group);
-	ClassDB::bind_method(D_METHOD("set_group", "call_flags", "group", "property", "value"), &SceneTree::set_group);
+	ClassDB::bind_method(D_METHOD("notify_group", "group", "notification"), &SceneTree::notify_group);
+	ClassDB::bind_method(D_METHOD("set_group", "group", "property", "value"), &SceneTree::set_group);
 
 	ClassDB::bind_method(D_METHOD("get_nodes_in_group", "group"), &SceneTree::_get_nodes_in_group);
 
-	ClassDB::bind_method(D_METHOD("set_current_scene", "child_node:Node"), &SceneTree::set_current_scene);
-	ClassDB::bind_method(D_METHOD("get_current_scene:Node"), &SceneTree::get_current_scene);
+	ClassDB::bind_method(D_METHOD("set_current_scene", "child_node"), &SceneTree::set_current_scene);
+	ClassDB::bind_method(D_METHOD("get_current_scene"), &SceneTree::get_current_scene);
 
 	ClassDB::bind_method(D_METHOD("change_scene", "path"), &SceneTree::change_scene);
-	ClassDB::bind_method(D_METHOD("change_scene_to", "packed_scene:PackedScene"), &SceneTree::change_scene_to);
+	ClassDB::bind_method(D_METHOD("change_scene_to", "packed_scene"), &SceneTree::change_scene_to);
 
 	ClassDB::bind_method(D_METHOD("reload_current_scene"), &SceneTree::reload_current_scene);
 
 	ClassDB::bind_method(D_METHOD("_change_scene"), &SceneTree::_change_scene);
 
-	ClassDB::bind_method(D_METHOD("set_network_peer", "peer:NetworkedMultiplayerPeer"), &SceneTree::set_network_peer);
+	ClassDB::bind_method(D_METHOD("set_network_peer", "peer"), &SceneTree::set_network_peer);
 	ClassDB::bind_method(D_METHOD("is_network_server"), &SceneTree::is_network_server);
 	ClassDB::bind_method(D_METHOD("has_network_peer"), &SceneTree::has_network_peer);
 	ClassDB::bind_method(D_METHOD("get_network_connected_peers"), &SceneTree::get_network_connected_peers);
@@ -2395,6 +2399,7 @@ SceneTree::SceneTree() {
 
 	stretch_mode = STRETCH_MODE_DISABLED;
 	stretch_aspect = STRETCH_ASPECT_IGNORE;
+	stretch_shrink = 1;
 
 	last_screen_size = Size2(OS::get_singleton()->get_video_mode().width, OS::get_singleton()->get_video_mode().height);
 	_update_root_rect();

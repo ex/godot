@@ -1136,7 +1136,7 @@ void EditorAssetLibrary::_http_request_completed(int p_status, int p_code, const
 				item->connect("category_selected", this, "_select_category");
 
 				if (r.has("icon_url") && r["icon_url"] != "") {
-					_request_image(item->get_instance_ID(), r["icon_url"], IMAGE_QUEUE_ICON, 0);
+					_request_image(item->get_instance_id(), r["icon_url"], IMAGE_QUEUE_ICON, 0);
 				}
 			}
 		} break;
@@ -1173,7 +1173,7 @@ void EditorAssetLibrary::_http_request_completed(int p_status, int p_code, const
 			item->connect("category_selected",this,"_category_selected");*/
 
 			if (r.has("icon_url") && r["icon_url"] != "") {
-				_request_image(description->get_instance_ID(), r["icon_url"], IMAGE_QUEUE_ICON, 0);
+				_request_image(description->get_instance_id(), r["icon_url"], IMAGE_QUEUE_ICON, 0);
 			}
 
 			if (d.has("previews")) {
@@ -1195,12 +1195,12 @@ void EditorAssetLibrary::_http_request_completed(int p_status, int p_code, const
 					description->add_preview(i, is_video, video_url);
 
 					if (p.has("thumbnail")) {
-						_request_image(description->get_instance_ID(), p["thumbnail"], IMAGE_QUEUE_THUMBNAIL, i);
+						_request_image(description->get_instance_id(), p["thumbnail"], IMAGE_QUEUE_THUMBNAIL, i);
 					}
 					if (is_video) {
-						//_request_image(description->get_instance_ID(),p["link"],IMAGE_QUEUE_SCREENSHOT,i);
+						//_request_image(description->get_instance_id(),p["link"],IMAGE_QUEUE_SCREENSHOT,i);
 					} else {
-						_request_image(description->get_instance_ID(), p["link"], IMAGE_QUEUE_SCREENSHOT, i);
+						_request_image(description->get_instance_id(), p["link"], IMAGE_QUEUE_SCREENSHOT, i);
 					}
 				}
 			}
@@ -1334,10 +1334,13 @@ EditorAssetLibrary::EditorAssetLibrary(bool p_templates_only) {
 	search_hb2->add_child(memnew(Label(TTR("Site:") + " ")));
 	repository = memnew(OptionButton);
 
+	// FIXME: Reenable me once GH-7147 is fixed.
+	/*
 	repository->add_item("godotengine.org");
 	repository->set_item_metadata(0, "https://godotengine.org/asset-library/api");
-	repository->add_item("localhost"); // TODO: Maybe remove?
-	repository->set_item_metadata(1, "http://127.0.0.1/asset-library/api");
+	*/
+	repository->add_item("localhost");
+	repository->set_item_metadata(/*1*/ 0, "http://127.0.0.1/asset-library/api");
 	repository->connect("item_selected", this, "_repository_changed");
 
 	search_hb2->add_child(repository);
