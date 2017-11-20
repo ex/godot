@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -42,12 +42,13 @@
 #include "lang_table.h"
 #include "main/main.h"
 #include "packet_peer_udp_winsock.h"
-#include "project_settings.h"
 #include "servers/audio_server.h"
 #include "servers/visual/visual_server_raster.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "stream_peer_winsock.h"
 #include "tcp_server_winsock.h"
+#include "version_generated.gen.h"
+#include "windows_terminal_logger.h"
 
 #include <process.h>
 #include <regstr.h>
@@ -63,11 +64,10 @@ __attribute__((visibility("default"))) DWORD NvOptimusEnablement = 0x00000001;
 #endif
 }
 
-#ifndef WM_MOUSEHWHEEL
-#define WM_MOUSEHWHEEL 0x020e
+// Workaround mingw-w64 < 4.0 bug
+#ifndef WM_TOUCH
+#define WM_TOUCH 576
 #endif
-
-//#define STDOUT_FILE
 
 extern HINSTANCE godot_hinstance;
 
@@ -144,12 +144,7 @@ int OS_Windows::get_video_driver_count() const {
 }
 const char *OS_Windows::get_video_driver_name(int p_driver) const {
 
-	return "GLES2";
-}
-
-OS::VideoMode OS_Windows::get_default_video_mode() const {
-
-	return VideoMode(1024, 600, false);
+	return "GLES3";
 }
 
 int OS_Windows::get_audio_driver_count() const {
@@ -164,6 +159,8 @@ const char *OS_Windows::get_audio_driver_name(int p_driver) const {
 }
 
 void OS_Windows::initialize_core() {
+
+	crash_handler.initialize();
 
 	last_button_state = 0;
 
@@ -202,6 +199,15 @@ void OS_Windows::initialize_core() {
 	IP_Unix::make_default();
 
 	cursor_shape = CURSOR_ARROW;
+}
+
+void OS_Windows::initialize_logger() {
+	Vector<Logger *> loggers;
+	loggers.push_back(memnew(WindowsTerminalLogger));
+	// FIXME: Reenable once we figure out how to get this properly in user://
+	// instead of littering the user's working dirs (res:// + pwd) with log files (GH-12277)
+	//loggers.push_back(memnew(RotatedFileLogger("user://logs/log.txt")));
+	_set_logger(memnew(CompositeLogger(loggers)));
 }
 
 bool OS_Windows::can_draw() const {
@@ -717,8 +723,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		} break;
 		case WM_DROPFILES: {
 
-			HDROP hDropInfo = NULL;
-			hDropInfo = (HDROP)wParam;
+			HDROP hDropInfo = (HDROP)wParam;
 			const int buffsize = 4096;
 			wchar_t buf[buffsize];
 
@@ -889,22 +894,11 @@ static int QueryDpiForMonitor(HMONITOR hmon, _MonitorDpiType dpiType = MDT_Defau
 	return (dpiX + dpiY) / 2;
 }
 
-BOOL CALLBACK OS_Windows::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
-	OS_Windows *self = (OS_Windows *)OS::get_singleton();
-	MonitorInfo minfo;
-	minfo.hMonitor = hMonitor;
-	minfo.hdcMonitor = hdcMonitor;
-	minfo.rect.position.x = lprcMonitor->left;
-	minfo.rect.position.y = lprcMonitor->top;
-	minfo.rect.size.x = lprcMonitor->right - lprcMonitor->left;
-	minfo.rect.size.y = lprcMonitor->bottom - lprcMonitor->top;
-
-	minfo.dpi = QueryDpiForMonitor(hMonitor);
-
-	self->monitor_info.push_back(minfo);
-
-	return TRUE;
-}
+typedef enum _SHC_PROCESS_DPI_AWARENESS {
+	SHC_PROCESS_DPI_UNAWARE = 0,
+	SHC_PROCESS_SYSTEM_DPI_AWARE = 1,
+	SHC_PROCESS_PER_MONITOR_DPI_AWARE = 2
+} SHC_PROCESS_DPI_AWARENESS;
 
 void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
 
@@ -912,6 +906,20 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 	outside = true;
 	window_has_focus = true;
 	WNDCLASSEXW wc;
+
+	if (is_hidpi_allowed()) {
+		HMODULE Shcore = LoadLibraryW(L"Shcore.dll");
+
+		if (Shcore != NULL) {
+			typedef HRESULT(WINAPI * SetProcessDpiAwareness_t)(SHC_PROCESS_DPI_AWARENESS);
+
+			SetProcessDpiAwareness_t SetProcessDpiAwareness = (SetProcessDpiAwareness_t)GetProcAddress(Shcore, "SetProcessDpiAwareness");
+
+			if (SetProcessDpiAwareness) {
+				SetProcessDpiAwareness(SHC_PROCESS_SYSTEM_DPI_AWARE);
+			}
+		}
+	}
 
 	video_mode = p_desired;
 	//printf("**************** desired %s, mode %s\n", p_desired.fullscreen?"true":"false", video_mode.fullscreen?"true":"false");
@@ -941,9 +949,6 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 		return; // Return
 	}
 
-	EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, 0);
-
-	print_line("DETECTED MONITORS: " + itos(monitor_info.size()));
 	pre_fs_valid = true;
 	if (video_mode.fullscreen) {
 
@@ -1018,7 +1023,16 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 		video_mode.fullscreen = false;
 	} else {
 
-		if (!(hWnd = CreateWindowExW(dwExStyle, L"Engine", L"", dwStyle | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, (GetSystemMetrics(SM_CXSCREEN) - WindowRect.right) / 2, (GetSystemMetrics(SM_CYSCREEN) - WindowRect.bottom) / 2, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top, NULL, NULL, hInstance, NULL))) {
+		hWnd = CreateWindowExW(
+				dwExStyle,
+				L"Engine", L"",
+				dwStyle | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+				(GetSystemMetrics(SM_CXSCREEN) - WindowRect.right) / 2,
+				(GetSystemMetrics(SM_CYSCREEN) - WindowRect.bottom) / 2,
+				WindowRect.right - WindowRect.left,
+				WindowRect.bottom - WindowRect.top,
+				NULL, NULL, hInstance, NULL);
+		if (!hWnd) {
 			MessageBoxW(NULL, L"Window Creation Error.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return; // Return FALSE
 		}
@@ -1038,12 +1052,6 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 		visual_server = memnew(VisualServerWrapMT(visual_server, get_render_thread_mode() == RENDER_SEPARATE_THREAD));
 	}
-
-	physics_server = memnew(PhysicsServerSW);
-	physics_server->init();
-
-	physics_2d_server = Physics2DServerWrapMT::init_server<Physics2DServerSW>();
-	physics_2d_server->init();
 
 	if (!is_no_window_mode_enabled()) {
 		ShowWindow(hWnd, SW_SHOW); // Show The Window
@@ -1072,12 +1080,7 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	power_manager = memnew(PowerWindows);
 
-	AudioDriverManager::get_driver(p_audio_driver)->set_singleton();
-
-	if (AudioDriverManager::get_driver(p_audio_driver)->init() != OK) {
-
-		ERR_PRINT("Initializing audio failed.");
-	}
+	AudioDriverManager::initialize(p_audio_driver);
 
 	TRACKMOUSEEVENT tme;
 	tme.cbSize = sizeof(TRACKMOUSEEVENT);
@@ -1088,7 +1091,7 @@ void OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	//RegisterTouchWindow(hWnd, 0); // Windows 7
 
-	_ensure_data_dir();
+	_ensure_user_data_dir();
 
 	DragAcceptFiles(hWnd, true);
 
@@ -1211,14 +1214,6 @@ void OS_Windows::finalize() {
 		memdelete(debugger_connection_console);
 	}
 	*/
-
-	physics_server->finish();
-	memdelete(physics_server);
-
-	physics_2d_server->finish();
-	memdelete(physics_2d_server);
-
-	monitor_info.clear();
 }
 
 void OS_Windows::finalize_core() {
@@ -1228,38 +1223,6 @@ void OS_Windows::finalize_core() {
 	TCPServerWinsock::cleanup();
 	StreamPeerWinsock::cleanup();
 }
-
-void OS_Windows::vprint(const char *p_format, va_list p_list, bool p_stderr) {
-
-	const unsigned int BUFFER_SIZE = 16384;
-	char buf[BUFFER_SIZE + 1]; // +1 for the terminating character
-	int len = vsnprintf(buf, BUFFER_SIZE, p_format, p_list);
-	if (len <= 0)
-		return;
-	if (len >= BUFFER_SIZE)
-		len = BUFFER_SIZE; // Output is too big, will be truncated
-	buf[len] = 0;
-
-	int wlen = MultiByteToWideChar(CP_UTF8, 0, buf, len, NULL, 0);
-	if (wlen < 0)
-		return;
-
-	wchar_t *wbuf = (wchar_t *)malloc((len + 1) * sizeof(wchar_t));
-	MultiByteToWideChar(CP_UTF8, 0, buf, len, wbuf, wlen);
-	wbuf[wlen] = 0;
-
-	if (p_stderr)
-		fwprintf(stderr, L"%ls", wbuf);
-	else
-		wprintf(L"%ls", wbuf);
-
-#ifdef STDOUT_FILE
-//vwfprintf(stdo,p_format,p_list);
-#endif
-	free(wbuf);
-
-	fflush(stdout);
-};
 
 void OS_Windows::alert(const String &p_alert, const String &p_title) {
 
@@ -1302,7 +1265,7 @@ OS_Windows::MouseMode OS_Windows::get_mouse_mode() const {
 	return mouse_mode;
 }
 
-void OS_Windows::warp_mouse_pos(const Point2 &p_to) {
+void OS_Windows::warp_mouse_position(const Point2 &p_to) {
 
 	if (mouse_mode == MOUSE_MODE_CAPTURED) {
 
@@ -1344,51 +1307,131 @@ OS::VideoMode OS_Windows::get_video_mode(int p_screen) const {
 void OS_Windows::get_fullscreen_mode_list(List<VideoMode> *p_list, int p_screen) const {
 }
 
+static BOOL CALLBACK _MonitorEnumProcCount(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+
+	int *data = (int *)dwData;
+	(*data)++;
+	return TRUE;
+}
+
 int OS_Windows::get_screen_count() const {
 
-	return monitor_info.size();
+	int data = 0;
+	EnumDisplayMonitors(NULL, NULL, _MonitorEnumProcCount, (LPARAM)&data);
+	return data;
 }
-int OS_Windows::get_current_screen() const {
 
-	HMONITOR monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-	for (int i = 0; i < monitor_info.size(); i++) {
-		if (monitor_info[i].hMonitor == monitor)
-			return i;
+typedef struct {
+	int count;
+	int screen;
+	HMONITOR monitor;
+} EnumScreenData;
+
+static BOOL CALLBACK _MonitorEnumProcScreen(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+
+	EnumScreenData *data = (EnumScreenData *)dwData;
+	if (data->monitor == hMonitor) {
+		data->screen = data->count;
 	}
 
-	return 0;
+	data->count++;
+	return TRUE;
 }
-void OS_Windows::set_current_screen(int p_screen) {
 
-	ERR_FAIL_INDEX(p_screen, monitor_info.size());
+int OS_Windows::get_current_screen() const {
+
+	EnumScreenData data = { 0, 0, MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST) };
+	EnumDisplayMonitors(NULL, NULL, _MonitorEnumProcScreen, (LPARAM)&data);
+	return data.screen;
+}
+
+void OS_Windows::set_current_screen(int p_screen) {
 
 	Vector2 ofs = get_window_position() - get_screen_position(get_current_screen());
 	set_window_position(ofs + get_screen_position(p_screen));
 }
 
+typedef struct {
+	int count;
+	int screen;
+	Point2 pos;
+} EnumPosData;
+
+static BOOL CALLBACK _MonitorEnumProcPos(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+
+	EnumPosData *data = (EnumPosData *)dwData;
+	if (data->count == data->screen) {
+		data->pos.x = lprcMonitor->left;
+		data->pos.y = lprcMonitor->top;
+	}
+
+	data->count++;
+	return TRUE;
+}
+
 Point2 OS_Windows::get_screen_position(int p_screen) const {
 
-	ERR_FAIL_INDEX_V(p_screen, monitor_info.size(), Point2());
-	return Vector2(monitor_info[p_screen].rect.position);
+	EnumPosData data = { 0, p_screen == -1 ? get_current_screen() : p_screen, Point2() };
+	EnumDisplayMonitors(NULL, NULL, _MonitorEnumProcPos, (LPARAM)&data);
+	return data.pos;
 }
+
+typedef struct {
+	int count;
+	int screen;
+	Size2 size;
+} EnumSizeData;
+
+static BOOL CALLBACK _MonitorEnumProcSize(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+
+	EnumSizeData *data = (EnumSizeData *)dwData;
+	if (data->count == data->screen) {
+		data->size.x = lprcMonitor->right - lprcMonitor->left;
+		data->size.y = lprcMonitor->bottom - lprcMonitor->top;
+	}
+
+	data->count++;
+	return TRUE;
+}
+
 Size2 OS_Windows::get_screen_size(int p_screen) const {
 
-	ERR_FAIL_INDEX_V(p_screen, monitor_info.size(), Point2());
-	return Vector2(monitor_info[p_screen].rect.size);
+	EnumSizeData data = { 0, p_screen == -1 ? get_current_screen() : p_screen, Size2() };
+	EnumDisplayMonitors(NULL, NULL, _MonitorEnumProcSize, (LPARAM)&data);
+	return data.size;
+}
+
+typedef struct {
+	int count;
+	int screen;
+	int dpi;
+} EnumDpiData;
+
+static BOOL CALLBACK _MonitorEnumProcDpi(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+
+	EnumDpiData *data = (EnumDpiData *)dwData;
+	if (data->count == data->screen) {
+		data->dpi = QueryDpiForMonitor(hMonitor);
+	}
+
+	data->count++;
+	return TRUE;
 }
 
 int OS_Windows::get_screen_dpi(int p_screen) const {
 
-	ERR_FAIL_INDEX_V(p_screen, monitor_info.size(), 72);
-	UINT dpix, dpiy;
-	return monitor_info[p_screen].dpi;
+	EnumDpiData data = { 0, p_screen == -1 ? get_current_screen() : p_screen, 72 };
+	EnumDisplayMonitors(NULL, NULL, _MonitorEnumProcDpi, (LPARAM)&data);
+	return data.dpi;
 }
+
 Point2 OS_Windows::get_window_position() const {
 
 	RECT r;
 	GetWindowRect(hWnd, &r);
 	return Point2(r.left, r.top);
 }
+
 void OS_Windows::set_window_position(const Point2 &p_position) {
 
 	if (video_mode.fullscreen) return;
@@ -1571,7 +1614,6 @@ Error OS_Windows::close_dynamic_library(void *p_library_handle) {
 }
 
 Error OS_Windows::get_dynamic_library_symbol_handle(void *p_library_handle, const String p_name, void *&p_symbol_handle, bool p_optional) {
-	char *error;
 	p_symbol_handle = (void *)GetProcAddress((HMODULE)p_library_handle, p_name.utf8().get_data());
 	if (!p_symbol_handle) {
 		if (!p_optional) {
@@ -1593,107 +1635,6 @@ void OS_Windows::request_attention() {
 	info.dwTimeout = 0;
 	info.uCount = 2;
 	FlashWindowEx(&info);
-}
-
-void OS_Windows::print_error(const char *p_function, const char *p_file, int p_line, const char *p_code, const char *p_rationale, ErrorType p_type) {
-
-	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
-	if (!hCon || hCon == INVALID_HANDLE_VALUE) {
-
-		const char *err_details;
-		if (p_rationale && p_rationale[0])
-			err_details = p_rationale;
-		else
-			err_details = p_code;
-
-		switch (p_type) {
-			case ERR_ERROR:
-				print("ERROR: %s: %s\n", p_function, err_details);
-				print("   At: %s:%i\n", p_file, p_line);
-				break;
-			case ERR_WARNING:
-				print("WARNING: %s: %s\n", p_function, err_details);
-				print("     At: %s:%i\n", p_file, p_line);
-				break;
-			case ERR_SCRIPT:
-				print("SCRIPT ERROR: %s: %s\n", p_function, err_details);
-				print("          At: %s:%i\n", p_file, p_line);
-				break;
-			case ERR_SHADER:
-				print("SHADER ERROR: %s: %s\n", p_function, err_details);
-				print("          At: %s:%i\n", p_file, p_line);
-				break;
-		}
-
-	} else {
-
-		CONSOLE_SCREEN_BUFFER_INFO sbi; //original
-		GetConsoleScreenBufferInfo(hCon, &sbi);
-
-		WORD current_fg = sbi.wAttributes & (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-		WORD current_bg = sbi.wAttributes & (BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY);
-
-		uint32_t basecol = 0;
-		switch (p_type) {
-			case ERR_ERROR: basecol = FOREGROUND_RED; break;
-			case ERR_WARNING: basecol = FOREGROUND_RED | FOREGROUND_GREEN; break;
-			case ERR_SCRIPT: basecol = FOREGROUND_RED | FOREGROUND_BLUE; break;
-			case ERR_SHADER: basecol = FOREGROUND_GREEN | FOREGROUND_BLUE; break;
-		}
-
-		basecol |= current_bg;
-
-		if (p_rationale && p_rationale[0]) {
-
-			SetConsoleTextAttribute(hCon, basecol | FOREGROUND_INTENSITY);
-			switch (p_type) {
-				case ERR_ERROR: print("ERROR: "); break;
-				case ERR_WARNING: print("WARNING: "); break;
-				case ERR_SCRIPT: print("SCRIPT ERROR: "); break;
-				case ERR_SHADER: print("SHADER ERROR: "); break;
-			}
-
-			SetConsoleTextAttribute(hCon, current_fg | current_bg | FOREGROUND_INTENSITY);
-			print("%s\n", p_rationale);
-
-			SetConsoleTextAttribute(hCon, basecol);
-			switch (p_type) {
-				case ERR_ERROR: print("   At: "); break;
-				case ERR_WARNING: print("     At: "); break;
-				case ERR_SCRIPT: print("          At: "); break;
-				case ERR_SHADER: print("          At: "); break;
-			}
-
-			SetConsoleTextAttribute(hCon, current_fg | current_bg);
-			print("%s:%i\n", p_file, p_line);
-
-		} else {
-
-			SetConsoleTextAttribute(hCon, basecol | FOREGROUND_INTENSITY);
-			switch (p_type) {
-				case ERR_ERROR: print("ERROR: %s: ", p_function); break;
-				case ERR_WARNING: print("WARNING: %s: ", p_function); break;
-				case ERR_SCRIPT: print("SCRIPT ERROR: %s: ", p_function); break;
-				case ERR_SHADER: print("SCRIPT ERROR: %s: ", p_function); break;
-			}
-
-			SetConsoleTextAttribute(hCon, current_fg | current_bg | FOREGROUND_INTENSITY);
-			print("%s\n", p_code);
-
-			SetConsoleTextAttribute(hCon, basecol);
-			switch (p_type) {
-				case ERR_ERROR: print("   At: "); break;
-				case ERR_WARNING: print("     At: "); break;
-				case ERR_SCRIPT: print("          At: "); break;
-				case ERR_SHADER: print("          At: "); break;
-			}
-
-			SetConsoleTextAttribute(hCon, current_fg | current_bg);
-			print("%s:%i\n", p_file, p_line);
-		}
-
-		SetConsoleTextAttribute(hCon, sbi.wAttributes);
-	}
 }
 
 String OS_Windows::get_name() {
@@ -1856,7 +1797,7 @@ void OS_Windows::set_cursor_shape(CursorShape p_shape) {
 	cursor_shape = p_shape;
 }
 
-Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode) {
+Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr) {
 
 	if (p_blocking && r_pipe) {
 
@@ -2191,6 +2132,43 @@ MainLoop *OS_Windows::get_main_loop() const {
 	return main_loop;
 }
 
+String OS_Windows::get_config_path() const {
+
+	if (has_environment("XDG_CONFIG_HOME")) { // unlikely, but after all why not?
+		return get_environment("XDG_CONFIG_HOME");
+	} else if (has_environment("APPDATA")) {
+		return get_environment("APPDATA");
+	} else {
+		return ".";
+	}
+}
+
+String OS_Windows::get_data_path() const {
+
+	if (has_environment("XDG_DATA_HOME")) {
+		return get_environment("XDG_DATA_HOME");
+	} else {
+		return get_config_path();
+	}
+}
+
+String OS_Windows::get_cache_path() const {
+
+	if (has_environment("XDG_CACHE_HOME")) {
+		return get_environment("XDG_CACHE_HOME");
+	} else if (has_environment("TEMP")) {
+		return get_environment("TEMP");
+	} else {
+		return get_config_path();
+	}
+}
+
+// Get properly capitalized engine name for system paths
+String OS_Windows::get_godot_dir_name() const {
+
+	return String(VERSION_SHORT_NAME).capitalize();
+}
+
 String OS_Windows::get_system_dir(SystemDir p_dir) const {
 
 	int id;
@@ -2227,18 +2205,17 @@ String OS_Windows::get_system_dir(SystemDir p_dir) const {
 	ERR_FAIL_COND_V(res != S_OK, String());
 	return String(szPath);
 }
-String OS_Windows::get_data_dir() const {
 
-	String an = get_safe_application_name();
-	if (an != "") {
+String OS_Windows::get_user_data_dir() const {
 
-		if (has_environment("APPDATA")) {
+	String appname = get_safe_application_name();
+	if (appname != "") {
 
-			bool use_godot = ProjectSettings::get_singleton()->get("application/config/use_shared_user_dir");
-			if (!use_godot)
-				return (OS::get_singleton()->get_environment("APPDATA") + "/" + an).replace("\\", "/");
-			else
-				return (OS::get_singleton()->get_environment("APPDATA") + "/Godot/app_userdata/" + an).replace("\\", "/");
+		bool use_godot_dir = ProjectSettings::get_singleton()->get("application/config/use_shared_user_dir");
+		if (use_godot_dir) {
+			return get_data_path().plus_file(get_godot_dir_name()).plus_file("app_userdata").plus_file(appname).replace("\\", "/");
+		} else {
+			return get_data_path().plus_file(appname).replace("\\", "/");
 		}
 	}
 
@@ -2267,7 +2244,7 @@ bool OS_Windows::is_vsync_enabled() const {
 	return true;
 }
 
-PowerState OS_Windows::get_power_state() {
+OS::PowerState OS_Windows::get_power_state() {
 	return power_manager->get_power_state();
 }
 
@@ -2282,6 +2259,41 @@ int OS_Windows::get_power_percent_left() {
 bool OS_Windows::_check_internal_feature_support(const String &p_feature) {
 
 	return p_feature == "pc" || p_feature == "s3tc";
+}
+
+void OS_Windows::disable_crash_handler() {
+	crash_handler.disable();
+}
+
+bool OS_Windows::is_disable_crash_handler() const {
+	return crash_handler.is_disabled();
+}
+
+Error OS_Windows::move_to_trash(const String &p_path) {
+	SHFILEOPSTRUCTA sf;
+	TCHAR *from = new TCHAR[p_path.length() + 2];
+	strcpy(from, p_path.utf8().get_data());
+	from[p_path.length()] = 0;
+	from[p_path.length() + 1] = 0;
+
+	sf.hwnd = hWnd;
+	sf.wFunc = FO_DELETE;
+	sf.pFrom = from;
+	sf.pTo = NULL;
+	sf.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION;
+	sf.fAnyOperationsAborted = FALSE;
+	sf.hNameMappings = NULL;
+	sf.lpszProgressTitle = NULL;
+
+	int ret = SHFileOperation(&sf);
+	delete[] from;
+
+	if (ret) {
+		ERR_PRINTS("SHFileOperation error: " + itos(ret));
+		return FAILED;
+	}
+
+	return OK;
 }
 
 OS_Windows::OS_Windows(HINSTANCE _hInstance) {
@@ -2304,12 +2316,17 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 #endif
 	user_proc = NULL;
 
+#ifdef WASAPI_ENABLED
+	AudioDriverManager::add_driver(&driver_wasapi);
+#endif
 #ifdef RTAUDIO_ENABLED
 	AudioDriverManager::add_driver(&driver_rtaudio);
 #endif
 #ifdef XAUDIO2_ENABLED
 	AudioDriverManager::add_driver(&driver_xaudio2);
 #endif
+
+	_set_logger(memnew(WindowsTerminalLogger));
 }
 
 OS_Windows::~OS_Windows() {

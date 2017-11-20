@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -278,8 +278,8 @@ public:
 	void remove_node(const StringName &p_func, int p_id);
 	bool has_node(const StringName &p_func, int p_id) const;
 	Ref<VisualScriptNode> get_node(const StringName &p_func, int p_id) const;
-	void set_node_pos(const StringName &p_func, int p_id, const Point2 &p_pos);
-	Point2 get_node_pos(const StringName &p_func, int p_id) const;
+	void set_node_position(const StringName &p_func, int p_id, const Point2 &p_pos);
+	Point2 get_node_position(const StringName &p_func, int p_id) const;
 	void get_node_list(const StringName &p_func, List<int> *r_nodes) const;
 
 	void sequence_connect(const StringName &p_func, int p_from_node, int p_from_output, int p_to_node);
@@ -291,8 +291,8 @@ public:
 	void data_disconnect(const StringName &p_func, int p_from_node, int p_from_port, int p_to_node, int p_to_port);
 	bool has_data_connection(const StringName &p_func, int p_from_node, int p_from_port, int p_to_node, int p_to_port) const;
 	void get_data_connection_list(const StringName &p_func, List<DataConnection> *r_connection) const;
-	bool is_input_value_port_connected(const StringName &p_name, int p_node, int p_port) const;
-	bool get_input_value_port_connection_source(const StringName &p_name, int p_node, int p_port, int *r_node, int *r_port) const;
+	bool is_input_value_port_connected(const StringName &p_func, int p_node, int p_port) const;
+	bool get_input_value_port_connection_source(const StringName &p_func, int p_node, int p_port, int *r_node, int *r_port) const;
 
 	void add_variable(const StringName &p_name, const Variant &p_default_value = Variant(), bool p_export = false);
 	bool has_variable(const StringName &p_name) const;
@@ -338,8 +338,6 @@ public:
 	virtual Error reload(bool p_keep_state = false);
 
 	virtual bool is_tool() const;
-
-	virtual String get_node_type() const;
 
 	virtual ScriptLanguage *get_language() const;
 
@@ -569,9 +567,9 @@ public:
 	virtual bool validate(const String &p_script, int &r_line_error, int &r_col_error, String &r_test_error, const String &p_path = "", List<String> *r_functions = NULL) const;
 	virtual Script *create_script() const;
 	virtual bool has_named_classes() const;
+	virtual bool supports_builtin_mode() const;
 	virtual int find_function(const String &p_function, const String &p_code) const;
 	virtual String make_function(const String &p_class, const String &p_name, const PoolStringArray &p_args) const;
-	virtual Error open_in_external_editor(const Ref<Script> &p_script, int p_line, int p_col) { return ERR_UNAVAILABLE; }
 	virtual void auto_indent_code(String &p_code, int p_from_line, int p_to_line) const;
 	virtual void add_global_constant(const StringName &p_variable, const Variant &p_value);
 
@@ -602,6 +600,7 @@ public:
 	virtual int profiling_get_frame_data(ProfilingInfo *p_info_arr, int p_info_max);
 
 	void add_register_func(const String &p_name, VisualScriptNodeRegisterFunc p_func);
+	void remove_register_func(const String &p_name);
 	Ref<VisualScriptNode> create_node_from_name(const String &p_name);
 	void get_registered_node_names(List<String> *r_names);
 

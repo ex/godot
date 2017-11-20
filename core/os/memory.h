@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -71,6 +71,14 @@ void *operator new(size_t p_size, const char *p_description); ///< operator new 
 void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)); ///< operator new that takes a description and uses MemoryStaticPool
 
 void *operator new(size_t p_size, void *p_pointer, size_t check, const char *p_description); ///< operator new that takes a description and uses a pointer to the preallocated memory
+
+#ifdef _MSC_VER
+// When compiling with VC++ 2017, the above declarations of placement new generate many irrelevant warnings (C4291).
+// The purpose of the following definitions is to muffle these warnings, not to provide a usable implementation of placement delete.
+void operator delete(void *p_mem, const char *p_description);
+void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size));
+void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description);
+#endif
 
 #define memalloc(m_size) Memory::alloc_static(m_size)
 #define memrealloc(m_mem, m_size) Memory::realloc_static(m_mem, m_size)

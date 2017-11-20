@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -66,6 +66,7 @@ public:
 	SubSurfaceScatterQuality subsurface_scatter_quality;
 	float subsurface_scatter_size;
 	bool subsurface_scatter_follow_surface;
+	bool subsurface_scatter_weight_samples;
 
 	uint64_t render_pass;
 	uint64_t scene_pass;
@@ -107,8 +108,9 @@ public:
 		TonemapShaderGLES3 tonemap_shader;
 
 		struct SceneDataUBO {
-
+			//this is a std140 compatible struct. Please read the OpenGL 3.3 Specificaiton spec before doing any changes
 			float projection_matrix[16];
+			float inv_projection_matrix[16];
 			float camera_inverse_matrix[16];
 			float camera_matrix[16];
 			float ambient_light_color[4];
@@ -122,6 +124,7 @@ public:
 			float z_slope_scale;
 			float shadow_dual_paraboloid_render_zfar;
 			float shadow_dual_paraboloid_render_side;
+			float viewport_size[2];
 			float screen_pixel_size[2];
 			float shadow_atlas_pixel_size[2];
 			float shadow_directional_pixel_size[2];
@@ -132,16 +135,16 @@ public:
 			float subsurface_scatter_width;
 			float ambient_occlusion_affect_light;
 
-			bool fog_depth_enabled;
+			uint32_t fog_depth_enabled;
 			float fog_depth_begin;
 			float fog_depth_curve;
-			bool fog_transmit_enabled;
+			uint32_t fog_transmit_enabled;
 			float fog_transmit_curve;
-			bool fog_height_enabled;
+			uint32_t fog_height_enabled;
 			float fog_height_min;
 			float fog_height_max;
 			float fog_height_curve;
-			uint8_t padding[8];
+			// make sure this struct is padded to be a multiple of 16 bytes for webgl
 
 		} ubo_data;
 
@@ -187,6 +190,7 @@ public:
 		int reflection_probe_count;
 
 		bool cull_front;
+		bool cull_disabled;
 		bool used_sss;
 		bool used_screen_texture;
 		bool using_contact_shadows;
@@ -242,7 +246,7 @@ public:
 
 		GLuint fbo_id[6];
 		GLuint cubemap;
-		int size;
+		uint32_t size;
 	};
 
 	Vector<ShadowCubeMap> shadow_cubemaps;
@@ -349,7 +353,7 @@ public:
 		VS::EnvironmentBG bg_mode;
 
 		RID sky;
-		float sky_scale;
+		float sky_custom_fov;
 
 		Color bg_color;
 		float bg_energy;
@@ -376,7 +380,9 @@ public:
 		float ssao_bias;
 		float ssao_light_affect;
 		Color ssao_color;
-		bool ssao_filter;
+		VS::EnvironmentSSAOQuality ssao_quality;
+		float ssao_bilateral_sharpness;
+		VS::EnvironmentSSAOBlur ssao_filter;
 
 		bool glow_enabled;
 		int glow_levels;
@@ -432,7 +438,7 @@ public:
 
 		Environment() {
 			bg_mode = VS::ENV_BG_CLEAR_COLOR;
-			sky_scale = 1.0;
+			sky_custom_fov = 0.0;
 			bg_energy = 1.0;
 			sky_ambient = 0;
 			ambient_energy = 1.0;
@@ -453,7 +459,9 @@ public:
 			ssao_radius2 = 0.0;
 			ssao_bias = 0.01;
 			ssao_light_affect = 0;
-			ssao_filter = true;
+			ssao_filter = VS::ENV_SSAO_BLUR_3x3;
+			ssao_quality = VS::ENV_SSAO_QUALITY_LOW;
+			ssao_bilateral_sharpness = 4;
 
 			tone_mapper = VS::ENV_TONE_MAPPER_LINEAR;
 			tone_mapper_exposure = 1.0;
@@ -517,19 +525,19 @@ public:
 
 	virtual void environment_set_background(RID p_env, VS::EnvironmentBG p_bg);
 	virtual void environment_set_sky(RID p_env, RID p_sky);
-	virtual void environment_set_sky_scale(RID p_env, float p_scale);
+	virtual void environment_set_sky_custom_fov(RID p_env, float p_scale);
 	virtual void environment_set_bg_color(RID p_env, const Color &p_color);
 	virtual void environment_set_bg_energy(RID p_env, float p_energy);
 	virtual void environment_set_canvas_max_layer(RID p_env, int p_max_layer);
 	virtual void environment_set_ambient_light(RID p_env, const Color &p_color, float p_energy = 1.0, float p_sky_contribution = 0.0);
 
-	virtual void environment_set_dof_blur_near(RID p_env, bool p_enable, float p_distance, float p_transition, float p_far_amount, VS::EnvironmentDOFBlurQuality p_quality);
-	virtual void environment_set_dof_blur_far(RID p_env, bool p_enable, float p_distance, float p_transition, float p_far_amount, VS::EnvironmentDOFBlurQuality p_quality);
+	virtual void environment_set_dof_blur_near(RID p_env, bool p_enable, float p_distance, float p_transition, float p_amount, VS::EnvironmentDOFBlurQuality p_quality);
+	virtual void environment_set_dof_blur_far(RID p_env, bool p_enable, float p_distance, float p_transition, float p_amount, VS::EnvironmentDOFBlurQuality p_quality);
 	virtual void environment_set_glow(RID p_env, bool p_enable, int p_level_flags, float p_intensity, float p_strength, float p_bloom_threshold, VS::EnvironmentGlowBlendMode p_blend_mode, float p_hdr_bleed_threshold, float p_hdr_bleed_scale, bool p_bicubic_upscale);
 	virtual void environment_set_fog(RID p_env, bool p_enable, float p_begin, float p_end, RID p_gradient_texture);
 
 	virtual void environment_set_ssr(RID p_env, bool p_enable, int p_max_steps, float p_fade_in, float p_fade_out, float p_depth_tolerance, bool p_roughness);
-	virtual void environment_set_ssao(RID p_env, bool p_enable, float p_radius, float p_radius2, float p_intensity2, float p_intensity, float p_bias, float p_light_affect, const Color &p_color, bool p_blur);
+	virtual void environment_set_ssao(RID p_env, bool p_enable, float p_radius, float p_intensity, float p_radius2, float p_intensity2, float p_bias, float p_light_affect, const Color &p_color, VS::EnvironmentSSAOQuality p_quality, VS::EnvironmentSSAOBlur p_blur, float p_bilateral_sharpness);
 
 	virtual void environment_set_tonemap(RID p_env, VS::EnvironmentToneMapper p_tone_mapper, float p_exposure, float p_white, bool p_auto_exposure, float p_min_luminance, float p_max_luminance, float p_auto_exp_speed, float p_auto_exp_scale);
 
@@ -643,17 +651,27 @@ public:
 			MAX_LIGHTS = 4096,
 			MAX_REFLECTIONS = 1024,
 
-			SORT_KEY_DEPTH_LAYER_SHIFT = 60,
+			SORT_KEY_PRIORITY_SHIFT = 56,
+			SORT_KEY_PRIORITY_MASK = 0xFF,
+			//depth layer for opaque (56-52)
+			SORT_KEY_OPAQUE_DEPTH_LAYER_SHIFT = 52,
+			SORT_KEY_OPAQUE_DEPTH_LAYER_MASK = 0xF,
 //64 bits unsupported in MSVC
-#define SORT_KEY_UNSHADED_FLAG (uint64_t(1) << 59)
-#define SORT_KEY_NO_DIRECTIONAL_FLAG (uint64_t(1) << 58)
-#define SORT_KEY_GI_PROBES_FLAG (uint64_t(1) << 57)
-#define SORT_KEY_VERTEX_LIT_FLAG (uint64_t(1) << 56)
-			SORT_KEY_SHADING_SHIFT = 56,
+#define SORT_KEY_UNSHADED_FLAG (uint64_t(1) << 51)
+#define SORT_KEY_NO_DIRECTIONAL_FLAG (uint64_t(1) << 50)
+#define SORT_KEY_GI_PROBES_FLAG (uint64_t(1) << 49)
+#define SORT_KEY_VERTEX_LIT_FLAG (uint64_t(1) << 48)
+			SORT_KEY_SHADING_SHIFT = 48,
 			SORT_KEY_SHADING_MASK = 15,
-			SORT_KEY_MATERIAL_INDEX_SHIFT = 40,
-			SORT_KEY_GEOMETRY_INDEX_SHIFT = 20,
-			SORT_KEY_GEOMETRY_TYPE_SHIFT = 15,
+			//48-32 material index
+			SORT_KEY_MATERIAL_INDEX_SHIFT = 32,
+			//32-12 geometry index
+			SORT_KEY_GEOMETRY_INDEX_SHIFT = 12,
+			//bits 12-8 geometry type
+			SORT_KEY_GEOMETRY_TYPE_SHIFT = 8,
+			//bits 0-7 for flags
+			SORT_KEY_OPAQUE_PRE_PASS = 8,
+			SORT_KEY_CULL_DISABLED_FLAG = 4,
 			SORT_KEY_SKELETON_FLAG = 2,
 			SORT_KEY_MIRROR_FLAG = 1
 
@@ -718,16 +736,22 @@ public:
 			}
 		}
 
-		struct SortByReverseDepth {
+		struct SortByReverseDepthAndPriority {
 
 			_FORCE_INLINE_ bool operator()(const Element *A, const Element *B) const {
-				return A->instance->depth > B->instance->depth;
+				uint32_t layer_A = uint32_t(A->sort_key >> SORT_KEY_PRIORITY_SHIFT);
+				uint32_t layer_B = uint32_t(B->sort_key >> SORT_KEY_PRIORITY_SHIFT);
+				if (layer_A == layer_B) {
+					return A->instance->depth > B->instance->depth;
+				} else {
+					return layer_A < layer_B;
+				}
 			}
 		};
 
-		void sort_by_reverse_depth(bool p_alpha) { //used for alpha
+		void sort_by_reverse_depth_and_priority(bool p_alpha) { //used for alpha
 
-			SortArray<Element *, SortByReverseDepth> sorter;
+			SortArray<Element *, SortByReverseDepthAndPriority> sorter;
 			if (p_alpha) {
 				sorter.sort(&elements[max_elements - alpha_element_count], alpha_element_count);
 			} else {
@@ -779,7 +803,7 @@ public:
 
 	RenderList render_list;
 
-	_FORCE_INLINE_ void _set_cull(bool p_front, bool p_reverse_cull);
+	_FORCE_INLINE_ void _set_cull(bool p_front, bool p_disabled, bool p_reverse_cull);
 
 	_FORCE_INLINE_ bool _setup_material(RasterizerStorageGLES3::Material *p_material, bool p_alpha_pass);
 	_FORCE_INLINE_ void _setup_geometry(RenderList::Element *e, const Transform &p_view_transform);
@@ -788,14 +812,14 @@ public:
 
 	void _render_list(RenderList::Element **p_elements, int p_element_count, const Transform &p_view_transform, const CameraMatrix &p_projection, GLuint p_base_env, bool p_reverse_cull, bool p_alpha_pass, bool p_shadow, bool p_directional_add, bool p_directional_shadows);
 
-	_FORCE_INLINE_ void _add_geometry(RasterizerStorageGLES3::Geometry *p_geometry, InstanceBase *p_instance, RasterizerStorageGLES3::GeometryOwner *p_owner, int p_material, bool p_shadow);
+	_FORCE_INLINE_ void _add_geometry(RasterizerStorageGLES3::Geometry *p_geometry, InstanceBase *p_instance, RasterizerStorageGLES3::GeometryOwner *p_owner, int p_material, bool p_depth_pass);
 
-	_FORCE_INLINE_ void _add_geometry_with_material(RasterizerStorageGLES3::Geometry *p_geometry, InstanceBase *p_instance, RasterizerStorageGLES3::GeometryOwner *p_owner, RasterizerStorageGLES3::Material *p_material, bool p_shadow);
+	_FORCE_INLINE_ void _add_geometry_with_material(RasterizerStorageGLES3::Geometry *p_geometry, InstanceBase *p_instance, RasterizerStorageGLES3::GeometryOwner *p_owner, RasterizerStorageGLES3::Material *p_material, bool p_depth_pass);
 
-	void _draw_sky(RasterizerStorageGLES3::Sky *p_sky, const CameraMatrix &p_projection, const Transform &p_transform, bool p_vflip, float p_scale, float p_energy);
+	void _draw_sky(RasterizerStorageGLES3::Sky *p_sky, const CameraMatrix &p_projection, const Transform &p_transform, bool p_vflip, float p_custom_fov, float p_energy);
 
 	void _setup_environment(Environment *env, const CameraMatrix &p_cam_projection, const Transform &p_cam_transform);
-	void _setup_directional_light(int p_index, const Transform &p_camera_inverse_transformm, bool p_use_shadows);
+	void _setup_directional_light(int p_index, const Transform &p_camera_inverse_transform, bool p_use_shadows);
 	void _setup_lights(RID *p_light_cull_result, int p_light_cull_count, const Transform &p_camera_inverse_transform, const CameraMatrix &p_camera_projection, RID p_shadow_atlas);
 	void _setup_reflections(RID *p_reflection_probe_cull_result, int p_reflection_probe_cull_count, const Transform &p_camera_inverse_transform, const CameraMatrix &p_camera_projection, RID p_reflection_atlas, Environment *p_env);
 
@@ -803,7 +827,7 @@ public:
 	void _copy_to_front_buffer(Environment *env);
 	void _copy_texture_to_front_buffer(GLuint p_texture); //used for debug
 
-	void _fill_render_list(InstanceBase **p_cull_result, int p_cull_count, bool p_shadow);
+	void _fill_render_list(InstanceBase **p_cull_result, int p_cull_count, bool p_depth_pass);
 
 	void _blur_effect_buffer();
 	void _render_mrts(Environment *env, const CameraMatrix &p_cam_projection);

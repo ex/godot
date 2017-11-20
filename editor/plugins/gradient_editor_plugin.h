@@ -1,9 +1,9 @@
 /*************************************************************************/
-/*  color_ramp_editor_plugin.h                                           */
+/*  gradient_editor_plugin.h                                             */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -50,8 +50,8 @@ protected:
 public:
 	virtual String get_name() const { return "ColorRamp"; }
 	bool has_main_screen() const { return false; }
-	virtual void edit(Object *p_node);
-	virtual bool handles(Object *p_node) const;
+	virtual void edit(Object *p_object);
+	virtual bool handles(Object *p_object) const;
 	virtual void make_visible(bool p_visible);
 
 	GradientEditorPlugin(EditorNode *p_node);

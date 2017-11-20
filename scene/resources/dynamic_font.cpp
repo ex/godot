@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -43,10 +43,10 @@ bool DynamicFontData::CacheID::operator<(CacheID right) const {
 	return false;
 }
 
-Ref<DynamicFontAtSize> DynamicFontData::_get_dynamic_font_at_size(CacheID p_id) {
+Ref<DynamicFontAtSize> DynamicFontData::_get_dynamic_font_at_size(CacheID p_cache_id) {
 
-	if (size_cache.has(p_id)) {
-		return Ref<DynamicFontAtSize>(size_cache[p_id]);
+	if (size_cache.has(p_cache_id)) {
+		return Ref<DynamicFontAtSize>(size_cache[p_cache_id]);
 	}
 
 	Ref<DynamicFontAtSize> dfas;
@@ -55,8 +55,8 @@ Ref<DynamicFontAtSize> DynamicFontData::_get_dynamic_font_at_size(CacheID p_id) 
 
 	dfas->font = Ref<DynamicFontData>(this);
 
-	size_cache[p_id] = dfas.ptr();
-	dfas->id = p_id;
+	size_cache[p_cache_id] = dfas.ptr();
+	dfas->id = p_cache_id;
 	dfas->_load();
 
 	return dfas;
@@ -397,7 +397,7 @@ unsigned long DynamicFontAtSize::_ft_stream_io(FT_Stream stream, unsigned long o
 
 	FileAccess *f = (FileAccess *)stream->descriptor.pointer;
 
-	if (f->get_pos() != offset) {
+	if (f->get_position() != offset) {
 		f->seek(offset);
 	}
 
@@ -524,7 +524,7 @@ void DynamicFontAtSize::_update_char(CharType p_char) {
 		if (mh > texsize)
 			texsize = mh; //special case, adapt to it?
 
-		texsize = nearest_power_of_2(texsize);
+		texsize = next_power_of_2(texsize);
 
 		texsize = MIN(texsize, 4096);
 
@@ -560,8 +560,23 @@ void DynamicFontAtSize::_update_char(CharType p_char) {
 
 				int ofs = ((i + tex_y + rect_margin) * tex.texture_size + j + tex_x + rect_margin) * 2;
 				ERR_FAIL_COND(ofs >= tex.imgdata.size());
-				wr[ofs + 0] = 255; //grayscale as 1
-				wr[ofs + 1] = slot->bitmap.buffer[i * slot->bitmap.width + j];
+				switch (slot->bitmap.pixel_mode) {
+					case FT_PIXEL_MODE_MONO: {
+						int byte = i * slot->bitmap.pitch + (j >> 3);
+						int bit = 1 << (7 - (j % 8));
+						wr[ofs + 0] = 255; //grayscale as 1
+						wr[ofs + 1] = slot->bitmap.buffer[byte] & bit ? 255 : 0;
+					} break;
+					case FT_PIXEL_MODE_GRAY:
+						wr[ofs + 0] = 255; //grayscale as 1
+						wr[ofs + 1] = slot->bitmap.buffer[i * slot->bitmap.pitch + j];
+						break;
+					// TODO: FT_PIXEL_MODE_LCD, FT_PIXEL_MODE_BGRA
+					default:
+						ERR_EXPLAIN("Font uses unsupported pixel format: " + itos(slot->bitmap.pixel_mode));
+						ERR_FAIL();
+						break;
+				}
 			}
 		}
 	}
@@ -892,10 +907,10 @@ void DynamicFont::_bind_methods() {
 	ADD_GROUP("Font", "");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "font_data", PROPERTY_HINT_RESOURCE_TYPE, "DynamicFontData"), "set_font_data", "get_font_data");
 
-	BIND_CONSTANT(SPACING_TOP);
-	BIND_CONSTANT(SPACING_BOTTOM);
-	BIND_CONSTANT(SPACING_CHAR);
-	BIND_CONSTANT(SPACING_SPACE);
+	BIND_ENUM_CONSTANT(SPACING_TOP);
+	BIND_ENUM_CONSTANT(SPACING_BOTTOM);
+	BIND_ENUM_CONSTANT(SPACING_CHAR);
+	BIND_ENUM_CONSTANT(SPACING_SPACE);
 }
 
 DynamicFont::DynamicFont() {

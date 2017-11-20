@@ -33,8 +33,8 @@ def get_opts():
 def get_flags():
 
     return [
-        ('tools', 'no'),
-        ('xaudio2', 'yes'),
+        ('tools', False),
+        ('xaudio2', True),
     ]
 
 
@@ -84,7 +84,7 @@ def configure(env):
     ## Architecture
 
     arch = ""
-    if os.getenv('Platform') == "ARM":
+    if str(os.getenv('Platform')).lower() == "arm":
 
         print("Compiled program architecture will be an ARM executable. (forcing bits=32).")
 
@@ -136,7 +136,7 @@ def configure(env):
 
     env.Append(CPPPATH=['#platform/uwp', '#drivers/windows'])
     env.Append(CCFLAGS=['/DUWP_ENABLED', '/DWINDOWS_ENABLED', '/DTYPED_METHOD_BIND'])
-    env.Append(CCFLAGS=['/DGLES2_ENABLED', '/DGL_GLEXT_PROTOTYPES', '/DEGL_EGLEXT_PROTOTYPES', '/DANGLE_ENABLED'])
+    env.Append(CCFLAGS=['/DGLES_ENABLED', '/DGL_GLEXT_PROTOTYPES', '/DEGL_EGLEXT_PROTOTYPES', '/DANGLE_ENABLED'])
     winver = "0x0602" # Windows 8 is the minimum target for UWP build
     env.Append(CCFLAGS=['/DWINVER=%s' % winver, '/D_WIN32_WINNT=%s' % winver])
 
@@ -145,8 +145,8 @@ def configure(env):
     env.Append(CPPFLAGS=['/AI', vc_base_path + 'lib/store/references'])
     env.Append(CPPFLAGS=['/AI', vc_base_path + 'lib/x86/store/references'])
 
-    env.Append(CCFLAGS=string.split('/FS /MP /GS /wd"4453" /wd"28204" /wd"4291" /Zc:wchar_t /Gm- /fp:precise /D "_UNICODE" /D "UNICODE" /D "WINAPI_FAMILY=WINAPI_FAMILY_APP" /errorReport:prompt /WX- /Zc:forScope /Gd /EHsc /nologo'))
-    env.Append(CXXFLAGS=string.split('/ZW /FS'))
+    env.Append(CCFLAGS='/FS /MP /GS /wd"4453" /wd"28204" /wd"4291" /Zc:wchar_t /Gm- /fp:precise /D "_UNICODE" /D "UNICODE" /D "WINAPI_FAMILY=WINAPI_FAMILY_APP" /errorReport:prompt /WX- /Zc:forScope /Gd /EHsc /nologo'.split())
+    env.Append(CXXFLAGS='/ZW /FS'.split())
     env.Append(CCFLAGS=['/AI', vc_base_path + '\\vcpackages', '/AI', os.environ['WINDOWSSDKDIR'] + '\\References\\CommonConfiguration\\Neutral'])
 
     ## Link flags

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -57,6 +57,17 @@ class ScriptTextEditor : public ScriptEditorBase {
 	int color_line;
 	String color_args;
 
+	struct ColorsCache {
+		Color symbol_color;
+		Color keyword_color;
+		Color basetype_color;
+		Color type_color;
+		Color comment_color;
+		Color string_color;
+	} colors_cache;
+
+	bool theme_loaded;
+
 	enum {
 		EDIT_UNDO,
 		EDIT_REDO,
@@ -74,11 +85,16 @@ class ScriptTextEditor : public ScriptEditorBase {
 		EDIT_MOVE_LINE_DOWN,
 		EDIT_INDENT_RIGHT,
 		EDIT_INDENT_LEFT,
+		EDIT_DELETE_LINE,
 		EDIT_CLONE_DOWN,
 		EDIT_PICK_COLOR,
 		EDIT_TO_UPPERCASE,
 		EDIT_TO_LOWERCASE,
 		EDIT_CAPITALIZE,
+		EDIT_FOLD_LINE,
+		EDIT_UNFOLD_LINE,
+		EDIT_FOLD_ALL_LINES,
+		EDIT_UNFOLD_ALL_LINES,
 		SEARCH_FIND,
 		SEARCH_FIND_NEXT,
 		SEARCH_FIND_PREV,
@@ -93,19 +109,20 @@ class ScriptTextEditor : public ScriptEditorBase {
 	};
 
 protected:
-	static void _code_complete_scripts(void *p_ud, const String &p_code, List<String> *r_options);
+	static void _code_complete_scripts(void *p_ud, const String &p_code, List<String> *r_options, bool &r_force);
 	void _breakpoint_toggled(int p_row);
 
 	//no longer virtual
 	void _validate_script();
-	void _code_complete_script(const String &p_code, List<String> *r_options);
+	void _code_complete_script(const String &p_code, List<String> *r_options, bool &r_force);
 	void _load_theme_settings();
+	void _set_theme_for_script();
 
 	void _notification(int p_what);
 	static void _bind_methods();
 
 	void _edit_option(int p_op);
-	void _make_context_menu(bool p_selection, bool p_color);
+	void _make_context_menu(bool p_selection, bool p_color, bool p_can_fold, bool p_is_folded);
 	void _text_edit_gui_input(const Ref<InputEvent> &ev);
 	void _color_changed(const Color &p_color);
 

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -112,7 +112,7 @@ void TouchScreenButton::_notification(int p_what) {
 
 			if (!is_inside_tree())
 				return;
-			if (!get_tree()->is_editor_hint() && !OS::get_singleton()->has_touchscreen_ui_hint() && visibility == VISIBILITY_TOUCHSCREEN_ONLY)
+			if (!Engine::get_singleton()->is_editor_hint() && !OS::get_singleton()->has_touchscreen_ui_hint() && visibility == VISIBILITY_TOUCHSCREEN_ONLY)
 				return;
 
 			if (finger_pressed != -1) {
@@ -129,11 +129,11 @@ void TouchScreenButton::_notification(int p_what) {
 
 			if (!shape_visible)
 				return;
-			if (!get_tree()->is_editor_hint() && !get_tree()->is_debugging_collisions_hint())
+			if (!Engine::get_singleton()->is_editor_hint() && !get_tree()->is_debugging_collisions_hint())
 				return;
 			if (shape.is_valid()) {
 				Color draw_col = get_tree()->get_debug_collisions_color();
-				Vector2 pos = shape_centered ? get_item_rect().size * 0.5f : Vector2();
+				Vector2 pos = shape_centered ? _edit_get_rect().size * 0.5f : Vector2();
 				draw_set_transform_matrix(get_canvas_transform().translated(pos));
 				shape->draw(get_canvas_item(), draw_col);
 			}
@@ -141,11 +141,11 @@ void TouchScreenButton::_notification(int p_what) {
 		} break;
 		case NOTIFICATION_ENTER_TREE: {
 
-			if (!get_tree()->is_editor_hint() && !OS::get_singleton()->has_touchscreen_ui_hint() && visibility == VISIBILITY_TOUCHSCREEN_ONLY)
+			if (!Engine::get_singleton()->is_editor_hint() && !OS::get_singleton()->has_touchscreen_ui_hint() && visibility == VISIBILITY_TOUCHSCREEN_ONLY)
 				return;
 			update();
 
-			if (!get_tree()->is_editor_hint())
+			if (!Engine::get_singleton()->is_editor_hint())
 				set_process_input(is_visible_in_tree());
 
 		} break;
@@ -154,7 +154,7 @@ void TouchScreenButton::_notification(int p_what) {
 				_release(true);
 		} break;
 		case NOTIFICATION_VISIBILITY_CHANGED: {
-			if (get_tree()->is_editor_hint())
+			if (Engine::get_singleton()->is_editor_hint())
 				break;
 			if (is_visible_in_tree()) {
 				set_process_input(true);
@@ -196,11 +196,11 @@ void TouchScreenButton::_input(const Ref<InputEvent> &p_event) {
 
 	ERR_FAIL_COND(!is_visible_in_tree());
 
-	const InputEventScreenTouch *st = p_event->cast_to<InputEventScreenTouch>();
+	const InputEventScreenTouch *st = Object::cast_to<InputEventScreenTouch>(*p_event);
 
 	if (passby_press) {
 
-		const InputEventScreenDrag *sd = p_event->cast_to<InputEventScreenDrag>();
+		const InputEventScreenDrag *sd = Object::cast_to<InputEventScreenDrag>(*p_event);
 
 		if (st && !st->is_pressed() && finger_pressed == st->get_index()) {
 
@@ -251,7 +251,7 @@ void TouchScreenButton::_input(const Ref<InputEvent> &p_event) {
 bool TouchScreenButton::_is_point_inside(const Point2 &p_point) {
 
 	Point2 coord = (get_global_transform_with_canvas()).affine_inverse().xform(p_point);
-	Rect2 item_rect = get_item_rect();
+	Rect2 item_rect = _edit_get_rect();
 
 	bool touched = false;
 	bool check_rect = true;
@@ -322,13 +322,13 @@ void TouchScreenButton::_release(bool p_exiting_tree) {
 	}
 }
 
-Rect2 TouchScreenButton::get_item_rect() const {
+Rect2 TouchScreenButton::_edit_get_rect() const {
 
 	if (texture.is_null())
 		return Rect2(0, 0, 1, 1);
 	/*
 	if (texture.is_null())
-		return CanvasItem::get_item_rect();
+		return CanvasItem::_edit_get_rect();
 	*/
 
 	return Rect2(Size2(), texture->get_size());
@@ -399,6 +399,9 @@ void TouchScreenButton::_bind_methods() {
 
 	ADD_SIGNAL(MethodInfo("pressed"));
 	ADD_SIGNAL(MethodInfo("released"));
+
+	BIND_ENUM_CONSTANT(VISIBILITY_ALWAYS);
+	BIND_ENUM_CONSTANT(VISIBILITY_TOUCHSCREEN_ONLY);
 }
 
 TouchScreenButton::TouchScreenButton() {

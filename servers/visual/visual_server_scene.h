@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -54,6 +54,8 @@ public:
 	uint64_t render_pass;
 
 	static VisualServerScene *singleton;
+
+// FIXME: Kept as reference for future implementation
 #if 0
 	struct Portal {
 
@@ -137,38 +139,6 @@ public:
 	virtual void camera_set_environment(RID p_camera, RID p_env);
 	virtual void camera_set_use_vertical_aspect(RID p_camera, bool p_enable);
 
-	/*
-
-	struct RoomInfo {
-
-		Transform affine_inverse;
-		Room *room;
-		List<Instance*> owned_geometry_instances;
-		List<Instance*> owned_portal_instances;
-		List<Instance*> owned_room_instances;
-		List<Instance*> owned_light_instances; //not used, but just for the sake of it
-		Set<Instance*> disconnected_child_portals;
-		Set<Instance*> owned_autoroom_geometry;
-		uint64_t last_visited_pass;
-		RoomInfo() { last_visited_pass=0; }
-
-	};
-
-	struct InstancePortal {
-
-		Portal *portal;
-		Set<Instance*> candidate_set;
-		Instance *connected;
-		uint64_t last_visited_pass;
-
-		Plane plane_cache;
-		Vector<Vector3> transformed_point_cache;
-
-
-		PortalInfo() { connected=NULL; last_visited_pass=0;}
-	};
-*/
-
 	/* SCENARIO API */
 
 	struct Instance;
@@ -225,8 +195,8 @@ public:
 
 		SelfList<Instance> update_item;
 
-		Rect3 aabb;
-		Rect3 transformed_aabb;
+		AABB aabb;
+		AABB transformed_aabb;
 		float extra_margin;
 		uint32_t object_ID;
 
@@ -235,10 +205,6 @@ public:
 		float lod_begin_hysteresis;
 		float lod_end_hysteresis;
 		RID lod_instance;
-
-		Instance *room;
-		SelfList<Instance> room_item;
-		bool visible_in_all_rooms;
 
 		uint64_t last_render_pass;
 		uint64_t last_frame_pass;
@@ -263,7 +229,7 @@ public:
 		}
 
 		Instance()
-			: scenario_item(this), update_item(this), room_item(this) {
+			: scenario_item(this), update_item(this) {
 
 			octree_id = 0;
 			scenario = NULL;
@@ -280,9 +246,6 @@ public:
 			lod_end = 0;
 			lod_begin_hysteresis = 0;
 			lod_end_hysteresis = 0;
-
-			room = NULL;
-			visible_in_all_rooms = false;
 
 			last_render_pass = 0;
 			last_frame_pass = 0;
@@ -396,6 +359,7 @@ public:
 			float attenuation;
 			float spot_angle;
 			float spot_attenuation;
+			bool visible;
 
 			bool operator==(const LightCache &p_cache) {
 
@@ -406,7 +370,8 @@ public:
 						radius == p_cache.radius &&
 						attenuation == p_cache.attenuation &&
 						spot_angle == p_cache.spot_angle &&
-						spot_attenuation == p_cache.spot_attenuation);
+						spot_attenuation == p_cache.spot_attenuation &&
+						visible == p_cache.visible);
 			}
 
 			LightCache() {
@@ -417,6 +382,7 @@ public:
 				attenuation = 1.0;
 				spot_angle = 1.0;
 				spot_attenuation = 1.0;
+				visible = true;
 			}
 		};
 
@@ -496,12 +462,11 @@ public:
 
 	virtual void instance_attach_skeleton(RID p_instance, RID p_skeleton);
 	virtual void instance_set_exterior(RID p_instance, bool p_enabled);
-	virtual void instance_set_room(RID p_instance, RID p_room);
 
 	virtual void instance_set_extra_visibility_margin(RID p_instance, real_t p_margin);
 
 	// don't use these in a game!
-	virtual Vector<ObjectID> instances_cull_aabb(const Rect3 &p_aabb, RID p_scenario = RID()) const;
+	virtual Vector<ObjectID> instances_cull_aabb(const AABB &p_aabb, RID p_scenario = RID()) const;
 	virtual Vector<ObjectID> instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario = RID()) const;
 	virtual Vector<ObjectID> instances_cull_convex(const Vector<Plane> &p_convex, RID p_scenario = RID()) const;
 
@@ -567,7 +532,7 @@ public:
 	_FORCE_INLINE_ uint32_t _gi_bake_find_cell(const GIProbeDataCell *cells, int x, int y, int z, int p_cell_subdiv);
 	void _bake_gi_downscale_light(int p_idx, int p_level, const GIProbeDataCell *p_cells, const GIProbeDataHeader *p_header, InstanceGIProbeData::LocalData *p_local_data, float p_propagate);
 	void _bake_gi_probe_light(const GIProbeDataHeader *header, const GIProbeDataCell *cells, InstanceGIProbeData::LocalData *local_data, const uint32_t *leaves, int p_leaf_count, const InstanceGIProbeData::LightCache &light_cache, int p_sign);
-	void _bake_gi_probe(Instance *p_probe);
+	void _bake_gi_probe(Instance *p_gi_probe);
 	bool _check_gi_probe(Instance *p_gi_probe);
 	void _setup_gi_probe(Instance *p_instance);
 

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -29,6 +29,7 @@
 /*************************************************************************/
 #include "visual_script_nodes.h"
 
+#include "engine.h"
 #include "global_constants.h"
 #include "os/input.h"
 #include "os/os.h"
@@ -532,6 +533,7 @@ String VisualScriptOperator::get_text() const {
 		L"A or B", //OP_OR,
 		L"A xor B", //OP_XOR,
 		L"not A", //OP_NOT,
+		L"A in B", //OP_IN,
 
 	};
 	return op_names[op];
@@ -1109,7 +1111,7 @@ void VisualScriptConstant::_bind_methods() {
 	}
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "type", PROPERTY_HINT_ENUM, argt), "set_constant_type", "get_constant_type");
-	ADD_PROPERTY(PropertyInfo(Variant::NIL, "value"), "set_constant_value", "get_constant_value");
+	ADD_PROPERTY(PropertyInfo(Variant::NIL, "value", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT), "set_constant_value", "get_constant_value");
 }
 
 class VisualScriptNodeInstanceConstant : public VisualScriptNodeInstance {
@@ -1208,6 +1210,7 @@ void VisualScriptPreload::set_preload(const Ref<Resource> &p_preload) {
 	preload = p_preload;
 	ports_changed_notify();
 }
+
 Ref<Resource> VisualScriptPreload::get_preload() const {
 
 	return preload;
@@ -1492,7 +1495,7 @@ void VisualScriptGlobalConstant::_bind_methods() {
 			cc += ",";
 		cc += GlobalConstants::get_global_constant_name(i);
 	}
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "constant/constant", PROPERTY_HINT_ENUM, cc), "set_global_constant", "get_global_constant");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "constant", PROPERTY_HINT_ENUM, cc), "set_global_constant", "get_global_constant");
 }
 
 VisualScriptGlobalConstant::VisualScriptGlobalConstant() {
@@ -1597,7 +1600,7 @@ VisualScriptNodeInstance *VisualScriptClassConstant::instance(VisualScriptInstan
 
 void VisualScriptClassConstant::_validate_property(PropertyInfo &property) const {
 
-	if (property.name == "constant/constant") {
+	if (property.name == "constant") {
 
 		List<String> constants;
 		ClassDB::get_integer_constant_list(base_type, &constants, true);
@@ -1621,7 +1624,7 @@ void VisualScriptClassConstant::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_base_type"), &VisualScriptClassConstant::get_base_type);
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "base_type", PROPERTY_HINT_TYPE_STRING, "Object"), "set_base_type", "get_base_type");
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "constant/constant", PROPERTY_HINT_ENUM, ""), "set_class_constant", "get_class_constant");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "constant", PROPERTY_HINT_ENUM, ""), "set_class_constant", "get_class_constant");
 }
 
 VisualScriptClassConstant::VisualScriptClassConstant() {
@@ -1726,7 +1729,7 @@ VisualScriptNodeInstance *VisualScriptBasicTypeConstant::instance(VisualScriptIn
 
 void VisualScriptBasicTypeConstant::_validate_property(PropertyInfo &property) const {
 
-	if (property.name == "constant/constant") {
+	if (property.name == "constant") {
 
 		List<StringName> constants;
 		Variant::get_numeric_constants_for_type(type, &constants);
@@ -1759,7 +1762,7 @@ void VisualScriptBasicTypeConstant::_bind_methods() {
 	}
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "basic_type", PROPERTY_HINT_ENUM, argt), "set_basic_type", "get_basic_type");
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "constant/constant", PROPERTY_HINT_ENUM, ""), "set_basic_type_constant", "get_basic_type_constant");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "constant", PROPERTY_HINT_ENUM, ""), "set_basic_type_constant", "get_basic_type_constant");
 }
 
 VisualScriptBasicTypeConstant::VisualScriptBasicTypeConstant() {
@@ -1774,8 +1777,8 @@ VisualScriptBasicTypeConstant::VisualScriptBasicTypeConstant() {
 const char *VisualScriptMathConstant::const_name[MATH_CONSTANT_MAX] = {
 	"One",
 	"PI",
-	"PIx2",
 	"PI/2",
+	"TAU",
 	"E",
 	"Sqrt2",
 	"INF",
@@ -1785,8 +1788,8 @@ const char *VisualScriptMathConstant::const_name[MATH_CONSTANT_MAX] = {
 double VisualScriptMathConstant::const_value[MATH_CONSTANT_MAX] = {
 	1.0,
 	Math_PI,
-	Math_PI * 2,
 	Math_PI * 0.5,
+	Math_TAU,
 	2.71828182845904523536,
 	Math::sqrt(2.0),
 	Math_INF,
@@ -1880,7 +1883,17 @@ void VisualScriptMathConstant::_bind_methods() {
 			cc += ",";
 		cc += const_name[i];
 	}
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "constant/constant", PROPERTY_HINT_ENUM, cc), "set_math_constant", "get_math_constant");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "constant", PROPERTY_HINT_ENUM, cc), "set_math_constant", "get_math_constant");
+
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_ONE);
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_PI);
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_HALF_PI);
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_TAU);
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_E);
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_SQRT2);
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_INF);
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_NAN);
+	BIND_ENUM_CONSTANT(MATH_CONSTANT_MAX);
 }
 
 VisualScriptMathConstant::VisualScriptMathConstant() {
@@ -1964,13 +1977,13 @@ public:
 VisualScriptNodeInstance *VisualScriptEngineSingleton::instance(VisualScriptInstance *p_instance) {
 
 	VisualScriptNodeInstanceEngineSingleton *instance = memnew(VisualScriptNodeInstanceEngineSingleton);
-	instance->singleton = ProjectSettings::get_singleton()->get_singleton_object(singleton);
+	instance->singleton = Engine::get_singleton()->get_singleton_object(singleton);
 	return instance;
 }
 
 VisualScriptEngineSingleton::TypeGuess VisualScriptEngineSingleton::guess_output_type(TypeGuess *p_inputs, int p_output) const {
 
-	Object *obj = ProjectSettings::get_singleton()->get_singleton_object(singleton);
+	Object *obj = Engine::get_singleton()->get_singleton_object(singleton);
 	TypeGuess tg;
 	tg.type = Variant::OBJECT;
 	if (obj) {
@@ -1988,11 +2001,11 @@ void VisualScriptEngineSingleton::_bind_methods() {
 
 	String cc;
 
-	List<ProjectSettings::Singleton> singletons;
+	List<Engine::Singleton> singletons;
 
-	ProjectSettings::get_singleton()->get_singletons(&singletons);
+	Engine::get_singleton()->get_singletons(&singletons);
 
-	for (List<ProjectSettings::Singleton>::Element *E = singletons.front(); E; E = E->next()) {
+	for (List<Engine::Singleton>::Element *E = singletons.front(); E; E = E->next()) {
 		if (E->get().name == "VS" || E->get().name == "PS" || E->get().name == "PS2D" || E->get().name == "AS" || E->get().name == "TS" || E->get().name == "SS" || E->get().name == "SS2D")
 			continue; //skip these, too simple named
 
@@ -2001,7 +2014,7 @@ void VisualScriptEngineSingleton::_bind_methods() {
 		cc += E->get().name;
 	}
 
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "constant/constant", PROPERTY_HINT_ENUM, cc), "set_singleton", "get_singleton");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "constant", PROPERTY_HINT_ENUM, cc), "set_singleton", "get_singleton");
 }
 
 VisualScriptEngineSingleton::VisualScriptEngineSingleton() {
@@ -2078,7 +2091,7 @@ public:
 
 	virtual int step(const Variant **p_inputs, Variant **p_outputs, StartMode p_start_mode, Variant *p_working_mem, Variant::CallError &r_error, String &r_error_str) {
 
-		Node *node = instance->get_owner_ptr()->cast_to<Node>();
+		Node *node = Object::cast_to<Node>(instance->get_owner_ptr());
 		if (!node) {
 			r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
 			r_error_str = "Base object is not a Node!";
@@ -2086,7 +2099,7 @@ public:
 		}
 
 		Node *another = node->get_node(path);
-		if (!node) {
+		if (!another) {
 			r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
 			r_error_str = "Path does not lead Node!";
 			return 0;
@@ -2142,10 +2155,7 @@ VisualScriptSceneNode::TypeGuess VisualScriptSceneNode::guess_output_type(TypeGu
 		return tg;
 
 	MainLoop *main_loop = OS::get_singleton()->get_main_loop();
-	if (!main_loop)
-		return tg;
-
-	SceneTree *scene_tree = main_loop->cast_to<SceneTree>();
+	SceneTree *scene_tree = Object::cast_to<SceneTree>(main_loop);
 
 	if (!scene_tree)
 		return tg;
@@ -2180,10 +2190,7 @@ void VisualScriptSceneNode::_validate_property(PropertyInfo &property) const {
 			return;
 
 		MainLoop *main_loop = OS::get_singleton()->get_main_loop();
-		if (!main_loop)
-			return;
-
-		SceneTree *scene_tree = main_loop->cast_to<SceneTree>();
+		SceneTree *scene_tree = Object::cast_to<SceneTree>(main_loop);
 
 		if (!scene_tree)
 			return;
@@ -2273,7 +2280,7 @@ public:
 
 	virtual int step(const Variant **p_inputs, Variant **p_outputs, StartMode p_start_mode, Variant *p_working_mem, Variant::CallError &r_error, String &r_error_str) {
 
-		Node *node = instance->get_owner_ptr()->cast_to<Node>();
+		Node *node = Object::cast_to<Node>(instance->get_owner_ptr());
 		if (!node) {
 			r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
 			r_error_str = "Base object is not a Node!";
@@ -2684,7 +2691,7 @@ VisualScriptNodeInstance *VisualScriptCustomNode::instance(VisualScriptInstance 
 }
 
 void VisualScriptCustomNode::_script_changed() {
-	ports_changed_notify();
+	call_deferred("ports_changed_notify");
 }
 
 void VisualScriptCustomNode::_bind_methods() {
@@ -2707,13 +2714,16 @@ void VisualScriptCustomNode::_bind_methods() {
 	BIND_VMETHOD(MethodInfo(Variant::STRING, "_get_category"));
 
 	BIND_VMETHOD(MethodInfo(Variant::INT, "_get_working_memory_size"));
-	BIND_VMETHOD(MethodInfo(Variant::NIL, "_step:Variant", PropertyInfo(Variant::ARRAY, "inputs"), PropertyInfo(Variant::ARRAY, "outputs"), PropertyInfo(Variant::INT, "start_mode"), PropertyInfo(Variant::ARRAY, "working_mem")));
+
+	MethodInfo stepmi(Variant::NIL, "_step", PropertyInfo(Variant::ARRAY, "inputs"), PropertyInfo(Variant::ARRAY, "outputs"), PropertyInfo(Variant::INT, "start_mode"), PropertyInfo(Variant::ARRAY, "working_mem"));
+	stepmi.return_val.usage |= PROPERTY_USAGE_NIL_IS_VARIANT;
+	BIND_VMETHOD(stepmi);
 
 	ClassDB::bind_method(D_METHOD("_script_changed"), &VisualScriptCustomNode::_script_changed);
 
-	BIND_CONSTANT(START_MODE_BEGIN_SEQUENCE);
-	BIND_CONSTANT(START_MODE_CONTINUE_SEQUENCE);
-	BIND_CONSTANT(START_MODE_RESUME_YIELD);
+	BIND_ENUM_CONSTANT(START_MODE_BEGIN_SEQUENCE);
+	BIND_ENUM_CONSTANT(START_MODE_CONTINUE_SEQUENCE);
+	BIND_ENUM_CONSTANT(START_MODE_RESUME_YIELD);
 
 	BIND_CONSTANT(STEP_PUSH_STACK_BIT);
 	BIND_CONSTANT(STEP_GO_BACK_BIT);
@@ -2844,7 +2854,9 @@ VisualScriptNodeInstance *VisualScriptSubCall::instance(VisualScriptInstance *p_
 
 void VisualScriptSubCall::_bind_methods() {
 
-	BIND_VMETHOD(MethodInfo(Variant::NIL, "_subcall:Variant", PropertyInfo(Variant::NIL, "arguments:Variant")));
+	MethodInfo scmi(Variant::NIL, "_subcall", PropertyInfo(Variant::NIL, "arguments"));
+	scmi.return_val.usage |= PROPERTY_USAGE_NIL_IS_VARIANT;
+	BIND_VMETHOD(scmi);
 }
 
 VisualScriptSubCall::VisualScriptSubCall() {
@@ -3535,6 +3547,11 @@ void VisualScriptInputAction::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "action"), "set_action_name", "get_action_name");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "mode", PROPERTY_HINT_ENUM, "Pressed,Released,JustPressed,JustReleased"), "set_action_mode", "get_action_mode");
+
+	BIND_ENUM_CONSTANT(MODE_PRESSED);
+	BIND_ENUM_CONSTANT(MODE_RELEASED);
+	BIND_ENUM_CONSTANT(MODE_JUST_PRESSED);
+	BIND_ENUM_CONSTANT(MODE_JUST_RELEASED);
 }
 
 VisualScriptInputAction::VisualScriptInputAction() {
@@ -3727,11 +3744,11 @@ void register_visual_script_nodes() {
 	VisualScriptLanguage::singleton->add_register_func("data/preload", create_node_generic<VisualScriptPreload>);
 	VisualScriptLanguage::singleton->add_register_func("data/action", create_node_generic<VisualScriptInputAction>);
 
-	VisualScriptLanguage::singleton->add_register_func("constant/constants/constant", create_node_generic<VisualScriptConstant>);
-	VisualScriptLanguage::singleton->add_register_func("constant/constants/math_constant", create_node_generic<VisualScriptMathConstant>);
-	VisualScriptLanguage::singleton->add_register_func("constant/constants/class_constant", create_node_generic<VisualScriptClassConstant>);
-	VisualScriptLanguage::singleton->add_register_func("constant/constants/global_constant", create_node_generic<VisualScriptGlobalConstant>);
-	VisualScriptLanguage::singleton->add_register_func("constant/constants/basic_type_constant", create_node_generic<VisualScriptBasicTypeConstant>);
+	VisualScriptLanguage::singleton->add_register_func("constants/constant", create_node_generic<VisualScriptConstant>);
+	VisualScriptLanguage::singleton->add_register_func("constants/math_constant", create_node_generic<VisualScriptMathConstant>);
+	VisualScriptLanguage::singleton->add_register_func("constants/class_constant", create_node_generic<VisualScriptClassConstant>);
+	VisualScriptLanguage::singleton->add_register_func("constants/global_constant", create_node_generic<VisualScriptGlobalConstant>);
+	VisualScriptLanguage::singleton->add_register_func("constants/basic_type_constant", create_node_generic<VisualScriptBasicTypeConstant>);
 
 	VisualScriptLanguage::singleton->add_register_func("custom/custom_node", create_node_generic<VisualScriptCustomNode>);
 	VisualScriptLanguage::singleton->add_register_func("custom/sub_call", create_node_generic<VisualScriptSubCall>);
@@ -3747,7 +3764,7 @@ void register_visual_script_nodes() {
 	VisualScriptLanguage::singleton->add_register_func("operators/compare/greater_equal", create_op_node<Variant::OP_GREATER_EQUAL>);
 	//mathematic
 	VisualScriptLanguage::singleton->add_register_func("operators/math/add", create_op_node<Variant::OP_ADD>);
-	VisualScriptLanguage::singleton->add_register_func("operators/math/subtract", create_op_node<Variant::OP_SUBSTRACT>);
+	VisualScriptLanguage::singleton->add_register_func("operators/math/subtract", create_op_node<Variant::OP_SUBTRACT>);
 	VisualScriptLanguage::singleton->add_register_func("operators/math/multiply", create_op_node<Variant::OP_MULTIPLY>);
 	VisualScriptLanguage::singleton->add_register_func("operators/math/divide", create_op_node<Variant::OP_DIVIDE>);
 	VisualScriptLanguage::singleton->add_register_func("operators/math/negate", create_op_node<Variant::OP_NEGATE>);

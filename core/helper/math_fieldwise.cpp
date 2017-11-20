@@ -1,9 +1,9 @@
 /*************************************************************************/
-/*  fieldwise.cpp                                                        */
+/*  math_fieldwise.cpp                                                   */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -46,8 +46,8 @@ Variant fieldwise_assign(const Variant &p_target, const Variant &p_source, const
 
 	switch (p_source.get_type()) {
 
-		/* clang-format makes a mess of this macro usage */
-		/* clang-format off */
+			/* clang-format makes a mess of this macro usage */
+			/* clang-format off */
 
 		case Variant::VECTOR2: {
 
@@ -106,9 +106,9 @@ Variant fieldwise_assign(const Variant &p_target, const Variant &p_source, const
 			return target;
 		}
 
-		case Variant::RECT3: {
+		case Variant::AABB: {
 
-			SETUP_TYPE(Rect3)
+			SETUP_TYPE(AABB)
 
 			/**/ TRY_TRANSFER_FIELD("px", position.x)
 			else TRY_TRANSFER_FIELD("py", position.y)

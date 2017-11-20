@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -51,11 +51,14 @@ class TextEdit : public Control {
 
 			MODE_NONE,
 			MODE_SHIFT,
-			MODE_POINTER
+			MODE_POINTER,
+			MODE_WORD,
+			MODE_LINE
 		};
 
 		Mode selecting_mode;
 		int selecting_line, selecting_column;
+		int selected_word_beg, selected_word_end, selected_word_origin;
 		bool selecting_text;
 
 		bool active;
@@ -70,6 +73,9 @@ class TextEdit : public Control {
 	struct Cache {
 
 		Ref<Texture> tab_icon;
+		Ref<Texture> can_fold_icon;
+		Ref<Texture> folded_icon;
+		Ref<Texture> folded_eol_icon;
 		Ref<StyleBox> style_normal;
 		Ref<StyleBox> style_focus;
 		Ref<Font> font;
@@ -102,6 +108,7 @@ class TextEdit : public Control {
 		int line_spacing;
 		int line_number_w;
 		int breakpoint_gutter_width;
+		int fold_gutter_width;
 		Size2 size;
 	} cache;
 
@@ -133,6 +140,7 @@ class TextEdit : public Control {
 			int width_cache : 24;
 			bool marked : 1;
 			bool breakpoint : 1;
+			bool hidden : 1;
 			Map<int, ColorRegionInfo> region_info;
 			String data;
 		};
@@ -152,11 +160,13 @@ class TextEdit : public Control {
 		int get_line_width(int p_line) const;
 		int get_max_width() const;
 		const Map<int, ColorRegionInfo> &get_color_region_info(int p_line);
-		void set(int p_line, const String &p_string);
+		void set(int p_line, const String &p_text);
 		void set_marked(int p_line, bool p_marked) { text[p_line].marked = p_marked; }
 		bool is_marked(int p_line) const { return text[p_line].marked; }
 		void set_breakpoint(int p_line, bool p_breakpoint) { text[p_line].breakpoint = p_breakpoint; }
 		bool is_breakpoint(int p_line) const { return text[p_line].breakpoint; }
+		void set_hidden(int p_line, bool p_hidden) { text[p_line].hidden = p_hidden; }
+		bool is_hidden(int p_line) const { return text[p_line].hidden; }
 		void insert(int p_at, const String &p_text);
 		void remove(int p_at);
 		int size() const { return text.size(); }
@@ -205,6 +215,7 @@ class TextEdit : public Control {
 	Vector<String> completion_strings;
 	Vector<String> completion_options;
 	bool completion_active;
+	bool completion_forced;
 	String completion_current;
 	String completion_base;
 	int completion_index;
@@ -237,6 +248,7 @@ class TextEdit : public Control {
 	bool setting_row;
 	bool wrap;
 	bool draw_tabs;
+	bool override_selected_font_color;
 	bool cursor_changed_dirty;
 	bool text_changed_dirty;
 	bool undo_enabled;
@@ -246,15 +258,24 @@ class TextEdit : public Control {
 	int line_length_guideline_col;
 	bool draw_breakpoint_gutter;
 	int breakpoint_gutter_width;
+	bool draw_fold_gutter;
+	int fold_gutter_width;
+	bool hiding_enabled;
 
 	bool highlight_all_occurrences;
 	bool scroll_past_end_of_file_enabled;
 	bool auto_brace_completion_enabled;
 	bool brace_matching_enabled;
+	bool highlight_current_line;
 	bool auto_indent;
 	bool cut_copy_line;
 	bool insert_mode;
 	bool select_identifiers_enabled;
+
+	bool smooth_scroll_enabled;
+	bool scrolling;
+	float target_v_scroll;
+	float v_scroll_speed;
 
 	bool raised_from_completion;
 
@@ -282,19 +303,30 @@ class TextEdit : public Control {
 	int search_result_line;
 	int search_result_col;
 
+	double line_scroll_pos;
+
 	bool context_menu_enabled;
 
 	int get_visible_rows() const;
+	int get_total_unhidden_rows() const;
+	double get_line_scroll_pos(bool p_recalculate = false) const;
+	void update_line_scroll_pos();
 
 	int get_char_count();
 
-	int get_char_pos_for(int p_px, String p_pos) const;
-	int get_column_x_offset(int p_column, String p_pos);
+	int get_char_pos_for(int p_px, String p_str) const;
+	int get_column_x_offset(int p_char, String p_str);
 
 	void adjust_viewport_to_cursor();
+	double get_scroll_line_diff() const;
 	void _scroll_moved(double);
 	void _update_scrollbars();
+	void _v_scroll_input();
 	void _click_selection_held();
+
+	void _update_selection_mode_pointer();
+	void _update_selection_mode_word();
+	void _update_selection_mode_line();
 
 	void _pre_shift_selection();
 	void _post_shift_selection();
@@ -320,7 +352,7 @@ class TextEdit : public Control {
 
 	/* super internal api, undo/redo builds on it */
 
-	void _base_insert_text(int p_line, int p_column, const String &p_text, int &r_end_line, int &r_end_column);
+	void _base_insert_text(int p_line, int p_char, const String &p_text, int &r_end_line, int &r_end_column);
 	String _base_get_text(int p_from_line, int p_from_column, int p_to_line, int p_to_column) const;
 	void _base_remove_text(int p_from_line, int p_from_column, int p_to_line, int p_to_column);
 
@@ -339,10 +371,10 @@ class TextEdit : public Control {
 protected:
 	virtual String get_tooltip(const Point2 &p_pos) const;
 
-	void _insert_text(int p_line, int p_column, const String &p_text, int *r_end_line = NULL, int *r_end_char = NULL);
+	void _insert_text(int p_line, int p_char, const String &p_text, int *r_end_line = NULL, int *r_end_char = NULL);
 	void _remove_text(int p_from_line, int p_from_column, int p_to_line, int p_to_column);
 	void _insert_text_at_cursor(const String &p_text);
-	void _gui_input(const Ref<InputEvent> &p_input);
+	void _gui_input(const Ref<InputEvent> &p_gui_input);
 	void _notification(int p_what);
 
 	void _consume_pair_symbol(CharType ch);
@@ -379,6 +411,8 @@ public:
 	void begin_complex_operation();
 	void end_complex_operation();
 
+	bool is_insert_text_operation();
+
 	void set_text(String p_text);
 	void insert_text_at_cursor(const String &p_text);
 	void insert_at(const String &p_text, int at);
@@ -387,6 +421,18 @@ public:
 	void set_line_as_breakpoint(int p_line, bool p_breakpoint);
 	bool is_line_set_as_breakpoint(int p_line) const;
 	void get_breakpoints(List<int> *p_breakpoints) const;
+
+	void set_line_as_hidden(int p_line, bool p_hidden);
+	bool is_line_hidden(int p_line) const;
+	void fold_all_lines();
+	void unhide_all_lines();
+	int num_lines_from(int p_line_from, int unhidden_amount) const;
+	int get_whitespace_level(int p_line) const;
+	bool can_fold(int p_line) const;
+	bool is_folded(int p_line) const;
+	void fold_line(int p_line);
+	void unfold_line(int p_line);
+
 	String get_text();
 	String get_line(int line) const;
 	void set_line(int line, String new_text);
@@ -415,7 +461,7 @@ public:
 	void center_viewport_to_cursor();
 
 	void cursor_set_column(int p_col, bool p_adjust_viewport = true);
-	void cursor_set_line(int p_row, bool p_adjust_viewport = true);
+	void cursor_set_line(int p_row, bool p_adjust_viewport = true, bool p_can_be_hidden = true);
 
 	int cursor_get_column() const;
 	int cursor_get_line() const;
@@ -430,6 +476,7 @@ public:
 	bool cursor_is_block_mode() const;
 
 	void set_readonly(bool p_readonly);
+	bool is_readonly() const;
 
 	void set_max_chars(int p_max_chars);
 	void set_wrap(bool p_wrap);
@@ -445,6 +492,7 @@ public:
 	void select_all();
 	void select(int p_from_line, int p_from_column, int p_to_line, int p_to_column);
 	void deselect();
+	void swap_lines(int line1, int line2);
 
 	void set_search_text(const String &p_search_text);
 	void set_search_flags(uint32_t p_flags);
@@ -473,6 +521,8 @@ public:
 	void set_indent_size(const int p_size);
 	void set_draw_tabs(bool p_draw);
 	bool is_drawing_tabs() const;
+	void set_override_selected_font_color(bool p_override_selected_font_color);
+	bool is_overriding_selected_font_color() const;
 
 	void set_insert_mode(bool p_enabled);
 	bool is_insert_mode() const;
@@ -487,6 +537,12 @@ public:
 	int get_h_scroll() const;
 	void set_h_scroll(int p_scroll);
 
+	void set_smooth_scroll_enabled(bool p_enable);
+	bool is_smooth_scroll_enabled() const;
+
+	void set_v_scroll_speed(float p_speed);
+	float get_v_scroll_speed() const;
+
 	uint32_t get_version() const;
 	uint32_t get_saved_version() const;
 	void tag_saved_version();
@@ -495,6 +551,9 @@ public:
 
 	void set_show_line_numbers(bool p_show);
 	bool is_show_line_numbers_enabled() const;
+
+	void set_highlight_current_line(bool p_enabled);
+	bool is_highlight_current_line_enabled() const;
 
 	void set_line_numbers_zero_padded(bool p_zero_padded);
 
@@ -507,10 +566,19 @@ public:
 	void set_breakpoint_gutter_width(int p_gutter_width);
 	int get_breakpoint_gutter_width() const;
 
+	void set_draw_fold_gutter(bool p_draw);
+	bool is_drawing_fold_gutter() const;
+
+	void set_fold_gutter_width(int p_gutter_width);
+	int get_fold_gutter_width() const;
+
+	void set_hiding_enabled(int p_enabled);
+	int is_hiding_enabled() const;
+
 	void set_tooltip_request_func(Object *p_obj, const StringName &p_function, const Variant &p_udata);
 
 	void set_completion(bool p_enabled, const Vector<String> &p_prefixes);
-	void code_complete(const Vector<String> &p_strings);
+	void code_complete(const Vector<String> &p_strings, bool p_forced = false);
 	void set_code_hint(const String &p_hint);
 	void query_code_comple();
 
@@ -518,6 +586,8 @@ public:
 	bool is_selecting_identifiers_on_hover_enabled() const;
 
 	void set_context_menu_enabled(bool p_enable);
+	bool is_context_menu_enabled();
+
 	PopupMenu *get_menu() const;
 
 	String get_text_for_completion();
@@ -527,5 +597,8 @@ public:
 	TextEdit();
 	~TextEdit();
 };
+
+VARIANT_ENUM_CAST(TextEdit::MenuItems);
+VARIANT_ENUM_CAST(TextEdit::SearchFlags);
 
 #endif // TEXT_EDIT_H

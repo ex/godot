@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -31,6 +31,10 @@
 #include "core/os/input.h"
 
 void ARVRPositionalTracker::_bind_methods() {
+	BIND_ENUM_CONSTANT(TRACKER_HAND_UNKNOWN);
+	BIND_ENUM_CONSTANT(TRACKER_LEFT_HAND);
+	BIND_ENUM_CONSTANT(TRACKER_RIGHT_HAND);
+
 	// this class is read only from GDScript, so we only have access to getters..
 	ClassDB::bind_method(D_METHOD("get_type"), &ARVRPositionalTracker::get_type);
 	ClassDB::bind_method(D_METHOD("get_name"), &ARVRPositionalTracker::get_name);
@@ -39,6 +43,7 @@ void ARVRPositionalTracker::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_orientation"), &ARVRPositionalTracker::get_orientation);
 	ClassDB::bind_method(D_METHOD("get_tracks_position"), &ARVRPositionalTracker::get_tracks_position);
 	ClassDB::bind_method(D_METHOD("get_position"), &ARVRPositionalTracker::get_position);
+	ClassDB::bind_method(D_METHOD("get_hand"), &ARVRPositionalTracker::get_hand);
 	ClassDB::bind_method(D_METHOD("get_transform", "adjust_by_reference_frame"), &ARVRPositionalTracker::get_transform);
 
 	// these functions we don't want to expose to normal users but do need to be callable from GDNative
@@ -47,6 +52,11 @@ void ARVRPositionalTracker::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_set_joy_id", "joy_id"), &ARVRPositionalTracker::set_joy_id);
 	ClassDB::bind_method(D_METHOD("_set_orientation", "orientation"), &ARVRPositionalTracker::set_orientation);
 	ClassDB::bind_method(D_METHOD("_set_rw_position", "rw_position"), &ARVRPositionalTracker::set_rw_position);
+
+	ClassDB::bind_method(D_METHOD("get_rumble"), &ARVRPositionalTracker::get_rumble);
+	ClassDB::bind_method(D_METHOD("set_rumble", "rumble"), &ARVRPositionalTracker::set_rumble);
+
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "rumble"), "set_rumble", "get_rumble");
 };
 
 void ARVRPositionalTracker::set_type(ARVRServer::TrackerType p_type) {
@@ -141,6 +151,14 @@ Vector3 ARVRPositionalTracker::get_rw_position() const {
 	return rw_position;
 };
 
+ARVRPositionalTracker::TrackerHand ARVRPositionalTracker::get_hand() const {
+	return hand;
+};
+
+void ARVRPositionalTracker::set_hand(const ARVRPositionalTracker::TrackerHand p_hand) {
+	hand = p_hand;
+};
+
 Transform ARVRPositionalTracker::get_transform(bool p_adjust_by_reference_frame) const {
 	Transform new_transform;
 
@@ -157,6 +175,18 @@ Transform ARVRPositionalTracker::get_transform(bool p_adjust_by_reference_frame)
 	return new_transform;
 };
 
+real_t ARVRPositionalTracker::get_rumble() const {
+	return rumble;
+};
+
+void ARVRPositionalTracker::set_rumble(real_t p_rumble) {
+	if (p_rumble > 0.0) {
+		rumble = p_rumble;
+	} else {
+		rumble = 0.0;
+	};
+};
+
 ARVRPositionalTracker::ARVRPositionalTracker() {
 	type = ARVRServer::TRACKER_UNKNOWN;
 	name = "Unknown";
@@ -164,6 +194,8 @@ ARVRPositionalTracker::ARVRPositionalTracker() {
 	tracker_id = 0;
 	tracks_orientation = false;
 	tracks_position = false;
+	hand = TRACKER_HAND_UNKNOWN;
+	rumble = 0.0;
 };
 
 ARVRPositionalTracker::~ARVRPositionalTracker(){

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -33,36 +33,36 @@
 #define _VERTEX_SNAP 0.0001
 #define EQ_VERTEX_DIST 0.00001
 
-bool SurfaceTool::Vertex::operator==(const Vertex &p_b) const {
+bool SurfaceTool::Vertex::operator==(const Vertex &p_vertex) const {
 
-	if (vertex != p_b.vertex)
+	if (vertex != p_vertex.vertex)
 		return false;
 
-	if (uv != p_b.uv)
+	if (uv != p_vertex.uv)
 		return false;
 
-	if (uv2 != p_b.uv2)
+	if (uv2 != p_vertex.uv2)
 		return false;
 
-	if (normal != p_b.normal)
+	if (normal != p_vertex.normal)
 		return false;
 
-	if (binormal != p_b.binormal)
+	if (binormal != p_vertex.binormal)
 		return false;
 
-	if (color != p_b.color)
+	if (color != p_vertex.color)
 		return false;
 
-	if (bones.size() != p_b.bones.size())
+	if (bones.size() != p_vertex.bones.size())
 		return false;
 
 	for (int i = 0; i < bones.size(); i++) {
-		if (bones[i] != p_b.bones[i])
+		if (bones[i] != p_vertex.bones[i])
 			return false;
 	}
 
 	for (int i = 0; i < weights.size(); i++) {
-		if (weights[i] != p_b.weights[i])
+		if (weights[i] != p_vertex.weights[i])
 			return false;
 	}
 
@@ -691,6 +691,17 @@ void SurfaceTool::mikktGetTexCoord(const SMikkTSpaceContext *pContext, float fvT
 	fvTexcOut[1] = v.y;
 	//fvTexcOut[1]=1.0-v.y;
 }
+
+void SurfaceTool::mikktSetTSpaceDefault(const SMikkTSpaceContext *pContext, const float fvTangent[], const float fvBiTangent[], const float fMagS, const float fMagT,
+		const tbool bIsOrientationPreserving, const int iFace, const int iVert) {
+
+	Vector<List<Vertex>::Element *> &varr = *((Vector<List<Vertex>::Element *> *)pContext->m_pUserData);
+	Vertex *vtx = &varr[iFace * 3 + iVert]->get();
+
+	vtx->tangent = Vector3(fvTangent[0], fvTangent[1], fvTangent[2]);
+	vtx->binormal = Vector3(fvBiTangent[0], fvBiTangent[1], fvBiTangent[2]);
+}
+
 void SurfaceTool::mikktSetTSpaceBasic(const SMikkTSpaceContext *pContext, const float fvTangent[], const float fSign, const int iFace, const int iVert) {
 
 	Vector<List<Vertex>::Element *> &varr = *((Vector<List<Vertex>::Element *> *)pContext->m_pUserData);
@@ -715,8 +726,8 @@ void SurfaceTool::generate_tangents() {
 	mkif.m_getNumVerticesOfFace = mikktGetNumVerticesOfFace;
 	mkif.m_getPosition = mikktGetPosition;
 	mkif.m_getTexCoord = mikktGetTexCoord;
-	mkif.m_setTSpaceBasic = mikktSetTSpaceBasic;
-	mkif.m_setTSpace = NULL;
+	mkif.m_setTSpace = mikktSetTSpaceDefault;
+	mkif.m_setTSpaceBasic = NULL;
 
 	SMikkTSpaceContext msc;
 	msc.m_pInterface = &mkif;

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -125,6 +125,7 @@ void VisualScriptNode::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_visual_script"), &VisualScriptNode::get_visual_script);
 	ClassDB::bind_method(D_METHOD("set_default_input_value", "port_idx", "value"), &VisualScriptNode::set_default_input_value);
 	ClassDB::bind_method(D_METHOD("get_default_input_value", "port_idx"), &VisualScriptNode::get_default_input_value);
+	ClassDB::bind_method(D_METHOD("ports_changed_notify"), &VisualScriptNode::ports_changed_notify);
 	ClassDB::bind_method(D_METHOD("_set_default_input_values", "values"), &VisualScriptNode::_set_default_input_values);
 	ClassDB::bind_method(D_METHOD("_get_default_input_values"), &VisualScriptNode::_get_default_input_values);
 
@@ -273,7 +274,9 @@ void VisualScript::_node_ports_changed(int p_id) {
 	Function &func = functions[function];
 	Ref<VisualScriptNode> vsn = func.nodes[p_id].node;
 
-	if (OS::get_singleton()->get_main_loop() && OS::get_singleton()->get_main_loop()->cast_to<SceneTree>() && OS::get_singleton()->get_main_loop()->cast_to<SceneTree>()->is_editor_hint()) {
+	if (OS::get_singleton()->get_main_loop() &&
+			Object::cast_to<SceneTree>(OS::get_singleton()->get_main_loop()) &&
+			Engine::get_singleton()->is_editor_hint()) {
 		vsn->validate_input_default_values(); //force validate default values when editing on editor
 	}
 
@@ -336,7 +339,7 @@ void VisualScript::add_node(const StringName &p_func, int p_id, const Ref<Visual
 
 	Function &func = functions[p_func];
 
-	if (p_node->cast_to<VisualScriptFunction>()) {
+	if (Object::cast_to<VisualScriptFunction>(*p_node)) {
 		//the function indeed
 		ERR_EXPLAIN("A function node already has been set here.");
 		ERR_FAIL_COND(func.function_id >= 0);
@@ -393,7 +396,7 @@ void VisualScript::remove_node(const StringName &p_func, int p_id) {
 		}
 	}
 
-	if (func.nodes[p_id].node->cast_to<VisualScriptFunction>()) {
+	if (Object::cast_to<VisualScriptFunction>(func.nodes[p_id].node.ptr())) {
 		func.function_id = -1; //revert to invalid
 	}
 
@@ -421,7 +424,7 @@ Ref<VisualScriptNode> VisualScript::get_node(const StringName &p_func, int p_id)
 	return func.nodes[p_id].node;
 }
 
-void VisualScript::set_node_pos(const StringName &p_func, int p_id, const Point2 &p_pos) {
+void VisualScript::set_node_position(const StringName &p_func, int p_id, const Point2 &p_pos) {
 
 	ERR_FAIL_COND(instances.size());
 	ERR_FAIL_COND(!functions.has(p_func));
@@ -431,7 +434,7 @@ void VisualScript::set_node_pos(const StringName &p_func, int p_id, const Point2
 	func.nodes[p_id].pos = p_pos;
 }
 
-Point2 VisualScript::get_node_pos(const StringName &p_func, int p_id) const {
+Point2 VisualScript::get_node_position(const StringName &p_func, int p_id) const {
 
 	ERR_FAIL_COND_V(!functions.has(p_func), Point2());
 	const Function &func = functions[p_func];
@@ -971,11 +974,6 @@ bool VisualScript::is_tool() const {
 	return false;
 }
 
-String VisualScript::get_node_type() const {
-
-	return String();
-}
-
 ScriptLanguage *VisualScript::get_language() const {
 
 	return VisualScriptLanguage::singleton;
@@ -1086,7 +1084,7 @@ int VisualScript::get_member_line(const StringName &p_member) const {
 #ifdef TOOLS_ENABLED
 	if (has_function(p_member)) {
 		for (Map<int, Function::NodeData>::Element *E = functions[p_member].nodes.front(); E; E = E->next()) {
-			if (E->get().node->cast_to<VisualScriptFunction>())
+			if (Object::cast_to<VisualScriptFunction>(E->get().node.ptr()))
 				return E->key();
 		}
 	}
@@ -1271,14 +1269,14 @@ void VisualScript::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_function_scroll", "name", "ofs"), &VisualScript::set_function_scroll);
 	ClassDB::bind_method(D_METHOD("get_function_scroll", "name"), &VisualScript::get_function_scroll);
 
-	ClassDB::bind_method(D_METHOD("add_node", "func", "id", "node", "pos"), &VisualScript::add_node, DEFVAL(Point2()));
+	ClassDB::bind_method(D_METHOD("add_node", "func", "id", "node", "position"), &VisualScript::add_node, DEFVAL(Point2()));
 	ClassDB::bind_method(D_METHOD("remove_node", "func", "id"), &VisualScript::remove_node);
 	ClassDB::bind_method(D_METHOD("get_function_node_id", "name"), &VisualScript::get_function_node_id);
 
 	ClassDB::bind_method(D_METHOD("get_node", "func", "id"), &VisualScript::get_node);
 	ClassDB::bind_method(D_METHOD("has_node", "func", "id"), &VisualScript::has_node);
-	ClassDB::bind_method(D_METHOD("set_node_pos", "func", "id", "pos"), &VisualScript::set_node_pos);
-	ClassDB::bind_method(D_METHOD("get_node_pos", "func", "id"), &VisualScript::get_node_pos);
+	ClassDB::bind_method(D_METHOD("set_node_position", "func", "id", "position"), &VisualScript::set_node_position);
+	ClassDB::bind_method(D_METHOD("get_node_position", "func", "id"), &VisualScript::get_node_position);
 
 	ClassDB::bind_method(D_METHOD("sequence_connect", "func", "from_node", "from_output", "to_node"), &VisualScript::sequence_connect);
 	ClassDB::bind_method(D_METHOD("sequence_disconnect", "func", "from_node", "from_output", "to_node"), &VisualScript::sequence_disconnect);
@@ -1578,12 +1576,15 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 
 		VisualScriptNodeInstance::StartMode start_mode;
 		{
-			if (p_resuming_yield)
+			if (p_resuming_yield) {
 				start_mode = VisualScriptNodeInstance::START_MODE_RESUME_YIELD;
-			else if (!flow_stack || !(flow_stack[flow_stack_pos] & VisualScriptNodeInstance::FLOW_STACK_PUSHED_BIT)) //if there is a push bit, it means we are continuing a sequence
-				start_mode = VisualScriptNodeInstance::START_MODE_BEGIN_SEQUENCE;
-			else
+				p_resuming_yield = false; // should resume only the first time
+			} else if (flow_stack && (flow_stack[flow_stack_pos] & VisualScriptNodeInstance::FLOW_STACK_PUSHED_BIT)) {
+				//if there is a push bit, it means we are continuing a sequence
 				start_mode = VisualScriptNodeInstance::START_MODE_CONTINUE_SEQUENCE;
+			} else {
+				start_mode = VisualScriptNodeInstance::START_MODE_BEGIN_SEQUENCE;
+			}
 		}
 
 		VSDEBUG("STEP - STARTSEQ: " + itos(start_mode));
@@ -1998,13 +1999,13 @@ void VisualScriptInstance::create(const Ref<VisualScript> &p_script, Object *p_o
 	max_input_args = 0;
 	max_output_args = 0;
 
-	if (p_owner->cast_to<Node>()) {
+	if (Object::cast_to<Node>(p_owner)) {
 		//turn on these if they exist and base is a node
-		Node *node = p_owner->cast_to<Node>();
+		Node *node = Object::cast_to<Node>(p_owner);
 		if (p_script->functions.has("_process"))
 			node->set_process(true);
-		if (p_script->functions.has("_fixed_process"))
-			node->set_fixed_process(true);
+		if (p_script->functions.has("_physics_process"))
+			node->set_physics_process(true);
 		if (p_script->functions.has("_input"))
 			node->set_process_input(true);
 		if (p_script->functions.has("_unhandled_input"))
@@ -2091,16 +2092,16 @@ void VisualScriptInstance::create(const Ref<VisualScript> &p_script, Object *p_o
 				}
 			}
 
-			if (node->cast_to<VisualScriptLocalVar>() || node->cast_to<VisualScriptLocalVarSet>()) {
+			if (Object::cast_to<VisualScriptLocalVar>(node.ptr()) || Object::cast_to<VisualScriptLocalVarSet>(*node)) {
 				//working memory is shared only for this node, for the same variables
 				Ref<VisualScriptLocalVar> vslv = node;
 
 				StringName var_name;
 
-				if (node->cast_to<VisualScriptLocalVar>())
-					var_name = String(node->cast_to<VisualScriptLocalVar>()->get_var_name()).strip_edges();
+				if (Object::cast_to<VisualScriptLocalVar>(*node))
+					var_name = String(Object::cast_to<VisualScriptLocalVar>(*node)->get_var_name()).strip_edges();
 				else
-					var_name = String(node->cast_to<VisualScriptLocalVarSet>()->get_var_name()).strip_edges();
+					var_name = String(Object::cast_to<VisualScriptLocalVarSet>(*node)->get_var_name()).strip_edges();
 
 				if (!local_var_indices.has(var_name)) {
 					local_var_indices[var_name] = function.max_stack;
@@ -2406,6 +2407,10 @@ bool VisualScriptLanguage::has_named_classes() const {
 
 	return false;
 }
+bool VisualScriptLanguage::supports_builtin_mode() const {
+
+	return true;
+}
 int VisualScriptLanguage::find_function(const String &p_function, const String &p_code) const {
 
 	return -1;
@@ -2637,6 +2642,11 @@ void VisualScriptLanguage::add_register_func(const String &p_name, VisualScriptN
 
 	ERR_FAIL_COND(register_funcs.has(p_name));
 	register_funcs[p_name] = p_func;
+}
+
+void VisualScriptLanguage::remove_register_func(const String &p_name) {
+	ERR_FAIL_COND(!register_funcs.has(p_name));
+	register_funcs.erase(p_name);
 }
 
 Ref<VisualScriptNode> VisualScriptLanguage::create_node_from_name(const String &p_name) {

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -69,6 +69,7 @@ struct CameraMatrix {
 	real_t get_z_near() const;
 	real_t get_aspect() const;
 	real_t get_fov() const;
+	bool is_orthogonal() const;
 
 	Vector<Plane> get_projection_planes(const Transform &p_transform) const;
 
@@ -85,7 +86,7 @@ struct CameraMatrix {
 
 	operator String() const;
 
-	void scale_translate_to_fit(const Rect3 &p_aabb);
+	void scale_translate_to_fit(const AABB &p_aabb);
 	void make_scale(const Vector3 &p_scale);
 	int get_pixels_per_meter(int p_for_pixel_width) const;
 	operator Transform() const;

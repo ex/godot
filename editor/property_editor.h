@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -31,6 +31,7 @@
 #define PROPERTY_EDITOR_H
 
 #include "editor/editor_file_dialog.h"
+#include "editor/scene_tree_editor.h"
 #include "scene/gui/button.h"
 #include "scene/gui/check_box.h"
 #include "scene/gui/check_button.h"
@@ -43,7 +44,6 @@
 #include "scene/gui/text_edit.h"
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tree.h"
-#include "scene_tree_editor.h"
 
 /**
 	@author Juan Linietsky <reduzio@gmail.com>
@@ -52,6 +52,19 @@
 class PropertyValueEvaluator;
 class CreateDialog;
 class PropertySelector;
+
+class EditorResourceConversionPlugin : public Reference {
+
+	GDCLASS(EditorResourceConversionPlugin, Reference)
+
+protected:
+	static void _bind_methods();
+
+public:
+	virtual String converts_to() const;
+	virtual bool handles(const Ref<Resource> &p_resource) const;
+	virtual Ref<Resource> convert(const Ref<Resource> &p_resource);
+};
 
 class CustomPropertyEditor : public Popup {
 
@@ -66,10 +79,10 @@ class CustomPropertyEditor : public Popup {
 		OBJ_MENU_MAKE_UNIQUE = 3,
 		OBJ_MENU_COPY = 4,
 		OBJ_MENU_PASTE = 5,
-		OBJ_MENU_REIMPORT = 6,
-		OBJ_MENU_NEW_SCRIPT = 7,
-		OBJ_MENU_SHOW_IN_FILE_SYSTEM = 8,
-		TYPE_BASE_ID = 100
+		OBJ_MENU_NEW_SCRIPT = 6,
+		OBJ_MENU_SHOW_IN_FILE_SYSTEM = 7,
+		TYPE_BASE_ID = 100,
+		CONVERT_BASE_ID = 1000
 	};
 
 	enum {
@@ -120,7 +133,6 @@ class CustomPropertyEditor : public Popup {
 
 	void _text_edit_changed();
 	void _file_selected(String p_file);
-	void _scroll_modified(double p_value);
 	void _modified(String p_string);
 	void _range_modified(double p_value);
 	void _focus_enter();
@@ -168,7 +180,6 @@ class PropertyEditor : public Control {
 
 	Tree *tree;
 	Label *top_label;
-	//Object *object;
 	LineEdit *search_box;
 
 	PropertyValueEvaluator *evaluator;
@@ -217,8 +228,8 @@ class PropertyEditor : public Control {
 
 	TreeItem *find_item(TreeItem *p_item, const String &p_name);
 
-	virtual void _changed_callback(Object *p_changed, const char *p_what);
-	virtual void _changed_callbacks(Object *p_changed, const String &p_callback);
+	virtual void _changed_callback(Object *p_changed, const char *p_prop);
+	virtual void _changed_callbacks(Object *p_changed, const String &p_prop);
 
 	void _check_reload_status(const String &p_name, TreeItem *item);
 
@@ -228,7 +239,7 @@ class PropertyEditor : public Control {
 
 	friend class ProjectExportDialog;
 	void _edit_set(const String &p_name, const Variant &p_value, bool p_refresh_all = false, const String &p_changed_field = "");
-	void _draw_flags(Object *ti, const Rect2 &p_rect);
+	void _draw_flags(Object *p_object, const Rect2 &p_rect);
 
 	bool _might_be_in_instance();
 	bool _get_instanced_node_original_property(const StringName &p_prop, Variant &value);

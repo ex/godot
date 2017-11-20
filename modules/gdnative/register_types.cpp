@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -28,54 +28,336 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "register_types.h"
+#include "gdnative/gdnative.h"
+
 #include "gdnative.h"
 
 #include "io/resource_loader.h"
 #include "io/resource_saver.h"
 
+#include "arvr/register_types.h"
+#include "nativescript/register_types.h"
+#include "pluginscript/register_types.h"
+
+#include "core/engine.h"
 #include "core/os/os.h"
+#include "core/project_settings.h"
 
-godot_variant cb_standard_varcall(void *handle, godot_string *p_procedure, godot_array *p_args) {
-	if (handle == NULL) {
-		ERR_PRINT("No valid library handle, can't call standard varcall procedure");
-		godot_variant ret;
-		godot_variant_new_nil(&ret);
-		return ret;
+#ifdef TOOLS_ENABLED
+#include "editor/editor_node.h"
+#include "gd_native_library_editor.h"
+// Class used to discover singleton gdnative files
+
+static void actual_discoverer_handler();
+
+class GDNativeSingletonDiscover : public Object {
+	// GDCLASS(GDNativeSingletonDiscover, Object)
+
+	virtual String get_class() const {
+		// okay, this is a really dirty hack.
+		// We're overriding get_class so we can connect it to a signal
+		// This works because get_class is a virtual method, so we don't
+		// need to register a new class to ClassDB just for this one
+		// little signal.
+
+		actual_discoverer_handler();
+
+		return "Object";
+	}
+};
+
+static Set<String> get_gdnative_singletons(EditorFileSystemDirectory *p_dir) {
+
+	Set<String> file_paths;
+
+	// check children
+
+	for (int i = 0; i < p_dir->get_file_count(); i++) {
+		String file_name = p_dir->get_file(i);
+		String file_type = p_dir->get_file_type(i);
+
+		if (file_type != "GDNativeLibrary") {
+			continue;
+		}
+
+		Ref<GDNativeLibrary> lib = ResourceLoader::load(p_dir->get_file_path(i));
+		if (lib.is_valid() && lib->is_singleton()) {
+			file_paths.insert(p_dir->get_file_path(i));
+		}
 	}
 
-	void *library_proc;
-	Error err = OS::get_singleton()->get_dynamic_library_symbol_handle(
-			handle,
-			*(String *)p_procedure,
-			library_proc,
-			true); // we roll our own message
-	if (err != OK) {
-		ERR_PRINT((String("GDNative procedure \"" + *(String *)p_procedure) + "\" does not exists and can't be called").utf8().get_data());
-		godot_variant ret;
-		godot_variant_new_nil(&ret);
-		return ret;
+	// check subdirectories
+	for (int i = 0; i < p_dir->get_subdir_count(); i++) {
+		Set<String> paths = get_gdnative_singletons(p_dir->get_subdir(i));
+
+		for (Set<String>::Element *E = paths.front(); E; E = E->next()) {
+			file_paths.insert(E->get());
+		}
 	}
+
+	return file_paths;
+}
+
+static void actual_discoverer_handler() {
+	EditorFileSystemDirectory *dir = EditorFileSystem::get_singleton()->get_filesystem();
+
+	Set<String> file_paths = get_gdnative_singletons(dir);
+
+	Array files;
+	files.resize(file_paths.size());
+	int i = 0;
+	for (Set<String>::Element *E = file_paths.front(); E; i++, E = E->next()) {
+		files.set(i, E->get());
+	}
+
+	ProjectSettings::get_singleton()->set("gdnative/singletons", files);
+
+	ProjectSettings::get_singleton()->save();
+}
+
+static GDNativeSingletonDiscover *discoverer = NULL;
+
+class GDNativeExportPlugin : public EditorExportPlugin {
+
+protected:
+	virtual void _export_file(const String &p_path, const String &p_type, const Set<String> &p_features);
+};
+
+void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_type, const Set<String> &p_features) {
+	if (p_type != "GDNativeLibrary") {
+		return;
+	}
+
+	Ref<GDNativeLibrary> lib = ResourceLoader::load(p_path);
+
+	if (lib.is_null()) {
+		return;
+	}
+
+	Ref<ConfigFile> config = lib->get_config_file();
+
+	String entry_lib_path;
+	{
+
+		List<String> entry_keys;
+		config->get_section_keys("entry", &entry_keys);
+
+		for (List<String>::Element *E = entry_keys.front(); E; E = E->next()) {
+			String key = E->get();
+
+			Vector<String> tags = key.split(".");
+
+			bool skip = false;
+			for (int i = 0; i < tags.size(); i++) {
+				bool has_feature = p_features.has(tags[i]);
+
+				if (!has_feature) {
+					skip = true;
+					break;
+				}
+			}
+
+			if (skip) {
+				continue;
+			}
+
+			entry_lib_path = config->get_value("entry", key);
+			break;
+		}
+	}
+
+	Vector<String> dependency_paths;
+	{
+
+		List<String> dependency_keys;
+		config->get_section_keys("dependencies", &dependency_keys);
+
+		for (List<String>::Element *E = dependency_keys.front(); E; E = E->next()) {
+			String key = E->get();
+
+			Vector<String> tags = key.split(".");
+
+			bool skip = false;
+			for (int i = 0; i < tags.size(); i++) {
+				bool has_feature = p_features.has(tags[i]);
+
+				if (!has_feature) {
+					skip = true;
+					break;
+				}
+			}
+
+			if (skip) {
+				continue;
+			}
+
+			dependency_paths = config->get_value("dependencies", key);
+			break;
+		}
+	}
+
+	bool is_statically_linked = false;
+	{
+
+		List<String> static_linking_keys;
+		config->get_section_keys("static_linking", &static_linking_keys);
+
+		for (List<String>::Element *E = static_linking_keys.front(); E; E = E->next()) {
+			String key = E->get();
+
+			Vector<String> tags = key.split(".");
+
+			bool skip = false;
+
+			for (int i = 0; i < tags.size(); i++) {
+				bool has_feature = p_features.has(tags[i]);
+
+				if (!has_feature) {
+					skip = true;
+					break;
+				}
+			}
+
+			if (skip) {
+				continue;
+			}
+
+			is_statically_linked = config->get_value("static_linking", key);
+			break;
+		}
+	}
+
+	if (!is_statically_linked)
+		add_shared_object(entry_lib_path);
+
+	for (int i = 0; i < dependency_paths.size(); i++) {
+		add_shared_object(dependency_paths[i]);
+	}
+}
+
+static void editor_init_callback() {
+
+	GDNativeLibraryEditor *library_editor = memnew(GDNativeLibraryEditor);
+	library_editor->set_name(TTR("GDNative"));
+	ProjectSettingsEditor::get_singleton()->get_tabs()->add_child(library_editor);
+
+	discoverer = memnew(GDNativeSingletonDiscover);
+	EditorFileSystem::get_singleton()->connect("filesystem_changed", discoverer, "get_class");
+
+	Ref<GDNativeExportPlugin> export_plugin;
+	export_plugin.instance();
+
+	EditorExport::get_singleton()->add_export_plugin(export_plugin);
+}
+
+#endif
+
+static godot_variant cb_standard_varcall(void *p_procedure_handle, godot_array *p_args) {
 
 	godot_gdnative_procedure_fn proc;
-	proc = (godot_gdnative_procedure_fn)library_proc;
+	proc = (godot_gdnative_procedure_fn)p_procedure_handle;
 
-	return proc(NULL, p_args);
+	return proc(p_args);
 }
 
 GDNativeCallRegistry *GDNativeCallRegistry::singleton;
 
+Vector<Ref<GDNative> > singleton_gdnatives;
+
+GDNativeLibraryResourceLoader *resource_loader_gdnlib = NULL;
+GDNativeLibraryResourceSaver *resource_saver_gdnlib = NULL;
+
 void register_gdnative_types() {
+
+#ifdef TOOLS_ENABLED
+
+	if (Engine::get_singleton()->is_editor_hint()) {
+		EditorNode::add_init_callback(editor_init_callback);
+	}
+#endif
 
 	ClassDB::register_class<GDNativeLibrary>();
 	ClassDB::register_class<GDNative>();
 
+	resource_loader_gdnlib = memnew(GDNativeLibraryResourceLoader);
+	resource_saver_gdnlib = memnew(GDNativeLibraryResourceSaver);
+
+	ResourceLoader::add_resource_format_loader(resource_loader_gdnlib);
+	ResourceSaver::add_resource_format_saver(resource_saver_gdnlib);
+
 	GDNativeCallRegistry::singleton = memnew(GDNativeCallRegistry);
 
 	GDNativeCallRegistry::singleton->register_native_call_type("standard_varcall", cb_standard_varcall);
+
+	register_arvr_types();
+	register_nativescript_types();
+	register_pluginscript_types();
+
+	// run singletons
+
+	Array singletons = Array();
+	if (ProjectSettings::get_singleton()->has_setting("gdnative/singletons")) {
+		singletons = ProjectSettings::get_singleton()->get("gdnative/singletons");
+	}
+
+	singleton_gdnatives.resize(singletons.size());
+
+	for (int i = 0; i < singletons.size(); i++) {
+		String path = singletons[i];
+
+		Ref<GDNativeLibrary> lib = ResourceLoader::load(path);
+
+		singleton_gdnatives[i].instance();
+		singleton_gdnatives[i]->set_library(lib);
+
+		if (!singleton_gdnatives[i]->initialize()) {
+			// Can't initialize. Don't make a native_call then
+			continue;
+		}
+
+		void *proc_ptr;
+		Error err = singleton_gdnatives[i]->get_symbol(
+				lib->get_symbol_prefix() + "gdnative_singleton",
+				proc_ptr);
+
+		if (err != OK) {
+			ERR_PRINT((String("No godot_gdnative_singleton in \"" + singleton_gdnatives[i]->get_library()->get_current_library_path()) + "\" found").utf8().get_data());
+		} else {
+			((void (*)())proc_ptr)();
+		}
+	}
 }
 
 void unregister_gdnative_types() {
+
+	for (int i = 0; i < singleton_gdnatives.size(); i++) {
+
+		if (singleton_gdnatives[i].is_null()) {
+			continue;
+		}
+
+		if (!singleton_gdnatives[i]->is_initialized()) {
+			continue;
+		}
+
+		singleton_gdnatives[i]->terminate();
+	}
+	singleton_gdnatives.clear();
+
+	unregister_pluginscript_types();
+	unregister_nativescript_types();
+	unregister_arvr_types();
+
 	memdelete(GDNativeCallRegistry::singleton);
+
+#ifdef TOOLS_ENABLED
+	if (Engine::get_singleton()->is_editor_hint() && discoverer != NULL) {
+		memdelete(discoverer);
+	}
+#endif
+
+	memdelete(resource_loader_gdnlib);
+	memdelete(resource_saver_gdnlib);
 
 	// This is for printing out the sizes of the core types
 
@@ -89,7 +371,7 @@ void unregister_gdnative_types() {
 	print_line(String("poolarray:\t") + itos(sizeof(PoolByteArray)));
 	print_line(String("quat:\t")      + itos(sizeof(Quat)));
 	print_line(String("rect2:\t")     + itos(sizeof(Rect2)));
-	print_line(String("rect3:\t")     + itos(sizeof(Rect3)));
+	print_line(String("aabb:\t")     + itos(sizeof(AABB)));
 	print_line(String("rid:\t")       + itos(sizeof(RID)));
 	print_line(String("string:\t")    + itos(sizeof(String)));
 	print_line(String("transform:\t") + itos(sizeof(Transform)));

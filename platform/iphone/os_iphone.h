@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -32,6 +32,7 @@
 #ifndef OS_IPHONE_H
 #define OS_IPHONE_H
 
+#include "drivers/coreaudio/audio_driver_coreaudio.h"
 #include "drivers/unix/os_unix.h"
 #include "os/input.h"
 
@@ -40,14 +41,8 @@
 #include "in_app_store.h"
 #include "main/input_default.h"
 #include "servers/audio_server.h"
-#include "servers/physics/physics_server_sw.h"
-#include "servers/physics_2d/physics_2d_server_sw.h"
-#include "servers/physics_2d/physics_2d_server_wrap_mt.h"
 #include "servers/visual/rasterizer.h"
 #include "servers/visual_server.h"
-
-class AudioDriverIphone;
-// class RasterizerGLES2;
 
 class OSIPhone : public OS_Unix {
 
@@ -67,14 +62,9 @@ private:
 
 	uint8_t supported_orientations;
 
-	//	Rasterizer *rasterizer;
-	//	RasterizerGLES2* rasterizer_gles22;
-
 	VisualServer *visual_server;
-	PhysicsServer *physics_server;
-	Physics2DServer *physics_2d_server;
 
-	AudioDriverIphone *audio_driver;
+	AudioDriverCoreAudio audio_driver;
 
 #ifdef GAME_CENTER_ENABLED
 	GameCenter *game_center;
@@ -93,8 +83,7 @@ private:
 	virtual int get_video_driver_count() const;
 	virtual const char *get_video_driver_name(int p_driver) const;
 
-	virtual VideoMode get_default_video_mode() const;
-
+	virtual void initialize_logger();
 	virtual void initialize_core();
 	virtual void initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver);
 
@@ -128,6 +117,8 @@ private:
 
 	InputDefault *input;
 
+	int virtual_keyboard_height;
+
 public:
 	bool iterate();
 
@@ -137,6 +128,7 @@ public:
 	void mouse_move(int p_idx, int p_prev_x, int p_prev_y, int p_x, int p_y, bool p_use_as_mouse);
 	void touches_cancelled();
 	void key(uint32_t p_key, bool p_pressed);
+	void set_virtual_keyboard_height(int p_height);
 
 	int set_base_framebuffer(int p_fb);
 
@@ -172,6 +164,7 @@ public:
 	virtual bool has_virtual_keyboard() const;
 	virtual void show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2());
 	virtual void hide_virtual_keyboard();
+	virtual int get_virtual_keyboard_height() const;
 
 	virtual void set_cursor_shape(CursorShape p_shape);
 
@@ -185,7 +178,7 @@ public:
 
 	Error shell_open(String p_uri);
 
-	String get_data_dir() const;
+	String get_user_data_dir() const;
 
 	void set_locale(String p_locale);
 	String get_locale() const;
@@ -201,7 +194,7 @@ public:
 	virtual void native_video_stop();
 
 	virtual bool _check_internal_feature_support(const String &p_feature);
-	OSIPhone(int width, int height);
+	OSIPhone(int width, int height, String p_data_dir);
 	~OSIPhone();
 };
 

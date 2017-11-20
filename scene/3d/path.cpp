@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -28,32 +28,16 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "path.h"
+
+#include "engine.h"
 #include "scene/scene_string_names.h"
 
 void Path::_notification(int p_what) {
-#if 0
-	if (p_what==NOTIFICATION_DRAW && curve.is_valid() && is_inside_scene() && get_scene()->is_editor_hint()) {
-		//draw the curve!!
-
-		for(int i=0;i<curve->get_point_count();i++) {
-
-			Vector2 prev_p=curve->get_point_pos(i);
-
-			for(int j=1;j<=8;j++) {
-
-				real_t frac = j/8.0;
-				Vector2 p = curve->interpolate(i,frac);
-				draw_line(prev_p,p,Color(0.5,0.6,1.0,0.7),2);
-				prev_p=p;
-			}
-		}
-	}
-#endif
 }
 
 void Path::_curve_changed() {
 
-	if (is_inside_tree() && get_tree()->is_editor_hint())
+	if (is_inside_tree() && Engine::get_singleton()->is_editor_hint())
 		update_gizmo();
 }
 
@@ -101,9 +85,15 @@ void PathFollow::_update_transform() {
 	if (!c.is_valid())
 		return;
 
+	if (delta_offset == 0) {
+		return;
+	}
+
 	float o = offset;
-	if (loop)
+
+	if (loop) {
 		o = Math::fposmod(o, c->get_baked_length());
+	}
 
 	Vector3 pos = c->interpolate_baked(o, cubic);
 	Transform t = get_transform();
@@ -117,14 +107,14 @@ void PathFollow::_update_transform() {
 		// see C. Dougan, The Parallel Transport Frame, Game Programming Gems 2 for example
 		// for a discussion about why not Frenet frame.
 
-		Vector3 t_prev = pos - c->interpolate_baked(o - lookahead, cubic);
-		Vector3 t_cur = c->interpolate_baked(o + lookahead, cubic) - pos;
+		Vector3 t_prev = (pos - c->interpolate_baked(o - delta_offset, cubic)).normalized();
+		Vector3 t_cur = (c->interpolate_baked(o + delta_offset, cubic) - pos).normalized();
 
 		Vector3 axis = t_prev.cross(t_cur);
-		float dot = t_prev.normalized().dot(t_cur.normalized());
+		float dot = t_prev.dot(t_cur);
 		float angle = Math::acos(CLAMP(dot, -1, 1));
 
-		if (axis.length() > CMP_EPSILON && angle > CMP_EPSILON) {
+		if (likely(Math::abs(angle) > CMP_EPSILON)) {
 			if (rotation_mode == ROTATION_Y) {
 				// assuming we're referring to global Y-axis. is this correct?
 				axis.x = 0;
@@ -132,27 +122,31 @@ void PathFollow::_update_transform() {
 			} else if (rotation_mode == ROTATION_XY) {
 				axis.z = 0;
 			} else if (rotation_mode == ROTATION_XYZ) {
-				// all components are OK
+				// all components are allowed
 			}
 
-			t.rotate_basis(axis.normalized(), angle);
+			if (likely(axis.length() > CMP_EPSILON)) {
+				t.rotate_basis(axis.normalized(), angle);
+			}
 		}
 
 		// do the additional tilting
 		float tilt_angle = c->interpolate_baked_tilt(o);
-		Vector3 tilt_axis = t_cur; // is this correct??
+		Vector3 tilt_axis = t_cur; // not sure what tilt is supposed to do, is this correct??
 
-		if (tilt_axis.length() > CMP_EPSILON && tilt_angle > CMP_EPSILON) {
+		if (likely(Math::abs(tilt_angle) > CMP_EPSILON)) {
 			if (rotation_mode == ROTATION_Y) {
 				tilt_axis.x = 0;
 				tilt_axis.z = 0;
 			} else if (rotation_mode == ROTATION_XY) {
 				tilt_axis.z = 0;
 			} else if (rotation_mode == ROTATION_XYZ) {
-				// all components are OK
+				// all components are allowed
 			}
 
-			t.rotate_basis(tilt_axis.normalized(), tilt_angle);
+			if (likely(tilt_axis.length() > CMP_EPSILON)) {
+				t.rotate_basis(tilt_axis.normalized(), tilt_angle);
+			}
 		}
 
 		t.translate(pos_offset);
@@ -171,8 +165,7 @@ void PathFollow::_notification(int p_what) {
 
 			Node *parent = get_parent();
 			if (parent) {
-
-				path = parent->cast_to<Path>();
+				path = Object::cast_to<Path>(parent);
 				if (path) {
 					_update_transform();
 				}
@@ -212,8 +205,6 @@ bool PathFollow::_set(const StringName &p_name, const Variant &p_value) {
 		set_cubic_interpolation(p_value);
 	} else if (String(p_name) == "loop") {
 		set_loop(p_value);
-	} else if (String(p_name) == "lookahead") {
-		set_lookahead(p_value);
 	} else
 		return false;
 
@@ -236,8 +227,6 @@ bool PathFollow::_get(const StringName &p_name, Variant &r_ret) const {
 		r_ret = cubic;
 	} else if (String(p_name) == "loop") {
 		r_ret = loop;
-	} else if (String(p_name) == "lookahead") {
-		r_ret = lookahead;
 	} else
 		return false;
 
@@ -255,7 +244,6 @@ void PathFollow::_get_property_list(List<PropertyInfo> *p_list) const {
 	p_list->push_back(PropertyInfo(Variant::INT, "rotation_mode", PROPERTY_HINT_ENUM, "None,Y,XY,XYZ"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "cubic_interp"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "loop"));
-	p_list->push_back(PropertyInfo(Variant::REAL, "lookahead", PROPERTY_HINT_RANGE, "0.001,1024.0,0.001"));
 }
 
 void PathFollow::_bind_methods() {
@@ -281,15 +269,16 @@ void PathFollow::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_loop", "loop"), &PathFollow::set_loop);
 	ClassDB::bind_method(D_METHOD("has_loop"), &PathFollow::has_loop);
 
-	BIND_CONSTANT(ROTATION_NONE);
-	BIND_CONSTANT(ROTATION_Y);
-	BIND_CONSTANT(ROTATION_XY);
-	BIND_CONSTANT(ROTATION_XYZ);
+	BIND_ENUM_CONSTANT(ROTATION_NONE);
+	BIND_ENUM_CONSTANT(ROTATION_Y);
+	BIND_ENUM_CONSTANT(ROTATION_XY);
+	BIND_ENUM_CONSTANT(ROTATION_XYZ);
 }
 
 void PathFollow::set_offset(float p_offset) {
-
+	delta_offset = p_offset - offset;
 	offset = p_offset;
+
 	if (path)
 		_update_transform();
 	_change_notify("offset");
@@ -339,16 +328,6 @@ float PathFollow::get_unit_offset() const {
 		return 0;
 }
 
-void PathFollow::set_lookahead(float p_lookahead) {
-
-	lookahead = p_lookahead;
-}
-
-float PathFollow::get_lookahead() const {
-
-	return lookahead;
-}
-
 void PathFollow::set_rotation_mode(RotationMode p_rotation_mode) {
 
 	rotation_mode = p_rotation_mode;
@@ -373,11 +352,11 @@ bool PathFollow::has_loop() const {
 PathFollow::PathFollow() {
 
 	offset = 0;
+	delta_offset = 0;
 	h_offset = 0;
 	v_offset = 0;
 	path = NULL;
 	rotation_mode = ROTATION_XYZ;
 	cubic = true;
 	loop = true;
-	lookahead = 0.1;
 }

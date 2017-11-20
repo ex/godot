@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -59,6 +59,7 @@ private:
 
 	MixTarget mix_target;
 
+	void _mix_internal(bool p_fadeout);
 	void _mix_audio();
 	static void _mix_audios(void *self) { reinterpret_cast<AudioStreamPlayer *>(self)->_mix_audio(); }
 
@@ -83,7 +84,7 @@ public:
 	void seek(float p_seconds);
 	void stop();
 	bool is_playing() const;
-	float get_pos();
+	float get_playback_position();
 
 	void set_bus(const StringName &p_bus);
 	StringName get_bus() const;

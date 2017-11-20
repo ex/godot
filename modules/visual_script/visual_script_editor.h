@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -103,6 +103,7 @@ class VisualScriptEditor : public ScriptEditorBase {
 
 	PropertySelector *method_select;
 	PropertySelector *new_connect_node_select;
+	PropertySelector *new_virtual_method_select;
 
 	VisualScriptEditorVariableEdit *variable_editor;
 
@@ -135,10 +136,7 @@ class VisualScriptEditor : public ScriptEditorBase {
 		Vector<Pair<Variant::Type, String> > args;
 	};
 
-	Map<int, VirtualInMenu> virtuals_in_menu;
-
-	PopupMenu *new_function_menu;
-
+	HashMap<StringName, Ref<StyleBox>, StringNameHasher> node_styles;
 	StringName edited_func;
 
 	void _update_graph_connections();
@@ -176,6 +174,8 @@ class VisualScriptEditor : public ScriptEditorBase {
 	int port_action_new_node;
 	void _port_action_menu(int p_option);
 	void _selected_connect_node_method_or_setget(const String &p_text);
+	void _cancel_connect_node_method_or_setget();
+	void _selected_new_virtual_method(const String &p_text);
 
 	int error_line;
 
@@ -187,7 +187,6 @@ class VisualScriptEditor : public ScriptEditorBase {
 	void _change_base_type();
 	void _member_selected();
 	void _member_edited();
-	void _override_pressed(int p_id);
 
 	void _begin_node_move();
 	void _end_node_move();
@@ -278,6 +277,29 @@ public:
 
 	VisualScriptEditor();
 	~VisualScriptEditor();
+};
+
+// Singleton
+class _VisualScriptEditor : public Object {
+	GDCLASS(_VisualScriptEditor, Object);
+
+	friend class VisualScriptLanguage;
+
+protected:
+	static void _bind_methods();
+	static _VisualScriptEditor *singleton;
+
+	static Map<String, RefPtr> custom_nodes;
+	static Ref<VisualScriptNode> create_node_custom(const String &p_name);
+
+public:
+	static _VisualScriptEditor *get_singleton() { return singleton; }
+
+	void add_custom_node(const String &p_name, const String &p_category, const Ref<Script> &p_script);
+	void remove_custom_node(const String &p_name, const String &p_category);
+
+	_VisualScriptEditor();
+	~_VisualScriptEditor();
 };
 #endif
 

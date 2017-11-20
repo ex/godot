@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -44,7 +44,7 @@ Control *SplitContainer::_getch(int p_idx) const {
 	int idx = 0;
 
 	for (int i = 0; i < get_child_count(); i++) {
-		Control *c = get_child(i)->cast_to<Control>();
+		Control *c = Object::cast_to<Control>(get_child(i));
 		if (!c || !c->is_visible_in_tree())
 			continue;
 		if (c->is_set_as_toplevel())
@@ -410,9 +410,9 @@ void SplitContainer::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "collapsed"), "set_collapsed", "is_collapsed");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "dragger_visibility", PROPERTY_HINT_ENUM, "Visible,Hidden,Hidden & Collapsed"), "set_dragger_visibility", "get_dragger_visibility");
 
-	BIND_CONSTANT(DRAGGER_VISIBLE);
-	BIND_CONSTANT(DRAGGER_HIDDEN);
-	BIND_CONSTANT(DRAGGER_HIDDEN_COLLAPSED);
+	BIND_ENUM_CONSTANT(DRAGGER_VISIBLE);
+	BIND_ENUM_CONSTANT(DRAGGER_HIDDEN);
+	BIND_ENUM_CONSTANT(DRAGGER_HIDDEN_COLLAPSED);
 }
 
 SplitContainer::SplitContainer(bool p_vertical) {

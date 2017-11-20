@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -60,8 +60,8 @@ protected:
 	void _update_camera(Camera *p_camera);
 	void _remove_camera(Camera *p_camera);
 
-	void _register_notifier(VisibilityNotifier *p_notifier, const Rect3 &p_rect);
-	void _update_notifier(VisibilityNotifier *p_notifier, const Rect3 &p_rect);
+	void _register_notifier(VisibilityNotifier *p_notifier, const AABB &p_rect);
+	void _update_notifier(VisibilityNotifier *p_notifier, const AABB &p_rect);
 	void _remove_notifier(VisibilityNotifier *p_notifier);
 	friend class Viewport;
 	void _update(uint64_t p_frame);

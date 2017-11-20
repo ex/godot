@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -103,7 +103,7 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 	}
 
 	/* GET FILESIZE */
-	uint32_t filesize = file->get_32();
+	file->get_32(); // filesize
 
 	/* CHECK WAVE */
 
@@ -129,7 +129,7 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 	int format_freq = 0;
 	int loop_begin = 0;
 	int loop_end = 0;
-	int frames;
+	int frames = 0;
 
 	Vector<float> data;
 
@@ -141,7 +141,7 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 
 		/* chunk size */
 		uint32_t chunksize = file->get_32();
-		uint32_t file_pos = file->get_pos(); //save file pos, so we can skip to next chunk safely
+		uint32_t file_pos = file->get_position(); //save file pos, so we can skip to next chunk safely
 
 		if (file->eof_reached()) {
 

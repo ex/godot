@@ -1,9 +1,9 @@
 /*************************************************************************/
-/*  globals.cpp                                                          */
+/*  project_settings.cpp                                                 */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -114,7 +114,15 @@ String ProjectSettings::globalize_path(const String &p_path) const {
 			return p_path.replace("res:/", resource_path);
 		};
 		return p_path.replace("res://", "");
-	};
+	} else if (p_path.begins_with("user://")) {
+
+		String data_dir = OS::get_singleton()->get_user_data_dir();
+		if (data_dir != "") {
+
+			return p_path.replace("user:/", data_dir);
+		};
+		return p_path.replace("user://", "");
+	}
 
 	return p_path;
 }
@@ -144,7 +152,7 @@ bool ProjectSettings::_set(const StringName &p_name, const Variant &p_value) {
 				bool override_valid = false;
 				for (int i = 1; i < s.size(); i++) {
 					String feature = s[i].strip_edges();
-					if (OS::get_singleton()->check_feature_support(feature) || custom_features.has(feature)) {
+					if (OS::get_singleton()->has_feature(feature) || custom_features.has(feature)) {
 						override_valid = true;
 						break;
 					}
@@ -253,7 +261,7 @@ bool ProjectSettings::_load_resource_pack(const String &p_pack) {
 	return true;
 }
 
-Error ProjectSettings::setup(const String &p_path, const String &p_main_pack) {
+Error ProjectSettings::setup(const String &p_path, const String &p_main_pack, bool p_upwards) {
 
 	//If looking for files in network, just use network!
 
@@ -286,11 +294,26 @@ Error ProjectSettings::setup(const String &p_path, const String &p_main_pack) {
 
 	//Attempt with execname.pck
 	if (exec_path != "") {
+		bool found = false;
 
-		if (_load_resource_pack(exec_path.get_basename() + ".pck")) {
+		// get our filename without our path (note, using exec_path.get_file before get_basename anymore because not all file systems have dots in their file names!)
+		String filebase_name = exec_path.get_file().get_basename();
 
+		// try to open at the location of executable
+		String datapack_name = exec_path.get_base_dir().plus_file(filebase_name) + ".pck";
+		if (_load_resource_pack(datapack_name)) {
+			found = true;
+		} else {
+			datapack_name = filebase_name + ".pck";
+			if (_load_resource_pack(datapack_name)) {
+				found = true;
+			}
+		}
+
+		// if we opened our package, try and load our project...
+		if (found) {
 			if (_load_settings("res://project.godot") == OK || _load_settings_binary("res://project.binary") == OK) {
-				//load override from location of executable
+				// load override from location of executable
 				_load_settings(exec_path.get_base_dir().plus_file("override.cfg"));
 			}
 
@@ -339,10 +362,14 @@ Error ProjectSettings::setup(const String &p_path, const String &p_main_pack) {
 			break;
 		}
 
-		d->change_dir("..");
-		if (d->get_current_dir() == current_dir)
-			break; //not doing anything useful
-		current_dir = d->get_current_dir();
+		if (p_upwards) {
+			d->change_dir("..");
+			if (d->get_current_dir() == current_dir)
+				break; //not doing anything useful
+			current_dir = d->get_current_dir();
+		} else {
+			break;
+		}
 	}
 
 	resource_path = candidate;
@@ -358,7 +385,7 @@ Error ProjectSettings::setup(const String &p_path, const String &p_main_pack) {
 	return OK;
 }
 
-bool ProjectSettings::has(String p_var) const {
+bool ProjectSettings::has_setting(String p_var) const {
 
 	_THREAD_SAFE_METHOD_
 
@@ -605,8 +632,8 @@ Error ProjectSettings::_save_settings_text(const String &p_file, const Map<Strin
 	file->store_line("; Engine configuration file.");
 	file->store_line("; It's best edited using the editor UI and not directly,");
 	file->store_line("; since the parameters that go here are not all obvious.");
-	file->store_line("; ");
-	file->store_line("; Format: ");
+	file->store_line(";");
+	file->store_line("; Format:");
 	file->store_line(";   [section] ; section goes between []");
 	file->store_line(";   param=value ; assign values to parameters");
 	file->store_line("");
@@ -733,52 +760,12 @@ Error ProjectSettings::save_custom(const String &p_path, const CustomMap &p_cust
 	}
 
 	return OK;
-
-#if 0
-	Error err = file->open(dst_file,FileAccess::WRITE);
-	if (err) {
-		memdelete(file);
-		ERR_EXPLAIN("Couldn't save project.godot");
-		ERR_FAIL_COND_V(err,err)
-	}
-
-
-	for(Map<String,List<String> >::Element *E=props.front();E;E=E->next()) {
-
-		if (E!=props.front())
-			file->store_string("\n");
-
-		if (E->key()!="")
-			file->store_string("["+E->key()+"]\n\n");
-		for(List<String>::Element *F=E->get().front();F;F=F->next()) {
-
-			String key = F->get();
-			if (E->key()!="")
-				key=E->key()+"/"+key;
-			Variant value;
-
-			if (p_custom.has(key))
-				value=p_custom[key];
-			else
-				value = get(key);
-
-			file->store_string(F->get()+"="+_encode_variant(value)+"\n");
-
-		}
-	}
-
-	file->close();
-	memdelete(file);
-
-
-	return OK;
-#endif
 }
 
 Variant _GLOBAL_DEF(const String &p_var, const Variant &p_default) {
 
 	Variant ret;
-	if (ProjectSettings::get_singleton()->has(p_var)) {
+	if (ProjectSettings::get_singleton()->has_setting(p_var)) {
 		ret = ProjectSettings::get_singleton()->get(p_var);
 	} else {
 		ProjectSettings::get_singleton()->set(p_var, p_default);
@@ -787,32 +774,6 @@ Variant _GLOBAL_DEF(const String &p_var, const Variant &p_default) {
 	ProjectSettings::get_singleton()->set_initial_value(p_var, p_default);
 	ProjectSettings::get_singleton()->set_builtin_order(p_var);
 	return ret;
-}
-
-void ProjectSettings::add_singleton(const Singleton &p_singleton) {
-
-	singletons.push_back(p_singleton);
-	singleton_ptrs[p_singleton.name] = p_singleton.ptr;
-}
-
-Object *ProjectSettings::get_singleton_object(const String &p_name) const {
-
-	const Map<StringName, Object *>::Element *E = singleton_ptrs.find(p_name);
-	if (!E)
-		return NULL;
-	else
-		return E->get();
-};
-
-bool ProjectSettings::has_singleton(const String &p_name) const {
-
-	return get_singleton_object(p_name) != NULL;
-};
-
-void ProjectSettings::get_singletons(List<Singleton> *p_singletons) {
-
-	for (List<Singleton>::Element *E = singletons.front(); E; E = E->next())
-		p_singletons->push_back(E->get());
 }
 
 Vector<String> ProjectSettings::get_optimizer_presets() const {
@@ -885,10 +846,20 @@ Variant ProjectSettings::property_get_revert(const String &p_name) {
 	return props[p_name].initial;
 }
 
+void ProjectSettings::set_setting(const String &p_setting, const Variant &p_value) {
+	set(p_setting, p_value);
+}
+
+Variant ProjectSettings::get_setting(const String &p_setting) const {
+	return get(p_setting);
+}
+
 void ProjectSettings::_bind_methods() {
 
-	ClassDB::bind_method(D_METHOD("has", "name"), &ProjectSettings::has);
-	ClassDB::bind_method(D_METHOD("set_order", "name", "pos"), &ProjectSettings::set_order);
+	ClassDB::bind_method(D_METHOD("has_setting", "name"), &ProjectSettings::has_setting);
+	ClassDB::bind_method(D_METHOD("set_setting", "name", "value"), &ProjectSettings::set_setting);
+	ClassDB::bind_method(D_METHOD("get_setting", "name"), &ProjectSettings::get_setting);
+	ClassDB::bind_method(D_METHOD("set_order", "name", "position"), &ProjectSettings::set_order);
 	ClassDB::bind_method(D_METHOD("get_order", "name"), &ProjectSettings::get_order);
 	ClassDB::bind_method(D_METHOD("set_initial_value", "name", "value"), &ProjectSettings::set_initial_value);
 	ClassDB::bind_method(D_METHOD("add_property_info", "hint"), &ProjectSettings::_add_property_info_bind);
@@ -896,8 +867,6 @@ void ProjectSettings::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("localize_path", "path"), &ProjectSettings::localize_path);
 	ClassDB::bind_method(D_METHOD("globalize_path", "path"), &ProjectSettings::globalize_path);
 	ClassDB::bind_method(D_METHOD("save"), &ProjectSettings::save);
-	ClassDB::bind_method(D_METHOD("has_singleton", "name"), &ProjectSettings::has_singleton);
-	ClassDB::bind_method(D_METHOD("get_singleton", "name"), &ProjectSettings::get_singleton_object);
 	ClassDB::bind_method(D_METHOD("load_resource_pack", "pack"), &ProjectSettings::_load_resource_pack);
 	ClassDB::bind_method(D_METHOD("property_can_revert", "name"), &ProjectSettings::property_can_revert);
 	ClassDB::bind_method(D_METHOD("property_get_revert", "name"), &ProjectSettings::property_get_revert);
@@ -1039,10 +1008,16 @@ ProjectSettings::ProjectSettings() {
 	GLOBAL_DEF("debug/settings/profiler/max_functions", 16384);
 
 	//assigning here, because using GLOBAL_GET on every block for compressing can be slow
+	Compression::zstd_long_distance_matching = GLOBAL_DEF("compression/formats/zstd/long_distance_matching", false);
+	custom_prop_info["compression/formats/zstd/long_distance_matching"] = PropertyInfo(Variant::BOOL, "compression/formats/zstd/long_distance_matching");
 	Compression::zstd_level = GLOBAL_DEF("compression/formats/zstd/compression_level", 3);
 	custom_prop_info["compression/formats/zstd/compression_level"] = PropertyInfo(Variant::INT, "compression/formats/zstd/compression_level", PROPERTY_HINT_RANGE, "1,22,1");
+	Compression::zstd_window_log_size = GLOBAL_DEF("compression/formats/zstd/window_log_size", 27);
+	custom_prop_info["compression/formats/zstd/window_log_size"] = PropertyInfo(Variant::INT, "compression/formats/zstd/window_log_size", PROPERTY_HINT_RANGE, "10,30,1");
+
 	Compression::zlib_level = GLOBAL_DEF("compression/formats/zlib/compression_level", Z_DEFAULT_COMPRESSION);
 	custom_prop_info["compression/formats/zlib/compression_level"] = PropertyInfo(Variant::INT, "compression/formats/zlib/compression_level", PROPERTY_HINT_RANGE, "-1,9,1");
+
 	Compression::gzip_level = GLOBAL_DEF("compression/formats/gzip/compression_level", Z_DEFAULT_COMPRESSION);
 	custom_prop_info["compression/formats/gzip/compression_level"] = PropertyInfo(Variant::INT, "compression/formats/gzip/compression_level", PROPERTY_HINT_RANGE, "-1,9,1");
 

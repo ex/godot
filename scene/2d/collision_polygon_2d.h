@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -69,7 +69,7 @@ public:
 	void set_polygon(const Vector<Point2> &p_polygon);
 	Vector<Point2> get_polygon() const;
 
-	virtual Rect2 get_item_rect() const;
+	virtual Rect2 _edit_get_rect() const;
 
 	virtual String get_configuration_warning() const;
 

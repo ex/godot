@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -106,7 +106,7 @@ public:
 	StringName _get_gizmo_geometry;
 	StringName _can_gizmo_scale;
 
-	StringName _fixed_process;
+	StringName _physics_process;
 	StringName _process;
 	StringName _enter_world;
 	StringName _exit_world;

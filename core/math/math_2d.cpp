@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -205,33 +205,6 @@ Vector2 Vector2::clamped(real_t p_len) const {
 	return v;
 }
 
-Vector2 Vector2::cubic_interpolate_soft(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_t) const {
-#if 0
-	k[0] = ((*this) (vi[0] + 1, vi[1], vi[2])) - ((*this) (vi[0],
-	vi[1],vi[2])); //fk = a0
-	k[1] = (((*this) (vi[0] + 1, vi[1], vi[2])) - ((*this) ((int) (v(0) -
-	1), vi[1],vi[2])))*0.5; //dk = a1
-	k[2] = (((*this) ((int) (v(0) + 2), vi[1], vi[2])) - ((*this) (vi[0],
-	vi[1],vi[2])))*0.5; //dk+1
-	k[3] = k[0]*3 - k[1]*2 - k[2];//a2
-	k[4] = k[1] + k[2] - k[0]*2;//a3
-
-	//ip = a3(t-tk)³ + a2(t-tk)² + a1(t-tk) + a0
-	//
-	//a3 = dk + dk+1 - Dk
-	//a2 = 3Dk - 2dk - dk+1
-	//a1 = dk
-	//a0 = fk
-	//
-	//dk = (fk+1 - fk-1)*0.5
-	//Dk = (fk+1 - fk)
-
-	real_t dk =
-#endif
-
-	return Vector2();
-}
-
 Vector2 Vector2::cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, const Vector2 &p_post_b, real_t p_t) const {
 
 	Vector2 p0 = p_pre_a;
@@ -281,22 +254,22 @@ Vector2 Vector2::cubic_interpolate(const Vector2 &p_b, const Vector2 &p_pre_a, c
 }
 
 // slide returns the component of the vector along the given plane, specified by its normal vector.
-Vector2 Vector2::slide(const Vector2 &p_n) const {
+Vector2 Vector2::slide(const Vector2 &p_normal) const {
 #ifdef MATH_CHECKS
-	ERR_FAIL_COND_V(p_n.is_normalized() == false, Vector2());
+	ERR_FAIL_COND_V(p_normal.is_normalized() == false, Vector2());
 #endif
-	return *this - p_n * this->dot(p_n);
+	return *this - p_normal * this->dot(p_normal);
 }
 
-Vector2 Vector2::bounce(const Vector2 &p_n) const {
-	return -reflect(p_n);
+Vector2 Vector2::bounce(const Vector2 &p_normal) const {
+	return -reflect(p_normal);
 }
 
-Vector2 Vector2::reflect(const Vector2 &p_n) const {
+Vector2 Vector2::reflect(const Vector2 &p_normal) const {
 #ifdef MATH_CHECKS
-	ERR_FAIL_COND_V(p_n.is_normalized() == false, Vector2());
+	ERR_FAIL_COND_V(p_normal.is_normalized() == false, Vector2());
 #endif
-	return 2.0 * p_n * this->dot(p_n) - *this;
+	return 2.0 * p_normal * this->dot(p_normal) - *this;
 }
 
 bool Rect2::intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_pos, Point2 *r_normal) const {

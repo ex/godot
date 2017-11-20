@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -55,7 +55,7 @@ FileAccess *FileAccess::create(AccessType p_access) {
 
 bool FileAccess::exists(const String &p_name) {
 
-	if (PackedData::get_singleton()->has_path(p_name))
+	if (PackedData::get_singleton() && PackedData::get_singleton()->has_path(p_name))
 		return true;
 
 	FileAccess *f = open(p_name, READ);
@@ -152,7 +152,7 @@ String FileAccess::fix_path(const String &p_path) const {
 
 			if (r_path.begins_with("user://")) {
 
-				String data_dir = OS::get_singleton()->get_data_dir();
+				String data_dir = OS::get_singleton()->get_user_data_dir();
 				if (data_dir != "") {
 
 					return r_path.replace("user:/", data_dir);
@@ -475,9 +475,9 @@ void FileAccess::store_buffer(const uint8_t *p_src, int p_length) {
 		store_8(p_src[i]);
 }
 
-Vector<uint8_t> FileAccess::get_file_as_array(const String &p_file) {
+Vector<uint8_t> FileAccess::get_file_as_array(const String &p_path) {
 
-	FileAccess *f = FileAccess::open(p_file, READ);
+	FileAccess *f = FileAccess::open(p_path, READ);
 	ERR_FAIL_COND_V(!f, Vector<uint8_t>());
 	Vector<uint8_t> data;
 	data.resize(f->get_len());

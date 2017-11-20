@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -43,6 +43,26 @@ void *operator new(size_t p_size, void *(*p_allocfunc)(size_t p_size)) {
 
 	return p_allocfunc(p_size);
 }
+
+#ifdef _MSC_VER
+void operator delete(void *p_mem, const char *p_description) {
+
+	ERR_EXPLAINC("Call to placement delete should not happen.");
+	CRASH_NOW();
+}
+
+void operator delete(void *p_mem, void *(*p_allocfunc)(size_t p_size)) {
+
+	ERR_EXPLAINC("Call to placement delete should not happen.");
+	CRASH_NOW();
+}
+
+void operator delete(void *p_mem, void *p_pointer, size_t check, const char *p_description) {
+
+	ERR_EXPLAINC("Call to placement delete should not happen.");
+	CRASH_NOW();
+}
+#endif
 
 #ifdef DEBUG_ENABLED
 uint64_t Memory::mem_usage = 0;

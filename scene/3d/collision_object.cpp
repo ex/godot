@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -28,6 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "collision_object.h"
+
 #include "scene/scene_string_names.h"
 #include "servers/physics_server.h"
 
@@ -144,9 +145,9 @@ void CollisionObject::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("shape_owner_clear_shapes", "owner_id"), &CollisionObject::shape_owner_clear_shapes);
 	ClassDB::bind_method(D_METHOD("shape_find_owner", "shape_index"), &CollisionObject::shape_find_owner);
 
-	BIND_VMETHOD(MethodInfo("_input_event", PropertyInfo(Variant::OBJECT, "camera"), PropertyInfo(Variant::OBJECT, "event", PROPERTY_HINT_RESOURCE_TYPE, "InputEvent"), PropertyInfo(Variant::VECTOR3, "click_pos"), PropertyInfo(Variant::VECTOR3, "click_normal"), PropertyInfo(Variant::INT, "shape_idx")));
+	BIND_VMETHOD(MethodInfo("_input_event", PropertyInfo(Variant::OBJECT, "camera"), PropertyInfo(Variant::OBJECT, "event", PROPERTY_HINT_RESOURCE_TYPE, "InputEvent"), PropertyInfo(Variant::VECTOR3, "click_position"), PropertyInfo(Variant::VECTOR3, "click_normal"), PropertyInfo(Variant::INT, "shape_idx")));
 
-	ADD_SIGNAL(MethodInfo("input_event", PropertyInfo(Variant::OBJECT, "camera"), PropertyInfo(Variant::OBJECT, "event", PROPERTY_HINT_RESOURCE_TYPE, "InputEvent"), PropertyInfo(Variant::VECTOR3, "click_pos"), PropertyInfo(Variant::VECTOR3, "click_normal"), PropertyInfo(Variant::INT, "shape_idx")));
+	ADD_SIGNAL(MethodInfo("input_event", PropertyInfo(Variant::OBJECT, "camera"), PropertyInfo(Variant::OBJECT, "event", PROPERTY_HINT_RESOURCE_TYPE, "InputEvent"), PropertyInfo(Variant::VECTOR3, "click_position"), PropertyInfo(Variant::VECTOR3, "click_normal"), PropertyInfo(Variant::INT, "shape_idx")));
 	ADD_SIGNAL(MethodInfo("mouse_entered"));
 	ADD_SIGNAL(MethodInfo("mouse_exited"));
 
@@ -160,7 +161,7 @@ uint32_t CollisionObject::create_shape_owner(Object *p_owner) {
 	uint32_t id;
 
 	if (shapes.size() == 0) {
-		id = 1;
+		id = 0;
 	} else {
 		id = shapes.back()->key() + 1;
 	}

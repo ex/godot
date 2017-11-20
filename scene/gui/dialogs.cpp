@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -60,17 +60,17 @@ void WindowDialog::_fix_size() {
 	float right = 0;
 	// Check validity, because the theme could contain a different type of StyleBox
 	if (panel->get_class() == "StyleBoxTexture") {
-		Ref<StyleBoxTexture> panel_texture = panel->cast_to<StyleBoxTexture>();
+		Ref<StyleBoxTexture> panel_texture = Object::cast_to<StyleBoxTexture>(*panel);
 		top = panel_texture->get_expand_margin_size(MARGIN_TOP);
 		left = panel_texture->get_expand_margin_size(MARGIN_LEFT);
 		bottom = panel_texture->get_expand_margin_size(MARGIN_BOTTOM);
 		right = panel_texture->get_expand_margin_size(MARGIN_RIGHT);
 	} else if (panel->get_class() == "StyleBoxFlat") {
-		Ref<StyleBoxFlat> panel_flat = panel->cast_to<StyleBoxFlat>();
-		top = panel_flat->_get_additional_border_size(MARGIN_TOP);
-		left = panel_flat->_get_additional_border_size(MARGIN_LEFT);
-		bottom = panel_flat->_get_additional_border_size(MARGIN_BOTTOM);
-		right = panel_flat->_get_additional_border_size(MARGIN_RIGHT);
+		Ref<StyleBoxFlat> panel_flat = Object::cast_to<StyleBoxFlat>(*panel);
+		top = panel_flat->get_expand_margin_size(MARGIN_TOP);
+		left = panel_flat->get_expand_margin_size(MARGIN_LEFT);
+		bottom = panel_flat->get_expand_margin_size(MARGIN_BOTTOM);
+		right = panel_flat->get_expand_margin_size(MARGIN_RIGHT);
 	}
 
 	pos.x = MAX(left, MIN(pos.x, viewport_size.x - size.x - right));
@@ -195,7 +195,7 @@ void WindowDialog::_notification(int p_what) {
 			RID canvas = get_canvas_item();
 
 			// Draw the background.
-			Ref<StyleBox> panel = get_stylebox("panel", "WindowDialog");
+			Ref<StyleBox> panel = get_stylebox("panel");
 			Size2 size = get_size();
 			panel->draw(canvas, Rect2(0, 0, size.x, size.y));
 
@@ -215,7 +215,7 @@ void WindowDialog::_notification(int p_what) {
 			close_button->set_pressed_texture(get_icon("close", "WindowDialog"));
 			close_button->set_hover_texture(get_icon("close_highlight", "WindowDialog"));
 			close_button->set_anchor(MARGIN_LEFT, ANCHOR_END);
-			close_button->set_begin(Point2(get_constant("close_h_ofs", "WindowDialog"), -get_constant("close_v_ofs", "WindowDialog")));
+			close_button->set_begin(Point2(-get_constant("close_h_ofs", "WindowDialog"), -get_constant("close_v_ofs", "WindowDialog")));
 		} break;
 
 		case NOTIFICATION_MOUSE_EXIT: {
@@ -227,11 +227,11 @@ void WindowDialog::_notification(int p_what) {
 		} break;
 #ifdef TOOLS_ENABLED
 		case NOTIFICATION_POST_POPUP: {
-			if (get_tree() && get_tree()->is_editor_hint() && EditorNode::get_singleton())
+			if (get_tree() && Engine::get_singleton()->is_editor_hint() && EditorNode::get_singleton())
 				EditorNode::get_singleton()->dim_editor(true);
 		} break;
 		case NOTIFICATION_POPUP_HIDE: {
-			if (get_tree() && get_tree()->is_editor_hint() && EditorNode::get_singleton())
+			if (get_tree() && Engine::get_singleton()->is_editor_hint() && EditorNode::get_singleton())
 				EditorNode::get_singleton()->dim_editor(false);
 		} break;
 #endif
@@ -271,7 +271,7 @@ int WindowDialog::_drag_hit_test(const Point2 &pos) const {
 
 void WindowDialog::set_title(const String &p_title) {
 
-	title = XL_MESSAGE(p_title);
+	title = tr(p_title);
 	update();
 }
 String WindowDialog::get_title() const {
@@ -424,7 +424,7 @@ void AcceptDialog::_update_child_rects() {
 	Vector2 csize(size.x - margin * 2, size.y - margin * 3 - hminsize.y - label_size.height);
 
 	for (int i = 0; i < get_child_count(); i++) {
-		Control *c = get_child(i)->cast_to<Control>();
+		Control *c = Object::cast_to<Control>(get_child(i));
 		if (!c)
 			continue;
 
@@ -448,7 +448,7 @@ Size2 AcceptDialog::get_minimum_size() const {
 	Size2 minsize = label->get_combined_minimum_size();
 
 	for (int i = 0; i < get_child_count(); i++) {
-		Control *c = get_child(i)->cast_to<Control>();
+		Control *c = Object::cast_to<Control>(get_child(i));
 		if (!c)
 			continue;
 
@@ -546,7 +546,7 @@ AcceptDialog::AcceptDialog() {
 	label->set_anchor(MARGIN_RIGHT, ANCHOR_END);
 	label->set_anchor(MARGIN_BOTTOM, ANCHOR_END);
 	label->set_begin(Point2(margin, margin));
-	label->set_end(Point2(margin, button_margin + 10));
+	label->set_end(Point2(-margin, -button_margin - 10));
 	//label->set_autowrap(true);
 	add_child(label);
 

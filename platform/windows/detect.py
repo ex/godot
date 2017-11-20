@@ -14,69 +14,57 @@ def get_name():
 def can_build():
 
     if (os.name == "nt"):
-        # building natively on windows!
-        if (os.getenv("VCINSTALLDIR")):
+        # Building natively on Windows
+        if (os.getenv("VCINSTALLDIR")): # MSVC
             return True
-        else:
-            print("\nMSVC not detected, attempting MinGW.")
-            mingw32 = ""
-            mingw64 = ""
-            if (os.getenv("MINGW32_PREFIX")):
-                mingw32 = os.getenv("MINGW32_PREFIX")
-            if (os.getenv("MINGW64_PREFIX")):
-                mingw64 = os.getenv("MINGW64_PREFIX")
 
-            test = "gcc --version > NUL 2>&1"
-            if os.system(test) != 0 and os.system(mingw32 + test) != 0 and os.system(mingw64 + test) != 0:
-                print("- could not detect gcc.")
-                print("Please, make sure a path to a MinGW /bin directory is accessible into the environment PATH.\n")
-                return False
-            else:
-                print("- gcc detected.")
+        print("MSVC not detected (no VCINSTALLDIR environment variable), attempting MinGW.")
+        mingw32 = ""
+        mingw64 = ""
+        if (os.getenv("MINGW32_PREFIX")):
+            mingw32 = os.getenv("MINGW32_PREFIX")
+        if (os.getenv("MINGW64_PREFIX")):
+            mingw64 = os.getenv("MINGW64_PREFIX")
 
+        test = "gcc --version > NUL 2>&1"
+        if (os.system(test) == 0 or os.system(mingw32 + test) == 0 or os.system(mingw64 + test) == 0):
             return True
 
     if (os.name == "posix"):
-
-        mingw = "i586-mingw32msvc-"
-        mingw64 = "x86_64-w64-mingw32-"
+        # Cross-compiling with MinGW-w64 (old MinGW32 is not supported)
         mingw32 = "i686-w64-mingw32-"
+        mingw64 = "x86_64-w64-mingw32-"
 
         if (os.getenv("MINGW32_PREFIX")):
             mingw32 = os.getenv("MINGW32_PREFIX")
-            mingw = mingw32
         if (os.getenv("MINGW64_PREFIX")):
             mingw64 = os.getenv("MINGW64_PREFIX")
 
         test = "gcc --version > /dev/null 2>&1"
-        if (os.system(mingw + test) == 0 or os.system(mingw64 + test) == 0 or os.system(mingw32 + test) == 0):
+        if (os.system(mingw64 + test) == 0 or os.system(mingw32 + test) == 0):
             return True
 
     return False
 
 
 def get_opts():
+    from SCons.Variables import BoolVariable, EnumVariable
 
-    mingw = ""
     mingw32 = ""
     mingw64 = ""
     if (os.name == "posix"):
-        mingw = "i586-mingw32msvc-"
         mingw32 = "i686-w64-mingw32-"
         mingw64 = "x86_64-w64-mingw32-"
 
-        if os.system(mingw32 + "gcc --version > /dev/null 2>&1") != 0:
-            mingw32 = mingw
-
     if (os.getenv("MINGW32_PREFIX")):
         mingw32 = os.getenv("MINGW32_PREFIX")
-        mingw = mingw32
     if (os.getenv("MINGW64_PREFIX")):
         mingw64 = os.getenv("MINGW64_PREFIX")
 
     return [
-        ('mingw_prefix', 'MinGW Prefix', mingw32),
-        ('mingw_prefix_64', 'MinGW Prefix 64 bits', mingw64),
+        ('mingw_prefix_32', 'MinGW prefix (Win32)', mingw32),
+        ('mingw_prefix_64', 'MinGW prefix (Win64)', mingw64),
+        EnumVariable('debug_symbols', 'Add debug symbols to release version', 'yes', ('yes', 'no', 'full')),
     ]
 
 
@@ -88,12 +76,10 @@ def get_flags():
 
 def build_res_file(target, source, env):
 
-    cmdbase = ""
     if (env["bits"] == "32"):
-        cmdbase = env['mingw_prefix']
+        cmdbase = env['mingw_prefix_32']
     else:
         cmdbase = env['mingw_prefix_64']
-    CPPPATH = env['CPPPATH']
     cmdbase = cmdbase + 'windres --include-dir . '
     import subprocess
     for x in range(len(source)):
@@ -111,8 +97,10 @@ def configure(env):
 
     env.Append(CPPPATH=['#platform/windows'])
 
-    # Targeted Windows version: Vista (and later)
-    winver = "0x0600" # Windows Vista is the minimum target for windows builds
+    # Targeted Windows version: 7 (and later), minimum supported version
+    # XP support dropped after EOL due to missing API for IPv6 and other issues
+    # Vista support dropped after EOL due to GH-10243
+    winver = "0x0601"
 
     if (os.name == "nt" and os.getenv("VCINSTALLDIR")): # MSVC
 
@@ -136,7 +124,7 @@ def configure(env):
             env.Append(LINKFLAGS=['/ENTRY:mainCRTStartup'])
 
         elif (env["target"] == "debug"):
-            env.Append(CCFLAGS=['/Z7', '/DDEBUG_ENABLED', '/DDEBUG_MEMORY_ENABLED', '/DD3D_DEBUG_INFO', '/Od'])
+            env.Append(CCFLAGS=['/Z7', '/DDEBUG_ENABLED', '/DDEBUG_MEMORY_ENABLED', '/DD3D_DEBUG_INFO', '/Od', '/EHsc'])
             env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
             env.Append(LINKFLAGS=['/DEBUG'])
 
@@ -184,6 +172,7 @@ def configure(env):
         env.Append(CCFLAGS=['/DWINDOWS_ENABLED'])
         env.Append(CCFLAGS=['/DOPENGL_ENABLED'])
         env.Append(CCFLAGS=['/DRTAUDIO_ENABLED'])
+        env.Append(CCFLAGS=['/DWASAPI_ENABLED'])
         env.Append(CCFLAGS=['/DTYPED_METHOD_BIND'])
         env.Append(CCFLAGS=['/DWIN32'])
         env.Append(CCFLAGS=['/DWINVER=%s' % winver, '/D_WIN32_WINNT=%s' % winver])
@@ -225,11 +214,20 @@ def configure(env):
 
             env.Append(LINKFLAGS=['-Wl,--subsystem,windows'])
 
+            if (env["debug_symbols"] == "yes"):
+               env.Prepend(CCFLAGS=['-g1'])
+            if (env["debug_symbols"] == "full"):
+               env.Prepend(CCFLAGS=['-g2'])
+
         elif (env["target"] == "release_debug"):
             env.Append(CCFLAGS=['-O2', '-DDEBUG_ENABLED'])
+            if (env["debug_symbols"] == "yes"):
+               env.Prepend(CCFLAGS=['-g1'])
+            if (env["debug_symbols"] == "full"):
+               env.Prepend(CCFLAGS=['-g2'])
 
         elif (env["target"] == "debug"):
-            env.Append(CCFLAGS=['-g', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
+            env.Append(CCFLAGS=['-g3', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
 
         ## Compiler configuration
 
@@ -238,16 +236,19 @@ def configure(env):
         else:
             env["PROGSUFFIX"] = env["PROGSUFFIX"] + ".exe"  # for linux cross-compilation
 
-        mingw_prefix = ""
-
         if (env["bits"] == "default"):
-            env["bits"] = "64" if "PROGRAMFILES(X86)" in os.environ else "32"
+            if (os.name == "nt"):
+                env["bits"] = "64" if "PROGRAMFILES(X86)" in os.environ else "32"
+            else: # default to 64-bit on Linux
+                env["bits"] = "64"
+
+        mingw_prefix = ""
 
         if (env["bits"] == "32"):
             env.Append(LINKFLAGS=['-static'])
             env.Append(LINKFLAGS=['-static-libgcc'])
             env.Append(LINKFLAGS=['-static-libstdc++'])
-            mingw_prefix = env["mingw_prefix"]
+            mingw_prefix = env["mingw_prefix_32"]
         else:
             env.Append(LINKFLAGS=['-static'])
             mingw_prefix = env["mingw_prefix_64"]
@@ -255,18 +256,23 @@ def configure(env):
         env["CC"] = mingw_prefix + "gcc"
         env['AS'] = mingw_prefix + "as"
         env['CXX'] = mingw_prefix + "g++"
-        env['AR'] = mingw_prefix + "ar"
-        env['RANLIB'] = mingw_prefix + "ranlib"
+        env['AR'] = mingw_prefix + "gcc-ar"
+        env['RANLIB'] = mingw_prefix + "gcc-ranlib"
         env['LD'] = mingw_prefix + "g++"
         env["x86_libtheora_opt_gcc"] = True
+
+        if env['use_lto']:
+            env.Append(CCFLAGS=['-flto'])
+            env.Append(LINKFLAGS=['-flto=' + str(env.GetOption("num_jobs"))])
 
         ## Compile flags
 
         env.Append(CCFLAGS=['-DWINDOWS_ENABLED', '-mwindows'])
         env.Append(CCFLAGS=['-DOPENGL_ENABLED'])
         env.Append(CCFLAGS=['-DRTAUDIO_ENABLED'])
+        env.Append(CCFLAGS=['-DWASAPI_ENABLED'])
         env.Append(CCFLAGS=['-DWINVER=%s' % winver, '-D_WIN32_WINNT=%s' % winver])
-        env.Append(LIBS=['mingw32', 'opengl32', 'dsound', 'ole32', 'd3d9', 'winmm', 'gdi32', 'iphlpapi', 'shlwapi', 'wsock32', 'ws2_32', 'kernel32', 'oleaut32', 'dinput8', 'dxguid'])
+        env.Append(LIBS=['mingw32', 'opengl32', 'dsound', 'ole32', 'd3d9', 'winmm', 'gdi32', 'iphlpapi', 'shlwapi', 'wsock32', 'ws2_32', 'kernel32', 'oleaut32', 'dinput8', 'dxguid', 'ksuser'])
 
         env.Append(CPPFLAGS=['-DMINGW_ENABLED'])
 

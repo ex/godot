@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -28,7 +28,9 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "physics_2d_server.h"
+#include "core/project_settings.h"
 #include "print_string.h"
+
 Physics2DServer *Physics2DServer::singleton = NULL;
 
 void Physics2DDirectBodyState::integrate_forces() {
@@ -92,16 +94,16 @@ void Physics2DDirectBodyState::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_contact_count"), &Physics2DDirectBodyState::get_contact_count);
 
-	ClassDB::bind_method(D_METHOD("get_contact_local_pos", "contact_idx"), &Physics2DDirectBodyState::get_contact_local_pos);
+	ClassDB::bind_method(D_METHOD("get_contact_local_position", "contact_idx"), &Physics2DDirectBodyState::get_contact_local_position);
 	ClassDB::bind_method(D_METHOD("get_contact_local_normal", "contact_idx"), &Physics2DDirectBodyState::get_contact_local_normal);
 	ClassDB::bind_method(D_METHOD("get_contact_local_shape", "contact_idx"), &Physics2DDirectBodyState::get_contact_local_shape);
 	ClassDB::bind_method(D_METHOD("get_contact_collider", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider);
-	ClassDB::bind_method(D_METHOD("get_contact_collider_pos", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider_pos);
+	ClassDB::bind_method(D_METHOD("get_contact_collider_position", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider_position);
 	ClassDB::bind_method(D_METHOD("get_contact_collider_id", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider_id);
 	ClassDB::bind_method(D_METHOD("get_contact_collider_object", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider_object);
 	ClassDB::bind_method(D_METHOD("get_contact_collider_shape", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider_shape);
 	ClassDB::bind_method(D_METHOD("get_contact_collider_shape_metadata", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider_shape_metadata);
-	ClassDB::bind_method(D_METHOD("get_contact_collider_velocity_at_pos", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider_velocity_at_pos);
+	ClassDB::bind_method(D_METHOD("get_contact_collider_velocity_at_position", "contact_idx"), &Physics2DDirectBodyState::get_contact_collider_velocity_at_position);
 	ClassDB::bind_method(D_METHOD("get_step"), &Physics2DDirectBodyState::get_step);
 	ClassDB::bind_method(D_METHOD("integrate_forces"), &Physics2DDirectBodyState::integrate_forces);
 	ClassDB::bind_method(D_METHOD("get_space_state"), &Physics2DDirectBodyState::get_space_state);
@@ -245,11 +247,11 @@ Dictionary Physics2DDirectSpaceState::_intersect_ray(const Vector2 &p_from, cons
 	return d;
 }
 
-Array Physics2DDirectSpaceState::_intersect_shape(const Ref<Physics2DShapeQueryParameters> &psq, int p_max_results) {
+Array Physics2DDirectSpaceState::_intersect_shape(const Ref<Physics2DShapeQueryParameters> &p_shape_query, int p_max_results) {
 
 	Vector<ShapeResult> sr;
 	sr.resize(p_max_results);
-	int rc = intersect_shape(psq->shape, psq->transform, psq->motion, psq->margin, sr.ptr(), sr.size(), psq->exclude, psq->collision_layer, psq->object_type_mask);
+	int rc = intersect_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->motion, p_shape_query->margin, sr.ptr(), sr.size(), p_shape_query->exclude, p_shape_query->collision_layer, p_shape_query->object_type_mask);
 	Array ret;
 	ret.resize(rc);
 	for (int i = 0; i < rc; i++) {
@@ -266,10 +268,10 @@ Array Physics2DDirectSpaceState::_intersect_shape(const Ref<Physics2DShapeQueryP
 	return ret;
 }
 
-Array Physics2DDirectSpaceState::_cast_motion(const Ref<Physics2DShapeQueryParameters> &psq) {
+Array Physics2DDirectSpaceState::_cast_motion(const Ref<Physics2DShapeQueryParameters> &p_shape_query) {
 
 	float closest_safe, closest_unsafe;
-	bool res = cast_motion(psq->shape, psq->transform, psq->motion, psq->margin, closest_safe, closest_unsafe, psq->exclude, psq->collision_layer, psq->object_type_mask);
+	bool res = cast_motion(p_shape_query->shape, p_shape_query->transform, p_shape_query->motion, p_shape_query->margin, closest_safe, closest_unsafe, p_shape_query->exclude, p_shape_query->collision_layer, p_shape_query->object_type_mask);
 	if (!res)
 		return Array();
 	Array ret;
@@ -307,12 +309,12 @@ Array Physics2DDirectSpaceState::_intersect_point(const Vector2 &p_point, int p_
 	return r;
 }
 
-Array Physics2DDirectSpaceState::_collide_shape(const Ref<Physics2DShapeQueryParameters> &psq, int p_max_results) {
+Array Physics2DDirectSpaceState::_collide_shape(const Ref<Physics2DShapeQueryParameters> &p_shape_query, int p_max_results) {
 
 	Vector<Vector2> ret;
 	ret.resize(p_max_results * 2);
 	int rc = 0;
-	bool res = collide_shape(psq->shape, psq->transform, psq->motion, psq->margin, ret.ptr(), p_max_results, rc, psq->exclude, psq->collision_layer, psq->object_type_mask);
+	bool res = collide_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->motion, p_shape_query->margin, ret.ptr(), p_max_results, rc, p_shape_query->exclude, p_shape_query->collision_layer, p_shape_query->object_type_mask);
 	if (!res)
 		return Array();
 	Array r;
@@ -321,11 +323,11 @@ Array Physics2DDirectSpaceState::_collide_shape(const Ref<Physics2DShapeQueryPar
 		r[i] = ret[i];
 	return r;
 }
-Dictionary Physics2DDirectSpaceState::_get_rest_info(const Ref<Physics2DShapeQueryParameters> &psq) {
+Dictionary Physics2DDirectSpaceState::_get_rest_info(const Ref<Physics2DShapeQueryParameters> &p_shape_query) {
 
 	ShapeRestInfo sri;
 
-	bool res = rest_info(psq->shape, psq->transform, psq->motion, psq->margin, &sri, psq->exclude, psq->collision_layer, psq->object_type_mask);
+	bool res = rest_info(p_shape_query->shape, p_shape_query->transform, p_shape_query->motion, p_shape_query->margin, &sri, p_shape_query->exclude, p_shape_query->collision_layer, p_shape_query->object_type_mask);
 	Dictionary r;
 	if (!res)
 		return r;
@@ -354,12 +356,12 @@ void Physics2DDirectSpaceState::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_rest_info", "shape"), &Physics2DDirectSpaceState::_get_rest_info);
 	//ClassDB::bind_method(D_METHOD("cast_motion","shape","xform","motion","exclude","umask"),&Physics2DDirectSpaceState::_intersect_shape,DEFVAL(Array()),DEFVAL(0));
 
-	BIND_CONSTANT(TYPE_MASK_STATIC_BODY);
-	BIND_CONSTANT(TYPE_MASK_KINEMATIC_BODY);
-	BIND_CONSTANT(TYPE_MASK_RIGID_BODY);
-	BIND_CONSTANT(TYPE_MASK_CHARACTER_BODY);
-	BIND_CONSTANT(TYPE_MASK_AREA);
-	BIND_CONSTANT(TYPE_MASK_COLLISION);
+	BIND_ENUM_CONSTANT(TYPE_MASK_STATIC_BODY);
+	BIND_ENUM_CONSTANT(TYPE_MASK_KINEMATIC_BODY);
+	BIND_ENUM_CONSTANT(TYPE_MASK_RIGID_BODY);
+	BIND_ENUM_CONSTANT(TYPE_MASK_CHARACTER_BODY);
+	BIND_ENUM_CONSTANT(TYPE_MASK_COLLISION);
+	BIND_ENUM_CONSTANT(TYPE_MASK_AREA);
 }
 
 int Physics2DShapeQueryResult::get_result_count() const {
@@ -473,7 +475,15 @@ bool Physics2DServer::_body_test_motion(RID p_body, const Transform2D &p_from, c
 
 void Physics2DServer::_bind_methods() {
 
-	ClassDB::bind_method(D_METHOD("shape_create", "type"), &Physics2DServer::shape_create);
+	ClassDB::bind_method(D_METHOD("line_shape_create"), &Physics2DServer::line_shape_create);
+	ClassDB::bind_method(D_METHOD("ray_shape_create"), &Physics2DServer::ray_shape_create);
+	ClassDB::bind_method(D_METHOD("segment_shape_create"), &Physics2DServer::segment_shape_create);
+	ClassDB::bind_method(D_METHOD("circle_shape_create"), &Physics2DServer::circle_shape_create);
+	ClassDB::bind_method(D_METHOD("rectangle_shape_create"), &Physics2DServer::rectangle_shape_create);
+	ClassDB::bind_method(D_METHOD("capsule_shape_create"), &Physics2DServer::capsule_shape_create);
+	ClassDB::bind_method(D_METHOD("convex_polygon_shape_create"), &Physics2DServer::convex_polygon_shape_create);
+	ClassDB::bind_method(D_METHOD("concave_polygon_shape_create"), &Physics2DServer::concave_polygon_shape_create);
+
 	ClassDB::bind_method(D_METHOD("shape_set_data", "shape", "data"), &Physics2DServer::shape_set_data);
 
 	ClassDB::bind_method(D_METHOD("shape_get_type", "shape"), &Physics2DServer::shape_get_type);
@@ -519,7 +529,7 @@ void Physics2DServer::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("area_set_monitor_callback", "area", "receiver", "method"), &Physics2DServer::area_set_monitor_callback);
 
-	ClassDB::bind_method(D_METHOD("body_create", "mode", "init_sleeping"), &Physics2DServer::body_create, DEFVAL(BODY_MODE_RIGID), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("body_create"), &Physics2DServer::body_create);
 
 	ClassDB::bind_method(D_METHOD("body_set_space", "body", "space"), &Physics2DServer::body_set_space);
 	ClassDB::bind_method(D_METHOD("body_get_space", "body"), &Physics2DServer::body_get_space);
@@ -561,7 +571,7 @@ void Physics2DServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("body_set_state", "body", "state", "value"), &Physics2DServer::body_set_state);
 	ClassDB::bind_method(D_METHOD("body_get_state", "body", "state"), &Physics2DServer::body_get_state);
 
-	ClassDB::bind_method(D_METHOD("body_apply_impulse", "body", "pos", "impulse"), &Physics2DServer::body_apply_impulse);
+	ClassDB::bind_method(D_METHOD("body_apply_impulse", "body", "position", "impulse"), &Physics2DServer::body_apply_impulse);
 	ClassDB::bind_method(D_METHOD("body_add_force", "body", "offset", "force"), &Physics2DServer::body_add_force);
 	ClassDB::bind_method(D_METHOD("body_set_axis_velocity", "body", "axis_velocity"), &Physics2DServer::body_set_axis_velocity);
 
@@ -578,6 +588,8 @@ void Physics2DServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("body_set_force_integration_callback", "body", "receiver", "method", "userdata"), &Physics2DServer::body_set_force_integration_callback, DEFVAL(Variant()));
 
 	ClassDB::bind_method(D_METHOD("body_test_motion", "body", "from", "motion", "margin", "result"), &Physics2DServer::_body_test_motion, DEFVAL(0.08), DEFVAL(Variant()));
+
+	ClassDB::bind_method(D_METHOD("body_get_direct_state", "body"), &Physics2DServer::body_get_direct_state);
 
 	/* JOINT API */
 
@@ -604,79 +616,80 @@ void Physics2DServer::_bind_methods() {
 	//ClassDB::bind_method(D_METHOD("sync"),&Physics2DServer::sync);
 	//ClassDB::bind_method(D_METHOD("flush_queries"),&Physics2DServer::flush_queries);
 
-	BIND_CONSTANT(SPACE_PARAM_CONTACT_RECYCLE_RADIUS);
-	BIND_CONSTANT(SPACE_PARAM_CONTACT_MAX_SEPARATION);
-	BIND_CONSTANT(SPACE_PARAM_BODY_MAX_ALLOWED_PENETRATION);
-	BIND_CONSTANT(SPACE_PARAM_BODY_LINEAR_VELOCITY_SLEEP_THRESHOLD);
-	BIND_CONSTANT(SPACE_PARAM_BODY_ANGULAR_VELOCITY_SLEEP_THRESHOLD);
-	BIND_CONSTANT(SPACE_PARAM_BODY_TIME_TO_SLEEP);
-	BIND_CONSTANT(SPACE_PARAM_CONSTRAINT_DEFAULT_BIAS);
+	BIND_ENUM_CONSTANT(SPACE_PARAM_CONTACT_RECYCLE_RADIUS);
+	BIND_ENUM_CONSTANT(SPACE_PARAM_CONTACT_MAX_SEPARATION);
+	BIND_ENUM_CONSTANT(SPACE_PARAM_BODY_MAX_ALLOWED_PENETRATION);
+	BIND_ENUM_CONSTANT(SPACE_PARAM_BODY_LINEAR_VELOCITY_SLEEP_THRESHOLD);
+	BIND_ENUM_CONSTANT(SPACE_PARAM_BODY_ANGULAR_VELOCITY_SLEEP_THRESHOLD);
+	BIND_ENUM_CONSTANT(SPACE_PARAM_BODY_TIME_TO_SLEEP);
+	BIND_ENUM_CONSTANT(SPACE_PARAM_CONSTRAINT_DEFAULT_BIAS);
 
-	BIND_CONSTANT(SHAPE_LINE);
-	BIND_CONSTANT(SHAPE_SEGMENT);
-	BIND_CONSTANT(SHAPE_CIRCLE);
-	BIND_CONSTANT(SHAPE_RECTANGLE);
-	BIND_CONSTANT(SHAPE_CAPSULE);
-	BIND_CONSTANT(SHAPE_CONVEX_POLYGON);
-	BIND_CONSTANT(SHAPE_CONCAVE_POLYGON);
-	BIND_CONSTANT(SHAPE_CUSTOM);
+	BIND_ENUM_CONSTANT(SHAPE_LINE);
+	BIND_ENUM_CONSTANT(SHAPE_RAY);
+	BIND_ENUM_CONSTANT(SHAPE_SEGMENT);
+	BIND_ENUM_CONSTANT(SHAPE_CIRCLE);
+	BIND_ENUM_CONSTANT(SHAPE_RECTANGLE);
+	BIND_ENUM_CONSTANT(SHAPE_CAPSULE);
+	BIND_ENUM_CONSTANT(SHAPE_CONVEX_POLYGON);
+	BIND_ENUM_CONSTANT(SHAPE_CONCAVE_POLYGON);
+	BIND_ENUM_CONSTANT(SHAPE_CUSTOM);
 
-	BIND_CONSTANT(AREA_PARAM_GRAVITY);
-	BIND_CONSTANT(AREA_PARAM_GRAVITY_VECTOR);
-	BIND_CONSTANT(AREA_PARAM_GRAVITY_IS_POINT);
-	BIND_CONSTANT(AREA_PARAM_GRAVITY_DISTANCE_SCALE);
-	BIND_CONSTANT(AREA_PARAM_GRAVITY_POINT_ATTENUATION);
-	BIND_CONSTANT(AREA_PARAM_LINEAR_DAMP);
-	BIND_CONSTANT(AREA_PARAM_ANGULAR_DAMP);
-	BIND_CONSTANT(AREA_PARAM_PRIORITY);
+	BIND_ENUM_CONSTANT(AREA_PARAM_GRAVITY);
+	BIND_ENUM_CONSTANT(AREA_PARAM_GRAVITY_VECTOR);
+	BIND_ENUM_CONSTANT(AREA_PARAM_GRAVITY_IS_POINT);
+	BIND_ENUM_CONSTANT(AREA_PARAM_GRAVITY_DISTANCE_SCALE);
+	BIND_ENUM_CONSTANT(AREA_PARAM_GRAVITY_POINT_ATTENUATION);
+	BIND_ENUM_CONSTANT(AREA_PARAM_LINEAR_DAMP);
+	BIND_ENUM_CONSTANT(AREA_PARAM_ANGULAR_DAMP);
+	BIND_ENUM_CONSTANT(AREA_PARAM_PRIORITY);
 
-	BIND_CONSTANT(AREA_SPACE_OVERRIDE_DISABLED);
-	BIND_CONSTANT(AREA_SPACE_OVERRIDE_COMBINE);
-	BIND_CONSTANT(AREA_SPACE_OVERRIDE_COMBINE_REPLACE);
-	BIND_CONSTANT(AREA_SPACE_OVERRIDE_REPLACE);
-	BIND_CONSTANT(AREA_SPACE_OVERRIDE_REPLACE_COMBINE);
+	BIND_ENUM_CONSTANT(AREA_SPACE_OVERRIDE_DISABLED);
+	BIND_ENUM_CONSTANT(AREA_SPACE_OVERRIDE_COMBINE);
+	BIND_ENUM_CONSTANT(AREA_SPACE_OVERRIDE_COMBINE_REPLACE);
+	BIND_ENUM_CONSTANT(AREA_SPACE_OVERRIDE_REPLACE);
+	BIND_ENUM_CONSTANT(AREA_SPACE_OVERRIDE_REPLACE_COMBINE);
 
-	BIND_CONSTANT(BODY_MODE_STATIC);
-	BIND_CONSTANT(BODY_MODE_KINEMATIC);
-	BIND_CONSTANT(BODY_MODE_RIGID);
-	BIND_CONSTANT(BODY_MODE_CHARACTER);
+	BIND_ENUM_CONSTANT(BODY_MODE_STATIC);
+	BIND_ENUM_CONSTANT(BODY_MODE_KINEMATIC);
+	BIND_ENUM_CONSTANT(BODY_MODE_RIGID);
+	BIND_ENUM_CONSTANT(BODY_MODE_CHARACTER);
 
-	BIND_CONSTANT(BODY_PARAM_BOUNCE);
-	BIND_CONSTANT(BODY_PARAM_FRICTION);
-	BIND_CONSTANT(BODY_PARAM_MASS);
-	BIND_CONSTANT(BODY_PARAM_INERTIA);
-	BIND_CONSTANT(BODY_PARAM_GRAVITY_SCALE);
-	BIND_CONSTANT(BODY_PARAM_LINEAR_DAMP);
-	BIND_CONSTANT(BODY_PARAM_ANGULAR_DAMP);
-	BIND_CONSTANT(BODY_PARAM_MAX);
+	BIND_ENUM_CONSTANT(BODY_PARAM_BOUNCE);
+	BIND_ENUM_CONSTANT(BODY_PARAM_FRICTION);
+	BIND_ENUM_CONSTANT(BODY_PARAM_MASS);
+	BIND_ENUM_CONSTANT(BODY_PARAM_INERTIA);
+	BIND_ENUM_CONSTANT(BODY_PARAM_GRAVITY_SCALE);
+	BIND_ENUM_CONSTANT(BODY_PARAM_LINEAR_DAMP);
+	BIND_ENUM_CONSTANT(BODY_PARAM_ANGULAR_DAMP);
+	BIND_ENUM_CONSTANT(BODY_PARAM_MAX);
 
-	BIND_CONSTANT(BODY_STATE_TRANSFORM);
-	BIND_CONSTANT(BODY_STATE_LINEAR_VELOCITY);
-	BIND_CONSTANT(BODY_STATE_ANGULAR_VELOCITY);
-	BIND_CONSTANT(BODY_STATE_SLEEPING);
-	BIND_CONSTANT(BODY_STATE_CAN_SLEEP);
+	BIND_ENUM_CONSTANT(BODY_STATE_TRANSFORM);
+	BIND_ENUM_CONSTANT(BODY_STATE_LINEAR_VELOCITY);
+	BIND_ENUM_CONSTANT(BODY_STATE_ANGULAR_VELOCITY);
+	BIND_ENUM_CONSTANT(BODY_STATE_SLEEPING);
+	BIND_ENUM_CONSTANT(BODY_STATE_CAN_SLEEP);
 
-	BIND_CONSTANT(JOINT_PIN);
-	BIND_CONSTANT(JOINT_GROOVE);
-	BIND_CONSTANT(JOINT_DAMPED_SPRING);
+	BIND_ENUM_CONSTANT(JOINT_PIN);
+	BIND_ENUM_CONSTANT(JOINT_GROOVE);
+	BIND_ENUM_CONSTANT(JOINT_DAMPED_SPRING);
 
-	BIND_CONSTANT(DAMPED_STRING_REST_LENGTH);
-	BIND_CONSTANT(DAMPED_STRING_STIFFNESS);
-	BIND_CONSTANT(DAMPED_STRING_DAMPING);
+	BIND_ENUM_CONSTANT(DAMPED_STRING_REST_LENGTH);
+	BIND_ENUM_CONSTANT(DAMPED_STRING_STIFFNESS);
+	BIND_ENUM_CONSTANT(DAMPED_STRING_DAMPING);
 
-	BIND_CONSTANT(CCD_MODE_DISABLED);
-	BIND_CONSTANT(CCD_MODE_CAST_RAY);
-	BIND_CONSTANT(CCD_MODE_CAST_SHAPE);
+	BIND_ENUM_CONSTANT(CCD_MODE_DISABLED);
+	BIND_ENUM_CONSTANT(CCD_MODE_CAST_RAY);
+	BIND_ENUM_CONSTANT(CCD_MODE_CAST_SHAPE);
 
-	//BIND_CONSTANT( TYPE_BODY );
-	//BIND_CONSTANT( TYPE_AREA );
+	//BIND_ENUM_CONSTANT( TYPE_BODY );
+	//BIND_ENUM_CONSTANT( TYPE_AREA );
 
-	BIND_CONSTANT(AREA_BODY_ADDED);
-	BIND_CONSTANT(AREA_BODY_REMOVED);
+	BIND_ENUM_CONSTANT(AREA_BODY_ADDED);
+	BIND_ENUM_CONSTANT(AREA_BODY_REMOVED);
 
-	BIND_CONSTANT(INFO_ACTIVE_OBJECTS);
-	BIND_CONSTANT(INFO_COLLISION_PAIRS);
-	BIND_CONSTANT(INFO_ISLAND_COUNT);
+	BIND_ENUM_CONSTANT(INFO_ACTIVE_OBJECTS);
+	BIND_ENUM_CONSTANT(INFO_COLLISION_PAIRS);
+	BIND_ENUM_CONSTANT(INFO_ISLAND_COUNT);
 }
 
 Physics2DServer::Physics2DServer() {
@@ -688,4 +701,69 @@ Physics2DServer::Physics2DServer() {
 Physics2DServer::~Physics2DServer() {
 
 	singleton = NULL;
+}
+
+Vector<Physics2DServerManager::ClassInfo> Physics2DServerManager::physics_2d_servers;
+int Physics2DServerManager::default_server_id = -1;
+int Physics2DServerManager::default_server_priority = -1;
+const String Physics2DServerManager::setting_property_name("physics/2d/physics_engine");
+
+void Physics2DServerManager::on_servers_changed() {
+
+	String physics_servers("DEFAULT");
+	for (int i = get_servers_count() - 1; 0 <= i; --i) {
+		physics_servers += "," + get_server_name(i);
+	}
+	ProjectSettings::get_singleton()->set_custom_property_info(setting_property_name, PropertyInfo(Variant::STRING, setting_property_name, PROPERTY_HINT_ENUM, physics_servers));
+}
+
+void Physics2DServerManager::register_server(const String &p_name, CreatePhysics2DServerCallback p_creat_callback) {
+
+	ERR_FAIL_COND(!p_creat_callback);
+	ERR_FAIL_COND(find_server_id(p_name) != -1);
+	physics_2d_servers.push_back(ClassInfo(p_name, p_creat_callback));
+	on_servers_changed();
+}
+
+void Physics2DServerManager::set_default_server(const String &p_name, int p_priority) {
+
+	const int id = find_server_id(p_name);
+	ERR_FAIL_COND(id == -1); // Not found
+	if (default_server_priority < p_priority) {
+		default_server_id = id;
+		default_server_priority = p_priority;
+	}
+}
+
+int Physics2DServerManager::find_server_id(const String &p_name) {
+
+	for (int i = physics_2d_servers.size() - 1; 0 <= i; --i) {
+		if (p_name == physics_2d_servers[i].name) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int Physics2DServerManager::get_servers_count() {
+	return physics_2d_servers.size();
+}
+
+String Physics2DServerManager::get_server_name(int p_id) {
+	ERR_FAIL_INDEX_V(p_id, get_servers_count(), "");
+	return physics_2d_servers[p_id].name;
+}
+
+Physics2DServer *Physics2DServerManager::new_default_server() {
+	ERR_FAIL_COND_V(default_server_id == -1, NULL);
+	return physics_2d_servers[default_server_id].create_callback();
+}
+
+Physics2DServer *Physics2DServerManager::new_server(const String &p_name) {
+	int id = find_server_id(p_name);
+	if (id == -1) {
+		return NULL;
+	} else {
+		return physics_2d_servers[id].create_callback();
+	}
 }

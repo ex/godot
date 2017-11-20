@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -115,6 +115,9 @@ Vector<String> FileDialog::get_selected_files() const {
 void FileDialog::update_dir() {
 
 	dir->set_text(dir_access->get_current_dir());
+	if (drives->is_visible()) {
+		drives->select(dir_access->get_current_drive());
+	}
 }
 
 void FileDialog::_dir_entered(String p_dir) {
@@ -183,8 +186,8 @@ void FileDialog::_action_pressed() {
 		String path = dir_access->get_current_dir();
 
 		path = path.replace("\\", "/");
-
-		if (TreeItem *item = tree->get_selected()) {
+		TreeItem *item = tree->get_selected();
+		if (item) {
 			Dictionary d = item->get_metadata(0);
 			if (d["dir"]) {
 				path = path.plus_file(d["name"]);
@@ -464,7 +467,7 @@ void FileDialog::update_filters() {
 		String flt = filters[i].get_slice(";", 0).strip_edges();
 		String desc = filters[i].get_slice(";", 1).strip_edges();
 		if (desc.length())
-			filter->add_item(String(XL_MESSAGE(desc)) + " ( " + flt + " )");
+			filter->add_item(String(tr(desc)) + " ( " + flt + " )");
 		else
 			filter->add_item("( " + flt + " )");
 	}
@@ -666,7 +669,6 @@ void FileDialog::_update_drives() {
 		drives->show();
 
 		for (int i = 0; i < dir_access->get_drive_count(); i++) {
-			String d = dir_access->get_drive(i);
 			drives->add_item(dir_access->get_drive(i));
 		}
 
@@ -718,16 +720,15 @@ void FileDialog::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("files_selected", PropertyInfo(Variant::POOL_STRING_ARRAY, "paths")));
 	ADD_SIGNAL(MethodInfo("dir_selected", PropertyInfo(Variant::STRING, "dir")));
 
-	BIND_CONSTANT(MODE_OPEN_FILE);
-	BIND_CONSTANT(MODE_OPEN_FILES);
-	BIND_CONSTANT(MODE_OPEN_DIR);
-	BIND_CONSTANT(MODE_OPEN_ANY);
+	BIND_ENUM_CONSTANT(MODE_OPEN_FILE);
+	BIND_ENUM_CONSTANT(MODE_OPEN_FILES);
+	BIND_ENUM_CONSTANT(MODE_OPEN_DIR);
+	BIND_ENUM_CONSTANT(MODE_OPEN_ANY);
+	BIND_ENUM_CONSTANT(MODE_SAVE_FILE);
 
-	BIND_CONSTANT(MODE_SAVE_FILE);
-
-	BIND_CONSTANT(ACCESS_RESOURCES);
-	BIND_CONSTANT(ACCESS_USERDATA);
-	BIND_CONSTANT(ACCESS_FILESYSTEM);
+	BIND_ENUM_CONSTANT(ACCESS_RESOURCES);
+	BIND_ENUM_CONSTANT(ACCESS_USERDATA);
+	BIND_ENUM_CONSTANT(ACCESS_FILESYSTEM);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "mode", PROPERTY_HINT_ENUM, "Open one,Open many,Open folder,Open any,Save"), "set_mode", "get_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "access", PROPERTY_HINT_ENUM, "Resources,User data,File system"), "set_access", "get_access");
@@ -758,38 +759,42 @@ FileDialog::FileDialog() {
 	mode = MODE_SAVE_FILE;
 	set_title(RTR("Save a File"));
 
+	HBoxContainer *hbc = memnew(HBoxContainer);
+	hbc->add_child(memnew(Label(RTR("Path:"))));
 	dir = memnew(LineEdit);
-	HBoxContainer *pathhb = memnew(HBoxContainer);
-	pathhb->add_child(dir);
+	hbc->add_child(dir);
 	dir->set_h_size_flags(SIZE_EXPAND_FILL);
 
 	refresh = memnew(ToolButton);
 	refresh->connect("pressed", this, "_update_file_list");
-	pathhb->add_child(refresh);
+	hbc->add_child(refresh);
 
 	drives = memnew(OptionButton);
-	pathhb->add_child(drives);
+	hbc->add_child(drives);
 	drives->connect("item_selected", this, "_select_drive");
 
 	makedir = memnew(Button);
 	makedir->set_text(RTR("Create Folder"));
 	makedir->connect("pressed", this, "_make_dir");
-	pathhb->add_child(makedir);
-
-	vbc->add_margin_child(RTR("Path:"), pathhb);
+	hbc->add_child(makedir);
+	vbc->add_child(hbc);
 
 	tree = memnew(Tree);
 	tree->set_hide_root(true);
 	vbc->add_margin_child(RTR("Directories & Files:"), tree, true);
 
+	hbc = memnew(HBoxContainer);
+	hbc->add_child(memnew(Label(RTR("File:"))));
 	file = memnew(LineEdit);
-	//add_child(file);
-	vbc->add_margin_child(RTR("File:"), file);
-
+	file->set_stretch_ratio(4);
+	file->set_h_size_flags(SIZE_EXPAND_FILL);
+	hbc->add_child(file);
 	filter = memnew(OptionButton);
-	//add_child(filter);
-	vbc->add_margin_child(RTR("Filter:"), filter);
+	filter->set_stretch_ratio(3);
+	filter->set_h_size_flags(SIZE_EXPAND_FILL);
 	filter->set_clip_text(true); //too many extensions overflow it
+	hbc->add_child(filter);
+	vbc->add_child(hbc);
 
 	dir_access = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 	access = ACCESS_RESOURCES;

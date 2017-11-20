@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -38,6 +38,8 @@ public:
 	static int zlib_level;
 	static int gzip_level;
 	static int zstd_level;
+	static bool zstd_long_distance_matching;
+	static int zstd_window_log_size;
 
 	enum Mode {
 		MODE_FASTLZ,

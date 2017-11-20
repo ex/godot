@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -149,6 +149,20 @@ Color ItemList::get_item_custom_bg_color(int p_idx) const {
 	ERR_FAIL_INDEX_V(p_idx, items.size(), Color());
 
 	return items[p_idx].custom_bg;
+}
+
+void ItemList::set_item_custom_fg_color(int p_idx, const Color &p_custom_fg_color) {
+
+	ERR_FAIL_INDEX(p_idx, items.size());
+
+	items[p_idx].custom_fg = p_custom_fg_color;
+}
+
+Color ItemList::get_item_custom_fg_color(int p_idx) const {
+
+	ERR_FAIL_INDEX_V(p_idx, items.size(), Color());
+
+	return items[p_idx].custom_fg;
 }
 
 void ItemList::set_item_tag_icon(int p_idx, const Ref<Texture> &p_tag_icon) {
@@ -339,7 +353,7 @@ void ItemList::set_same_column_width(bool p_enable) {
 	update();
 	shape_changed = true;
 }
-int ItemList::is_same_column_width() const {
+bool ItemList::is_same_column_width() const {
 
 	return same_column_width;
 }
@@ -475,7 +489,7 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 
 				if (mb->get_button_index() == BUTTON_RIGHT) {
 
-					emit_signal("item_rmb_selected", i, pos);
+					emit_signal("item_rmb_selected", i, get_local_mouse_position());
 				}
 			} else {
 
@@ -486,7 +500,7 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 
 				if (items[i].selected && mb->get_button_index() == BUTTON_RIGHT) {
 
-					emit_signal("item_rmb_selected", i, pos);
+					emit_signal("item_rmb_selected", i, get_local_mouse_position());
 				} else {
 					bool selected = !items[i].selected;
 
@@ -501,7 +515,7 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 
 					if (mb->get_button_index() == BUTTON_RIGHT) {
 
-						emit_signal("item_rmb_selected", i, pos);
+						emit_signal("item_rmb_selected", i, get_local_mouse_position());
 					} else if (/*select_mode==SELECT_SINGLE &&*/ mb->is_doubleclick()) {
 
 						emit_signal("item_activated", i);
@@ -510,11 +524,6 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 			}
 
 			return;
-		} else {
-			Vector<int> sItems = get_selected_items();
-			for (int i = 0; i < sItems.size(); i++) {
-				unselect(sItems[i]);
-			}
 		}
 	}
 	if (mb.is_valid() && mb->get_button_index() == BUTTON_WHEEL_UP && mb->is_pressed()) {
@@ -534,7 +543,7 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 				uint64_t now = OS::get_singleton()->get_ticks_msec();
 				uint64_t diff = now - search_time_msec;
 
-				if (diff < int(ProjectSettings::get_singleton()->get("gui/timers/incremental_search_max_interval_msec")) * 2) {
+				if (diff < uint64_t(ProjectSettings::get_singleton()->get("gui/timers/incremental_search_max_interval_msec")) * 2) {
 
 					for (int i = current - 1; i >= 0; i--) {
 
@@ -569,7 +578,7 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 				uint64_t now = OS::get_singleton()->get_ticks_msec();
 				uint64_t diff = now - search_time_msec;
 
-				if (diff < int(ProjectSettings::get_singleton()->get("gui/timers/incremental_search_max_interval_msec")) * 2) {
+				if (diff < uint64_t(ProjectSettings::get_singleton()->get("gui/timers/incremental_search_max_interval_msec")) * 2) {
 
 					for (int i = current + 1; i < items.size(); i++) {
 
@@ -736,16 +745,16 @@ void ItemList::_notification(int p_what) {
 		Ref<StyleBox> bg = get_stylebox("bg");
 
 		int mw = scroll_bar->get_minimum_size().x;
-		scroll_bar->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_END, mw + bg->get_margin(MARGIN_RIGHT));
-		scroll_bar->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, bg->get_margin(MARGIN_RIGHT));
+		scroll_bar->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_END, -mw);
+		scroll_bar->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 0);
 		scroll_bar->set_anchor_and_margin(MARGIN_TOP, ANCHOR_BEGIN, bg->get_margin(MARGIN_TOP));
-		scroll_bar->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, bg->get_margin(MARGIN_BOTTOM));
+		scroll_bar->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, -bg->get_margin(MARGIN_BOTTOM));
 
 		Size2 size = get_size();
 
 		int width = size.width - bg->get_minimum_size().width;
 		if (scroll_bar->is_visible()) {
-			width -= mw + bg->get_margin(MARGIN_RIGHT);
+			width -= mw;
 		}
 
 		draw_style_box(bg, Rect2(Point2(), size));
@@ -824,6 +833,10 @@ void ItemList::_notification(int p_what) {
 				if (fixed_column_width > 0)
 					minsize.x = fixed_column_width;
 				max_column_width = MAX(max_column_width, minsize.x);
+
+				// elements need to adapt to the selected size
+				minsize.y += vseparation;
+				minsize.x += hseparation;
 				items[i].rect_cache.size = minsize;
 				items[i].min_rect_cache.size = minsize;
 			}
@@ -837,7 +850,6 @@ void ItemList::_notification(int p_what) {
 
 			while (true) {
 				//repeat util all fits
-				//print_line("try with "+itos(current_columns));
 				bool all_fit = true;
 				Vector2 ofs;
 				int col = 0;
@@ -852,13 +864,11 @@ void ItemList::_notification(int p_what) {
 						break;
 					}
 
-					items[i].rect_cache = items[i].min_rect_cache;
 					if (same_column_width)
 						items[i].rect_cache.size.x = max_column_width;
 					items[i].rect_cache.position = ofs;
 					max_h = MAX(max_h, items[i].rect_cache.size.y);
 					ofs.x += items[i].rect_cache.size.x + hseparation;
-					//print_line("item "+itos(i)+" ofs "+rtos(items[i].rect_cache.size.x));
 					col++;
 					if (col == current_columns) {
 
@@ -887,7 +897,6 @@ void ItemList::_notification(int p_what) {
 						auto_height_value = ofs.y + max_h + bg->get_minimum_size().height;
 					scroll_bar->set_max(max);
 					scroll_bar->set_page(page);
-					//print_line("max: "+rtos(max)+" page "+rtos(page));
 					if (max <= page) {
 						scroll_bar->set_value(0);
 						scroll_bar->hide();
@@ -936,23 +945,23 @@ void ItemList::_notification(int p_what) {
 			if (items[i].selected) {
 				Rect2 r = rcache;
 				r.position += base_ofs;
+				r.position.y -= vseparation / 2;
+				r.size.y += vseparation;
+				r.position.x -= hseparation / 2;
+				r.size.x += hseparation;
 
-				// Use stylebox to dimension potential bg color
-				r.position.x -= sbsel->get_margin(MARGIN_LEFT);
-				r.size.x += sbsel->get_margin(MARGIN_LEFT) + sbsel->get_margin(MARGIN_RIGHT);
-				r.position.y -= sbsel->get_margin(MARGIN_TOP);
-				r.size.y += sbsel->get_margin(MARGIN_TOP) + sbsel->get_margin(MARGIN_BOTTOM);
 				draw_style_box(sbsel, r);
 			}
-
 			if (items[i].custom_bg.a > 0.001) {
-
 				Rect2 r = rcache;
 				r.position += base_ofs;
 
 				// Size rect to make the align the temperature colors
 				r.position.y -= vseparation / 2;
 				r.size.y += vseparation;
+				r.position.x -= hseparation / 2;
+				r.size.x += hseparation;
+
 				draw_rect(r, items[i].custom_bg);
 			}
 
@@ -1021,7 +1030,7 @@ void ItemList::_notification(int p_what) {
 				else
 					max_len = size.x;
 
-				Color modulate = items[i].selected ? font_color_selected : font_color;
+				Color modulate = items[i].selected ? font_color_selected : (items[i].custom_fg != Color() ? items[i].custom_fg : font_color);
 				if (items[i].disabled)
 					modulate.a *= 0.5;
 
@@ -1089,12 +1098,16 @@ void ItemList::_notification(int p_what) {
 
 				Rect2 r = rcache;
 				r.position += base_ofs;
+				r.position.y -= vseparation / 2;
+				r.size.y += vseparation;
+				r.position.x -= hseparation / 2;
+				r.size.x += hseparation;
 				draw_style_box(cursor, r);
 			}
 		}
 
 		for (int i = 0; i < separators.size(); i++) {
-			draw_line(Vector2(bg->get_margin(MARGIN_LEFT), base_ofs.y + separators[i]), Vector2(size.width - bg->get_margin(MARGIN_LEFT), base_ofs.y + separators[i]), guide_color);
+			draw_line(Vector2(bg->get_margin(MARGIN_LEFT), base_ofs.y + separators[i]), Vector2(width, base_ofs.y + separators[i]), guide_color);
 		}
 	}
 }
@@ -1103,7 +1116,7 @@ void ItemList::_scroll_changed(double) {
 	update();
 }
 
-int ItemList::get_item_at_pos(const Point2 &p_pos, bool p_exact) const {
+int ItemList::get_item_at_position(const Point2 &p_pos, bool p_exact) const {
 
 	Vector2 pos = p_pos;
 	Ref<StyleBox> bg = get_stylebox("bg");
@@ -1151,7 +1164,7 @@ bool ItemList::is_pos_at_end_of_items(const Point2 &p_pos) const {
 
 String ItemList::get_tooltip(const Point2 &p_pos) const {
 
-	int closest = get_item_at_pos(p_pos);
+	int closest = get_item_at_position(p_pos);
 
 	if (closest != -1) {
 		if (!items[closest].tooltip_enabled) {
@@ -1348,7 +1361,7 @@ void ItemList::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_auto_height", "enable"), &ItemList::set_auto_height);
 	ClassDB::bind_method(D_METHOD("has_auto_height"), &ItemList::has_auto_height);
 
-	ClassDB::bind_method(D_METHOD("get_item_at_pos", "pos", "exact"), &ItemList::get_item_at_pos, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("get_item_at_position", "position", "exact"), &ItemList::get_item_at_position, DEFVAL(false));
 
 	ClassDB::bind_method(D_METHOD("ensure_current_is_visible"), &ItemList::ensure_current_is_visible);
 
@@ -1374,13 +1387,14 @@ void ItemList::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "icon_mode", PROPERTY_HINT_ENUM, "Top,Left"), "set_icon_mode", "get_icon_mode");
 	ADD_PROPERTYNO(PropertyInfo(Variant::REAL, "icon_scale"), "set_icon_scale", "get_icon_scale");
 
-	BIND_CONSTANT(ICON_MODE_TOP);
-	BIND_CONSTANT(ICON_MODE_LEFT);
-	BIND_CONSTANT(SELECT_SINGLE);
-	BIND_CONSTANT(SELECT_MULTI);
+	BIND_ENUM_CONSTANT(ICON_MODE_TOP);
+	BIND_ENUM_CONSTANT(ICON_MODE_LEFT);
+
+	BIND_ENUM_CONSTANT(SELECT_SINGLE);
+	BIND_ENUM_CONSTANT(SELECT_MULTI);
 
 	ADD_SIGNAL(MethodInfo("item_selected", PropertyInfo(Variant::INT, "index")));
-	ADD_SIGNAL(MethodInfo("item_rmb_selected", PropertyInfo(Variant::INT, "index"), PropertyInfo(Variant::VECTOR2, "atpos")));
+	ADD_SIGNAL(MethodInfo("item_rmb_selected", PropertyInfo(Variant::INT, "index"), PropertyInfo(Variant::VECTOR2, "at_position")));
 	ADD_SIGNAL(MethodInfo("multi_selected", PropertyInfo(Variant::INT, "index"), PropertyInfo(Variant::BOOL, "selected")));
 	ADD_SIGNAL(MethodInfo("item_activated", PropertyInfo(Variant::INT, "index")));
 

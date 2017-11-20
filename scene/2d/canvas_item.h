@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -121,6 +121,8 @@ public:
 	static void finish_shaders();
 	static void flush_changes();
 
+	RID get_shader_rid() const;
+
 	CanvasItemMaterial();
 	virtual ~CanvasItemMaterial();
 };
@@ -214,11 +216,31 @@ public:
 
 	/* EDITOR */
 
-	virtual Variant edit_get_state() const;
-	virtual void edit_set_state(const Variant &p_state);
-	virtual void edit_set_rect(const Rect2 &p_edit_rect);
-	virtual void edit_rotate(float p_rot);
-	virtual Size2 edit_get_minimum_size() const;
+	virtual void _edit_set_state(const Dictionary &p_state){};
+	virtual Dictionary _edit_get_state() const { return Dictionary(); };
+
+	// Used to move/select the node
+	virtual void _edit_set_position(const Point2 &p_position){};
+	virtual Point2 _edit_get_position() const { return Point2(); };
+	virtual bool _edit_use_position() const { return false; };
+
+	// Used to resize/move/select the node
+	virtual void _edit_set_rect(const Rect2 &p_rect){};
+	virtual Rect2 _edit_get_rect() const { return Rect2(-32, -32, 64, 64); };
+	Rect2 _edit_get_item_and_children_rect() const;
+	virtual bool _edit_use_rect() const { return false; };
+
+	// Used to rotate the node
+	virtual void _edit_set_rotation(float p_rotation){};
+	virtual float _edit_get_rotation() const { return 0.0; };
+	virtual bool _edit_use_rotation() const { return false; };
+
+	// Used to set a pivot
+	virtual void _edit_set_pivot(const Point2 &p_pivot){};
+	virtual Point2 _edit_get_pivot() const { return Point2(); };
+	virtual bool _edit_use_pivot() const { return false; };
+
+	virtual Size2 _edit_get_minimum_size() const;
 
 	/* VISIBILITY */
 
@@ -248,11 +270,11 @@ public:
 	void draw_circle(const Point2 &p_pos, float p_radius, const Color &p_color);
 	void draw_texture(const Ref<Texture> &p_texture, const Point2 &p_pos, const Color &p_modulate = Color(1, 1, 1, 1), const Ref<Texture> &p_normal_map = Ref<Texture>());
 	void draw_texture_rect(const Ref<Texture> &p_texture, const Rect2 &p_rect, bool p_tile = false, const Color &p_modulate = Color(1, 1, 1), bool p_transpose = false, const Ref<Texture> &p_normal_map = Ref<Texture>());
-	void draw_texture_rect_region(const Ref<Texture> &p_texture, const Rect2 &p_rect, const Rect2 &p_src_rect, const Color &p_modulate = Color(1, 1, 1), bool p_transpose = false, const Ref<Texture> &p_normal_map = Ref<Texture>(), bool p_clip_uv = true);
+	void draw_texture_rect_region(const Ref<Texture> &p_texture, const Rect2 &p_rect, const Rect2 &p_src_rect, const Color &p_modulate = Color(1, 1, 1), bool p_transpose = false, const Ref<Texture> &p_normal_map = Ref<Texture>(), bool p_clip_uv = false);
 	void draw_style_box(const Ref<StyleBox> &p_style_box, const Rect2 &p_rect);
 	void draw_primitive(const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, Ref<Texture> p_texture = Ref<Texture>(), float p_width = 1, const Ref<Texture> &p_normal_map = Ref<Texture>());
-	void draw_polygon(const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs = Vector<Point2>(), Ref<Texture> p_texture = Ref<Texture>(), const Ref<Texture> &p_normal_map = Ref<Texture>());
-	void draw_colored_polygon(const Vector<Point2> &p_points, const Color &p_color, const Vector<Point2> &p_uvs = Vector<Point2>(), Ref<Texture> p_texture = Ref<Texture>(), const Ref<Texture> &p_normal_map = Ref<Texture>());
+	void draw_polygon(const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs = Vector<Point2>(), Ref<Texture> p_texture = Ref<Texture>(), const Ref<Texture> &p_normal_map = Ref<Texture>(), bool p_antialiased = false);
+	void draw_colored_polygon(const Vector<Point2> &p_points, const Color &p_color, const Vector<Point2> &p_uvs = Vector<Point2>(), Ref<Texture> p_texture = Ref<Texture>(), const Ref<Texture> &p_normal_map = Ref<Texture>(), bool p_antialiased = false);
 
 	void draw_string(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_text, const Color &p_modulate = Color(1, 1, 1), int p_clip_w = -1);
 	float draw_char(const Ref<Font> &p_font, const Point2 &p_pos, const String &p_char, const String &p_next = "", const Color &p_modulate = Color(1, 1, 1));
@@ -270,13 +292,10 @@ public:
 
 	CanvasItem *get_parent_item() const;
 
-	virtual Rect2 get_item_rect() const = 0;
 	virtual Transform2D get_transform() const = 0;
 
 	virtual Transform2D get_global_transform() const;
 	virtual Transform2D get_global_transform_with_canvas() const;
-
-	Rect2 get_item_and_children_rect() const;
 
 	CanvasItem *get_toplevel() const;
 	_FORCE_INLINE_ RID get_canvas_item() const { return canvas_item; }
@@ -291,17 +310,17 @@ public:
 	RID get_canvas() const;
 	Ref<World2D> get_world_2d() const;
 
-	void set_material(const Ref<Material> &p_material);
+	virtual void set_material(const Ref<Material> &p_material);
 	Ref<Material> get_material() const;
 
-	void set_use_parent_material(bool p_use_parent_material);
+	virtual void set_use_parent_material(bool p_use_parent_material);
 	bool get_use_parent_material() const;
 
-	Ref<InputEvent> make_input_local(const Ref<InputEvent> &pevent) const;
-	Vector2 make_canvas_pos_local(const Vector2 &screen_point) const;
+	Ref<InputEvent> make_input_local(const Ref<InputEvent> &p_event) const;
+	Vector2 make_canvas_position_local(const Vector2 &screen_point) const;
 
 	Vector2 get_global_mouse_position() const;
-	Vector2 get_local_mouse_pos() const;
+	Vector2 get_local_mouse_position() const;
 
 	void set_notify_local_transform(bool p_enable);
 	bool is_local_transform_notification_enabled() const;

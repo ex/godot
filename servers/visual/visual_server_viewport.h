@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -72,6 +72,8 @@ public:
 
 		VS::ViewportClearMode clear_mode;
 
+		bool transparent_bg;
+
 		struct CanvasKey {
 
 			int layer;
@@ -101,6 +103,7 @@ public:
 		Viewport() {
 			update_mode = VS::VIEWPORT_UPDATE_WHEN_VISIBLE;
 			clear_mode = VS::VIEWPORT_CLEAR_ALWAYS;
+			transparent_bg = false;
 			disable_environment = false;
 			viewport_to_screen = 0;
 			shadow_atlas_size = 0;

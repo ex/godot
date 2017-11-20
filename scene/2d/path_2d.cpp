@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -28,6 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "path_2d.h"
+
+#include "engine.h"
 #include "scene/scene_string_names.h"
 
 void Path2D::_notification(int p_what) {
@@ -35,13 +37,13 @@ void Path2D::_notification(int p_what) {
 	if (p_what == NOTIFICATION_DRAW && curve.is_valid()) {
 		//draw the curve!!
 
-		if (!get_tree()->is_editor_hint() && !get_tree()->is_debugging_navigation_hint()) {
+		if (!Engine::get_singleton()->is_editor_hint() && !get_tree()->is_debugging_navigation_hint()) {
 			return;
 		}
 
 		for (int i = 0; i < curve->get_point_count(); i++) {
 
-			Vector2 prev_p = curve->get_point_pos(i);
+			Vector2 prev_p = curve->get_point_position(i);
 
 			for (int j = 1; j <= 8; j++) {
 
@@ -56,7 +58,7 @@ void Path2D::_notification(int p_what) {
 
 void Path2D::_curve_changed() {
 
-	if (is_inside_tree() && get_tree()->is_editor_hint())
+	if (is_inside_tree() && Engine::get_singleton()->is_editor_hint())
 		update();
 }
 
@@ -105,28 +107,39 @@ void PathFollow2D::_update_transform() {
 	if (!c.is_valid())
 		return;
 
+	if (delta_offset == 0) {
+		return;
+	}
+
 	float o = offset;
 	if (loop)
 		o = Math::fposmod(o, c->get_baked_length());
 
 	Vector2 pos = c->interpolate_baked(o, cubic);
 
+	Vector2 offset = Vector2(h_offset, v_offset);
+
+	Transform2D t = get_transform();
+	t.set_origin(pos);
+
 	if (rotate) {
 
-		Vector2 n = (c->interpolate_baked(o + lookahead, cubic) - pos).normalized();
-		Vector2 t = -n.tangent();
-		pos += n * h_offset;
-		pos += t * v_offset;
+		Vector2 t_prev = (pos - c->interpolate_baked(o - delta_offset, cubic)).normalized();
+		Vector2 t_cur = (c->interpolate_baked(o + delta_offset, cubic) - pos).normalized();
 
-		set_rotation(t.angle());
+		float dot = t_prev.dot(t_cur);
+		float angle = Math::acos(CLAMP(dot, -1, 1));
+
+		t.rotate(angle);
+
+		t.translate(offset);
 
 	} else {
 
-		pos.x += h_offset;
-		pos.y += v_offset;
+		t.set_origin(t.get_origin() + offset);
 	}
 
-	set_position(pos);
+	set_transform(t);
 }
 
 void PathFollow2D::_notification(int p_what) {
@@ -135,13 +148,9 @@ void PathFollow2D::_notification(int p_what) {
 
 		case NOTIFICATION_ENTER_TREE: {
 
-			Node *parent = get_parent();
-			if (parent) {
-
-				path = parent->cast_to<Path2D>();
-				if (path) {
-					_update_transform();
-				}
+			path = Object::cast_to<Path2D>(get_parent());
+			if (path) {
+				_update_transform();
 			}
 
 		} break;
@@ -178,8 +187,6 @@ bool PathFollow2D::_set(const StringName &p_name, const Variant &p_value) {
 		set_cubic_interpolation(p_value);
 	} else if (String(p_name) == "loop") {
 		set_loop(p_value);
-	} else if (String(p_name) == "lookahead") {
-		set_lookahead(p_value);
 	} else
 		return false;
 
@@ -202,8 +209,6 @@ bool PathFollow2D::_get(const StringName &p_name, Variant &r_ret) const {
 		r_ret = cubic;
 	} else if (String(p_name) == "loop") {
 		r_ret = loop;
-	} else if (String(p_name) == "lookahead") {
-		r_ret = lookahead;
 	} else
 		return false;
 
@@ -221,7 +226,6 @@ void PathFollow2D::_get_property_list(List<PropertyInfo> *p_list) const {
 	p_list->push_back(PropertyInfo(Variant::BOOL, "rotate"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "cubic_interp"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "loop"));
-	p_list->push_back(PropertyInfo(Variant::REAL, "lookahead", PROPERTY_HINT_RANGE, "0.001,1024.0,0.001"));
 }
 
 String PathFollow2D::get_configuration_warning() const {
@@ -229,7 +233,7 @@ String PathFollow2D::get_configuration_warning() const {
 	if (!is_visible_in_tree() || !is_inside_tree())
 		return String();
 
-	if (!get_parent() || !get_parent()->cast_to<Path2D>()) {
+	if (!Object::cast_to<Path2D>(get_parent())) {
 		return TTR("PathFollow2D only works when set as a child of a Path2D node.");
 	}
 
@@ -261,7 +265,7 @@ void PathFollow2D::_bind_methods() {
 }
 
 void PathFollow2D::set_offset(float p_offset) {
-
+	delta_offset = p_offset - offset;
 	offset = p_offset;
 	if (path)
 		_update_transform();
@@ -312,16 +316,6 @@ float PathFollow2D::get_unit_offset() const {
 		return 0;
 }
 
-void PathFollow2D::set_lookahead(float p_lookahead) {
-
-	lookahead = p_lookahead;
-}
-
-float PathFollow2D::get_lookahead() const {
-
-	return lookahead;
-}
-
 void PathFollow2D::set_rotate(bool p_rotate) {
 
 	rotate = p_rotate;
@@ -346,11 +340,11 @@ bool PathFollow2D::has_loop() const {
 PathFollow2D::PathFollow2D() {
 
 	offset = 0;
+	delta_offset = 0;
 	h_offset = 0;
 	v_offset = 0;
 	path = NULL;
 	rotate = true;
 	cubic = true;
 	loop = true;
-	lookahead = 4;
 }

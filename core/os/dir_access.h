@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -89,7 +89,7 @@ public:
 	static bool exists(String p_dir);
 	virtual size_t get_space_left() = 0;
 
-	virtual Error copy(String p_from, String p_to);
+	virtual Error copy(String p_from, String p_to, int chmod_flags = -1);
 	virtual Error rename(String p_from, String p_to) = 0;
 	virtual Error remove(String p_name) = 0;
 

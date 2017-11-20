@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -117,7 +117,7 @@ void EditorAutoloadSettings::_autoload_add() {
 	undo_redo->create_action(TTR("Add AutoLoad"));
 	undo_redo->add_do_property(ProjectSettings::get_singleton(), name, "*" + path);
 
-	if (ProjectSettings::get_singleton()->has(name)) {
+	if (ProjectSettings::get_singleton()->has_setting(name)) {
 		undo_redo->add_undo_property(ProjectSettings::get_singleton(), name, ProjectSettings::get_singleton()->get(name));
 	} else {
 		undo_redo->add_undo_property(ProjectSettings::get_singleton(), name, Variant());
@@ -169,7 +169,7 @@ void EditorAutoloadSettings::_autoload_edited() {
 			return;
 		}
 
-		if (ProjectSettings::get_singleton()->has("autoload/" + name)) {
+		if (ProjectSettings::get_singleton()->has_setting("autoload/" + name)) {
 			ti->set_text(0, old_name);
 			EditorNode::get_singleton()->show_warning(vformat(TTR("Autoload '%s' already exists!"), name));
 			return;
@@ -238,7 +238,7 @@ void EditorAutoloadSettings::_autoload_edited() {
 
 void EditorAutoloadSettings::_autoload_button_pressed(Object *p_item, int p_column, int p_button) {
 
-	TreeItem *ti = p_item->cast_to<TreeItem>();
+	TreeItem *ti = Object::cast_to<TreeItem>(p_item);
 
 	String name = "autoload/" + ti->get_text(0);
 
@@ -364,7 +364,7 @@ void EditorAutoloadSettings::update_autoload() {
 
 		item->add_button(3, get_icon("MoveUp", "EditorIcons"), BUTTON_MOVE_UP);
 		item->add_button(3, get_icon("MoveDown", "EditorIcons"), BUTTON_MOVE_DOWN);
-		item->add_button(3, get_icon("Del", "EditorIcons"), BUTTON_DELETE);
+		item->add_button(3, get_icon("Remove", "EditorIcons"), BUTTON_DELETE);
 		item->set_selectable(3, false);
 	}
 
@@ -419,12 +419,12 @@ bool EditorAutoloadSettings::can_drop_data_fw(const Point2 &p_point, const Varia
 		return false;
 
 	if (drop_data.has("type")) {
-		TreeItem *ti = tree->get_item_at_pos(p_point);
+		TreeItem *ti = tree->get_item_at_position(p_point);
 
 		if (!ti)
 			return false;
 
-		int section = tree->get_drop_section_at_pos(p_point);
+		int section = tree->get_drop_section_at_position(p_point);
 
 		if (section < -1)
 			return false;
@@ -437,12 +437,12 @@ bool EditorAutoloadSettings::can_drop_data_fw(const Point2 &p_point, const Varia
 
 void EditorAutoloadSettings::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_control) {
 
-	TreeItem *ti = tree->get_item_at_pos(p_point);
+	TreeItem *ti = tree->get_item_at_position(p_point);
 
 	if (!ti)
 		return;
 
-	int section = tree->get_drop_section_at_pos(p_point);
+	int section = tree->get_drop_section_at_position(p_point);
 
 	if (section < -1)
 		return;
@@ -580,7 +580,7 @@ EditorAutoloadSettings::EditorAutoloadSettings() {
 	tree = memnew(Tree);
 	tree->set_hide_root(true);
 	tree->set_select_mode(Tree::SELECT_MULTI);
-	tree->set_single_select_cell_editing_only_when_already_selected(true);
+	tree->set_allow_reselect(true);
 
 	tree->set_drag_forwarding(this);
 

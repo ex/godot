@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -42,7 +42,7 @@ void PrimitiveMesh::_update() const {
 
 	PoolVector<Vector3> points = arr[VS::ARRAY_VERTEX];
 
-	aabb = Rect3();
+	aabb = AABB();
 
 	int pc = points.size();
 	ERR_FAIL_COND(pc == 0);
@@ -105,6 +105,15 @@ Array PrimitiveMesh::surface_get_arrays(int p_surface) const {
 	return VisualServer::get_singleton()->mesh_surface_get_arrays(mesh, 0);
 }
 
+Array PrimitiveMesh::surface_get_blend_shape_arrays(int p_surface) const {
+	ERR_FAIL_INDEX_V(p_surface, 1, Array());
+	if (pending_request) {
+		_update();
+	}
+
+	return Array();
+}
+
 uint32_t PrimitiveMesh::surface_get_format(int p_idx) const {
 	ERR_FAIL_INDEX_V(p_idx, 1, 0);
 	if (pending_request) {
@@ -119,6 +128,8 @@ Mesh::PrimitiveType PrimitiveMesh::surface_get_primitive_type(int p_idx) const {
 }
 
 Ref<Material> PrimitiveMesh::surface_get_material(int p_idx) const {
+	ERR_FAIL_INDEX_V(p_idx, 1, NULL);
+
 	return material;
 }
 
@@ -130,7 +141,7 @@ StringName PrimitiveMesh::get_blend_shape_name(int p_index) const {
 	return StringName();
 }
 
-Rect3 PrimitiveMesh::get_aabb() const {
+AABB PrimitiveMesh::get_aabb() const {
 	if (pending_request) {
 		_update();
 	}
@@ -151,6 +162,8 @@ void PrimitiveMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_material", "material"), &PrimitiveMesh::set_material);
 	ClassDB::bind_method(D_METHOD("get_material"), &PrimitiveMesh::get_material);
 
+	ClassDB::bind_method(D_METHOD("get_mesh_arrays"), &PrimitiveMesh::get_mesh_arrays);
+
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "material", PROPERTY_HINT_RESOURCE_TYPE, "Material"), "set_material", "get_material");
 }
 
@@ -166,6 +179,10 @@ void PrimitiveMesh::set_material(const Ref<Material> &p_material) {
 
 Ref<Material> PrimitiveMesh::get_material() const {
 	return material;
+}
+
+Array PrimitiveMesh::get_mesh_arrays() const {
+	return surface_get_arrays(0);
 }
 
 PrimitiveMesh::PrimitiveMesh() {
@@ -213,7 +230,6 @@ void CapsuleMesh::_create_mesh_array(Array &p_arr) const {
 	prevrow = 0;
 	for (j = 0; j <= (rings + 1); j++) {
 		v = j;
-		w;
 
 		v /= (rings + 1);
 		w = sin(0.5 * Math_PI * v);
@@ -292,7 +308,6 @@ void CapsuleMesh::_create_mesh_array(Array &p_arr) const {
 	prevrow = 0;
 	for (j = 0; j <= (rings + 1); j++) {
 		v = j;
-		w;
 
 		v /= (rings + 1);
 		v += 1.0;
@@ -618,8 +633,8 @@ Vector3 CubeMesh::get_size() const {
 	return size;
 }
 
-void CubeMesh::set_subdivide_width(const int p_subdivide) {
-	subdivide_w = p_subdivide > 0 ? p_subdivide : 0;
+void CubeMesh::set_subdivide_width(const int p_divisions) {
+	subdivide_w = p_divisions > 0 ? p_divisions : 0;
 	_request_update();
 }
 
@@ -627,8 +642,8 @@ int CubeMesh::get_subdivide_width() const {
 	return subdivide_w;
 }
 
-void CubeMesh::set_subdivide_height(const int p_subdivide) {
-	subdivide_h = p_subdivide > 0 ? p_subdivide : 0;
+void CubeMesh::set_subdivide_height(const int p_divisions) {
+	subdivide_h = p_divisions > 0 ? p_divisions : 0;
 	_request_update();
 }
 
@@ -636,8 +651,8 @@ int CubeMesh::get_subdivide_height() const {
 	return subdivide_h;
 }
 
-void CubeMesh::set_subdivide_depth(const int p_subdivide) {
-	subdivide_d = p_subdivide > 0 ? p_subdivide : 0;
+void CubeMesh::set_subdivide_depth(const int p_divisions) {
+	subdivide_d = p_divisions > 0 ? p_divisions : 0;
 	_request_update();
 }
 
@@ -957,8 +972,8 @@ Size2 PlaneMesh::get_size() const {
 	return size;
 }
 
-void PlaneMesh::set_subdivide_width(const int p_subdivide) {
-	subdivide_w = p_subdivide > 0 ? p_subdivide : 0;
+void PlaneMesh::set_subdivide_width(const int p_divisions) {
+	subdivide_w = p_divisions > 0 ? p_divisions : 0;
 	_request_update();
 }
 
@@ -966,8 +981,8 @@ int PlaneMesh::get_subdivide_width() const {
 	return subdivide_w;
 }
 
-void PlaneMesh::set_subdivide_depth(const int p_subdivide) {
-	subdivide_d = p_subdivide > 0 ? p_subdivide : 0;
+void PlaneMesh::set_subdivide_depth(const int p_divisions) {
+	subdivide_d = p_divisions > 0 ? p_divisions : 0;
 	_request_update();
 }
 
@@ -1016,13 +1031,9 @@ void PrismMesh::_create_mesh_array(Array &p_arr) const {
 	for (j = 0; j <= (subdivide_h + 1); j++) {
 		float scale = (y - start_pos.y) / size.y;
 		float scaled_size_x = size.x * scale;
-		float start_x = start_pos.x;
-		float offset_front = 0.0;
-		float offset_back = 0.0;
-
-		start_x += (1.0 - scale) * size.x * left_to_right;
-		offset_front += (1.0 - scale) * onethird * left_to_right;
-		offset_back = (1.0 - scale) * onethird * (1.0 - left_to_right);
+		float start_x = start_pos.x + (1.0 - scale) * size.x * left_to_right;
+		float offset_front = (1.0 - scale) * onethird * left_to_right;
+		float offset_back = (1.0 - scale) * onethird * (1.0 - left_to_right);
 
 		x = 0.0;
 		for (i = 0; i <= (subdivide_w + 1); i++) {
@@ -1288,14 +1299,16 @@ void QuadMesh::_create_mesh_array(Array &p_arr) const {
 	tangents.resize(4 * 4);
 	uvs.resize(4);
 
-	for (int i = 0; i < 4; i++) {
+	Vector2 _size = Vector2(size.x / 2.0f, size.y / 2.0f);
 
-		static const Vector3 quad_faces[4] = {
-			Vector3(-1, -1, 0),
-			Vector3(-1, 1, 0),
-			Vector3(1, 1, 0),
-			Vector3(1, -1, 0),
-		};
+	Vector3 quad_faces[4] = {
+		Vector3(-_size.x, -_size.y, 0),
+		Vector3(-_size.x, _size.y, 0),
+		Vector3(_size.x, _size.y, 0),
+		Vector3(_size.x, -_size.y, 0),
+	};
+
+	for (int i = 0; i < 4; i++) {
 
 		faces.set(i, quad_faces[i]);
 		normals.set(i, Vector3(0, 0, 1));
@@ -1314,18 +1327,30 @@ void QuadMesh::_create_mesh_array(Array &p_arr) const {
 		uvs.set(i, quad_uv[i]);
 	}
 
-	p_arr[ARRAY_VERTEX] = faces;
-	p_arr[ARRAY_NORMAL] = normals;
-	p_arr[ARRAY_TANGENT] = tangents;
-	p_arr[ARRAY_TEX_UV] = uvs;
+	p_arr[VS::ARRAY_VERTEX] = faces;
+	p_arr[VS::ARRAY_NORMAL] = normals;
+	p_arr[VS::ARRAY_TANGENT] = tangents;
+	p_arr[VS::ARRAY_TEX_UV] = uvs;
 };
 
 void QuadMesh::_bind_methods() {
-	// nothing here yet...
+	ClassDB::bind_method(D_METHOD("set_size", "size"), &QuadMesh::set_size);
+	ClassDB::bind_method(D_METHOD("get_size"), &QuadMesh::get_size);
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "size"), "set_size", "get_size");
 }
 
 QuadMesh::QuadMesh() {
 	primitive_type = PRIMITIVE_TRIANGLE_FAN;
+	size = Size2(1.0, 1.0);
+}
+
+void QuadMesh::set_size(const Size2 &p_size) {
+	size = p_size;
+	_request_update();
+}
+
+Size2 QuadMesh::get_size() const {
+	return size;
 }
 
 /**

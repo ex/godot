@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -62,6 +62,10 @@ class PhysicsServerSW : public PhysicsServer {
 	mutable RID_Owner<JointSW> joint_owner;
 
 	//void _clear_query(QuerySW *p_query);
+	friend class CollisionObjectSW;
+	SelfList<CollisionObjectSW>::List pending_shape_update_list;
+	void _update_shapes();
+
 public:
 	static PhysicsServerSW *singleton;
 
@@ -91,7 +95,7 @@ public:
 	virtual void space_set_param(RID p_space, SpaceParameter p_param, real_t p_value);
 	virtual real_t space_get_param(RID p_space, SpaceParameter p_param) const;
 
-	// this function only works on fixed process, errors and returns null otherwise
+	// this function only works on physics process, errors and returns null otherwise
 	virtual PhysicsDirectSpaceState *space_get_direct_state(RID p_space);
 
 	virtual void space_set_debug_contacts(RID p_space, int p_max_contacts);
@@ -127,7 +131,7 @@ public:
 	virtual void area_set_param(RID p_area, AreaParameter p_param, const Variant &p_value);
 	virtual void area_set_transform(RID p_area, const Transform &p_transform);
 
-	virtual Variant area_get_param(RID p_parea, AreaParameter p_param) const;
+	virtual Variant area_get_param(RID p_area, AreaParameter p_param) const;
 	virtual Transform area_get_transform(RID p_area) const;
 
 	virtual void area_set_ray_pickable(RID p_area, bool p_enable);
@@ -183,6 +187,9 @@ public:
 	virtual void body_set_param(RID p_body, BodyParameter p_param, real_t p_value);
 	virtual real_t body_get_param(RID p_body, BodyParameter p_param) const;
 
+	virtual void body_set_kinematic_safe_margin(RID p_body, real_t p_margin);
+	virtual real_t body_get_kinematic_safe_margin(RID p_body) const;
+
 	virtual void body_set_state(RID p_body, BodyState p_state, const Variant &p_variant);
 	virtual Variant body_get_state(RID p_body, BodyState p_state) const;
 
@@ -217,7 +224,10 @@ public:
 	virtual void body_set_ray_pickable(RID p_body, bool p_enable);
 	virtual bool body_is_ray_pickable(RID p_body) const;
 
-	virtual bool body_test_motion(RID p_body, const Transform &p_from, const Vector3 &p_motion, float p_margin = 0.001, MotionResult *r_result = NULL);
+	virtual bool body_test_motion(RID p_body, const Transform &p_from, const Vector3 &p_motion, MotionResult *r_result = NULL);
+
+	// this function only works on physics process, errors and returns null otherwise
+	virtual PhysicsDirectBodyState *body_get_direct_state(RID p_body);
 
 	/* JOINT API */
 
@@ -264,18 +274,6 @@ public:
 	virtual void joint_set_solver_priority(RID p_joint, int p_priority);
 	virtual int joint_get_solver_priority(RID p_joint) const;
 
-#if 0
-	virtual void joint_set_param(RID p_joint, JointParam p_param, real_t p_value);
-	virtual real_t joint_get_param(RID p_joint,JointParam p_param) const;
-
-	virtual RID pin_joint_create(const Vector3& p_pos,RID p_body_a,RID p_body_b=RID());
-	virtual RID groove_joint_create(const Vector3& p_a_groove1,const Vector3& p_a_groove2, const Vector3& p_b_anchor, RID p_body_a,RID p_body_b);
-	virtual RID damped_spring_joint_create(const Vector3& p_anchor_a,const Vector3& p_anchor_b,RID p_body_a,RID p_body_b=RID());
-	virtual void damped_string_joint_set_param(RID p_joint, DampedStringParam p_param, real_t p_value);
-	virtual real_t damped_string_joint_get_param(RID p_joint, DampedStringParam p_param) const;
-
-	virtual JointType joint_get_type(RID p_joint) const;
-#endif
 	/* MISC */
 
 	virtual void free(RID p_rid);

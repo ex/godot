@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -33,6 +33,7 @@
 
 #include "scene/3d/camera.h"
 #include "scene/3d/spatial.h"
+#include "servers/arvr/arvr_positional_tracker.h"
 
 /**
 	@author Bastiaan Olij <mux213@gmail.com>
@@ -50,6 +51,11 @@ protected:
 
 public:
 	String get_configuration_warning() const;
+
+	virtual Vector3 project_local_ray_normal(const Point2 &p_pos) const;
+	virtual Point2 unproject_position(const Vector3 &p_pos) const;
+	virtual Vector3 project_position(const Point2 &p_point) const;
+	virtual Vector<Plane> get_frustum() const;
 
 	ARVRCamera();
 	~ARVRCamera();
@@ -83,7 +89,11 @@ public:
 	int is_button_pressed(int p_button) const;
 	float get_joystick_axis(int p_axis) const;
 
+	real_t get_rumble() const;
+	void set_rumble(real_t p_rumble);
+
 	bool get_is_active() const;
+	ARVRPositionalTracker::TrackerHand get_hand() const;
 
 	String get_configuration_warning() const;
 
@@ -115,6 +125,8 @@ public:
 
 	bool get_is_active() const;
 	Vector3 get_size() const;
+
+	Plane get_plane() const;
 
 	String get_configuration_warning() const;
 

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -82,9 +82,9 @@ bool Skeleton::_set(const StringName &p_path, const Variant &p_value) {
 	return true;
 }
 
-bool Skeleton::_get(const StringName &p_name, Variant &r_ret) const {
+bool Skeleton::_get(const StringName &p_path, Variant &r_ret) const {
 
-	String path = p_name;
+	String path = p_path;
 
 	if (!path.begins_with("bones/"))
 		return false;
@@ -111,7 +111,7 @@ bool Skeleton::_get(const StringName &p_name, Variant &r_ret) const {
 
 			Object *obj = ObjectDB::get_instance(E->get());
 			ERR_CONTINUE(!obj);
-			Node *node = obj->cast_to<Node>();
+			Node *node = Object::cast_to<Node>(obj);
 			ERR_CONTINUE(!node);
 			NodePath path = get_path_to(node);
 			children.push_back(path);
@@ -245,7 +245,7 @@ void Skeleton::_notification(int p_what) {
 
 					Object *obj = ObjectDB::get_instance(E->get());
 					ERR_CONTINUE(!obj);
-					Spatial *sp = obj->cast_to<Spatial>();
+					Spatial *sp = Object::cast_to<Spatial>(obj);
 					ERR_CONTINUE(!sp);
 					sp->set_transform(b.pose_global);
 				}
@@ -433,7 +433,7 @@ void Skeleton::get_bound_child_nodes_to_bone(int p_bone, List<Node *> *p_bound) 
 
 		Object *obj = ObjectDB::get_instance(E->get());
 		ERR_CONTINUE(!obj);
-		p_bound->push_back(obj->cast_to<Node>());
+		p_bound->push_back(Object::cast_to<Node>(obj));
 	}
 }
 

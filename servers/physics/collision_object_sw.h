@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -61,7 +61,7 @@ private:
 		Transform xform;
 		Transform xform_inv;
 		BroadPhaseSW::ID bpid;
-		Rect3 aabb_cache; //for rayqueries
+		AABB aabb_cache; //for rayqueries
 		real_t area_cache;
 		ShapeSW *shape;
 		bool disabled;
@@ -74,6 +74,8 @@ private:
 	Transform transform;
 	Transform inv_transform;
 	bool _static;
+
+	SelfList<CollisionObjectSW> pending_shape_update_list;
 
 	void _update_shapes();
 
@@ -98,7 +100,7 @@ protected:
 	void _set_static(bool p_static);
 
 	virtual void _shapes_changed() = 0;
-	void _set_space(SpaceSW *space);
+	void _set_space(SpaceSW *p_space);
 
 	bool ray_pickable;
 
@@ -121,7 +123,7 @@ public:
 	_FORCE_INLINE_ ShapeSW *get_shape(int p_index) const { return shapes[p_index].shape; }
 	_FORCE_INLINE_ const Transform &get_shape_transform(int p_index) const { return shapes[p_index].xform; }
 	_FORCE_INLINE_ const Transform &get_shape_inv_transform(int p_index) const { return shapes[p_index].xform_inv; }
-	_FORCE_INLINE_ const Rect3 &get_shape_aabb(int p_index) const { return shapes[p_index].aabb_cache; }
+	_FORCE_INLINE_ const AABB &get_shape_aabb(int p_index) const { return shapes[p_index].aabb_cache; }
 	_FORCE_INLINE_ const real_t get_shape_area(int p_index) const { return shapes[p_index].area_cache; }
 
 	_FORCE_INLINE_ Transform get_transform() const { return transform; }

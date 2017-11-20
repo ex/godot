@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -34,11 +34,14 @@
 #include "compressed_translation.h"
 #include "core/io/xml_parser.h"
 #include "core_string_names.h"
+#include "engine.h"
 #include "func_ref.h"
 #include "geometry.h"
 #include "input_map.h"
 #include "io/config_file.h"
 #include "io/http_client.h"
+#include "io/marshalls.h"
+#include "io/networked_multiplayer_peer.h"
 #include "io/packet_peer.h"
 #include "io/packet_peer_udp.h"
 #include "io/pck_packer.h"
@@ -56,7 +59,6 @@
 #include "project_settings.h"
 #include "translation.h"
 #include "undo_redo.h"
-
 static ResourceFormatSaverBinary *resource_saver_binary = NULL;
 static ResourceFormatLoaderBinary *resource_loader_binary = NULL;
 static ResourceFormatImporter *resource_format_importer = NULL;
@@ -68,6 +70,7 @@ static _Engine *_engine = NULL;
 static _ClassDB *_classdb = NULL;
 static _Marshalls *_marshalls = NULL;
 static TranslationLoaderPO *resource_format_po = NULL;
+static _JSON *_json = NULL;
 
 static IP *ip = NULL;
 
@@ -75,6 +78,8 @@ static _Geometry *_geometry = NULL;
 
 extern Mutex *_global_mutex;
 
+extern void register_global_constants();
+extern void unregister_global_constants();
 extern void register_variant_methods();
 extern void unregister_variant_methods();
 
@@ -88,6 +93,7 @@ void register_core_types() {
 
 	StringName::setup();
 
+	register_global_constants();
 	register_variant_methods();
 
 	CoreStringNames::create();
@@ -104,6 +110,8 @@ void register_core_types() {
 	ResourceLoader::add_resource_format_loader(resource_format_importer);
 
 	ClassDB::register_class<Object>();
+
+	ClassDB::register_virtual_class<Script>();
 
 	ClassDB::register_class<Reference>();
 	ClassDB::register_class<WeakRef>();
@@ -132,6 +140,7 @@ void register_core_types() {
 	ClassDB::register_virtual_class<IP>();
 	ClassDB::register_virtual_class<PacketPeer>();
 	ClassDB::register_class<PacketPeerStream>();
+	ClassDB::register_virtual_class<NetworkedMultiplayerPeer>();
 	ClassDB::register_class<MainLoop>();
 	//ClassDB::register_type<OptimizedSaver>();
 	ClassDB::register_class<Translation>();
@@ -157,6 +166,9 @@ void register_core_types() {
 	ClassDB::register_class<PackedDataContainer>();
 	ClassDB::register_virtual_class<PackedDataContainerRef>();
 	ClassDB::register_class<AStar>();
+	ClassDB::register_class<EncodedObjectAsID>();
+
+	ClassDB::register_class<JSONParseResult>();
 
 	ip = IP::create();
 
@@ -168,6 +180,7 @@ void register_core_types() {
 	_engine = memnew(_Engine);
 	_classdb = memnew(_ClassDB);
 	_marshalls = memnew(_Marshalls);
+	_json = memnew(_JSON);
 }
 
 void register_core_settings() {
@@ -177,18 +190,33 @@ void register_core_settings() {
 
 void register_core_singletons() {
 
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("ProjectSettings", ProjectSettings::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("IP", IP::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("Geometry", _Geometry::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("ResourceLoader", _ResourceLoader::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("ResourceSaver", _ResourceSaver::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("OS", _OS::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("Engine", _Engine::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("ClassDB", _classdb));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("Marshalls", _Marshalls::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("TranslationServer", TranslationServer::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("Input", Input::get_singleton()));
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("InputMap", InputMap::get_singleton()));
+	ClassDB::register_class<ProjectSettings>();
+	ClassDB::register_virtual_class<IP>();
+	ClassDB::register_class<_Geometry>();
+	ClassDB::register_class<_ResourceLoader>();
+	ClassDB::register_class<_ResourceSaver>();
+	ClassDB::register_class<_OS>();
+	ClassDB::register_class<_Engine>();
+	ClassDB::register_class<_ClassDB>();
+	ClassDB::register_class<_Marshalls>();
+	ClassDB::register_class<TranslationServer>();
+	ClassDB::register_virtual_class<Input>();
+	ClassDB::register_class<InputMap>();
+	ClassDB::register_class<_JSON>();
+
+	Engine::get_singleton()->add_singleton(Engine::Singleton("ProjectSettings", ProjectSettings::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("IP", IP::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("Geometry", _Geometry::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("ResourceLoader", _ResourceLoader::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("ResourceSaver", _ResourceSaver::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("OS", _OS::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("Engine", _Engine::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("ClassDB", _classdb));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("Marshalls", _Marshalls::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("TranslationServer", TranslationServer::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("Input", Input::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("InputMap", InputMap::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("JSON", _JSON::get_singleton()));
 }
 
 void unregister_core_types() {
@@ -199,6 +227,7 @@ void unregister_core_types() {
 	memdelete(_engine);
 	memdelete(_classdb);
 	memdelete(_marshalls);
+	memdelete(_json);
 
 	memdelete(_geometry);
 
@@ -217,6 +246,7 @@ void unregister_core_types() {
 	ObjectDB::cleanup();
 
 	unregister_variant_methods();
+	unregister_global_constants();
 
 	ClassDB::cleanup();
 	ResourceCache::clear();

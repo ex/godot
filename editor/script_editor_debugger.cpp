@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -215,7 +215,7 @@ void ScriptEditorDebugger::_scene_tree_folded(Object *obj) {
 
 		return;
 	}
-	TreeItem *item = obj->cast_to<TreeItem>();
+	TreeItem *item = Object::cast_to<TreeItem>(obj);
 
 	if (!item)
 		return;
@@ -306,8 +306,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		String error = p_data[1];
 		step->set_disabled(!can_continue);
 		next->set_disabled(!can_continue);
-		reason->set_text(error);
-		reason->set_tooltip(error);
+		_set_reason_text(error, MESSAGE_ERROR);
 		breaked = true;
 		dobreak->set_disabled(true);
 		docontinue->set_disabled(false);
@@ -372,7 +371,13 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 			if (has_icon(p_data[i + 2], "EditorIcons"))
 				it->set_icon(0, get_icon(p_data[i + 2], "EditorIcons"));
 			it->set_metadata(0, id);
+
 			if (id == inspected_object_id) {
+				TreeItem *cti = it->get_parent(); //ensure selected is always uncollapsed
+				while (cti) {
+					cti->set_collapsed(false);
+					cti = cti->get_parent();
+				}
 				it->select(0);
 			}
 
@@ -385,6 +390,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 					it->set_collapsed(true);
 				}
 			}
+
 			lv[level] = it;
 		}
 		updating_scene_tree = false;
@@ -439,11 +445,8 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 		inspected_object->last_edited_id = id;
 
-		if (tabs->get_current_tab() == 2) {
-			inspect_properties->edit(inspected_object);
-		} else {
-			editor->push_item(inspected_object);
-		}
+		tabs->set_current_tab(inspect_info->get_index());
+		inspect_properties->edit(inspected_object);
 
 	} else if (p_msg == "message:video_mem") {
 
@@ -571,7 +574,38 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		for (int i = 0; i < arr.size(); i++) {
 			p[i] = arr[i];
 			if (i < perf_items.size()) {
-				perf_items[i]->set_text(1, rtos(p[i]));
+
+				float v = p[i];
+				String vs = rtos(v);
+				String tt = vs;
+				switch (Performance::MonitorType((int)perf_items[i]->get_metadata(1))) {
+					case Performance::MONITOR_TYPE_MEMORY: {
+						// for the time being, going above GBs is a bad sign.
+						String unit = "B";
+						if ((int)v > 1073741824) {
+							unit = "GB";
+							v /= 1073741824.0;
+						} else if ((int)v > 1048576) {
+							unit = "MB";
+							v /= 1048576.0;
+						} else if ((int)v > 1024) {
+							unit = "KB";
+							v /= 1024.0;
+						}
+						tt += " bytes";
+						vs = rtos(v) + " " + unit;
+					} break;
+					case Performance::MONITOR_TYPE_TIME: {
+						tt += " seconds";
+						vs += " s";
+					} break;
+					default: {
+						tt += " " + perf_items[i]->get_text(0);
+					} break;
+				}
+
+				perf_items[i]->set_text(1, vs);
+				perf_items[i]->set_tooltip(1, tt);
 				if (p[i] > perf_max[i])
 					perf_max[i] = p[i];
 			}
@@ -646,8 +680,8 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		metric.frame_number = p_data[0];
 		metric.frame_time = p_data[1];
 		metric.idle_time = p_data[2];
-		metric.fixed_time = p_data[3];
-		metric.fixed_frame_time = p_data[4];
+		metric.physics_time = p_data[3];
+		metric.physics_frame_time = p_data[4];
 		int frame_data_amount = p_data[6];
 		int frame_function_amount = p_data[7];
 
@@ -660,10 +694,10 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 			EditorProfiler::Metric::Category::Item item;
 			item.calls = 1;
 			item.line = 0;
-			item.name = "Fixed Time";
-			item.total = metric.fixed_time;
+			item.name = "Physics Time";
+			item.total = metric.physics_time;
 			item.self = item.total;
-			item.signature = "fixed_time";
+			item.signature = "physics_time";
 
 			frame_time.items.push_back(item);
 
@@ -674,10 +708,10 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 			frame_time.items.push_back(item);
 
-			item.name = "Fixed Frame Time";
-			item.total = metric.fixed_frame_time;
+			item.name = "Physics Frame Time";
+			item.total = metric.physics_frame_time;
 			item.self = item.total;
-			item.signature = "fixed_frame_time";
+			item.signature = "physics_frame_time";
 
 			frame_time.items.push_back(item);
 
@@ -757,7 +791,22 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 	}
 }
 
-void ScriptEditorDebugger::_performance_select(Object *, int, bool) {
+void ScriptEditorDebugger::_set_reason_text(const String &p_reason, MessageType p_type) {
+	switch (p_type) {
+		case MESSAGE_ERROR:
+			reason->add_color_override("font_color", get_color("error_color", "Editor"));
+			break;
+		case MESSAGE_WARNING:
+			reason->add_color_override("font_color", get_color("warning_color", "Editor"));
+			break;
+		default:
+			reason->add_color_override("font_color", get_color("success_color", "Editor"));
+	}
+	reason->set_text(p_reason);
+	reason->set_tooltip(p_reason);
+}
+
+void ScriptEditorDebugger::_performance_select() {
 
 	perf_draw->update();
 }
@@ -767,18 +816,21 @@ void ScriptEditorDebugger::_performance_draw() {
 	Vector<int> which;
 	for (int i = 0; i < perf_items.size(); i++) {
 
-		if (perf_items[i]->is_selected(0))
+		if (perf_items[i]->is_checked(0))
 			which.push_back(i);
 	}
 
-	if (which.empty())
-		return;
-
-	Ref<StyleBox> graph_sb = get_stylebox("normal", "TextEdit");
 	Ref<Font> graph_font = get_font("font", "TextEdit");
 
+	if (which.empty()) {
+		perf_draw->draw_string(graph_font, Point2(0, graph_font->get_ascent()), TTR("Pick one or more items from the list to display the graph."), get_color("font_color", "Label"), perf_draw->get_size().x);
+		return;
+	}
+
+	Ref<StyleBox> graph_sb = get_stylebox("normal", "TextEdit");
+
 	int cols = Math::ceil(Math::sqrt((float)which.size()));
-	int rows = (which.size() + 1) / cols;
+	int rows = Math::ceil((float)which.size() / cols);
 	if (which.size() == 1)
 		rows = 1;
 
@@ -795,14 +847,14 @@ void ScriptEditorDebugger::_performance_draw() {
 		r.position += graph_sb->get_offset();
 		r.size -= graph_sb->get_minimum_size();
 		int pi = which[i];
-		Color c = get_color("success_color", "Editor");
-		c.set_hsv(Math::fmod(c.get_h() + pi * 0.7654, 1), c.get_s(), c.get_v());
-		//c = c.linear_interpolate(get_color("base_color", "Editor"), 0.9);
+		Color c = get_color("accent_color", "Editor");
+		float h = (float)which[i] / (float)(perf_items.size());
+		c.set_hsv(Math::fmod(h + 0.4, 0.9), c.get_s() * 0.9, c.get_v() * 1.4);
 
-		c.a = 0.8;
-		perf_draw->draw_string(graph_font, r.position + Point2(0, graph_font->get_ascent()), perf_items[pi]->get_text(0), c, r.size.x);
 		c.a = 0.6;
-		perf_draw->draw_string(graph_font, r.position + Point2(graph_font->get_char_size('X').width, graph_font->get_ascent() + graph_font->get_height()), perf_items[pi]->get_text(1), c, r.size.y);
+		perf_draw->draw_string(graph_font, r.position + Point2(0, graph_font->get_ascent()), perf_items[pi]->get_text(0), c, r.size.x);
+		c.a = 0.9;
+		perf_draw->draw_string(graph_font, r.position + Point2(0, graph_font->get_ascent() + graph_font->get_height()), perf_items[pi]->get_text(1), c, r.size.y);
 
 		float spacing = point_sep / float(cols);
 		float from = r.size.width;
@@ -917,8 +969,7 @@ void ScriptEditorDebugger::_notification(int p_what) {
 					dobreak->set_disabled(false);
 					tabs->set_current_tab(0);
 
-					reason->set_text(TTR("Child Process Connected"));
-					reason->set_tooltip(TTR("Child Process Connected"));
+					_set_reason_text(TTR("Child Process Connected"), MESSAGE_SUCCESS);
 					profiler->clear();
 
 					inspect_scene_tree->clear();
@@ -1025,6 +1076,8 @@ void ScriptEditorDebugger::_notification(int p_what) {
 			tabs->add_style_override("panel", editor->get_gui_base()->get_stylebox("DebuggerPanel", "EditorStyles"));
 			tabs->add_style_override("tab_fg", editor->get_gui_base()->get_stylebox("DebuggerTabFG", "EditorStyles"));
 			tabs->add_style_override("tab_bg", editor->get_gui_base()->get_stylebox("DebuggerTabBG", "EditorStyles"));
+			tabs->set_margin(MARGIN_LEFT, -EditorNode::get_singleton()->get_gui_base()->get_stylebox("BottomPanelDebuggerOverride", "EditorStyles")->get_margin(MARGIN_LEFT));
+			tabs->set_margin(MARGIN_RIGHT, EditorNode::get_singleton()->get_gui_base()->get_stylebox("BottomPanelDebuggerOverride", "EditorStyles")->get_margin(MARGIN_RIGHT));
 		} break;
 	}
 }
@@ -1045,7 +1098,7 @@ void ScriptEditorDebugger::start() {
 
 	int remote_port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
 	if (server->listen(remote_port) != OK) {
-		EditorNode::get_log()->add_message(String("** Error listening on port ") + itos(remote_port) + String(" **"));
+		EditorNode::get_log()->add_message(String("Error listening on port ") + itos(remote_port), true);
 		return;
 	}
 	set_process(true);
@@ -1085,9 +1138,6 @@ void ScriptEditorDebugger::stop() {
 
 	EditorNode::get_singleton()->get_pause_button()->set_pressed(false);
 	EditorNode::get_singleton()->get_pause_button()->set_disabled(true);
-
-	//avoid confusion when stopped debugging but an object is still edited
-	EditorNode::get_singleton()->push_item(NULL);
 
 	if (hide_on_stop) {
 		if (is_visible_in_tree())
@@ -1207,7 +1257,7 @@ void ScriptEditorDebugger::_method_changed(Object *p_base, const StringName &p_n
 	if (!p_base || !live_debug || !connection.is_valid() || !editor->get_edited_scene())
 		return;
 
-	Node *node = p_base->cast_to<Node>();
+	Node *node = Object::cast_to<Node>(p_base);
 
 	VARIANT_ARGPTRS
 
@@ -1235,7 +1285,7 @@ void ScriptEditorDebugger::_method_changed(Object *p_base, const StringName &p_n
 		return;
 	}
 
-	Resource *res = p_base->cast_to<Resource>();
+	Resource *res = Object::cast_to<Resource>(p_base);
 
 	if (res && res->get_path() != String()) {
 
@@ -1263,7 +1313,7 @@ void ScriptEditorDebugger::_property_changed(Object *p_base, const StringName &p
 	if (!p_base || !live_debug || !connection.is_valid() || !editor->get_edited_scene())
 		return;
 
-	Node *node = p_base->cast_to<Node>();
+	Node *node = Object::cast_to<Node>(p_base);
 
 	if (node) {
 
@@ -1294,7 +1344,7 @@ void ScriptEditorDebugger::_property_changed(Object *p_base, const StringName &p
 		return;
 	}
 
-	Resource *res = p_base->cast_to<Resource>();
+	Resource *res = Object::cast_to<Resource>(p_base);
 
 	if (res && res->get_path() != String()) {
 
@@ -1605,8 +1655,10 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 	tabs->add_style_override("panel", editor->get_gui_base()->get_stylebox("DebuggerPanel", "EditorStyles"));
 	tabs->add_style_override("tab_fg", editor->get_gui_base()->get_stylebox("DebuggerTabFG", "EditorStyles"));
 	tabs->add_style_override("tab_bg", editor->get_gui_base()->get_stylebox("DebuggerTabBG", "EditorStyles"));
-	tabs->set_v_size_flags(SIZE_EXPAND_FILL);
-	tabs->set_area_as_parent_rect();
+
+	tabs->set_anchors_and_margins_preset(Control::PRESET_WIDE);
+	tabs->set_margin(MARGIN_LEFT, -editor->get_gui_base()->get_stylebox("BottomPanelDebuggerOverride", "EditorStyles")->get_margin(MARGIN_LEFT));
+	tabs->set_margin(MARGIN_RIGHT, editor->get_gui_base()->get_stylebox("BottomPanelDebuggerOverride", "EditorStyles")->get_margin(MARGIN_RIGHT));
 	add_child(tabs);
 
 	{ //debugger
@@ -1764,13 +1816,12 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		perf_monitors->set_column_title(1, TTR("Value"));
 		perf_monitors->set_column_titles_visible(true);
 		hsp->add_child(perf_monitors);
-		perf_monitors->set_select_mode(Tree::SELECT_MULTI);
-		perf_monitors->connect("multi_selected", this, "_performance_select");
+		perf_monitors->connect("item_edited", this, "_performance_select");
 		perf_draw = memnew(Control);
 		perf_draw->connect("draw", this, "_performance_draw");
 		hsp->add_child(perf_draw);
 		hsp->set_name(TTR("Monitors"));
-		hsp->set_split_offset(300);
+		hsp->set_split_offset(340 * EDSCALE);
 		tabs->add_child(hsp);
 		perf_max.resize(Performance::MONITOR_MAX);
 
@@ -1780,6 +1831,7 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		for (int i = 0; i < Performance::MONITOR_MAX; i++) {
 
 			String n = Performance::get_singleton()->get_monitor_name(Performance::Monitor(i));
+			Performance::MonitorType mtype = Performance::get_singleton()->get_monitor_type(Performance::Monitor(i));
 			String base = n.get_slice("/", 0);
 			String name = n.get_slice("/", 1);
 			if (!bases.has(base)) {
@@ -1787,12 +1839,16 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 				b->set_text(0, base.capitalize());
 				b->set_editable(0, false);
 				b->set_selectable(0, false);
+				b->set_expand_right(0, true);
 				bases[base] = b;
 			}
 
 			TreeItem *it = perf_monitors->create_item(bases[base]);
-			it->set_editable(0, false);
-			it->set_selectable(0, true);
+			it->set_metadata(1, mtype);
+			it->set_cell_mode(0, TreeItem::CELL_MODE_CHECK);
+			it->set_editable(0, true);
+			it->set_selectable(0, false);
+			it->set_selectable(1, false);
 			it->set_text(0, name.capitalize());
 			perf_items.push_back(it);
 			perf_max[i] = 0;

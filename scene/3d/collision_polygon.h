@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -40,7 +40,7 @@ class CollisionPolygon : public Spatial {
 
 protected:
 	float depth;
-	Rect3 aabb;
+	AABB aabb;
 	Vector<Point2> polygon;
 
 	uint32_t owner_id;
@@ -64,7 +64,7 @@ public:
 	void set_disabled(bool p_disabled);
 	bool is_disabled() const;
 
-	virtual Rect3 get_item_rect() const;
+	virtual AABB get_item_rect() const;
 
 	String get_configuration_warning() const;
 

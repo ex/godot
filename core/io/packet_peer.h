@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -98,7 +98,9 @@ public:
 
 	void set_stream_peer(const Ref<StreamPeer> &p_peer);
 	void set_input_buffer_max_size(int p_max_size);
+	int get_input_buffer_max_size() const;
 	void set_output_buffer_max_size(int p_max_size);
+	int get_output_buffer_max_size() const;
 	PacketPeerStream();
 };
 

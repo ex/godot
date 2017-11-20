@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -51,7 +51,7 @@ void ParticlesEditor::_node_selected(const NodePath &p_path) {
 	if (!sel)
 		return;
 
-	VisualInstance *vi = sel->cast_to<VisualInstance>();
+	VisualInstance *vi = Object::cast_to<VisualInstance>(sel);
 	if (!vi) {
 
 		err_dialog->set_text(TTR("Node does not contain geometry."));
@@ -135,7 +135,7 @@ void ParticlesEditor::_menu_option(int p_option) {
 			/*
 			Node *root = get_scene()->get_root_node();
 			ERR_FAIL_COND(!root);
-			EditorNode *en = root->cast_to<EditorNode>();
+			EditorNode *en = Object::cast_to<EditorNode>(root);
 			ERR_FAIL_COND(!en);
 			Node * node = en->get_edited_scene();
 */
@@ -153,15 +153,15 @@ void ParticlesEditor::_generate_aabb() {
 
 	EditorProgress ep("gen_aabb", TTR("Generating AABB"), int(time));
 
-	Rect3 rect;
+	AABB rect;
 	while (running < time) {
 
 		uint64_t ticks = OS::get_singleton()->get_ticks_usec();
 		ep.step("Generating..", int(running), true);
 		OS::get_singleton()->delay_usec(1000);
 
-		Rect3 capture = node->capture_aabb();
-		if (rect == Rect3())
+		AABB capture = node->capture_aabb();
+		if (rect == AABB())
 			rect = capture;
 		else
 			rect.merge_with(capture);
@@ -247,7 +247,7 @@ void ParticlesEditor::_generate_emission_points() {
 
 		PoolVector<Face3>::Read r = geometry.read();
 
-		Rect3 aabb;
+		AABB aabb;
 
 		for (int i = 0; i < gcount; i++) {
 
@@ -270,9 +270,7 @@ void ParticlesEditor::_generate_emission_points() {
 
 				Vector3 dir;
 				dir[Math::rand() % 3] = 1.0;
-				Vector3 ofs = Vector3(1, 1, 1) - dir;
-				ofs = (Vector3(1, 1, 1) - dir) * Vector3(Math::randf(), Math::randf(), Math::randf()) * aabb.size;
-				ofs += aabb.position;
+				Vector3 ofs = (Vector3(1, 1, 1) - dir) * Vector3(Math::randf(), Math::randf(), Math::randf()) * aabb.size + aabb.position;
 
 				Vector3 ofsv = ofs + aabb.size * dir;
 
@@ -391,7 +389,7 @@ ParticlesEditor::ParticlesEditor() {
 	particles_editor_hb->add_child(options);
 	particles_editor_hb->hide();
 
-	options->set_text("Particles");
+	options->set_text(TTR("Particles"));
 	options->get_popup()->add_item(TTR("Generate AABB"), MENU_OPTION_GENERATE_AABB);
 	options->get_popup()->add_separator();
 	options->get_popup()->add_item(TTR("Create Emission Points From Mesh"), MENU_OPTION_CREATE_EMISSION_VOLUME_FROM_MESH);
@@ -463,7 +461,7 @@ ParticlesEditor::ParticlesEditor() {
 
 void ParticlesEditorPlugin::edit(Object *p_object) {
 
-	particles_editor->edit(p_object->cast_to<Particles>());
+	particles_editor->edit(Object::cast_to<Particles>(p_object));
 }
 
 bool ParticlesEditorPlugin::handles(Object *p_object) const {

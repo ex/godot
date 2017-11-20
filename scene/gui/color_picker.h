@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -81,10 +81,10 @@ private:
 	void _sample_draw();
 	void _hsv_draw(int p_which, Control *c);
 
-	void _uv_input(const Ref<InputEvent> &p_input);
-	void _w_input(const Ref<InputEvent> &p_input);
-	void _preset_input(const Ref<InputEvent> &p_input);
-	void _screen_input(const Ref<InputEvent> &p_input);
+	void _uv_input(const Ref<InputEvent> &p_event);
+	void _w_input(const Ref<InputEvent> &p_event);
+	void _preset_input(const Ref<InputEvent> &p_event);
+	void _screen_input(const Ref<InputEvent> &p_event);
 	void _add_preset_pressed();
 	void _screen_pick_pressed();
 

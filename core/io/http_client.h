@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -131,6 +131,7 @@ public:
 	};
 
 private:
+#ifndef JAVASCRIPT_ENABLED
 	Status status;
 	IP::ResolverID resolving;
 	int conn_port;
@@ -152,13 +153,18 @@ private:
 
 	int response_num;
 	Vector<String> response_headers;
-
-	static void _bind_methods();
-	PoolStringArray _get_response_headers();
-	Dictionary _get_response_headers_as_dictionary();
 	int read_chunk_size;
 
 	Error _get_http_data(uint8_t *p_buffer, int p_bytes, int &r_received);
+
+#else
+#include "platform/javascript/http_client.h.inc"
+#endif
+
+	PoolStringArray _get_response_headers();
+	Dictionary _get_response_headers_as_dictionary();
+
+	static void _bind_methods();
 
 public:
 	//Error connect_and_get(const String& p_url,bool p_verify_host=true); //connects to a full url and perform request
@@ -169,8 +175,6 @@ public:
 
 	Error request_raw(Method p_method, const String &p_url, const Vector<String> &p_headers, const PoolVector<uint8_t> &p_body);
 	Error request(Method p_method, const String &p_url, const Vector<String> &p_headers, const String &p_body = String());
-	Error send_body_text(const String &p_body);
-	Error send_body_data(const PoolByteArray &p_body);
 
 	void close();
 
@@ -197,6 +201,7 @@ public:
 	~HTTPClient();
 };
 
+VARIANT_ENUM_CAST(HTTPClient::ResponseCode)
 VARIANT_ENUM_CAST(HTTPClient::Method);
 VARIANT_ENUM_CAST(HTTPClient::Status);
 

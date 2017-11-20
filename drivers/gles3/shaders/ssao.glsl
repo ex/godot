@@ -11,8 +11,25 @@ void main() {
 
 [fragment]
 
+#define TWO_PI 6.283185307179586476925286766559
+
+#ifdef SSAO_QUALITY_HIGH
+
+#define NUM_SAMPLES (80)
+
+#endif
+
+#ifdef SSAO_QUALITY_LOW
 
 #define NUM_SAMPLES (15)
+
+#endif
+
+#if !defined(SSAO_QUALITY_LOW) && !defined(SSAO_QUALITY_HIGH)
+
+#define NUM_SAMPLES (40)
+
+#endif
 
 // If using depth mip levels, the log of the maximum pixel offset before we need to switch to a lower
 // miplevel to maintain reasonable spatial locality in the cache
@@ -64,7 +81,12 @@ layout(location = 0) out float visibility;
 uniform vec4 proj_info;
 
 vec3 reconstructCSPosition(vec2 S, float z) {
-    return vec3((S.xy * proj_info.xy + proj_info.zw) * z, z);
+#ifdef USE_ORTHOGONAL_PROJECTION
+	return vec3((S.xy * proj_info.xy + proj_info.zw), z);
+#else
+	return vec3((S.xy * proj_info.xy + proj_info.zw) * z, z);
+
+#endif
 }
 
 vec3 getPosition(ivec2 ssP) {
@@ -72,7 +94,11 @@ vec3 getPosition(ivec2 ssP) {
     P.z = texelFetch(source_depth, ssP, 0).r;
 
     P.z = P.z * 2.0 - 1.0;
+#ifdef USE_ORTHOGONAL_PROJECTION
+    P.z = ((P.z + (camera_z_far + camera_z_near)/(camera_z_far - camera_z_near)) * (camera_z_far - camera_z_near))/2.0;
+#else
     P.z = 2.0 * camera_z_near * camera_z_far / (camera_z_far + camera_z_near - P.z * (camera_z_far - camera_z_near));
+#endif
     P.z = -P.z;
 
     // Offset to pixel center
@@ -117,7 +143,12 @@ vec3 getOffsetPosition(ivec2 ssC, vec2 unitOffset, float ssR) {
 		//read from depth buffer
 		P.z = texelFetch(source_depth, mipP, 0).r;
 		P.z = P.z * 2.0 - 1.0;
+#ifdef USE_ORTHOGONAL_PROJECTION
+		P.z = ((P.z + (camera_z_far + camera_z_near)/(camera_z_far - camera_z_near)) * (camera_z_far - camera_z_near))/2.0;
+#else
 		P.z = 2.0 * camera_z_near * camera_z_far / (camera_z_far + camera_z_near - P.z * (camera_z_far - camera_z_near));
+
+#endif
 		P.z = -P.z;
 
 	} else {
@@ -197,15 +228,15 @@ void main() {
 
 	//visibility=-C.z/camera_z_far;
 	//return;
-
-	//vec3 n_C = texelFetch(source_normal,ssC,0).rgb * 2.0 - 1.0;
-
+#if 0
+	vec3 n_C = texelFetch(source_normal,ssC,0).rgb * 2.0 - 1.0;
+#else
 	vec3 n_C = reconstructCSFaceNormal(C);
 	n_C = -n_C;
-
+#endif
 
 	// Hash function used in the HPG12 AlchemyAO paper
-	float randomPatternRotationAngle = float((3 * ssC.x ^ ssC.y + ssC.x * ssC.y) * 10);
+	float randomPatternRotationAngle = mod(float((3 * ssC.x ^ ssC.y + ssC.x * ssC.y) * 10), TWO_PI);
 
 	// Reconstruct normals from positions. These will lead to 1-pixel black lines
 	// at depth discontinuities, however the blur will wipe those out so they are not visible
@@ -213,8 +244,11 @@ void main() {
 
 	// Choose the screen-space sample radius
 	// proportional to the projected area of the sphere
+#ifdef USE_ORTHOGONAL_PROJECTION
+	float ssDiskRadius = -proj_scale * radius;
+#else
 	float ssDiskRadius = -proj_scale * radius / C.z;
-
+#endif
 	float sum = 0.0;
 	for (int i = 0; i < NUM_SAMPLES; ++i) {
 		sum += sampleAO(ssC, C, n_C, ssDiskRadius, radius,i, randomPatternRotationAngle);
@@ -225,7 +259,7 @@ void main() {
 #ifdef ENABLE_RADIUS2
 
 	//go again for radius2
-	randomPatternRotationAngle = float((5 * ssC.x ^ ssC.y + ssC.x * ssC.y) * 11);
+	randomPatternRotationAngle = mod(float((5 * ssC.x ^ ssC.y + ssC.x * ssC.y) * 11), TWO_PI);
 
 	// Reconstruct normals from positions. These will lead to 1-pixel black lines
 	// at depth discontinuities, however the blur will wipe those out so they are not visible

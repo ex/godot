@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -45,6 +45,7 @@ public:
 		BG_CLEAR_COLOR,
 		BG_COLOR,
 		BG_SKY,
+		BG_COLOR_SKY,
 		BG_CANVAS,
 		BG_KEEP,
 		BG_MAX
@@ -70,12 +71,25 @@ public:
 		DOF_BLUR_QUALITY_HIGH,
 	};
 
+	enum SSAOBlur {
+		SSAO_BLUR_DISABLED,
+		SSAO_BLUR_1x1,
+		SSAO_BLUR_2x2,
+		SSAO_BLUR_3x3
+	};
+
+	enum SSAOQuality {
+		SSAO_QUALITY_LOW,
+		SSAO_QUALITY_MEDIUM,
+		SSAO_QUALITY_HIGH
+	};
+
 private:
 	RID environment;
 
 	BGMode bg_mode;
 	Ref<Sky> bg_sky;
-	float bg_sky_scale;
+	float bg_sky_custom_fov;
 	Color bg_color;
 	float bg_energy;
 	int bg_canvas_max_layer;
@@ -113,7 +127,9 @@ private:
 	float ssao_bias;
 	float ssao_direct_light_affect;
 	Color ssao_color;
-	bool ssao_blur;
+	SSAOBlur ssao_blur;
+	float ssao_edge_sharpness;
+	SSAOQuality ssao_quality;
 
 	bool glow_enabled;
 	int glow_levels;
@@ -161,7 +177,7 @@ protected:
 public:
 	void set_background(BGMode p_bg);
 	void set_sky(const Ref<Sky> &p_sky);
-	void set_sky_scale(float p_scale);
+	void set_sky_custom_fov(float p_scale);
 	void set_bg_color(const Color &p_color);
 	void set_bg_energy(float p_energy);
 	void set_canvas_max_layer(int p_max_layer);
@@ -171,7 +187,7 @@ public:
 
 	BGMode get_background() const;
 	Ref<Sky> get_sky() const;
-	float get_sky_scale() const;
+	float get_sky_custom_fov() const;
 	Color get_bg_color() const;
 	float get_bg_energy() const;
 	int get_canvas_max_layer() const;
@@ -224,10 +240,10 @@ public:
 	void set_ssr_max_steps(int p_steps);
 	int get_ssr_max_steps() const;
 
-	void set_ssr_fade_in(float p_transition);
+	void set_ssr_fade_in(float p_fade_in);
 	float get_ssr_fade_in() const;
 
-	void set_ssr_fade_out(float p_transition);
+	void set_ssr_fade_out(float p_fade_out);
 	float get_ssr_fade_out() const;
 
 	void set_ssr_depth_tolerance(float p_depth_tolerance);
@@ -260,8 +276,14 @@ public:
 	void set_ssao_color(const Color &p_color);
 	Color get_ssao_color() const;
 
-	void set_ssao_blur(bool p_enable);
-	bool is_ssao_blur_enabled() const;
+	void set_ssao_blur(SSAOBlur p_blur);
+	SSAOBlur get_ssao_blur() const;
+
+	void set_ssao_quality(SSAOQuality p_quality);
+	SSAOQuality get_ssao_quality() const;
+
+	void set_ssao_edge_sharpness(float p_edge_sharpness);
+	float get_ssao_edge_sharpness() const;
 
 	void set_glow_enabled(bool p_enabled);
 	bool is_glow_enabled() const;
@@ -369,5 +391,7 @@ VARIANT_ENUM_CAST(Environment::BGMode)
 VARIANT_ENUM_CAST(Environment::ToneMapper)
 VARIANT_ENUM_CAST(Environment::GlowBlendMode)
 VARIANT_ENUM_CAST(Environment::DOFBlurQuality)
+VARIANT_ENUM_CAST(Environment::SSAOQuality)
+VARIANT_ENUM_CAST(Environment::SSAOBlur)
 
 #endif // ENVIRONMENT_H

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -67,7 +67,7 @@ public:
 
 	virtual int get_max_packet_size() const;
 
-	virtual Error listen(int p_port, IP_Address p_bind_address = IP_Address("*"), int p_recv_buffer_size = 65536);
+	virtual Error listen(int p_port, const IP_Address &p_bind_address = IP_Address("*"), int p_recv_buffer_size = 65536);
 	virtual void close();
 	virtual Error wait();
 	virtual bool is_listening() const;

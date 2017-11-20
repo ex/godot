@@ -1,9 +1,9 @@
 /*************************************************************************/
-/*  visual_script_nodes.h                                               */
+/*  visual_script_nodes.h                                                */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -196,7 +196,7 @@ public:
 	virtual String get_text() const;
 	virtual String get_category() const { return "data"; }
 
-	void set_variable(StringName p_var);
+	void set_variable(StringName p_variable);
 	StringName get_variable() const;
 
 	virtual VisualScriptNodeInstance *instance(VisualScriptInstance *p_instance);
@@ -230,7 +230,7 @@ public:
 	virtual String get_text() const;
 	virtual String get_category() const { return "data"; }
 
-	void set_variable(StringName p_var);
+	void set_variable(StringName p_variable);
 	StringName get_variable() const;
 
 	virtual VisualScriptNodeInstance *instance(VisualScriptInstance *p_instance);
@@ -301,7 +301,7 @@ public:
 	virtual String get_text() const;
 	virtual String get_category() const { return "data"; }
 
-	void set_preload(const Ref<Resource> &p_value);
+	void set_preload(const Ref<Resource> &p_preload);
 	Ref<Resource> get_preload() const;
 
 	virtual VisualScriptNodeInstance *instance(VisualScriptInstance *p_instance);
@@ -474,8 +474,8 @@ public:
 	enum MathConstant {
 		MATH_CONSTANT_ONE,
 		MATH_CONSTANT_PI,
-		MATH_CONSTANT_2PI,
 		MATH_CONSTANT_HALF_PI,
+		MATH_CONSTANT_TAU,
 		MATH_CONSTANT_E,
 		MATH_CONSTANT_SQRT2,
 		MATH_CONSTANT_INF,
@@ -726,6 +726,8 @@ public:
 
 	VisualScriptCustomNode();
 };
+
+VARIANT_ENUM_CAST(VisualScriptCustomNode::StartMode);
 
 class VisualScriptSubCall : public VisualScriptNode {
 

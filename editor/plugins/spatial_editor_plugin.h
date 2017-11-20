@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -49,6 +49,7 @@ class SpatialEditorGizmo : public SpatialGizmo {
 	GDCLASS(SpatialEditorGizmo, SpatialGizmo);
 
 	bool selected;
+	bool instanced;
 
 public:
 	void set_selected(bool p_selected) { selected = p_selected; }
@@ -82,10 +83,12 @@ class SpatialEditorViewport : public Control {
 		VIEW_PERSPECTIVE,
 		VIEW_ENVIRONMENT,
 		VIEW_ORTHOGONAL,
+		VIEW_HALF_RESOLUTION,
 		VIEW_AUDIO_LISTENER,
 		VIEW_AUDIO_DOPPLER,
 		VIEW_GIZMOS,
 		VIEW_INFORMATION,
+		VIEW_FPS,
 		VIEW_DISPLAY_NORMAL,
 		VIEW_DISPLAY_WIREFRAME,
 		VIEW_DISPLAY_OVERDRAW,
@@ -105,11 +108,21 @@ private:
 	void _menu_option(int p_option);
 	Size2 prev_size;
 
+	Spatial *preview_node;
+	AABB *preview_bounds;
+	Vector<String> selected_files;
+	AcceptDialog *accept;
+
+	Node *target_node;
+	Point2 drop_pos;
+
 	EditorNode *editor;
+	EditorData *editor_data;
 	EditorSelection *editor_selection;
 	UndoRedo *undo_redo;
 
 	Button *preview_camera;
+	ViewportContainer *viewport_container;
 
 	MenuButton *view_menu;
 
@@ -121,9 +134,13 @@ private:
 	float gizmo_scale;
 
 	bool freelook_active;
+	real_t freelook_speed;
 
 	PanelContainer *info;
 	Label *info_label;
+
+	PanelContainer *fps;
+	Label *fps_label;
 
 	struct _RayResult {
 
@@ -141,12 +158,12 @@ private:
 	ObjectID _select_ray(const Point2 &p_pos, bool p_append, bool &r_includes_current, int *r_gizmo_handle = NULL, bool p_alt_select = false);
 	void _find_items_at_pos(const Point2 &p_pos, bool &r_includes_current, Vector<_RayResult> &results, bool p_alt_select = false);
 	Vector3 _get_ray_pos(const Vector2 &p_pos) const;
-	Vector3 _get_ray(const Vector2 &p_pos);
+	Vector3 _get_ray(const Vector2 &p_pos) const;
 	Point2 _point_to_screen(const Vector3 &p_point);
 	Transform _get_camera_transform() const;
 	int get_selected_count() const;
 
-	Vector3 _get_camera_pos() const;
+	Vector3 _get_camera_position() const;
 	Vector3 _get_camera_normal() const;
 	Vector3 _get_screen_to_space(const Vector3 &p_vector3);
 
@@ -194,6 +211,9 @@ private:
 		TRANSFORM_X_AXIS,
 		TRANSFORM_Y_AXIS,
 		TRANSFORM_Z_AXIS,
+		TRANSFORM_YZ,
+		TRANSFORM_XZ,
+		TRANSFORM_XY,
 	};
 
 	struct EditData {
@@ -217,6 +237,7 @@ private:
 
 		Vector3 pos;
 		float x_rot, y_rot, distance;
+		Vector3 eye_pos; // Used in freelook mode
 		bool region_select;
 		Point2 region_begin, region_end;
 
@@ -225,13 +246,20 @@ private:
 			distance = 4;
 			region_select = false;
 		}
-	} cursor;
+	};
+	// Viewport camera supports movement smoothing,
+	// so one cursor is the real cursor, while the other can be an interpolated version.
+	Cursor cursor; // Immediate cursor
+	Cursor camera_cursor; // That one may be interpolated (don't modify this one except for smoothing purposes)
 
 	void scale_cursor_distance(real_t scale);
 
+	void set_freelook_active(bool active_now);
+	void scale_freelook_speed(real_t scale);
+
 	real_t zoom_indicator_delay;
 
-	RID move_gizmo_instance[3], rotate_gizmo_instance[3];
+	RID move_gizmo_instance[3], move_plane_gizmo_instance[3], rotate_gizmo_instance[3], scale_gizmo_instance[3], scale_plane_gizmo_instance[3];
 
 	String last_message;
 	String message;
@@ -240,12 +268,13 @@ private:
 	void set_message(String p_message, float p_time = 5);
 
 	//
-	void _update_camera();
+	void _update_camera(float p_interp_delta);
 	Transform to_camera_transform(const Cursor &p_cursor) const;
 	void _draw();
 
 	void _smouseenter();
-	void _sinput(const Ref<InputEvent> &p_ie);
+	void _smouseexit();
+	void _sinput(const Ref<InputEvent> &p_event);
 	void _update_freelook(real_t delta);
 	SpatialEditor *spatial_editor;
 
@@ -260,6 +289,17 @@ private:
 	void _selection_menu_hide();
 	void _list_select(Ref<InputEventMouseButton> b);
 	Point2i _get_warped_mouse_motion(const Ref<InputEventMouseMotion> &p_ev_mouse_motion) const;
+
+	Vector3 _get_instance_position(const Point2 &p_pos) const;
+	static AABB _calculate_spatial_bounds(const Spatial *p_parent, const AABB p_bounds);
+	void _create_preview(const Vector<String> &files) const;
+	void _remove_preview();
+	bool _cyclical_dependency_exists(const String &p_target_scene_path, Node *p_desired_node);
+	bool _create_instance(Node *parent, String &path, const Point2 &p_point);
+	void _perform_drop_data();
+
+	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;
+	void drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
 
 protected:
 	void _notification(int p_what);
@@ -276,6 +316,11 @@ public:
 
 	void focus_selection();
 
+	void assign_pending_data_pointers(
+			Spatial *p_preview_node,
+			AABB *p_preview_bounds,
+			AcceptDialog *p_accept);
+
 	Viewport *get_viewport_node() { return viewport; }
 
 	SpatialEditorViewport(SpatialEditor *p_spatial_editor, EditorNode *p_editor, int p_index);
@@ -286,8 +331,9 @@ class SpatialEditorSelectedItem : public Object {
 	GDCLASS(SpatialEditorSelectedItem, Object);
 
 public:
-	Rect3 aabb;
+	AABB aabb;
 	Transform original; // original location when moving
+	Transform original_local;
 	Transform last_xform; // last transform
 	Spatial *sp;
 	RID sbox_instance;
@@ -345,6 +391,8 @@ public:
 		TOOL_MODE_ROTATE,
 		TOOL_MODE_SCALE,
 		TOOL_MODE_LIST_SELECT,
+		TOOL_LOCK_SELECTED,
+		TOOL_UNLOCK_SELECTED,
 		TOOL_MAX
 
 	};
@@ -376,8 +424,9 @@ private:
 	bool grid_enable[3]; //should be always visible if true
 	bool grid_enabled;
 
-	Ref<ArrayMesh> move_gizmo[3], rotate_gizmo[3];
+	Ref<ArrayMesh> move_gizmo[3], move_plane_gizmo[3], rotate_gizmo[3], scale_gizmo[3], scale_plane_gizmo[3];
 	Ref<SpatialMaterial> gizmo_color[3];
+	Ref<SpatialMaterial> plane_gizmo_color[3];
 	Ref<SpatialMaterial> gizmo_hl;
 
 	int over_gizmo_handle;
@@ -389,6 +438,10 @@ private:
 	RID cursor_instance;
 	Ref<SpatialMaterial> indicator_mat;
 	Ref<SpatialMaterial> cursor_material;
+
+	// Scene drag and drop support
+	Spatial *preview_node;
+	AABB preview_bounds;
 
 	/*
 	struct Selected {
@@ -428,13 +481,19 @@ private:
 		MENU_VIEW_ORIGIN,
 		MENU_VIEW_GRID,
 		MENU_VIEW_CAMERA_SETTINGS,
-
+		MENU_LOCK_SELECTED,
+		MENU_UNLOCK_SELECTED
 	};
 
 	Button *tool_button[TOOL_MAX];
 
 	MenuButton *transform_menu;
 	MenuButton *view_menu;
+
+	ToolButton *lock_button;
+	ToolButton *unlock_button;
+
+	AcceptDialog *accept;
 
 	ConfirmationDialog *snap_dialog;
 	ConfirmationDialog *xform_dialog;
@@ -490,6 +549,8 @@ private:
 
 	bool is_any_freelook_active() const;
 
+	void _refresh_menu_icons();
+
 protected:
 	void _notification(int p_what);
 	//void _gui_input(InputEvent p_event);
@@ -500,6 +561,8 @@ protected:
 public:
 	static SpatialEditor *get_singleton() { return singleton; }
 	void snap_cursor_to_plane(const Plane &p_plane);
+
+	Vector3 snap_point(Vector3 p_target, Vector3 p_start = Vector3(0, 0, 0)) const;
 
 	float get_znear() const { return settings_znear->get_value(); }
 	float get_zfar() const { return settings_zfar->get_value(); }
@@ -517,7 +580,10 @@ public:
 	bool are_local_coords_enabled() const { return transform_menu->get_popup()->is_item_checked(transform_menu->get_popup()->get_item_index(SpatialEditor::MENU_TRANSFORM_LOCAL_COORDS)); }
 
 	Ref<ArrayMesh> get_move_gizmo(int idx) const { return move_gizmo[idx]; }
+	Ref<ArrayMesh> get_move_plane_gizmo(int idx) const { return move_plane_gizmo[idx]; }
 	Ref<ArrayMesh> get_rotate_gizmo(int idx) const { return rotate_gizmo[idx]; }
+	Ref<ArrayMesh> get_scale_gizmo(int idx) const { return scale_gizmo[idx]; }
+	Ref<ArrayMesh> get_scale_plane_gizmo(int idx) const { return scale_plane_gizmo[idx]; }
 
 	void update_transform_gizmo();
 
@@ -552,6 +618,7 @@ public:
 	Camera *get_camera() { return NULL; }
 	void edit(Spatial *p_spatial);
 	void clear();
+
 	SpatialEditor(EditorNode *p_editor);
 	~SpatialEditor();
 };

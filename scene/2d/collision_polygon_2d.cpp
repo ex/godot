@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -30,6 +30,7 @@
 #include "collision_polygon_2d.h"
 
 #include "collision_object_2d.h"
+#include "engine.h"
 #include "scene/resources/concave_polygon_shape_2d.h"
 #include "scene/resources/convex_polygon_shape_2d.h"
 
@@ -78,11 +79,6 @@ void CollisionPolygon2D::_build_polygon() {
 Vector<Vector<Vector2> > CollisionPolygon2D::_decompose_in_convex() {
 
 	Vector<Vector<Vector2> > decomp;
-#if 0
-	//fast but imprecise triangulator, gave us problems
-	decomp = Geometry::decompose_polygon(polygon);
-#else
-
 	List<TriangulatorPoly> in_poly, out_poly;
 
 	TriangulatorPoly inp;
@@ -115,8 +111,6 @@ Vector<Vector<Vector2> > CollisionPolygon2D::_decompose_in_convex() {
 		idx++;
 	}
 
-#endif
-
 	return decomp;
 }
 
@@ -125,7 +119,7 @@ void CollisionPolygon2D::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_PARENTED: {
 
-			parent = get_parent()->cast_to<CollisionObject2D>();
+			parent = Object::cast_to<CollisionObject2D>(get_parent());
 			if (parent) {
 				owner_id = parent->create_shape_owner(this);
 				_build_polygon();
@@ -134,7 +128,7 @@ void CollisionPolygon2D::_notification(int p_what) {
 				parent->shape_owner_set_one_way_collision(owner_id, one_way_collision);
 			}
 
-			/*if (get_tree()->is_editor_hint()) {
+			/*if (Engine::get_singleton()->is_editor_hint()) {
 				//display above all else
 				set_z_as_relative(false);
 				set_z(VS::CANVAS_ITEM_Z_MAX - 1);
@@ -158,7 +152,7 @@ void CollisionPolygon2D::_notification(int p_what) {
 
 		case NOTIFICATION_DRAW: {
 
-			if (!get_tree()->is_editor_hint() && !get_tree()->is_debugging_collisions_hint()) {
+			if (!Engine::get_singleton()->is_editor_hint() && !get_tree()->is_debugging_collisions_hint()) {
 				break;
 			}
 
@@ -249,14 +243,14 @@ CollisionPolygon2D::BuildMode CollisionPolygon2D::get_build_mode() const {
 	return build_mode;
 }
 
-Rect2 CollisionPolygon2D::get_item_rect() const {
+Rect2 CollisionPolygon2D::_edit_get_rect() const {
 
 	return aabb;
 }
 
 String CollisionPolygon2D::get_configuration_warning() const {
 
-	if (!get_parent()->cast_to<CollisionObject2D>()) {
+	if (!Object::cast_to<CollisionObject2D>(get_parent())) {
 		return TTR("CollisionPolygon2D only serves to provide a collision shape to a CollisionObject2D derived node. Please only use it as a child of Area2D, StaticBody2D, RigidBody2D, KinematicBody2D, etc. to give them a shape.");
 	}
 
@@ -308,6 +302,9 @@ void CollisionPolygon2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::POOL_VECTOR2_ARRAY, "polygon"), "set_polygon", "get_polygon");
 	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "disabled"), "set_disabled", "is_disabled");
 	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "one_way_collision"), "set_one_way_collision", "is_one_way_collision_enabled");
+
+	BIND_ENUM_CONSTANT(BUILD_SOLIDS);
+	BIND_ENUM_CONSTANT(BUILD_SEGMENTS);
 }
 
 CollisionPolygon2D::CollisionPolygon2D() {

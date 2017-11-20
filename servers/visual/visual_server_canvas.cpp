@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -37,10 +37,8 @@ void VisualServerCanvas::_render_canvas_item_tree(Item *p_canvas_item, const Tra
 	RasterizerCanvas::Item *z_list[z_range];
 	RasterizerCanvas::Item *z_last_list[z_range];
 
-	for (int i = 0; i < z_range; i++) {
-		z_list[i] = NULL;
-		z_last_list[i] = NULL;
-	}
+	memset(z_list, 0, z_range * sizeof(RasterizerCanvas::Item *));
+	memset(z_last_list, 0, z_range * sizeof(RasterizerCanvas::Item *));
 
 	_render_canvas_item(p_canvas_item, p_transform, p_clip_rect, Color(1, 1, 1, 1), 0, z_list, z_last_list, NULL, NULL);
 
@@ -200,10 +198,9 @@ void VisualServerCanvas::render_canvas(Canvas *p_canvas, const Transform2D &p_tr
 		RasterizerCanvas::Item *z_list[z_range];
 		RasterizerCanvas::Item *z_last_list[z_range];
 
-		for (int i = 0; i < z_range; i++) {
-			z_list[i] = NULL;
-			z_last_list[i] = NULL;
-		}
+		memset(z_list, 0, z_range * sizeof(RasterizerCanvas::Item *));
+		memset(z_last_list, 0, z_range * sizeof(RasterizerCanvas::Item *));
+
 		for (int i = 0; i < l; i++) {
 			_render_canvas_item(ci[i].item, p_transform, p_clip_rect, Color(1, 1, 1, 1), 0, z_list, z_last_list, NULL, NULL);
 		}
@@ -392,14 +389,14 @@ void VisualServerCanvas::canvas_item_set_draw_behind_parent(RID p_item, bool p_e
 	canvas_item->behind = p_enable;
 }
 
-void VisualServerCanvas::canvas_item_add_line(RID p_item, const Point2 &p_from, const Point2 &p_to, const Color &p_colors, float p_width, bool p_antialiased) {
+void VisualServerCanvas::canvas_item_add_line(RID p_item, const Point2 &p_from, const Point2 &p_to, const Color &p_color, float p_width, bool p_antialiased) {
 
 	Item *canvas_item = canvas_item_owner.getornull(p_item);
 	ERR_FAIL_COND(!canvas_item);
 
 	Item::CommandLine *line = memnew(Item::CommandLine);
 	ERR_FAIL_COND(!line);
-	line->color = p_colors;
+	line->color = p_color;
 	line->from = p_from;
 	line->to = p_to;
 	line->width = p_width;
@@ -632,7 +629,7 @@ void VisualServerCanvas::canvas_item_add_primitive(RID p_item, const Vector<Poin
 	canvas_item->commands.push_back(prim);
 }
 
-void VisualServerCanvas::canvas_item_add_polygon(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, RID p_texture, RID p_normal_map) {
+void VisualServerCanvas::canvas_item_add_polygon(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, RID p_texture, RID p_normal_map, bool p_antialiased) {
 
 	Item *canvas_item = canvas_item_owner.getornull(p_item);
 	ERR_FAIL_COND(!canvas_item);
@@ -661,6 +658,7 @@ void VisualServerCanvas::canvas_item_add_polygon(RID p_item, const Vector<Point2
 	polygon->colors = p_colors;
 	polygon->indices = indices;
 	polygon->count = indices.size();
+	polygon->antialiased = p_antialiased;
 	canvas_item->rect_dirty = true;
 
 	canvas_item->commands.push_back(polygon);
@@ -700,6 +698,7 @@ void VisualServerCanvas::canvas_item_add_triangle_array(RID p_item, const Vector
 	polygon->colors = p_colors;
 	polygon->indices = indices;
 	polygon->count = count;
+	polygon->antialiased = false;
 	canvas_item->rect_dirty = true;
 
 	canvas_item->commands.push_back(polygon);
@@ -745,6 +744,7 @@ void VisualServerCanvas::canvas_item_add_particles(RID p_item, RID p_particles, 
 	//take the chance and request processing for them, at least once until they become visible again
 	VSG::storage->particles_request_process(p_particles);
 
+	canvas_item->rect_dirty = true;
 	canvas_item->commands.push_back(part);
 }
 
@@ -758,6 +758,7 @@ void VisualServerCanvas::canvas_item_add_multimesh(RID p_item, RID p_mesh, RID p
 	mm->multimesh = p_mesh;
 	mm->skeleton = p_skeleton;
 
+	canvas_item->rect_dirty = true;
 	canvas_item->commands.push_back(mm);
 }
 
@@ -1001,11 +1002,11 @@ void VisualServerCanvas::canvas_light_set_shadow_buffer_size(RID p_light, int p_
 	RasterizerCanvas::Light *clight = canvas_light_owner.get(p_light);
 	ERR_FAIL_COND(!clight);
 
-	int new_size = nearest_power_of_2(p_size);
+	int new_size = next_power_of_2(p_size);
 	if (new_size == clight->shadow_buffer_size)
 		return;
 
-	clight->shadow_buffer_size = nearest_power_of_2(p_size);
+	clight->shadow_buffer_size = next_power_of_2(p_size);
 
 	if (clight->shadow_buffer.is_valid()) {
 		VSG::storage->free(clight->shadow_buffer);
@@ -1096,13 +1097,15 @@ void VisualServerCanvas::canvas_light_occluder_set_polygon(RID p_occluder, RID p
 
 	if (occluder->polygon.is_valid()) {
 		LightOccluderPolygon *occluder_poly = canvas_light_occluder_polygon_owner.get(p_polygon);
-		if (!occluder_poly)
+		if (!occluder_poly) {
 			occluder->polygon = RID();
-		ERR_FAIL_COND(!occluder_poly);
-		occluder_poly->owners.insert(occluder);
-		occluder->polygon_buffer = occluder_poly->occluder;
-		occluder->aabb_cache = occluder_poly->aabb;
-		occluder->cull_cache = occluder_poly->cull_mode;
+			ERR_FAIL_COND(!occluder_poly);
+		} else {
+			occluder_poly->owners.insert(occluder);
+			occluder->polygon_buffer = occluder_poly->occluder;
+			occluder->aabb_cache = occluder_poly->aabb;
+			occluder->cull_cache = occluder_poly->cull_mode;
+		}
 	}
 }
 void VisualServerCanvas::canvas_light_occluder_set_transform(RID p_occluder, const Transform2D &p_xform) {

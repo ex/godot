@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -324,7 +324,7 @@ enum KeyModifierMask {
 };
 
 String keycode_get_string(uint32_t p_code);
-bool keycode_has_unicode(uint32_t p_unicode);
+bool keycode_has_unicode(uint32_t p_keycode);
 int find_keycode(const String &p_code);
 int keycode_get_count();
 int keycode_get_value_by_index(int p_index);

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -87,6 +87,6 @@ EditorNameDialog::EditorNameDialog() {
 	makevb->add_child(name);
 	name->set_margin(MARGIN_TOP, 5);
 	name->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_BEGIN, 5);
-	name->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 5);
+	name->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, -5);
 	name->connect("gui_input", this, "_line_gui_input");
 }

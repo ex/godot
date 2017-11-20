@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -31,30 +31,25 @@
 #define OS_JAVASCRIPT_H
 
 #include "audio_driver_javascript.h"
-#include "audio_server_javascript.h"
 #include "drivers/unix/os_unix.h"
-#include "javascript_eval.h"
 #include "main/input_default.h"
 #include "os/input.h"
 #include "os/main_loop.h"
 #include "power_javascript.h"
 #include "servers/audio_server.h"
-#include "servers/physics/physics_server_sw.h"
-#include "servers/physics_2d/physics_2d_server_sw.h"
 #include "servers/visual/rasterizer.h"
 
 #include <emscripten/html5.h>
 
-typedef String (*GetDataDirFunc)();
+typedef String (*GetUserDataDirFunc)();
 
 class OS_JavaScript : public OS_Unix {
 
+	bool idbfs_available;
 	int64_t time_to_save_sync;
 	int64_t last_sync_time;
 
 	VisualServer *visual_server;
-	PhysicsServer *physics_server;
-	Physics2DServer *physics_2d_server;
 	AudioDriverJavaScript audio_driver_javascript;
 	const char *gl_extensions;
 
@@ -67,13 +62,9 @@ class OS_JavaScript : public OS_Unix {
 	CursorShape cursor_shape;
 	MainLoop *main_loop;
 
-	GetDataDirFunc get_data_dir_func;
+	GetUserDataDirFunc get_user_data_dir_func;
 
 	PowerJavascript *power_manager;
-
-#ifdef JAVASCRIPT_EVAL_ENABLED
-	JavaScript *javascript_eval;
-#endif
 
 	static void _close_notification_funcs(const String &p_file, int p_flags);
 
@@ -87,11 +78,10 @@ public:
 	virtual int get_video_driver_count() const;
 	virtual const char *get_video_driver_name(int p_driver) const;
 
-	virtual VideoMode get_default_video_mode() const;
-
 	virtual int get_audio_driver_count() const;
 	virtual const char *get_audio_driver_name(int p_driver) const;
 
+	virtual void initialize_logger();
 	virtual void initialize_core();
 	virtual void initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver);
 
@@ -103,11 +93,6 @@ public:
 	typedef int64_t ProcessID;
 
 	//static OS* get_singleton();
-
-	virtual void print_error(const char *p_function, const char *p_file, int p_line, const char *p_code, const char *p_rationale, ErrorType p_type) {
-
-		OS::print_error(p_function, p_file, p_line, p_code, p_rationale, p_type);
-	}
 
 	virtual void alert(const String &p_alert, const String &p_title = "ALERT!");
 
@@ -124,7 +109,7 @@ public:
 	virtual VideoMode get_video_mode(int p_screen = 0) const;
 	virtual void get_fullscreen_mode_list(List<VideoMode> *p_list, int p_screen = 0) const;
 
-	virtual Size2 get_screen_size(int p_screen = 0) const;
+	virtual Size2 get_screen_size(int p_screen = -1) const;
 
 	virtual void set_window_size(const Size2);
 	virtual Size2 get_window_size() const;
@@ -140,6 +125,8 @@ public:
 
 	virtual bool can_draw() const;
 
+	virtual bool is_userfs_persistent() const;
+
 	virtual void set_cursor_shape(CursorShape p_shape);
 
 	void main_loop_begin();
@@ -154,7 +141,7 @@ public:
 	void set_opengl_extensions(const char *p_gl_extensions);
 
 	virtual Error shell_open(String p_uri);
-	virtual String get_data_dir() const;
+	virtual String get_user_data_dir() const;
 	String get_executable_path() const;
 	virtual String get_resource_dir() const;
 
@@ -165,13 +152,15 @@ public:
 	virtual String get_joy_guid(int p_device) const;
 	bool joy_connection_changed(int p_type, const EmscriptenGamepadEvent *p_event);
 
-	virtual PowerState get_power_state();
+	virtual OS::PowerState get_power_state();
 	virtual int get_power_seconds_left();
 	virtual int get_power_percent_left();
 
 	virtual bool _check_internal_feature_support(const String &p_feature);
 
-	OS_JavaScript(const char *p_execpath, GetDataDirFunc p_get_data_dir_func);
+	void set_idbfs_available(bool p_idbfs_available);
+
+	OS_JavaScript(const char *p_execpath, GetUserDataDirFunc p_get_user_data_dir_func);
 	~OS_JavaScript();
 };
 

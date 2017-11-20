@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -883,7 +883,7 @@ RES ResourceFormatLoaderTheme::load(const String &p_path, const String &p_origin
 					ERR_FAIL_V(RES());
 				}
 
-				sbflat->set_border_size(params[0].to_int());
+				sbflat->set_border_width_all(params[0].to_int());
 
 				if (!params[0].is_valid_integer()) {
 
@@ -929,8 +929,8 @@ RES ResourceFormatLoaderTheme::load(const String &p_path, const String &p_origin
 					dark = Color::html(params[3]);
 				}
 
-				sbflat->set_dark_color(dark);
-				sbflat->set_light_color(bright);
+				sbflat->set_border_color_all(bright);
+				//				sbflat->set_dark_color(dark);
 				sbflat->set_bg_color(normal);
 
 				if (params.size() == ccodes + 5) {
@@ -1030,14 +1030,13 @@ RES ResourceFormatLoaderTheme::load(const String &p_path, const String &p_origin
 					ERR_FAIL_V(RES());
 				}
 
-				if (res->cast_to<StyleBox>()) {
-
+				if (Object::cast_to<StyleBox>(*res)) {
 					theme->set_stylebox(item, control, res);
-				} else if (res->cast_to<Font>()) {
+				} else if (Object::cast_to<Font>(*res)) {
 					theme->set_font(item, control, res);
-				} else if (res->cast_to<Font>()) {
+				} else if (Object::cast_to<Font>(*res)) {
 					theme->set_font(item, control, res);
-				} else if (res->cast_to<Texture>()) {
+				} else if (Object::cast_to<Texture>(*res)) {
 					theme->set_icon(item, control, res);
 				} else {
 					memdelete(f);

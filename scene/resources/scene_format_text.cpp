@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -33,7 +33,7 @@
 #include "project_settings.h"
 #include "version.h"
 
-//version 2: changed names for basis, rect3, poolvectors, etc.
+//version 2: changed names for basis, aabb, poolvectors, etc.
 #define FORMAT_VERSION 2
 
 #include "os/dir_access.h"
@@ -239,7 +239,7 @@ Error ResourceInteractiveLoaderText::poll() {
 				return error;
 			}
 
-			Resource *r = obj->cast_to<Resource>();
+			Resource *r = Object::cast_to<Resource>(obj);
 			if (!r) {
 
 				error_text += "Can't create sub resource of type, because not a resource: " + type;
@@ -305,7 +305,7 @@ Error ResourceInteractiveLoaderText::poll() {
 			return error;
 		}
 
-		Resource *r = obj->cast_to<Resource>();
+		Resource *r = Object::cast_to<Resource>(obj);
 		if (!r) {
 
 			error_text += "Can't create sub resource of type, because not a resource: " + res_type;
@@ -621,9 +621,9 @@ ResourceInteractiveLoaderText::~ResourceInteractiveLoaderText() {
 	memdelete(f);
 }
 
-void ResourceInteractiveLoaderText::get_dependencies(FileAccess *f, List<String> *p_dependencies, bool p_add_types) {
+void ResourceInteractiveLoaderText::get_dependencies(FileAccess *p_f, List<String> *p_dependencies, bool p_add_types) {
 
-	open(f);
+	open(p_f);
 	ignore_resource_parsing = true;
 	ERR_FAIL_COND(error != OK);
 
@@ -679,7 +679,7 @@ Error ResourceInteractiveLoaderText::rename_dependencies(FileAccess *p_f, const 
 
 	String base_path = local_path.get_base_dir();
 
-	uint64_t tag_end = f->get_pos();
+	uint64_t tag_end = f->get_position();
 
 	while (true) {
 
@@ -741,7 +741,7 @@ Error ResourceInteractiveLoaderText::rename_dependencies(FileAccess *p_f, const 
 
 			fw->store_line("[ext_resource path=\"" + path + "\" type=\"" + type + "\" id=" + itos(index) + "]");
 
-			tag_end = f->get_pos();
+			tag_end = f->get_position();
 		}
 	}
 
@@ -891,7 +891,7 @@ String ResourceInteractiveLoaderText::recognize(FileAccess *p_f) {
 
 /////////////////////
 
-Ref<ResourceInteractiveLoader> ResourceFormatLoaderText::load_interactive(const String &p_path, Error *r_error) {
+Ref<ResourceInteractiveLoader> ResourceFormatLoaderText::load_interactive(const String &p_path, const String &p_original_path, Error *r_error) {
 
 	if (r_error)
 		*r_error = ERR_CANT_OPEN;
@@ -905,7 +905,8 @@ Ref<ResourceInteractiveLoader> ResourceFormatLoaderText::load_interactive(const 
 	}
 
 	Ref<ResourceInteractiveLoaderText> ria = memnew(ResourceInteractiveLoaderText);
-	ria->local_path = ProjectSettings::get_singleton()->localize_path(p_path);
+	String path = p_original_path != "" ? p_original_path : p_path;
+	ria->local_path = ProjectSettings::get_singleton()->localize_path(path);
 	ria->res_path = ria->local_path;
 	//ria->set_local_path( ProjectSettings::get_singleton()->localize_path(p_path) );
 	ria->open(f);

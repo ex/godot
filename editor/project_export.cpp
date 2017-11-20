@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -35,7 +35,6 @@
 #include "io/image_loader.h"
 #include "io/resource_loader.h"
 #include "io/resource_saver.h"
-#include "io_plugins/editor_texture_import_plugin.h"
 #include "os/dir_access.h"
 #include "os/file_access.h"
 #include "os/os.h"
@@ -49,7 +48,7 @@ void ProjectExportDialog::_notification(int p_what) {
 
 	switch (p_what) {
 		case NOTIFICATION_READY: {
-			delete_preset->set_icon(get_icon("Del", "EditorIcons"));
+			delete_preset->set_icon(get_icon("Remove", "EditorIcons"));
 			connect("confirmed", this, "_export_pck_zip");
 			custom_feature_display->get_parent_control()->add_style_override("panel", get_stylebox("bg", "Tree"));
 		} break;
@@ -72,7 +71,7 @@ void ProjectExportDialog::popup_export() {
 	_update_presets();
 
 	// Restore valid window bounds or pop up at default size.
-	if (EditorSettings::get_singleton()->has("interface/dialogs/export_bounds")) {
+	if (EditorSettings::get_singleton()->has_setting("interface/dialogs/export_bounds")) {
 		popup(EditorSettings::get_singleton()->get("interface/dialogs/export_bounds"));
 	} else {
 		popup_centered_ratio();
@@ -194,7 +193,7 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 			patch->set_checked(0, true);
 		patch->set_tooltip(0, patchlist[i]);
 		patch->set_metadata(0, i);
-		patch->add_button(0, get_icon("Del", "EditorIcons"), 0);
+		patch->add_button(0, get_icon("Remove", "EditorIcons"), 0);
 		patch->add_button(0, get_icon("folder", "FileDialog"), 1);
 	}
 
@@ -309,7 +308,7 @@ void ProjectExportDialog::_patch_button_pressed(Object *p_item, int p_column, in
 	if (p_id == 0) {
 		Vector<String> patches = current->get_patches();
 		ERR_FAIL_INDEX(patch_index, patches.size());
-		patch_erase->set_text(vformat(TTR("Delete patch '" + patches[patch_index].get_file() + "' from list?")));
+		patch_erase->set_text(vformat(TTR("Delete patch '%s' from list?"), patches[patch_index].get_file()));
 		patch_erase->popup_centered_minsize();
 	} else {
 		patch_dialog->popup_centered_ratio();
@@ -426,15 +425,16 @@ void ProjectExportDialog::_delete_preset_confirm() {
 
 	int idx = presets->get_current();
 	parameters->edit(NULL); //to avoid crash
+	_edit_preset(-1);
 	EditorExport::get_singleton()->remove_export_preset(idx);
 	_update_presets();
-	_edit_preset(-1);
+	_edit_preset(presets->get_current());
 }
 
 Variant ProjectExportDialog::get_drag_data_fw(const Point2 &p_point, Control *p_from) {
 
 	if (p_from == presets) {
-		int pos = presets->get_item_at_pos(p_point, true);
+		int pos = presets->get_item_at_position(p_point, true);
 
 		if (pos >= 0) {
 			Dictionary d;
@@ -455,7 +455,7 @@ Variant ProjectExportDialog::get_drag_data_fw(const Point2 &p_point, Control *p_
 		}
 	} else if (p_from == patches) {
 
-		TreeItem *item = patches->get_item_at_pos(p_point);
+		TreeItem *item = patches->get_item_at_position(p_point);
 
 		if (item && item->get_cell_mode(0) == TreeItem::CELL_MODE_CHECK) {
 
@@ -482,7 +482,7 @@ bool ProjectExportDialog::can_drop_data_fw(const Point2 &p_point, const Variant 
 		if (!d.has("type") || String(d["type"]) != "export_preset")
 			return false;
 
-		if (presets->get_item_at_pos(p_point, true) < 0 && !presets->is_pos_at_end_of_items(p_point))
+		if (presets->get_item_at_position(p_point, true) < 0 && !presets->is_pos_at_end_of_items(p_point))
 			return false;
 	} else if (p_from == patches) {
 
@@ -492,7 +492,7 @@ bool ProjectExportDialog::can_drop_data_fw(const Point2 &p_point, const Variant 
 
 		patches->set_drop_mode_flags(Tree::DROP_MODE_ON_ITEM);
 
-		TreeItem *item = patches->get_item_at_pos(p_point);
+		TreeItem *item = patches->get_item_at_position(p_point);
 
 		if (!item) {
 
@@ -511,8 +511,8 @@ void ProjectExportDialog::drop_data_fw(const Point2 &p_point, const Variant &p_d
 
 		int to_pos = -1;
 
-		if (presets->get_item_at_pos(p_point, true) >= 0) {
-			to_pos = presets->get_item_at_pos(p_point, true);
+		if (presets->get_item_at_position(p_point, true) >= 0) {
+			to_pos = presets->get_item_at_position(p_point, true);
 		}
 
 		if (to_pos == -1 && !presets->is_pos_at_end_of_items(p_point))
@@ -541,7 +541,7 @@ void ProjectExportDialog::drop_data_fw(const Point2 &p_point, const Variant &p_d
 
 		int from_pos = d["patch"];
 
-		TreeItem *item = patches->get_item_at_pos(p_point);
+		TreeItem *item = patches->get_item_at_position(p_point);
 		if (!item)
 			return;
 
@@ -733,6 +733,12 @@ void ProjectExportDialog::_export_project_to_path(const String &p_path) {
 	ERR_FAIL_COND(platform.is_null());
 
 	Error err = platform->export_project(current, export_debug->is_pressed(), p_path, 0);
+	if (err != OK) {
+		error_dialog->set_text(TTR("Export templates for this platform are missing/corrupted: ") + platform->get_name());
+		error_dialog->show();
+		error_dialog->popup_centered_minsize(Size2(300, 80));
+		ERR_PRINT("Failed to export project");
+	}
 }
 
 void ProjectExportDialog::_bind_methods() {
@@ -892,7 +898,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	Panel *features_panel = memnew(Panel);
 	custom_feature_display = memnew(RichTextLabel);
 	features_panel->add_child(custom_feature_display);
-	custom_feature_display->set_area_as_parent_rect(10 * EDSCALE);
+	custom_feature_display->set_anchors_and_margins_preset(Control::PRESET_WIDE, Control::PRESET_MODE_MINSIZE, 10 * EDSCALE);
 	custom_feature_display->set_v_size_flags(SIZE_EXPAND_FILL);
 	feature_vb->add_margin_child(TTR("Feature List:"), features_panel, true);
 	sections->add_child(feature_vb);
@@ -913,8 +919,9 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	updating = false;
 
-	get_ok()->set_text("Export PCK/Zip");
-	export_button = add_button("Export Project", !OS::get_singleton()->get_swap_ok_cancel(), "export");
+	get_cancel()->set_text(TTR("Close"));
+	get_ok()->set_text(TTR("Export PCK/Zip"));
+	export_button = add_button(TTR("Export Project"), !OS::get_singleton()->get_swap_ok_cancel(), "export");
 
 	export_pck_zip = memnew(FileDialog);
 	export_pck_zip->add_filter("*.zip ; ZIP File");
@@ -927,7 +934,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_error = memnew(Label);
 	main_vb->add_child(export_error);
 	export_error->hide();
-	export_error->add_color_override("font_color", Color(1, 0.5, 0.5));
+	export_error->add_color_override("font_color", get_color("error_color", "Editor"));
 
 	export_templates_error = memnew(HBoxContainer);
 	main_vb->add_child(export_templates_error);
@@ -935,8 +942,14 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	Label *export_error2 = memnew(Label);
 	export_templates_error->add_child(export_error2);
-	export_error2->add_color_override("font_color", Color(1, 0.5, 0.5));
+	export_error2->add_color_override("font_color", get_color("error_color", "Editor"));
 	export_error2->set_text(" - " + TTR("Export templates for this platform are missing:") + " ");
+
+	error_dialog = memnew(AcceptDialog);
+	error_dialog->set_title("Error");
+	error_dialog->set_text(TTR("Export templates for this platform are missing/corrupted:") + " ");
+	main_vb->add_child(error_dialog);
+	error_dialog->hide();
 
 	LinkButton *download_templates = memnew(LinkButton);
 	download_templates->set_text(TTR("Manage Export Templates"));

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -140,7 +140,7 @@ public:
 	uint32_t get_item_accelerator(int p_idx) const;
 	Variant get_item_metadata(int p_idx) const;
 	bool is_item_disabled(int p_idx) const;
-	String get_item_submenu(int p_ID) const;
+	String get_item_submenu(int p_idx) const;
 	bool is_item_separator(int p_idx) const;
 	bool is_item_checkable(int p_idx) const;
 	String get_item_tooltip(int p_idx) const;

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -28,6 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "input_default.h"
+
 #include "input_map.h"
 #include "os/os.h"
 #include "scene/resources/texture.h"
@@ -79,7 +80,7 @@ bool InputDefault::is_key_pressed(int p_scancode) const {
 bool InputDefault::is_mouse_button_pressed(int p_button) const {
 
 	_THREAD_SAFE_METHOD_
-	return (mouse_button_mask & (1 << p_button)) != 0;
+	return (mouse_button_mask & (1 << (p_button - 1))) != 0;
 }
 
 static int _combine_device(int p_value, int p_device) {
@@ -96,58 +97,6 @@ bool InputDefault::is_joy_button_pressed(int p_device, int p_button) const {
 bool InputDefault::is_action_pressed(const StringName &p_action) const {
 
 	return action_state.has(p_action) && action_state[p_action].pressed;
-#if 0
-	if (custom_action_press.has(p_action))
-		return true; //simpler
-
-	const List<InputEvent> *alist = InputMap::get_singleton()->get_action_list(p_action);
-	if (!alist)
-		return false;
-
-
-	for (const List<InputEvent>::Element *E=alist->front();E;E=E->next()) {
-
-
-		int device=E->get().device;
-
-		switch(E->get().type) {
-
-			case InputEvent::KEY: {
-
-				const InputEventKey &iek=E->get().key;
-				if ((keys_pressed.has(iek->get_scancode())))
-					return true;
-			} break;
-			case InputEvent::MOUSE_BUTTON: {
-
-				const InputEventMouseButton &iemb=E->get().mouse_button;
-				 if(mouse_button_mask&(1<<iemb->get_button_index()))
-					 return true;
-			} break;
-			case InputEvent::JOYPAD_BUTTON: {
-
-				const InputEventJoypadButton &iejb=E->get().joy_button;
-				int c = _combine_device(iejb->get_button_index(),device);
-				if (joy_buttons_pressed.has(c))
-					return true;
-			} break;
-			case InputEvent::JOYPAD_MOTION: {
-
-				const InputEventJoypadMotion &iejm=E->get().joy_motion;
-				int c = _combine_device(iejm.axis,device);
-				if (_joy_axis.has(c)) {
-					if (iejm.axis_value < 0) {
-						if (_joy_axis[c] < -0.5f) return true;
-					}
-					else
-						if (_joy_axis[c] > 0.5f) return true;
-				}
-			} break;
-		}
-	}
-
-	return false;
-#endif
 }
 
 bool InputDefault::is_action_just_pressed(const StringName &p_action) const {
@@ -156,8 +105,8 @@ bool InputDefault::is_action_just_pressed(const StringName &p_action) const {
 	if (!E)
 		return false;
 
-	if (Engine::get_singleton()->is_in_fixed_frame()) {
-		return E->get().pressed && E->get().fixed_frame == Engine::get_singleton()->get_fixed_frames();
+	if (Engine::get_singleton()->is_in_physics_frame()) {
+		return E->get().pressed && E->get().physics_frame == Engine::get_singleton()->get_physics_frames();
 	} else {
 		return E->get().pressed && E->get().idle_frame == Engine::get_singleton()->get_idle_frames();
 	}
@@ -169,8 +118,8 @@ bool InputDefault::is_action_just_released(const StringName &p_action) const {
 	if (!E)
 		return false;
 
-	if (Engine::get_singleton()->is_in_fixed_frame()) {
-		return !E->get().pressed && E->get().fixed_frame == Engine::get_singleton()->get_fixed_frames();
+	if (Engine::get_singleton()->is_in_physics_frame()) {
+		return !E->get().pressed && E->get().physics_frame == Engine::get_singleton()->get_physics_frames();
 	} else {
 		return !E->get().pressed && E->get().idle_frame == Engine::get_singleton()->get_idle_frames();
 	}
@@ -316,10 +265,11 @@ void InputDefault::parse_input_event(const Ref<InputEvent> &p_event) {
 
 	if (mb.is_valid() && !mb->is_doubleclick()) {
 
-		if (mb->is_pressed())
-			mouse_button_mask |= (1 << mb->get_button_index());
-		else
-			mouse_button_mask &= ~(1 << mb->get_button_index());
+		if (mb->is_pressed()) {
+			mouse_button_mask |= (1 << (mb->get_button_index() - 1));
+		} else {
+			mouse_button_mask &= ~(1 << (mb->get_button_index() - 1));
+		}
 
 		if (main_loop && emulate_touch && mb->get_button_index() == 1) {
 			Ref<InputEventScreenTouch> touch_event;
@@ -374,7 +324,7 @@ void InputDefault::parse_input_event(const Ref<InputEvent> &p_event) {
 
 			if (InputMap::get_singleton()->event_is_action(p_event, E->key()) && is_action_pressed(E->key()) != p_event->is_pressed()) {
 				Action action;
-				action.fixed_frame = Engine::get_singleton()->get_fixed_frames();
+				action.physics_frame = Engine::get_singleton()->get_physics_frames();
 				action.idle_frame = Engine::get_singleton()->get_idle_frames();
 				action.pressed = p_event->is_pressed();
 				action_state[E->key()] = action;
@@ -472,9 +422,9 @@ int InputDefault::get_mouse_button_mask() const {
 	return mouse_button_mask; // do not trust OS implementaiton, should remove it - OS::get_singleton()->get_mouse_button_state();
 }
 
-void InputDefault::warp_mouse_pos(const Vector2 &p_to) {
+void InputDefault::warp_mouse_position(const Vector2 &p_to) {
 
-	OS::get_singleton()->warp_mouse_pos(p_to);
+	OS::get_singleton()->warp_mouse_position(p_to);
 }
 
 Point2i InputDefault::warp_mouse_motion(const Ref<InputEventMouseMotion> &p_motion, const Rect2 &p_rect) {
@@ -497,7 +447,7 @@ Point2i InputDefault::warp_mouse_motion(const Ref<InputEventMouseMotion> &p_moti
 	const Point2i pos_local = p_motion->get_global_position() - p_rect.position;
 	const Point2i pos_warped(Math::fposmod(pos_local.x, p_rect.size.x), Math::fposmod(pos_local.y, p_rect.size.y));
 	if (pos_warped != pos_local) {
-		OS::get_singleton()->warp_mouse_pos(pos_warped + p_rect.position);
+		OS::get_singleton()->warp_mouse_position(pos_warped + p_rect.position);
 	}
 
 	return rel_warped;
@@ -510,7 +460,7 @@ void InputDefault::action_press(const StringName &p_action) {
 
 	Action action;
 
-	action.fixed_frame = Engine::get_singleton()->get_fixed_frames();
+	action.physics_frame = Engine::get_singleton()->get_physics_frames();
 	action.idle_frame = Engine::get_singleton()->get_idle_frames();
 	action.pressed = true;
 
@@ -521,7 +471,7 @@ void InputDefault::action_release(const StringName &p_action) {
 
 	Action action;
 
-	action.fixed_frame = Engine::get_singleton()->get_fixed_frames();
+	action.physics_frame = Engine::get_singleton()->get_physics_frames();
 	action.idle_frame = Engine::get_singleton()->get_idle_frames();
 	action.pressed = false;
 
@@ -775,7 +725,7 @@ static const char *s_ControllerMappings[] = {
 	"4e564944494120436f72706f72617469,NVIDIA Controller,a:b0,b:b1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b9,leftstick:b7,lefttrigger:a4,leftx:a0,lefty:a1,rightshoulder:b10,rightstick:b8,righttrigger:a5,rightx:a2,righty:a3,start:b6,x:b2,y:b3,",
 	"532e542e442e20496e74657261637420,3dfx InterAct HammerHead FX,leftx:a0,lefty:a1,dpdown:h0.4,rightstick:b25,rightshoulder:b27,rightx:a2,start:b31,righty:a3,dpleft:h0.8,lefttrigger:b28,x:b20,dpup:h0.1,back:b30,leftstick:b22,leftshoulder:b26,y:b21,a:b23,dpright:h0.2,righttrigger:b29,b:b24,",
 	"506572666f726d616e63652044657369,PDP Rock Candy Wireless Controller for PS3,leftx:a0,lefty:a1,dpdown:h0.4,rightstick:b6,rightshoulder:b18,rightx:a2,start:b16,righty:a3,dpleft:h0.8,lefttrigger:b9,x:b0,dpup:h0.1,back:h0.2,leftstick:b4,leftshoulder:b3,y:b2,a:b1,dpright:h0.2,righttrigger:b10,b:b17,",
-	"4f5559412047616d6520436f6e74726f,OUYA Game Controller,leftx:a0,lefty:a1,dpdown:b9,rightstick:b7,rightshoulder:b5,rightx:a3,start:b16,righty:a4,dpleft:b10,lefttrigger:b12,x:b1,dpup:b8,back:b14,leftstick:b6,leftshoulder:b4,y:b2,a:b0,dpright:b11,righttrigger:b13,b:b3,",
+	"4f5559412047616d6520436f6e74726f,OUYA Game Controller,leftx:a1,lefty:a3,dpdown:b12,rightstick:b8,rightshoulder:b10,rightx:a6,start:b-86,righty:a7,dpleft:b13,lefttrigger:b15,x:b2,dpup:b11,leftstick:b7,leftshoulder:b9,y:b3,a:b0,dpright:b14,righttrigger:b16,b:b1,",
 #endif
 
 #ifdef JAVASCRIPT_ENABLED

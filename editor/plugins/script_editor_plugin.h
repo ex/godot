@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -65,7 +65,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void popup(const Vector<String> &p_base, bool p_dontclear = false);
+	void popup(const Vector<String> &p_functions, bool p_dontclear = false);
 	ScriptEditorQuickOpen();
 };
 
@@ -131,9 +131,11 @@ class ScriptEditor : public PanelContainer {
 		FILE_RELOAD_THEME,
 		FILE_SAVE_THEME,
 		FILE_SAVE_THEME_AS,
+		FILE_RUN,
 		FILE_CLOSE,
 		CLOSE_DOCS,
 		CLOSE_ALL,
+		CLOSE_OTHER_TABS,
 		TOGGLE_SCRIPTS_PANEL,
 		FILE_TOOL_RELOAD,
 		FILE_TOOL_RELOAD_SOFT,
@@ -149,10 +151,11 @@ class ScriptEditor : public PanelContainer {
 		SEARCH_WEBSITE,
 		HELP_SEARCH_FIND,
 		HELP_SEARCH_FIND_NEXT,
-		WINDOW_MOVE_LEFT,
-		WINDOW_MOVE_RIGHT,
+		WINDOW_MOVE_UP,
+		WINDOW_MOVE_DOWN,
 		WINDOW_NEXT,
 		WINDOW_PREV,
+		WINDOW_SORT,
 		WINDOW_SELECT_BASE = 100
 	};
 
@@ -172,6 +175,7 @@ class ScriptEditor : public PanelContainer {
 	MenuButton *edit_menu;
 	MenuButton *script_search_menu;
 	MenuButton *debug_menu;
+	PopupMenu *context_menu;
 	Timer *autosave_timer;
 	uint64_t idle;
 
@@ -186,6 +190,8 @@ class ScriptEditor : public PanelContainer {
 	HSplitContainer *script_split;
 	ItemList *members_overview;
 	bool members_overview_enabled;
+	ItemList *help_overview;
+	bool help_overview_enabled;
 	VSplitContainer *list_split;
 	TabContainer *tab_container;
 	EditorFileDialog *file_dialog;
@@ -223,14 +229,14 @@ class ScriptEditor : public PanelContainer {
 	EditorHelpIndex *help_index;
 
 	void _tab_changed(int p_which);
-	void _menu_option(int p_optin);
+	void _menu_option(int p_option);
 
 	Tree *disk_changed_list;
 	ConfirmationDialog *disk_changed;
 
 	bool restoring_layout;
 
-	String _get_debug_tooltip(const String &p_text, Node *_ste);
+	String _get_debug_tooltip(const String &p_text, Node *_se);
 
 	void _resave_scripts(const String &p_str);
 	void _reload_scripts();
@@ -246,6 +252,7 @@ class ScriptEditor : public PanelContainer {
 	void _close_current_tab();
 	void _close_discard_current_tab(const String &p_str);
 	void _close_docs_tab();
+	void _close_other_tabs();
 	void _close_all_tabs();
 
 	void _ask_close_current_unsaved_tab(ScriptEditorBase *current);
@@ -289,9 +296,14 @@ class ScriptEditor : public PanelContainer {
 	void _update_members_overview_visibility();
 	void _update_members_overview();
 	void _update_script_names();
+	bool _sort_list_on_update;
 
 	void _members_overview_selected(int p_idx);
 	void _script_selected(int p_idx);
+
+	void _update_help_overview_visibility();
+	void _update_help_overview();
+	void _help_overview_selected(int p_idx);
 
 	void _find_scripts(Node *p_base, Node *p_current, Set<Ref<Script> > &used);
 
@@ -299,7 +311,14 @@ class ScriptEditor : public PanelContainer {
 
 	void _script_split_dragged(float);
 
+	Variant get_drag_data_fw(const Point2 &p_point, Control *p_from);
+	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;
+	void drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
+
 	void _unhandled_input(const Ref<InputEvent> &p_event);
+
+	void _script_list_gui_input(const Ref<InputEvent> &ev);
+	void _make_script_list_context_menu();
 
 	void _help_search(String p_text);
 	void _help_index(String p_text);
@@ -318,6 +337,7 @@ class ScriptEditor : public PanelContainer {
 	void _update_script_colors();
 	void _update_modified_scripts_for_external_editor(Ref<Script> p_for_script = Ref<Script>());
 
+	void _script_changed();
 	int file_dialog_option;
 	void _file_dialog_action(String p_file);
 
@@ -343,13 +363,7 @@ public:
 	_FORCE_INLINE_ bool edit(const Ref<Script> &p_script, bool p_grab_focus = true) { return edit(p_script, -1, 0, p_grab_focus); }
 	bool edit(const Ref<Script> &p_script, int p_line, int p_col, bool p_grab_focus = true);
 
-	Dictionary get_state() const;
-	void set_state(const Dictionary &p_state);
-	void clear();
-
 	void get_breakpoints(List<String> *p_breakpoints);
-
-	//void swap_lines(TextEdit *tx, int line1, int line2);
 
 	void save_all_scripts();
 
@@ -392,14 +406,10 @@ class ScriptEditorPlugin : public EditorPlugin {
 public:
 	virtual String get_name() const { return "Script"; }
 	bool has_main_screen() const { return true; }
-	virtual void edit(Object *p_node);
-	virtual bool handles(Object *p_node) const;
+	virtual void edit(Object *p_object);
+	virtual bool handles(Object *p_object) const;
 	virtual void make_visible(bool p_visible);
 	virtual void selected_notify();
-
-	Dictionary get_state() const;
-	virtual void set_state(const Dictionary &p_state);
-	virtual void clear();
 
 	virtual void save_external_data();
 	virtual void apply_changes();

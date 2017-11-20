@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -60,9 +60,9 @@ public:
 private:
 	Path2D *path;
 	real_t offset;
+	real_t delta_offset; // change in offset since last _update_transform
 	real_t h_offset;
 	real_t v_offset;
-	real_t lookahead;
 	bool cubic;
 	bool loop;
 	bool rotate;
@@ -90,13 +90,10 @@ public:
 	void set_unit_offset(float p_unit_offset);
 	float get_unit_offset() const;
 
-	void set_lookahead(float p_lookahead);
-	float get_lookahead() const;
-
 	void set_loop(bool p_loop);
 	bool has_loop() const;
 
-	void set_rotate(bool p_enabled);
+	void set_rotate(bool p_rotate);
 	bool is_rotating() const;
 
 	void set_cubic_interpolation(bool p_enable);

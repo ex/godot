@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -152,7 +152,7 @@ RES ResourceFormatDDS::load(const String &p_path, const String &p_original_path,
 	*/
 
 	//must avoid this later
-	while (f->get_pos() < 128)
+	while (f->get_position() < 128)
 		f->get_8();
 
 	DDSFormat dds_format;

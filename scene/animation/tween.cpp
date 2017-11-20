@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -152,7 +152,7 @@ void Tween::_notification(int p_what) {
 			if (!processing) {
 				//make sure that a previous process state was not saved
 				//only process if "processing" is set
-				set_fixed_process_internal(false);
+				set_physics_process_internal(false);
 				set_process_internal(false);
 			}
 		} break;
@@ -160,19 +160,19 @@ void Tween::_notification(int p_what) {
 
 		} break;
 		case NOTIFICATION_INTERNAL_PROCESS: {
-			if (tween_process_mode == TWEEN_PROCESS_FIXED)
+			if (tween_process_mode == TWEEN_PROCESS_PHYSICS)
 				break;
 
 			if (processing)
 				_tween_process(get_process_delta_time());
 		} break;
-		case NOTIFICATION_INTERNAL_FIXED_PROCESS: {
+		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
 
 			if (tween_process_mode == TWEEN_PROCESS_IDLE)
 				break;
 
 			if (processing)
-				_tween_process(get_fixed_process_delta_time());
+				_tween_process(get_physics_process_delta_time());
 		} break;
 		case NOTIFICATION_EXIT_TREE: {
 
@@ -222,27 +222,27 @@ void Tween::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("tween_step", PropertyInfo(Variant::OBJECT, "object"), PropertyInfo(Variant::STRING, "key"), PropertyInfo(Variant::REAL, "elapsed"), PropertyInfo(Variant::OBJECT, "value")));
 	ADD_SIGNAL(MethodInfo("tween_completed", PropertyInfo(Variant::OBJECT, "object"), PropertyInfo(Variant::STRING, "key")));
 
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "playback_process_mode", PROPERTY_HINT_ENUM, "Fixed,Idle"), "set_tween_process_mode", "get_tween_process_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "playback_process_mode", PROPERTY_HINT_ENUM, "Physics,Idle"), "set_tween_process_mode", "get_tween_process_mode");
 
-	BIND_CONSTANT(TWEEN_PROCESS_FIXED);
-	BIND_CONSTANT(TWEEN_PROCESS_IDLE);
+	BIND_ENUM_CONSTANT(TWEEN_PROCESS_PHYSICS);
+	BIND_ENUM_CONSTANT(TWEEN_PROCESS_IDLE);
 
-	BIND_CONSTANT(TRANS_LINEAR);
-	BIND_CONSTANT(TRANS_SINE);
-	BIND_CONSTANT(TRANS_QUINT);
-	BIND_CONSTANT(TRANS_QUART);
-	BIND_CONSTANT(TRANS_QUAD);
-	BIND_CONSTANT(TRANS_EXPO);
-	BIND_CONSTANT(TRANS_ELASTIC);
-	BIND_CONSTANT(TRANS_CUBIC);
-	BIND_CONSTANT(TRANS_CIRC);
-	BIND_CONSTANT(TRANS_BOUNCE);
-	BIND_CONSTANT(TRANS_BACK);
+	BIND_ENUM_CONSTANT(TRANS_LINEAR);
+	BIND_ENUM_CONSTANT(TRANS_SINE);
+	BIND_ENUM_CONSTANT(TRANS_QUINT);
+	BIND_ENUM_CONSTANT(TRANS_QUART);
+	BIND_ENUM_CONSTANT(TRANS_QUAD);
+	BIND_ENUM_CONSTANT(TRANS_EXPO);
+	BIND_ENUM_CONSTANT(TRANS_ELASTIC);
+	BIND_ENUM_CONSTANT(TRANS_CUBIC);
+	BIND_ENUM_CONSTANT(TRANS_CIRC);
+	BIND_ENUM_CONSTANT(TRANS_BOUNCE);
+	BIND_ENUM_CONSTANT(TRANS_BACK);
 
-	BIND_CONSTANT(EASE_IN);
-	BIND_CONSTANT(EASE_OUT);
-	BIND_CONSTANT(EASE_IN_OUT);
-	BIND_CONSTANT(EASE_OUT_IN);
+	BIND_ENUM_CONSTANT(EASE_IN);
+	BIND_ENUM_CONSTANT(EASE_OUT);
+	BIND_ENUM_CONSTANT(EASE_IN_OUT);
+	BIND_ENUM_CONSTANT(EASE_OUT_IN);
 }
 
 Variant &Tween::_get_initial_val(InterpolateData &p_data) {
@@ -416,10 +416,10 @@ Variant Tween::_run_equation(InterpolateData &p_data) {
 
 			result = r;
 		} break;
-		case Variant::RECT3: {
-			Rect3 i = initial_val;
-			Rect3 d = delta_val;
-			Rect3 r;
+		case Variant::AABB: {
+			AABB i = initial_val;
+			AABB d = delta_val;
+			AABB r;
 
 			APPLY_EQUATION(position.x);
 			APPLY_EQUATION(position.y);
@@ -560,12 +560,16 @@ void Tween::_tween_process(float p_delta) {
 
 		switch (data.type) {
 			case INTER_PROPERTY:
-			case INTER_METHOD:
-				break;
+			case INTER_METHOD: {
+				Variant result = _run_equation(data);
+				emit_signal("tween_step", object, data.key, data.elapsed, result);
+				_apply_tween_value(data, result);
+				if (data.finish)
+					_apply_tween_value(data, data.final_val);
+			} break;
+
 			case INTER_CALLBACK:
 				if (data.finish) {
-
-					Variant::CallError error;
 					if (data.call_deferred) {
 
 						switch (data.args) {
@@ -588,8 +592,8 @@ void Tween::_tween_process(float p_delta) {
 								object->call_deferred(data.key, data.arg[0], data.arg[1], data.arg[2], data.arg[3], data.arg[4]);
 								break;
 						}
-
 					} else {
+						Variant::CallError error;
 						Variant *arg[5] = {
 							&data.arg[0],
 							&data.arg[1],
@@ -599,19 +603,11 @@ void Tween::_tween_process(float p_delta) {
 						};
 						object->call(data.key, (const Variant **)arg, data.args, error);
 					}
-					if (!repeat)
-						call_deferred("_remove", object, data.key, true);
 				}
-				continue;
+				break;
 		}
 
-		Variant result = _run_equation(data);
-		emit_signal("tween_step", object, data.key, data.elapsed, result);
-
-		_apply_tween_value(data, result);
-
 		if (data.finish) {
-			_apply_tween_value(data, data.final_val);
 			emit_signal("tween_completed", object, data.key);
 			// not repeat mode, remove completed action
 			if (!repeat)
@@ -646,7 +642,7 @@ void Tween::_set_process(bool p_process, bool p_force) {
 
 	switch (tween_process_mode) {
 
-		case TWEEN_PROCESS_FIXED: set_fixed_process_internal(p_process && active); break;
+		case TWEEN_PROCESS_PHYSICS: set_physics_process_internal(p_process && active); break;
 		case TWEEN_PROCESS_IDLE: set_process_internal(p_process && active); break;
 	}
 
@@ -960,10 +956,10 @@ bool Tween::_calc_delta_val(const Variant &p_initial_val, const Variant &p_final
 		case Variant::QUAT:
 			delta_val = final_val.operator Quat() - initial_val.operator Quat();
 			break;
-		case Variant::RECT3: {
-			Rect3 i = initial_val;
-			Rect3 f = final_val;
-			delta_val = Rect3(f.position - i.position, f.size - i.size);
+		case Variant::AABB: {
+			AABB i = initial_val;
+			AABB f = final_val;
+			delta_val = AABB(f.position - i.position, f.size - i.size);
 		} break;
 		case Variant::TRANSFORM: {
 			Transform i = initial_val;

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -42,8 +42,6 @@ Shader::Mode Shader::get_mode() const {
 void Shader::set_code(const String &p_code) {
 
 	String type = ShaderLanguage::get_shader_type(p_code);
-
-	print_line("mode: " + type);
 
 	if (type == "canvas_item") {
 		mode = MODE_CANVAS_ITEM;
@@ -137,9 +135,9 @@ void Shader::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "code", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_code", "get_code");
 
-	BIND_CONSTANT(MODE_SPATIAL);
-	BIND_CONSTANT(MODE_CANVAS_ITEM);
-	BIND_CONSTANT(MODE_PARTICLES);
+	BIND_ENUM_CONSTANT(MODE_SPATIAL);
+	BIND_ENUM_CONSTANT(MODE_CANVAS_ITEM);
+	BIND_ENUM_CONSTANT(MODE_PARTICLES);
 }
 
 Shader::Shader() {

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -40,7 +40,7 @@ void Font::draw_halign(RID p_canvas_item, const Point2 &p_pos, HAlign p_align, f
 		return;
 	}
 
-	float ofs;
+	float ofs = 0.f;
 	switch (p_align) {
 		case HALIGN_LEFT: {
 			ofs = 0;
@@ -50,6 +50,9 @@ void Font::draw_halign(RID p_canvas_item, const Point2 &p_pos, HAlign p_align, f
 		} break;
 		case HALIGN_RIGHT: {
 			ofs = p_width - length;
+		} break;
+		default: {
+			ERR_PRINT("Unknown halignment type");
 		} break;
 	}
 	draw(p_canvas_item, p_pos + Point2(ofs, 0), p_text, p_modulate, p_width);
@@ -77,13 +80,13 @@ void Font::update_changes() {
 
 void Font::_bind_methods() {
 
-	ClassDB::bind_method(D_METHOD("draw", "canvas_item", "pos", "string", "modulate", "clip_w"), &Font::draw, DEFVAL(Color(1, 1, 1)), DEFVAL(-1));
+	ClassDB::bind_method(D_METHOD("draw", "canvas_item", "position", "string", "modulate", "clip_w"), &Font::draw, DEFVAL(Color(1, 1, 1)), DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("get_ascent"), &Font::get_ascent);
 	ClassDB::bind_method(D_METHOD("get_descent"), &Font::get_descent);
 	ClassDB::bind_method(D_METHOD("get_height"), &Font::get_height);
 	ClassDB::bind_method(D_METHOD("is_distance_field_hint"), &Font::is_distance_field_hint);
 	ClassDB::bind_method(D_METHOD("get_string_size", "string"), &Font::get_string_size);
-	ClassDB::bind_method(D_METHOD("draw_char", "canvas_item", "pos", "char", "next", "modulate"), &Font::draw_char, DEFVAL(-1), DEFVAL(Color(1, 1, 1)));
+	ClassDB::bind_method(D_METHOD("draw_char", "canvas_item", "position", "char", "next", "modulate"), &Font::draw_char, DEFVAL(-1), DEFVAL(Color(1, 1, 1)));
 	ClassDB::bind_method(D_METHOD("update_changes"), &Font::update_changes);
 }
 
@@ -179,14 +182,14 @@ Vector<Variant> BitmapFont::_get_textures() const {
 	return rtextures;
 }
 
-Error BitmapFont::create_from_fnt(const String &p_string) {
+Error BitmapFont::create_from_fnt(const String &p_file) {
 	//fnt format used by angelcode bmfont
 	//http://www.angelcode.com/products/bmfont/
 
-	FileAccess *f = FileAccess::open(p_string, FileAccess::READ);
+	FileAccess *f = FileAccess::open(p_file, FileAccess::READ);
 
 	if (!f) {
-		ERR_EXPLAIN("Can't open font: " + p_string);
+		ERR_EXPLAIN("Can't open font: " + p_file);
 		ERR_FAIL_V(ERR_FILE_NOT_FOUND);
 	}
 
@@ -255,7 +258,7 @@ Error BitmapFont::create_from_fnt(const String &p_string) {
 			if (keys.has("file")) {
 
 				String file = keys["file"];
-				file = p_string.get_base_dir() + "/" + file;
+				file = p_file.get_base_dir() + "/" + file;
 				Ref<Texture> tex = ResourceLoader::load(file);
 				if (tex.is_null()) {
 					ERR_PRINT("Can't load font texture!");

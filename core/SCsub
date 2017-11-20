@@ -18,7 +18,7 @@ gd_cpp = '#include "project_settings.h"\n'
 gd_cpp += gd_inc
 gd_cpp += "void ProjectSettings::register_global_defaults() {\n" + gd_call + "\n}\n"
 
-f = open("global_defaults.gen.cpp", "wb")
+f = open("global_defaults.gen.cpp", "w")
 f.write(gd_cpp)
 f.close()
 
@@ -47,7 +47,7 @@ if ("SCRIPT_AES256_ENCRYPTION_KEY" in os.environ):
         txt = "0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0"
         print("Invalid AES256 encryption key, not 64 bits hex: " + e)
 
-f = open("script_encryption_key.gen.cpp", "wb")
+f = open("script_encryption_key.gen.cpp", "w")
 f.write("#include \"project_settings.h\"\nuint8_t script_encryption_key[32]={" + txt + "};\n")
 f.close()
 
@@ -83,24 +83,8 @@ thirdparty_minizip_sources = [
 thirdparty_minizip_sources = [thirdparty_minizip_dir + file for file in thirdparty_minizip_sources]
 env.add_source_files(env.core_sources, thirdparty_minizip_sources)
 
-thirdparty_zstd_dir = "#thirdparty/zstd/"
-thirdparty_zstd_sources = [
-	"common/entropy_common.c",
-	"common/error_private.c",
-	"common/fse_decompress.c",
-	"common/pool.c",
-	"common/threading.c",
-	"common/xxhash.c",
-	"common/zstd_common.c",
-	"compress/fse_compress.c",
-	"compress/huf_compress.c",
-	"compress/zstd_compress.c",
-	"compress/zstdmt_compress.c",
-	"decompress/huf_decompress.c",
-	"decompress/zstd_decompress.c",
-]
-thirdparty_zstd_sources = [thirdparty_zstd_dir + file for file in thirdparty_zstd_sources]
-env.add_source_files(env.core_sources, thirdparty_zstd_sources)
+if 'builtin_zstd' in env and env['builtin_zstd']:
+    SConscript("#thirdparty/zstd/SCsub")
 
 
 # Godot's own sources
@@ -123,5 +107,4 @@ SConscript('helper/SCsub')
 # Build it all as a library
 lib = env.Library("core", env.core_sources)
 env.Prepend(LIBS=[lib])
-env.Append(CPPPATH=["#thirdparty/zstd", "#thirdparty/zstd/common"])
 Export('env')

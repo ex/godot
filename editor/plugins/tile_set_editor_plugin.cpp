@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -43,7 +43,7 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 
 		Node *child = p_node->get_child(i);
 
-		if (!child->cast_to<Sprite>()) {
+		if (!Object::cast_to<Sprite>(child)) {
 			if (child->get_child_count() > 0) {
 				_import_node(child, p_library);
 			}
@@ -51,7 +51,7 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 			continue;
 		}
 
-		Sprite *mi = child->cast_to<Sprite>();
+		Sprite *mi = Object::cast_to<Sprite>(child);
 		Ref<Texture> texture = mi->get_texture();
 		Ref<Texture> normal_map = mi->get_normal_map();
 		Ref<ShaderMaterial> material = mi->get_material();
@@ -99,18 +99,18 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 
 			Node *child2 = mi->get_child(j);
 
-			if (child2->cast_to<NavigationPolygonInstance>())
-				nav_poly = child2->cast_to<NavigationPolygonInstance>()->get_navigation_polygon();
+			if (Object::cast_to<NavigationPolygonInstance>(child2))
+				nav_poly = Object::cast_to<NavigationPolygonInstance>(child2)->get_navigation_polygon();
 
-			if (child2->cast_to<LightOccluder2D>())
-				occluder = child2->cast_to<LightOccluder2D>()->get_occluder_polygon();
+			if (Object::cast_to<LightOccluder2D>(child2))
+				occluder = Object::cast_to<LightOccluder2D>(child2)->get_occluder_polygon();
 
-			if (!child2->cast_to<StaticBody2D>())
+			if (!Object::cast_to<StaticBody2D>(child2))
 				continue;
 
 			found_collisions = true;
 
-			StaticBody2D *sb = child2->cast_to<StaticBody2D>();
+			StaticBody2D *sb = Object::cast_to<StaticBody2D>(child2);
 
 			List<uint32_t> shapes;
 			sb->get_shape_owners(&shapes);
@@ -147,12 +147,12 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 	}
 }
 
-void TileSetEditor::_import_scene(Node *scene, Ref<TileSet> p_library, bool p_merge) {
+void TileSetEditor::_import_scene(Node *p_scene, Ref<TileSet> p_library, bool p_merge) {
 
 	if (!p_merge)
 		p_library->clear();
 
-	_import_node(scene, p_library);
+	_import_node(p_scene, p_library);
 }
 
 void TileSetEditor::_menu_confirm() {
@@ -238,7 +238,7 @@ void TileSetEditor::_bind_methods() {
 TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 
 	Panel *panel = memnew(Panel);
-	panel->set_area_as_parent_rect();
+	panel->set_anchors_and_margins_preset(Control::PRESET_WIDE);
 	add_child(panel);
 	MenuButton *options = memnew(MenuButton);
 	panel->add_child(options);
@@ -268,8 +268,8 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 
 void TileSetEditorPlugin::edit(Object *p_node) {
 
-	if (p_node && p_node->cast_to<TileSet>()) {
-		tileset_editor->edit(p_node->cast_to<TileSet>());
+	if (Object::cast_to<TileSet>(p_node)) {
+		tileset_editor->edit(Object::cast_to<TileSet>(p_node));
 		tileset_editor->show();
 	} else
 		tileset_editor->hide();
@@ -293,8 +293,7 @@ TileSetEditorPlugin::TileSetEditorPlugin(EditorNode *p_node) {
 	tileset_editor = memnew(TileSetEditor(p_node));
 
 	p_node->get_viewport()->add_child(tileset_editor);
-	tileset_editor->set_area_as_parent_rect();
-	tileset_editor->set_anchor(MARGIN_RIGHT, Control::ANCHOR_END);
+	tileset_editor->set_anchors_and_margins_preset(Control::PRESET_WIDE);
 	tileset_editor->set_anchor(MARGIN_BOTTOM, Control::ANCHOR_BEGIN);
 	tileset_editor->set_end(Point2(0, 22));
 	tileset_editor->hide();

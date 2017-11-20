@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -44,7 +44,7 @@ int TriangleMesh::_create_bvh(BVH *p_bvh, BVH **p_bb, int p_from, int p_size, in
 		return -1;
 	}
 
-	Rect3 aabb;
+	AABB aabb;
 	aabb = p_bb[p_from]->aabb;
 	for (int i = 1; i < p_size; i++) {
 
@@ -158,7 +158,7 @@ void TriangleMesh::create(const PoolVector<Vector3> &p_faces) {
 
 	max_depth = 0;
 	int max_alloc = fc;
-	int max = _create_bvh(bw.ptr(), bwp.ptr(), 0, fc, 1, max_depth, max_alloc);
+	_create_bvh(bw.ptr(), bwp.ptr(), 0, fc, 1, max_depth, max_alloc);
 
 	bw = PoolVector<BVH>::Write(); //clearup
 	bvh.resize(max_alloc); //resize back
@@ -166,7 +166,7 @@ void TriangleMesh::create(const PoolVector<Vector3> &p_faces) {
 	valid = true;
 }
 
-Vector3 TriangleMesh::get_area_normal(const Rect3 &p_aabb) const {
+Vector3 TriangleMesh::get_area_normal(const AABB &p_aabb) const {
 
 	uint32_t *stack = (uint32_t *)alloca(sizeof(int) * max_depth);
 

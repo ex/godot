@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -35,13 +35,13 @@
 #include "servers/visual/visual_server_raster.h"
 //#include "servers/visual/visual_server_wrap_mt.h"
 
-#include "audio_driver_iphone.h"
 #include "main/main.h"
 
 #include "core/io/file_access_pack.h"
 #include "core/os/dir_access.h"
 #include "core/os/file_access.h"
 #include "core/project_settings.h"
+#include "drivers/unix/syslog_logger.h"
 
 #include "sem_iphone.h"
 
@@ -54,17 +54,12 @@ int OSIPhone::get_video_driver_count() const {
 
 const char *OSIPhone::get_video_driver_name(int p_driver) const {
 
-	return "GLES2";
+	return "GLES3";
 };
 
 OSIPhone *OSIPhone::get_singleton() {
 
 	return (OSIPhone *)OS::get_singleton();
-};
-
-OS::VideoMode OSIPhone::get_default_video_mode() const {
-
-	return video_mode;
 };
 
 uint8_t OSIPhone::get_orientations() const {
@@ -97,7 +92,18 @@ void OSIPhone::initialize_core() {
 
 	OS_Unix::initialize_core();
 	SemaphoreIphone::make_default();
+
+	set_data_dir(data_dir);
 };
+
+void OSIPhone::initialize_logger() {
+	Vector<Logger *> loggers;
+	loggers.push_back(memnew(SyslogLogger));
+	// FIXME: Reenable once we figure out how to get this properly in user://
+	// instead of littering the user's working dirs (res:// + pwd) with log files (GH-12277)
+	//loggers.push_back(memnew(RotatedFileLogger("user://logs/log.txt")));
+	_set_logger(memnew(CompositeLogger(loggers)));
+}
 
 void OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
 
@@ -124,44 +130,36 @@ void OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_
 	// reset this to what it should be, it will have been set to 0 after visual_server->init() is called
 	RasterizerStorageGLES3::system_fbo = gl_view_base_fb;
 
-	audio_driver = memnew(AudioDriverIphone);
-	audio_driver->set_singleton();
-	audio_driver->init();
-
-	// init physics servers
-	physics_server = memnew(PhysicsServerSW);
-	physics_server->init();
-	//physics_2d_server = memnew( Physics2DServerSW );
-	physics_2d_server = Physics2DServerWrapMT::init_server<Physics2DServerSW>();
-	physics_2d_server->init();
+	AudioDriverManager::add_driver(&audio_driver);
+	AudioDriverManager::initialize(p_audio_driver);
 
 	input = memnew(InputDefault);
 
 /*
 #ifdef IOS_SCORELOOP_ENABLED
 	scoreloop = memnew(ScoreloopIOS);
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("Scoreloop", scoreloop));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("Scoreloop", scoreloop));
 	scoreloop->connect();
 #endif
 	*/
 
 #ifdef GAME_CENTER_ENABLED
 	game_center = memnew(GameCenter);
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("GameCenter", game_center));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("GameCenter", game_center));
 	game_center->connect();
 #endif
 
 #ifdef STOREKIT_ENABLED
 	store_kit = memnew(InAppStore);
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("InAppStore", store_kit));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("InAppStore", store_kit));
 #endif
 
 #ifdef ICLOUD_ENABLED
 	icloud = memnew(ICloud);
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("ICloud", icloud));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("ICloud", icloud));
 //icloud->connect();
 #endif
-	ProjectSettings::get_singleton()->add_singleton(ProjectSettings::Singleton("iOS", memnew(iOS)));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("iOS", memnew(iOS)));
 };
 
 MainLoop *OSIPhone::get_main_loop() const {
@@ -374,12 +372,6 @@ void OSIPhone::finalize() {
 	memdelete(visual_server);
 	//	memdelete(rasterizer);
 
-	physics_server->finish();
-	memdelete(physics_server);
-
-	physics_2d_server->finish();
-	memdelete(physics_2d_server);
-
 	memdelete(input);
 };
 
@@ -457,6 +449,14 @@ void OSIPhone::hide_virtual_keyboard() {
 	_hide_keyboard();
 };
 
+void OSIPhone::set_virtual_keyboard_height(int p_height) {
+	virtual_keyboard_height = p_height;
+}
+
+int OSIPhone::get_virtual_keyboard_height() const {
+	return virtual_keyboard_height;
+}
+
 Error OSIPhone::shell_open(String p_uri) {
 	return _shell_open(p_uri);
 };
@@ -470,7 +470,7 @@ void OSIPhone::set_cursor_shape(CursorShape p_shape){
 
 };
 
-String OSIPhone::get_data_dir() const {
+String OSIPhone::get_user_data_dir() const {
 
 	return data_dir;
 };
@@ -509,7 +509,7 @@ Error OSIPhone::native_video_play(String p_path, float p_volume, String p_audio_
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ);
 	bool exists = f && f->is_open();
 
-	String tempFile = get_data_dir();
+	String tempFile = get_user_data_dir();
 	if (!exists)
 		return FAILED;
 
@@ -521,7 +521,7 @@ Error OSIPhone::native_video_play(String p_path, float p_volume, String p_audio_
 			p_path = p_path.replace("res:/", ProjectSettings::get_singleton()->get_resource_path());
 		}
 	} else if (p_path.begins_with("user://"))
-		p_path = p_path.replace("user:/", get_data_dir());
+		p_path = p_path.replace("user:/", get_user_data_dir());
 
 	memdelete(f);
 
@@ -558,7 +558,7 @@ bool OSIPhone::_check_internal_feature_support(const String &p_feature) {
 	return p_feature == "mobile" || p_feature == "etc" || p_feature == "pvrtc" || p_feature == "etc2";
 }
 
-OSIPhone::OSIPhone(int width, int height) {
+OSIPhone::OSIPhone(int width, int height, String p_data_dir) {
 
 	main_loop = NULL;
 	visual_server = NULL;
@@ -570,6 +570,13 @@ OSIPhone::OSIPhone(int width, int height) {
 	vm.resizable = false;
 	set_video_mode(vm);
 	event_count = 0;
+	virtual_keyboard_height = 0;
+
+	// can't call set_data_dir from here, since it requires DirAccess
+	// which is initialized in initialize_core
+	data_dir = p_data_dir;
+
+	_set_logger(memnew(SyslogLogger));
 };
 
 OSIPhone::~OSIPhone() {

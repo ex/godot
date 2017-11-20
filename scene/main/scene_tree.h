@@ -1,9 +1,9 @@
 /*************************************************************************/
-/*  scene_main_loop.h                                                    */
+/*  scene_tree.h                                                         */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -105,15 +105,12 @@ private:
 	Viewport *root;
 
 	uint64_t tree_version;
-	float fixed_process_time;
+	float physics_process_time;
 	float idle_process_time;
 	bool accept_quit;
 	bool quit_on_go_back;
 	uint32_t last_id;
 
-#ifdef TOOLS_ENABLED
-	bool editor_hint;
-#endif
 #ifdef DEBUG_ENABLED
 	bool debug_collisions_hint;
 	bool debug_navigation_hint;
@@ -127,6 +124,7 @@ private:
 	bool input_handled;
 	Size2 last_screen_size;
 	StringName tree_changed_name;
+	StringName node_added_name;
 	StringName node_removed_name;
 
 	int64_t current_frame;
@@ -150,7 +148,7 @@ private:
 	StretchMode stretch_mode;
 	StretchAspect stretch_aspect;
 	Size2i stretch_min;
-	int stretch_shrink;
+	real_t stretch_shrink;
 
 	void _update_root_rect();
 
@@ -202,6 +200,8 @@ private:
 	void _connection_failed();
 	void _server_disconnected();
 
+	int rpc_sender_id;
+
 	//path sent caches
 	struct PathSentCache {
 		Map<int, bool> confirmed_peers;
@@ -234,6 +234,7 @@ private:
 	void _rpc(Node *p_from, int p_to, bool p_unreliable, bool p_set, const StringName &p_name, const Variant **p_arg, int p_argcount);
 
 	void tree_changed();
+	void node_added(Node *p_node);
 	void node_removed(Node *p_node);
 
 	Group *add_to_group(const StringName &p_group, Node *p_node);
@@ -359,18 +360,12 @@ public:
 
 	void set_input_as_handled();
 	bool is_input_handled();
-	_FORCE_INLINE_ float get_fixed_process_time() const { return fixed_process_time; }
+	_FORCE_INLINE_ float get_physics_process_time() const { return physics_process_time; }
 	_FORCE_INLINE_ float get_idle_process_time() const { return idle_process_time; }
 
 #ifdef TOOLS_ENABLED
-	void set_editor_hint(bool p_enabled);
-
-	bool is_editor_hint() const;
 	bool is_node_being_edited(const Node *p_node) const;
 #else
-	void set_editor_hint(bool p_enabled) {}
-
-	bool is_editor_hint() const { return false; }
 	bool is_node_being_edited(const Node *p_node) const { return false; }
 #endif
 
@@ -422,7 +417,7 @@ public:
 	void get_nodes_in_group(const StringName &p_group, List<Node *> *p_list);
 	bool has_group(const StringName &p_identifier) const;
 
-	void set_screen_stretch(StretchMode p_mode, StretchAspect p_aspect, const Size2 p_minsize, int p_shrink = 1);
+	void set_screen_stretch(StretchMode p_mode, StretchAspect p_aspect, const Size2 p_minsize, real_t p_shrink = 1);
 
 //void change_scene(const String& p_path);
 //Node *get_loaded_scene();
@@ -454,6 +449,7 @@ public:
 	bool has_network_peer() const;
 	int get_network_unique_id() const;
 	Vector<int> get_network_connected_peers() const;
+	int get_rpc_sender_id() const;
 
 	void set_refuse_new_network_connections(bool p_refuse);
 	bool is_refusing_new_network_connections() const;
@@ -465,5 +461,6 @@ public:
 
 VARIANT_ENUM_CAST(SceneTree::StretchMode);
 VARIANT_ENUM_CAST(SceneTree::StretchAspect);
+VARIANT_ENUM_CAST(SceneTree::CallGroupFlags);
 
 #endif

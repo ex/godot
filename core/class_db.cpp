@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -45,11 +45,6 @@
 #endif
 
 #ifdef DEBUG_METHODS_ENABLED
-
-ParamDef::ParamDef(const Variant &p_variant)
-	: used(true),
-	  val(p_variant) {
-}
 
 MethodDefinition D_METHOD(const char *p_name) {
 
@@ -192,6 +187,25 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	return md;
 }
 
+MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_arg2, const char *p_arg3, const char *p_arg4, const char *p_arg5, const char *p_arg6, const char *p_arg7, const char *p_arg8, const char *p_arg9, const char *p_arg10, const char *p_arg11) {
+
+	MethodDefinition md;
+	md.name = StaticCString::create(p_name);
+	md.args.resize(11);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
+	md.args[6] = StaticCString::create(p_arg7);
+	md.args[7] = StaticCString::create(p_arg8);
+	md.args[8] = StaticCString::create(p_arg9);
+	md.args[9] = StaticCString::create(p_arg10);
+	md.args[10] = StaticCString::create(p_arg11);
+	return md;
+}
+
 #endif
 
 ClassDB::APIType ClassDB::current_api = API_CORE;
@@ -210,6 +224,7 @@ ClassDB::ClassInfo::ClassInfo() {
 	creation_func = NULL;
 	inherits_ptr = NULL;
 	disabled = false;
+	exposed = false;
 }
 ClassDB::ClassInfo::~ClassInfo() {
 }
@@ -538,11 +553,14 @@ void ClassDB::get_method_list(StringName p_class, List<MethodInfo> *p_methods, b
 				minfo.arguments.push_back(method->get_argument_info(i));
 			}
 
-			if (method->get_argument_type(-1) != Variant::NIL) {
-				minfo.return_val = method->get_argument_info(-1);
+			minfo.return_val = method->get_return_info();
+			minfo.flags = method->get_hint_flags();
+
+			for (int i = 0; i < method->get_argument_count(); i++) {
+				if (method->has_default_argument(i))
+					minfo.default_arguments.push_back(method->get_default_argument(i));
 			}
 
-			minfo.flags = method->get_hint_flags();
 			p_methods->push_back(minfo);
 		}
 
@@ -583,7 +601,7 @@ MethodBind *ClassDB::get_method(StringName p_class, StringName p_name) {
 	return NULL;
 }
 
-void ClassDB::bind_integer_constant(const StringName &p_class, const StringName &p_name, int p_constant) {
+void ClassDB::bind_integer_constant(const StringName &p_class, const StringName &p_enum, const StringName &p_name, int p_constant) {
 
 	OBJTYPE_WLOCK;
 
@@ -600,6 +618,24 @@ void ClassDB::bind_integer_constant(const StringName &p_class, const StringName 
 
 	type->constant_map[p_name] = p_constant;
 #ifdef DEBUG_METHODS_ENABLED
+
+	String enum_name = p_enum;
+	if (enum_name != String()) {
+		if (enum_name.find(".") != -1) {
+			enum_name = enum_name.get_slicec('.', 1);
+		}
+
+		List<StringName> *constants_list = type->enum_map.getptr(enum_name);
+
+		if (constants_list) {
+			constants_list->push_back(p_name);
+		} else {
+			List<StringName> new_list;
+			new_list.push_back(p_name);
+			type->enum_map[enum_name] = new_list;
+		}
+	}
+
 	type->constant_order.push_back(p_name);
 #endif
 }
@@ -654,6 +690,77 @@ int ClassDB::get_integer_constant(const StringName &p_class, const StringName &p
 
 	return 0;
 }
+
+#ifdef DEBUG_METHODS_ENABLED
+StringName ClassDB::get_integer_constant_enum(const StringName &p_class, const StringName &p_name, bool p_no_inheritance) {
+
+	OBJTYPE_RLOCK;
+
+	ClassInfo *type = classes.getptr(p_class);
+
+	while (type) {
+
+		const StringName *k = NULL;
+		while ((k = type->enum_map.next(k))) {
+
+			List<StringName> &constants_list = type->enum_map.get(*k);
+			const List<StringName>::Element *found = constants_list.find(p_name);
+			if (found)
+				return *k;
+		}
+
+		if (p_no_inheritance)
+			break;
+
+		type = type->inherits_ptr;
+	}
+
+	return StringName();
+}
+
+void ClassDB::get_enum_list(const StringName &p_class, List<StringName> *p_enums, bool p_no_inheritance) {
+
+	OBJTYPE_RLOCK;
+
+	ClassInfo *type = classes.getptr(p_class);
+
+	while (type) {
+
+		const StringName *k = NULL;
+		while ((k = type->enum_map.next(k))) {
+			p_enums->push_back(*k);
+		}
+
+		if (p_no_inheritance)
+			break;
+
+		type = type->inherits_ptr;
+	}
+}
+
+void ClassDB::get_enum_constants(const StringName &p_class, const StringName &p_enum, List<StringName> *p_constants, bool p_no_inheritance) {
+
+	OBJTYPE_RLOCK;
+
+	ClassInfo *type = classes.getptr(p_class);
+
+	while (type) {
+
+		const List<StringName> *constants = type->enum_map.getptr(p_enum);
+
+		if (constants) {
+			for (const List<StringName>::Element *E = constants->front(); E; E = E->next()) {
+				p_constants->push_back(E->get());
+			}
+		}
+
+		if (p_no_inheritance)
+			break;
+
+		type = type->inherits_ptr;
+	}
+}
+#endif
 
 void ClassDB::add_signal(StringName p_class, const MethodInfo &p_signal) {
 
@@ -777,7 +884,7 @@ void ClassDB::add_property(StringName p_class, const PropertyInfo &p_pinfo, cons
 	MethodBind *mb_get = NULL;
 	if (p_getter) {
 
-		MethodBind *mb_get = get_method(p_class, p_getter);
+		mb_get = get_method(p_class, p_getter);
 #ifdef DEBUG_METHODS_ENABLED
 
 		if (!mb_get) {
@@ -1195,6 +1302,15 @@ bool ClassDB::is_class_enabled(StringName p_class) {
 
 	ERR_FAIL_COND_V(!ti, false);
 	return !ti->disabled;
+}
+
+bool ClassDB::is_class_exposed(StringName p_class) {
+
+	OBJTYPE_RLOCK;
+
+	ClassInfo *ti = classes.getptr(p_class);
+	ERR_FAIL_COND_V(!ti, false);
+	return ti->exposed;
 }
 
 StringName ClassDB::get_category(const StringName &p_node) {

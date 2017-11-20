@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -51,7 +51,8 @@ public:
 		IMPORT_ANIMATION_KEEP_VALUE_TRACKS = 32,
 		IMPORT_GENERATE_TANGENT_ARRAYS = 256,
 		IMPORT_FAIL_ON_MISSING_DEPENDENCIES = 512,
-		IMPORT_MATERIALS_IN_INSTANCES = 1024
+		IMPORT_MATERIALS_IN_INSTANCES = 1024,
+		IMPORT_USE_COMPRESSION = 2048
 
 	};
 
@@ -83,12 +84,20 @@ class ResourceImporterScene : public ResourceImporter {
 	static ResourceImporterScene *singleton;
 
 	enum Presets {
-		PRESET_SINGLE_SCENE,
 		PRESET_SEPARATE_MATERIALS,
 		PRESET_SEPARATE_MESHES,
+		PRESET_SEPARATE_ANIMATIONS,
+
+		PRESET_SINGLE_SCENE,
+
 		PRESET_SEPARATE_MESHES_AND_MATERIALS,
+		PRESET_SEPARATE_MESHES_AND_ANIMATIONS,
+		PRESET_SEPARATE_MATERIALS_AND_ANIMATIONS,
+		PRESET_SEPARATE_MESHES_MATERIALS_AND_ANIMATIONS,
+
 		PRESET_MULTIPLE_SCENES,
 		PRESET_MULTIPLE_SCENES_AND_MATERIALS,
+		PRESET_MAX
 	};
 
 	void _replace_owner(Node *p_node, Node *p_scene, Node *p_new_owner);
@@ -111,8 +120,9 @@ public:
 
 	virtual void get_import_options(List<ImportOption> *r_options, int p_preset = 0) const;
 	virtual bool get_option_visibility(const String &p_option, const Map<StringName, Variant> &p_options) const;
+	virtual int get_import_order() const { return 100; } //after everything
 
-	void _make_external_resources(Node *p_node, const String &p_base_path, bool p_make_materials, bool p_keep_materials, bool p_make_meshes, Map<Ref<Material>, Ref<Material> > &p_materials, Map<Ref<ArrayMesh>, Ref<ArrayMesh> > &p_meshes);
+	void _make_external_resources(Node *p_node, const String &p_base_path, bool p_make_animations, bool p_make_materials, bool p_keep_materials, bool p_make_meshes, Map<Ref<Animation>, Ref<Animation> > &p_animations, Map<Ref<Material>, Ref<Material> > &p_materials, Map<Ref<ArrayMesh>, Ref<ArrayMesh> > &p_meshes);
 
 	Node *_fix_node(Node *p_node, Node *p_root, Map<Ref<ArrayMesh>, Ref<Shape> > &collision_map);
 

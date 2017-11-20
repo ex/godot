@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -29,6 +29,7 @@
 /*************************************************************************/
 #include "particles_2d.h"
 
+#include "engine.h"
 #include "scene/3d/particles.h"
 #include "scene/scene_string_names.h"
 
@@ -76,7 +77,7 @@ void Particles2D::set_randomness_ratio(float p_ratio) {
 void Particles2D::set_visibility_rect(const Rect2 &p_aabb) {
 
 	visibility_rect = p_aabb;
-	Rect3 aabb;
+	AABB aabb;
 	aabb.position.x = p_aabb.position.x;
 	aabb.position.y = p_aabb.position.y;
 	aabb.size.x = p_aabb.size.x;
@@ -222,7 +223,7 @@ String Particles2D::get_configuration_warning() const {
 
 Rect2 Particles2D::capture_rect() const {
 
-	Rect3 aabb = VS::get_singleton()->particles_get_current_aabb(particles);
+	AABB aabb = VS::get_singleton()->particles_get_current_aabb(particles);
 	Rect2 r;
 	r.position.x = aabb.position.x;
 	r.position.y = aabb.position.y;
@@ -295,7 +296,7 @@ void Particles2D::_notification(int p_what) {
 		VS::get_singleton()->canvas_item_add_particles(get_canvas_item(), particles, texture_rid, normal_rid, h_frames, v_frames);
 
 #ifdef TOOLS_ENABLED
-		if (get_tree()->is_editor_hint() && (this == get_tree()->get_edited_scene_root() || get_tree()->get_edited_scene_root()->is_a_parent_of(this))) {
+		if (Engine::get_singleton()->is_editor_hint() && (this == get_tree()->get_edited_scene_root() || get_tree()->get_edited_scene_root()->is_a_parent_of(this))) {
 
 			draw_rect(visibility_rect, Color(0, 0.7, 0.9, 0.4), false);
 		}
@@ -377,7 +378,7 @@ void Particles2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "fixed_fps", PROPERTY_HINT_RANGE, "0,1000,1"), "set_fixed_fps", "get_fixed_fps");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fract_delta"), "set_fractional_delta", "get_fractional_delta");
 	ADD_GROUP("Drawing", "");
-	ADD_PROPERTY(PropertyInfo(Variant::RECT3, "visibility_rect"), "set_visibility_rect", "get_visibility_rect");
+	ADD_PROPERTY(PropertyInfo(Variant::AABB, "visibility_rect"), "set_visibility_rect", "get_visibility_rect");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "local_coords"), "set_use_local_coordinates", "get_use_local_coordinates");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "draw_order", PROPERTY_HINT_ENUM, "Index,Lifetime"), "set_draw_order", "get_draw_order");
 	ADD_GROUP("Process Material", "process_");
@@ -388,8 +389,8 @@ void Particles2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "h_frames", PROPERTY_HINT_RANGE, "1,1024,1"), "set_h_frames", "get_h_frames");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "v_frames", PROPERTY_HINT_RANGE, "1,1024,1"), "set_v_frames", "get_v_frames");
 
-	BIND_CONSTANT(DRAW_ORDER_INDEX);
-	BIND_CONSTANT(DRAW_ORDER_LIFETIME);
+	BIND_ENUM_CONSTANT(DRAW_ORDER_INDEX);
+	BIND_ENUM_CONSTANT(DRAW_ORDER_LIFETIME);
 }
 
 Particles2D::Particles2D() {

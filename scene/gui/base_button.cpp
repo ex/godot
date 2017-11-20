@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -28,6 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "base_button.h"
+
 #include "os/keyboard.h"
 #include "print_string.h"
 #include "scene/main/viewport.h"
@@ -38,7 +39,9 @@ void BaseButton::_unpress_group() {
 	if (!button_group.is_valid())
 		return;
 
-	status.pressed = true;
+	if (toggle_mode) {
+		status.pressed = true;
+	}
 
 	for (Set<BaseButton *>::Element *E = button_group->buttons.front(); E; E = E->next()) {
 		if (E->get() == this)
@@ -86,14 +89,14 @@ void BaseButton::_gui_input(Ref<InputEvent> p_event) {
 
 					status.pressed = !status.pressed;
 					pressed();
-					if (get_script_instance()) {
-						Variant::CallError ce;
-						get_script_instance()->call(SceneStringNames::get_singleton()->_pressed, NULL, 0, ce);
-					}
+
 					emit_signal("pressed");
 					_unpress_group();
 
 					toggled(status.pressed);
+					if (get_script_instance()) {
+						get_script_instance()->call(SceneStringNames::get_singleton()->_toggled, status.pressed);
+					}
 					emit_signal("toggled", status.pressed);
 				}
 
@@ -142,10 +145,10 @@ void BaseButton::_gui_input(Ref<InputEvent> p_event) {
 					emit_signal("pressed");
 
 					toggled(status.pressed);
-					emit_signal("toggled", status.pressed);
 					if (get_script_instance()) {
 						get_script_instance()->call(SceneStringNames::get_singleton()->_toggled, status.pressed);
 					}
+					emit_signal("toggled", status.pressed);
 				}
 
 				_unpress_group();
@@ -514,13 +517,13 @@ void BaseButton::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "shortcut", PROPERTY_HINT_RESOURCE_TYPE, "ShortCut"), "set_shortcut", "get_shortcut");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "group", PROPERTY_HINT_RESOURCE_TYPE, "ButtonGroup"), "set_button_group", "get_button_group");
 
-	BIND_CONSTANT(DRAW_NORMAL);
-	BIND_CONSTANT(DRAW_PRESSED);
-	BIND_CONSTANT(DRAW_HOVER);
-	BIND_CONSTANT(DRAW_DISABLED);
+	BIND_ENUM_CONSTANT(DRAW_NORMAL);
+	BIND_ENUM_CONSTANT(DRAW_PRESSED);
+	BIND_ENUM_CONSTANT(DRAW_HOVER);
+	BIND_ENUM_CONSTANT(DRAW_DISABLED);
 
-	BIND_CONSTANT(ACTION_MODE_BUTTON_PRESS);
-	BIND_CONSTANT(ACTION_MODE_BUTTON_RELEASE);
+	BIND_ENUM_CONSTANT(ACTION_MODE_BUTTON_PRESS);
+	BIND_ENUM_CONSTANT(ACTION_MODE_BUTTON_RELEASE);
 }
 
 BaseButton::BaseButton() {

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -75,7 +75,7 @@ void EditorHistory::_add_object(ObjectID p_object, const String &p_property, int
 
 	Object *obj = ObjectDB::get_instance(p_object);
 	ERR_FAIL_COND(!obj);
-	Reference *r = obj->cast_to<Reference>();
+	Reference *r = Object::cast_to<Reference>(obj);
 	Obj o;
 	if (r)
 		o.ref = REF(r);
@@ -141,7 +141,7 @@ ObjectID EditorHistory::get_history_obj(int p_obj) const {
 	return history[p_obj].path[history[p_obj].level].object;
 }
 
-bool EditorHistory::is_at_begining() const {
+bool EditorHistory::is_at_beginning() const {
 	return current <= 0;
 }
 bool EditorHistory::is_at_end() const {
@@ -633,13 +633,13 @@ Vector<EditorData::EditedScene> EditorData::get_edited_scenes() const {
 	return out_edited_scenes_list;
 }
 
-void EditorData::set_edited_scene_version(uint64_t version, int scene_idx) {
+void EditorData::set_edited_scene_version(uint64_t version, int p_scene_idx) {
 	ERR_FAIL_INDEX(current_edited_scene, edited_scene.size());
-	if (scene_idx < 0) {
+	if (p_scene_idx < 0) {
 		edited_scene[current_edited_scene].version = version;
 	} else {
-		ERR_FAIL_INDEX(scene_idx, edited_scene.size());
-		edited_scene[scene_idx].version = version;
+		ERR_FAIL_INDEX(p_scene_idx, edited_scene.size());
+		edited_scene[p_scene_idx].version = version;
 	}
 }
 
@@ -913,8 +913,8 @@ void EditorSelection::update() {
 
 	if (!changed)
 		return;
-	emit_signal("selection_changed");
 	changed = false;
+	emit_signal("selection_changed");
 }
 
 List<Node *> &EditorSelection::get_selected_node_list() {

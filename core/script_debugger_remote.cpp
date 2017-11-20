@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -29,11 +29,12 @@
 /*************************************************************************/
 #include "script_debugger_remote.h"
 
+#include "engine.h"
 #include "io/ip.h"
+#include "io/marshalls.h"
 #include "os/input.h"
 #include "os/os.h"
 #include "project_settings.h"
-
 void ScriptDebuggerRemote::_send_video_memory() {
 
 	List<ResourceUsage> usage;
@@ -120,6 +121,21 @@ static ObjectID safe_get_instance_id(const Variant &p_v) {
 	}
 }
 
+void ScriptDebuggerRemote::_put_variable(const String &p_name, const Variant &p_variable) {
+
+	packet_peer_stream->put_var(p_name);
+	int len = 0;
+	Error err = encode_variant(p_variable, NULL, len);
+	if (err != OK)
+		ERR_PRINT("Failed to encode variant");
+
+	if (len > packet_peer_stream->get_output_buffer_max_size()) { //limit to max size
+		packet_peer_stream->put_var(Variant());
+	} else {
+		packet_peer_stream->put_var(p_variable);
+	}
+}
+
 void ScriptDebuggerRemote::debug(ScriptLanguage *p_script, bool p_can_continue) {
 
 	//this function is called when there is a debugger break (bug on script)
@@ -129,8 +145,6 @@ void ScriptDebuggerRemote::debug(ScriptLanguage *p_script, bool p_can_continue) 
 		ERR_EXPLAIN("Script Debugger failed to connect, but being used anyway.");
 		ERR_FAIL();
 	}
-
-	OS::get_singleton()->enable_for_stealing_focus(ProjectSettings::get_singleton()->get("editor_pid"));
 
 	packet_peer_stream->put_var("debug_enter");
 	packet_peer_stream->put_var(2);
@@ -210,14 +224,7 @@ void ScriptDebuggerRemote::debug(ScriptLanguage *p_script, bool p_can_continue) 
 
 					while (E) {
 
-						if (F->get().get_type() == Variant::OBJECT) {
-							packet_peer_stream->put_var("*" + E->get());
-							String pretty_print = F->get().operator String();
-							packet_peer_stream->put_var(pretty_print.ascii().get_data());
-						} else {
-							packet_peer_stream->put_var(E->get());
-							packet_peer_stream->put_var(F->get());
-						}
+						_put_variable(E->get(), F->get());
 
 						E = E->next();
 						F = F->next();
@@ -231,15 +238,7 @@ void ScriptDebuggerRemote::debug(ScriptLanguage *p_script, bool p_can_continue) 
 					List<Variant>::Element *F = local_vals.front();
 
 					while (E) {
-
-						if (F->get().get_type() == Variant::OBJECT) {
-							packet_peer_stream->put_var("*" + E->get());
-							String pretty_print = F->get().operator String();
-							packet_peer_stream->put_var(pretty_print.ascii().get_data());
-						} else {
-							packet_peer_stream->put_var(E->get());
-							packet_peer_stream->put_var(F->get());
-						}
+						_put_variable(E->get(), F->get());
 
 						E = E->next();
 						F = F->next();
@@ -429,9 +428,9 @@ void ScriptDebuggerRemote::_err_handler(void *ud, const char *p_func, const char
 	sdr->mutex->unlock();
 }
 
-bool ScriptDebuggerRemote::_parse_live_edit(const Array &cmd) {
+bool ScriptDebuggerRemote::_parse_live_edit(const Array &p_command) {
 
-	String cmdstr = cmd[0];
+	String cmdstr = p_command[0];
 	if (!live_edit_funcs || !cmdstr.begins_with("live_"))
 		return false;
 
@@ -441,7 +440,7 @@ bool ScriptDebuggerRemote::_parse_live_edit(const Array &cmd) {
 		if (!live_edit_funcs->root_func)
 			return true;
 		//print_line("root: "+Variant(cmd).get_construct_string());
-		live_edit_funcs->root_func(live_edit_funcs->udata, cmd[1], cmd[2]);
+		live_edit_funcs->root_func(live_edit_funcs->udata, p_command[1], p_command[2]);
 
 	} else if (cmdstr == "live_node_path") {
 
@@ -449,75 +448,75 @@ bool ScriptDebuggerRemote::_parse_live_edit(const Array &cmd) {
 			return true;
 		//print_line("path: "+Variant(cmd).get_construct_string());
 
-		live_edit_funcs->node_path_func(live_edit_funcs->udata, cmd[1], cmd[2]);
+		live_edit_funcs->node_path_func(live_edit_funcs->udata, p_command[1], p_command[2]);
 
 	} else if (cmdstr == "live_res_path") {
 
 		if (!live_edit_funcs->res_path_func)
 			return true;
-		live_edit_funcs->res_path_func(live_edit_funcs->udata, cmd[1], cmd[2]);
+		live_edit_funcs->res_path_func(live_edit_funcs->udata, p_command[1], p_command[2]);
 
 	} else if (cmdstr == "live_node_prop_res") {
 		if (!live_edit_funcs->node_set_res_func)
 			return true;
 
-		live_edit_funcs->node_set_res_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3]);
+		live_edit_funcs->node_set_res_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3]);
 
 	} else if (cmdstr == "live_node_prop") {
 
 		if (!live_edit_funcs->node_set_func)
 			return true;
-		live_edit_funcs->node_set_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3]);
+		live_edit_funcs->node_set_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3]);
 
 	} else if (cmdstr == "live_res_prop_res") {
 
 		if (!live_edit_funcs->res_set_res_func)
 			return true;
-		live_edit_funcs->res_set_res_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3]);
+		live_edit_funcs->res_set_res_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3]);
 
 	} else if (cmdstr == "live_res_prop") {
 
 		if (!live_edit_funcs->res_set_func)
 			return true;
-		live_edit_funcs->res_set_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3]);
+		live_edit_funcs->res_set_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3]);
 
 	} else if (cmdstr == "live_node_call") {
 
 		if (!live_edit_funcs->node_call_func)
 			return true;
-		live_edit_funcs->node_call_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], cmd[6], cmd[7]);
+		live_edit_funcs->node_call_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3], p_command[4], p_command[5], p_command[6], p_command[7]);
 
 	} else if (cmdstr == "live_res_call") {
 
 		if (!live_edit_funcs->res_call_func)
 			return true;
-		live_edit_funcs->res_call_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], cmd[6], cmd[7]);
+		live_edit_funcs->res_call_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3], p_command[4], p_command[5], p_command[6], p_command[7]);
 
 	} else if (cmdstr == "live_create_node") {
 
-		live_edit_funcs->tree_create_node_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3]);
+		live_edit_funcs->tree_create_node_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3]);
 
 	} else if (cmdstr == "live_instance_node") {
 
-		live_edit_funcs->tree_instance_node_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3]);
+		live_edit_funcs->tree_instance_node_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3]);
 
 	} else if (cmdstr == "live_remove_node") {
 
-		live_edit_funcs->tree_remove_node_func(live_edit_funcs->udata, cmd[1]);
+		live_edit_funcs->tree_remove_node_func(live_edit_funcs->udata, p_command[1]);
 
 	} else if (cmdstr == "live_remove_and_keep_node") {
 
-		live_edit_funcs->tree_remove_and_keep_node_func(live_edit_funcs->udata, cmd[1], cmd[2]);
+		live_edit_funcs->tree_remove_and_keep_node_func(live_edit_funcs->udata, p_command[1], p_command[2]);
 	} else if (cmdstr == "live_restore_node") {
 
-		live_edit_funcs->tree_restore_node_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3]);
+		live_edit_funcs->tree_restore_node_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3]);
 
 	} else if (cmdstr == "live_duplicate_node") {
 
-		live_edit_funcs->tree_duplicate_node_func(live_edit_funcs->udata, cmd[1], cmd[2]);
+		live_edit_funcs->tree_duplicate_node_func(live_edit_funcs->udata, p_command[1], p_command[2]);
 	} else if (cmdstr == "live_reparent_node") {
 
-		live_edit_funcs->tree_reparent_node_func(live_edit_funcs->udata, cmd[1], cmd[2], cmd[3], cmd[4]);
+		live_edit_funcs->tree_reparent_node_func(live_edit_funcs->udata, p_command[1], p_command[2], p_command[3], p_command[4]);
 
 	} else {
 
@@ -566,30 +565,19 @@ void ScriptDebuggerRemote::_send_object_id(ObjectID p_id) {
 			}
 
 			Variant var = obj->get(E->get().name);
+			packet_peer_stream->put_var(E->get().type);
+			//only send information that can be sent..
 
-			if (E->get().type == Variant::OBJECT || var.get_type() == Variant::OBJECT) {
+			int len = 0; //test how big is this to encode
+			encode_variant(var, NULL, len);
 
-				ObjectID id2;
-				Object *obj = var;
-				if (obj) {
-					id2 = obj->get_instance_id();
-				} else {
-					id2 = 0;
-				}
-
-				packet_peer_stream->put_var(Variant::INT); //hint string
-				packet_peer_stream->put_var(PROPERTY_HINT_OBJECT_ID); //hint
-				packet_peer_stream->put_var(E->get().hint_string); //hint string
-				packet_peer_stream->put_var(id2); //value
+			if (len > packet_peer_stream->get_output_buffer_max_size()) { //limit to max size
+				packet_peer_stream->put_var(PROPERTY_HINT_OBJECT_TOO_BIG);
+				packet_peer_stream->put_var("");
+				packet_peer_stream->put_var(Variant());
 			} else {
-				packet_peer_stream->put_var(E->get().type);
 				packet_peer_stream->put_var(E->get().hint);
 				packet_peer_stream->put_var(E->get().hint_string);
-				//only send information that can be sent..
-
-				if (var.get_type() >= Variant::DICTIONARY) {
-					var = Array(); //send none for now, may be to big
-				}
 				packet_peer_stream->put_var(var);
 			}
 		}
@@ -660,8 +648,8 @@ void ScriptDebuggerRemote::_poll_events() {
 			profiling = true;
 			frame_time = 0;
 			idle_time = 0;
-			fixed_time = 0;
-			fixed_frame_time = 0;
+			physics_time = 0;
+			physics_frame_time = 0;
 
 			print_line("PROFILING ALRIGHT!");
 
@@ -740,8 +728,8 @@ void ScriptDebuggerRemote::_send_profiling_data(bool p_for_frame) {
 	packet_peer_stream->put_var(Engine::get_singleton()->get_frames_drawn()); //total frame time
 	packet_peer_stream->put_var(frame_time); //total frame time
 	packet_peer_stream->put_var(idle_time); //idle frame time
-	packet_peer_stream->put_var(fixed_time); //fixed frame time
-	packet_peer_stream->put_var(fixed_frame_time); //fixed frame time
+	packet_peer_stream->put_var(physics_time); //fixed frame time
+	packet_peer_stream->put_var(physics_frame_time); //fixed frame time
 
 	packet_peer_stream->put_var(USEC_TO_SEC(total_script_time)); //total script execution time
 
@@ -844,7 +832,7 @@ void ScriptDebuggerRemote::send_message(const String &p_message, const Array &p_
 	mutex->unlock();
 }
 
-void ScriptDebuggerRemote::_print_handler(void *p_this, const String &p_string) {
+void ScriptDebuggerRemote::_print_handler(void *p_this, const String &p_string, bool p_error) {
 
 	ScriptDebuggerRemote *sdr = (ScriptDebuggerRemote *)p_this;
 
@@ -868,15 +856,19 @@ void ScriptDebuggerRemote::_print_handler(void *p_this, const String &p_string) 
 	}
 
 	sdr->char_count += allowed_chars;
-
-	if (sdr->char_count >= sdr->max_cps) {
-		s += "\n[output overflow, print less text!]\n";
-	}
+	bool overflowed = sdr->char_count >= sdr->max_cps;
 
 	sdr->mutex->lock();
 	if (!sdr->locking && sdr->tcp_client->is_connected_to_host()) {
 
+		if (overflowed)
+			s += "[...]";
+
 		sdr->output_strings.push_back(s);
+
+		if (overflowed) {
+			sdr->output_strings.push_back("[output overflow, print less text!]");
+		}
 	}
 	sdr->mutex->unlock();
 }
@@ -930,12 +922,12 @@ void ScriptDebuggerRemote::profiling_end() {
 	//ignores this, uses it via connnection
 }
 
-void ScriptDebuggerRemote::profiling_set_frame_times(float p_frame_time, float p_idle_time, float p_fixed_time, float p_fixed_frame_time) {
+void ScriptDebuggerRemote::profiling_set_frame_times(float p_frame_time, float p_idle_time, float p_physics_time, float p_physics_frame_time) {
 
 	frame_time = p_frame_time;
 	idle_time = p_idle_time;
-	fixed_time = p_fixed_time;
-	fixed_frame_time = p_fixed_frame_time;
+	physics_time = p_physics_time;
+	physics_frame_time = p_physics_frame_time;
 }
 
 ScriptDebuggerRemote::ResourceUsageFunc ScriptDebuggerRemote::resource_usage_func = NULL;
@@ -948,7 +940,7 @@ ScriptDebuggerRemote::ScriptDebuggerRemote()
 	  tcp_client(StreamPeerTCP::create_ref()),
 	  packet_peer_stream(Ref<PacketPeerStream>(memnew(PacketPeerStream))),
 	  last_perf_time(0),
-	  performance(ProjectSettings::get_singleton()->get_singleton_object("Performance")),
+	  performance(Engine::get_singleton()->get_singleton_object("Performance")),
 	  requested_quit(false),
 	  mutex(Mutex::create()),
 	  max_cps(GLOBAL_GET("network/limits/debugger_stdout/max_chars_per_second")),

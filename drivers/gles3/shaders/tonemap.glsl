@@ -170,17 +170,14 @@ vec3 tonemap_aces(vec3 color) {
 	return color = clamp((color*(a*color+b))/(color*(c*color+d)+e),vec3(0.0),vec3(1.0));
 }
 
-vec3 tonemap_reindhart(vec3 color,vec3 white) {
+vec3 tonemap_reindhart(vec3 color,float white) {
 
 	return ( color * ( 1.0 + ( color / ( white) ) ) ) / ( 1.0 + color );
 }
 
-
 void main() {
 
-	ivec2 coord = ivec2(gl_FragCoord.xy);
-	vec3 color = texelFetch(source,coord,0).rgb;
-
+	vec4 color = textureLod(source, uv_interp, 0.0);
 
 #ifdef USE_AUTO_EXPOSURE
 
@@ -324,5 +321,3 @@ void main() {
 
 	frag_color=vec4(color.rgb,1.0);
 }
-
-

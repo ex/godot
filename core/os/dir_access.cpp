@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -38,7 +38,7 @@ String DirAccess::_get_root_path() const {
 	switch (_access_type) {
 
 		case ACCESS_RESOURCES: return ProjectSettings::get_singleton()->get_resource_path();
-		case ACCESS_USERDATA: return OS::get_singleton()->get_data_dir();
+		case ACCESS_USERDATA: return OS::get_singleton()->get_user_data_dir();
 		default: return "";
 	}
 
@@ -217,7 +217,7 @@ String DirAccess::fix_path(String p_path) const {
 
 			if (p_path.begins_with("user://")) {
 
-				String data_dir = OS::get_singleton()->get_data_dir();
+				String data_dir = OS::get_singleton()->get_user_data_dir();
 				if (data_dir != "") {
 
 					return p_path.replace_first("user:/", data_dir);
@@ -292,7 +292,7 @@ String DirAccess::get_full_path(const String &p_path, AccessType p_access) {
 	return full;
 }
 
-Error DirAccess::copy(String p_from, String p_to) {
+Error DirAccess::copy(String p_from, String p_to, int chmod_flags) {
 
 	//printf("copy %s -> %s\n",p_from.ascii().get_data(),p_to.ascii().get_data());
 	Error err;
@@ -312,7 +312,7 @@ Error DirAccess::copy(String p_from, String p_to) {
 	}
 
 	fsrc->seek_end(0);
-	int size = fsrc->get_pos();
+	int size = fsrc->get_position();
 	fsrc->seek(0);
 	err = OK;
 	while (size--) {
@@ -327,6 +327,11 @@ Error DirAccess::copy(String p_from, String p_to) {
 		}
 
 		fdst->store_8(fsrc->get_8());
+	}
+
+	if (err == OK && chmod_flags != -1) {
+		fdst->close();
+		err = fdst->_chmod(p_to, chmod_flags);
 	}
 
 	memdelete(fsrc);

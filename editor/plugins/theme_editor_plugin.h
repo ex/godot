@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -30,7 +30,6 @@
 #ifndef THEME_EDITOR_PLUGIN_H
 #define THEME_EDITOR_PLUGIN_H
 
-#include "scene/gui/button_group.h"
 #include "scene/gui/check_box.h"
 #include "scene/gui/file_dialog.h"
 #include "scene/gui/option_button.h"
@@ -70,7 +69,8 @@ class ThemeEditor : public Control {
 		POPUP_REMOVE,
 		POPUP_CLASS_REMOVE,
 		POPUP_CREATE_EMPTY,
-		POPUP_CREATE_EDITOR_EMPTY
+		POPUP_CREATE_EDITOR_EMPTY,
+		POPUP_IMPORT_EDITOR_THEME
 	};
 
 	int popup_mode;

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -67,7 +67,7 @@ void RectangleShape2D::_bind_methods() {
 }
 
 RectangleShape2D::RectangleShape2D()
-	: Shape2D(Physics2DServer::get_singleton()->shape_create(Physics2DServer::SHAPE_RECTANGLE)) {
+	: Shape2D(Physics2DServer::get_singleton()->rectangle_shape_create()) {
 
 	extents = Vector2(10, 10);
 	_update_shape();

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -48,6 +48,13 @@ class ARVRPositionalTracker : public Object {
 	GDCLASS(ARVRPositionalTracker, Object);
 	_THREAD_SAFE_CLASS_
 
+public:
+	enum TrackerHand {
+		TRACKER_HAND_UNKNOWN, /* unknown or not applicable */
+		TRACKER_LEFT_HAND, /* controller is the left hand controller */
+		TRACKER_RIGHT_HAND /* controller is the right hand controller */
+	};
+
 private:
 	ARVRServer::TrackerType type; // type of tracker
 	StringName name; // (unique) name of the tracker
@@ -57,6 +64,8 @@ private:
 	Basis orientation; // our orientation
 	bool tracks_position; // do we track position?
 	Vector3 rw_position; // our position "in the real world, so without world_scale applied"
+	TrackerHand hand; // if known, the hand this tracker is held in
+	real_t rumble; // rumble strength, 0.0 is off, 1.0 is maximum, note that we only record here, arvr_interface is responsible for execution
 
 protected:
 	static void _bind_methods();
@@ -77,11 +86,17 @@ public:
 	Vector3 get_position() const; // get position with world_scale applied
 	void set_rw_position(const Vector3 &p_rw_position);
 	Vector3 get_rw_position() const;
+	ARVRPositionalTracker::TrackerHand get_hand() const;
+	void set_hand(const ARVRPositionalTracker::TrackerHand p_hand);
+	real_t get_rumble() const;
+	void set_rumble(real_t p_rumble);
 
 	Transform get_transform(bool p_adjust_by_reference_frame) const;
 
 	ARVRPositionalTracker();
 	~ARVRPositionalTracker();
 };
+
+VARIANT_ENUM_CAST(ARVRPositionalTracker::TrackerHand);
 
 #endif

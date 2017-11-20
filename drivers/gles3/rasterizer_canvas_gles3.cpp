@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -148,13 +148,6 @@ void RasterizerCanvasGLES3::canvas_begin() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		storage->frame.clear_request = false;
 	}
-
-	/*canvas_shader.unbind();
-	canvas_shader.set_custom_shader(0);
-	canvas_shader.set_conditional(CanvasShaderGLES2::USE_MODULATE,false);
-	canvas_shader.bind();
-	canvas_shader.set_uniform(CanvasShaderGLES2::TEXTURE, 0);
-	canvas_use_modulate=false;*/
 
 	reset_canvas();
 
@@ -574,6 +567,16 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 
 					Size2 texpixel_size(1.0 / texture->width, 1.0 / texture->height);
 					Rect2 src_rect = (rect->flags & CANVAS_RECT_REGION) ? Rect2(rect->source.position * texpixel_size, rect->source.size * texpixel_size) : Rect2(0, 0, 1, 1);
+					Rect2 dst_rect = Rect2(rect->rect.position, rect->rect.size);
+
+					if (dst_rect.size.width < 0) {
+						dst_rect.position.x += dst_rect.size.width;
+						dst_rect.size.width *= -1;
+					}
+					if (dst_rect.size.height < 0) {
+						dst_rect.position.y += dst_rect.size.height;
+						dst_rect.size.height *= -1;
+					}
 
 					if (rect->flags & CANVAS_RECT_FLIP_H) {
 						src_rect.size.x *= -1;
@@ -584,12 +587,12 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 					}
 
 					if (rect->flags & CANVAS_RECT_TRANSPOSE) {
-						//err..
+						dst_rect.size.x *= -1; // Encoding in the dst_rect.z uniform
 					}
 
 					state.canvas_shader.set_uniform(CanvasShaderGLES3::COLOR_TEXPIXEL_SIZE, texpixel_size);
 
-					state.canvas_shader.set_uniform(CanvasShaderGLES3::DST_RECT, Color(rect->rect.position.x, rect->rect.position.y, rect->rect.size.x, rect->rect.size.y));
+					state.canvas_shader.set_uniform(CanvasShaderGLES3::DST_RECT, Color(dst_rect.position.x, dst_rect.position.y, dst_rect.size.x, dst_rect.size.y));
 					state.canvas_shader.set_uniform(CanvasShaderGLES3::SRC_RECT, Color(src_rect.position.x, src_rect.position.y, src_rect.size.x, src_rect.size.y));
 					state.canvas_shader.set_uniform(CanvasShaderGLES3::CLIP_RECT_UV, (rect->flags & CANVAS_RECT_CLIP_UV) ? true : false);
 
@@ -601,8 +604,18 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 					}
 
 				} else {
+					Rect2 dst_rect = Rect2(rect->rect.position, rect->rect.size);
 
-					state.canvas_shader.set_uniform(CanvasShaderGLES3::DST_RECT, Color(rect->rect.position.x, rect->rect.position.y, rect->rect.size.x, rect->rect.size.y));
+					if (dst_rect.size.width < 0) {
+						dst_rect.position.x += dst_rect.size.width;
+						dst_rect.size.width *= -1;
+					}
+					if (dst_rect.size.height < 0) {
+						dst_rect.position.y += dst_rect.size.height;
+						dst_rect.size.height *= -1;
+					}
+
+					state.canvas_shader.set_uniform(CanvasShaderGLES3::DST_RECT, Color(dst_rect.position.x, dst_rect.position.y, dst_rect.size.x, dst_rect.size.y));
 					state.canvas_shader.set_uniform(CanvasShaderGLES3::SRC_RECT, Color(0, 0, 1, 1));
 					state.canvas_shader.set_uniform(CanvasShaderGLES3::CLIP_RECT_UV, false);
 					glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -691,6 +704,13 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 					state.canvas_shader.set_uniform(CanvasShaderGLES3::COLOR_TEXPIXEL_SIZE, texpixel_size);
 				}
 				_draw_polygon(polygon->indices.ptr(), polygon->count, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1);
+#ifdef GLES_OVER_GL
+				if (polygon->antialiased) {
+					glEnable(GL_LINE_SMOOTH);
+					_draw_generic(GL_LINE_LOOP, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1);
+					glDisable(GL_LINE_SMOOTH);
+				}
+#endif
 
 			} break;
 			case Item::Command::TYPE_PARTICLES: {
@@ -884,61 +904,6 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 	}
 }
 
-#if 0
-void RasterizerGLES2::_canvas_item_setup_shader_params(ShaderMaterial *material,Shader* shader) {
-
-	if (canvas_shader.bind())
-		rebind_texpixel_size=true;
-
-	if (material->shader_version!=shader->version) {
-		//todo optimize uniforms
-		material->shader_version=shader->version;
-	}
-
-	if (shader->has_texscreen && framebuffer.active) {
-
-		int x = viewport.x;
-		int y = window_size.height-(viewport.height+viewport.y);
-
-		canvas_shader.set_uniform(CanvasShaderGLES2::TEXSCREEN_SCREEN_MULT,Vector2(float(viewport.width)/framebuffer.width,float(viewport.height)/framebuffer.height));
-		canvas_shader.set_uniform(CanvasShaderGLES2::TEXSCREEN_SCREEN_CLAMP,Color(float(x)/framebuffer.width,float(y)/framebuffer.height,float(x+viewport.width)/framebuffer.width,float(y+viewport.height)/framebuffer.height));
-		canvas_shader.set_uniform(CanvasShaderGLES2::TEXSCREEN_TEX,max_texture_units-1);
-		glActiveTexture(GL_TEXTURE0+max_texture_units-1);
-		glBindTexture(GL_TEXTURE_2D,framebuffer.sample_color);
-		if (framebuffer.scale==1 && !canvas_texscreen_used) {
-#ifdef GLEW_ENABLED
-			if (current_rt) {
-				glReadBuffer(GL_COLOR_ATTACHMENT0);
-			} else {
-				glReadBuffer(GL_BACK);
-			}
-#endif
-			if (current_rt) {
-				glCopyTexSubImage2D(GL_TEXTURE_2D,0,viewport.x,viewport.y,viewport.x,viewport.y,viewport.width,viewport.height);
-				canvas_shader.set_uniform(CanvasShaderGLES2::TEXSCREEN_SCREEN_CLAMP,Color(float(x)/framebuffer.width,float(viewport.y)/framebuffer.height,float(x+viewport.width)/framebuffer.width,float(y+viewport.height)/framebuffer.height));
-				//window_size.height-(viewport.height+viewport.y)
-			} else {
-				glCopyTexSubImage2D(GL_TEXTURE_2D,0,x,y,x,y,viewport.width,viewport.height);
-			}
-
-			canvas_texscreen_used=true;
-		}
-
-		glActiveTexture(GL_TEXTURE0);
-
-	}
-
-	if (shader->has_screen_uv) {
-		canvas_shader.set_uniform(CanvasShaderGLES2::SCREEN_UV_MULT,Vector2(1.0/viewport.width,1.0/viewport.height));
-	}
-
-
-	uses_texpixel_size=shader->uses_texpixel_size;
-
-}
-
-#endif
-
 void RasterizerCanvasGLES3::_copy_texscreen(const Rect2 &p_rect) {
 
 	glDisable(GL_BLEND);
@@ -1107,6 +1072,10 @@ void RasterizerCanvasGLES3::canvas_render_items(Item *p_item_list, int p_z, cons
 					_copy_texscreen(Rect2());
 				}
 
+				if (shader_ptr->canvas_item.uses_time) {
+					VisualServerRaster::redraw_request();
+				}
+
 				state.canvas_shader.set_custom_shader(shader_ptr->custom_code_id);
 				state.canvas_shader.bind();
 
@@ -1207,11 +1176,7 @@ void RasterizerCanvasGLES3::canvas_render_items(Item *p_item_list, int p_z, cons
 			last_blend_mode = blend_mode;
 		}
 
-		state.canvas_item_modulate = unshaded ? ci->final_modulate : Color(
-																			 ci->final_modulate.r * p_modulate.r,
-																			 ci->final_modulate.g * p_modulate.g,
-																			 ci->final_modulate.b * p_modulate.b,
-																			 ci->final_modulate.a * p_modulate.a);
+		state.canvas_item_modulate = unshaded ? ci->final_modulate : Color(ci->final_modulate.r * p_modulate.r, ci->final_modulate.g * p_modulate.g, ci->final_modulate.b * p_modulate.b, ci->final_modulate.a * p_modulate.a);
 
 		state.final_transform = ci->final_transform;
 		state.extra_matrix = Transform2D();
@@ -1280,6 +1245,7 @@ void RasterizerCanvasGLES3::canvas_render_items(Item *p_item_list, int p_z, cons
 							case VS::CANVAS_LIGHT_FILTER_NONE: state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_NEAREST, true); break;
 							case VS::CANVAS_LIGHT_FILTER_PCF3: state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF3, true); break;
 							case VS::CANVAS_LIGHT_FILTER_PCF5: state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF5, true); break;
+							case VS::CANVAS_LIGHT_FILTER_PCF7: state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF7, true); break;
 							case VS::CANVAS_LIGHT_FILTER_PCF9: state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF9, true); break;
 							case VS::CANVAS_LIGHT_FILTER_PCF13: state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF13, true); break;
 						}
@@ -1330,6 +1296,7 @@ void RasterizerCanvasGLES3::canvas_render_items(Item *p_item_list, int p_z, cons
 				state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_NEAREST, false);
 				state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF3, false);
 				state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF5, false);
+				state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF7, false);
 				state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF9, false);
 				state.canvas_shader.set_conditional(CanvasShaderGLES3::SHADOW_FILTER_PCF13, false);
 
@@ -1541,6 +1508,7 @@ void RasterizerCanvasGLES3::reset_canvas() {
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_SCISSOR_TEST);
+	glDisable(GL_DITHER);
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	if (storage->frame.current_rt && storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {

@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -40,7 +40,7 @@ Size2 ScrollContainer::get_minimum_size() const {
 
 	for (int i = 0; i < get_child_count(); i++) {
 
-		Control *c = get_child(i)->cast_to<Control>();
+		Control *c = Object::cast_to<Control>(get_child(i));
 		if (!c)
 			continue;
 		if (c->is_set_as_toplevel())
@@ -67,7 +67,7 @@ Size2 ScrollContainer::get_minimum_size() const {
 };
 
 void ScrollContainer::_cancel_drag() {
-	set_fixed_process(false);
+	set_physics_process(false);
 	drag_touching_deaccel = false;
 	drag_touching = false;
 	drag_speed = Vector2();
@@ -121,7 +121,7 @@ void ScrollContainer::_gui_input(const Ref<InputEvent> &p_gui_input) {
 		if (mb->is_pressed()) {
 
 			if (drag_touching) {
-				set_fixed_process(false);
+				set_physics_process(false);
 				drag_touching_deaccel = false;
 				drag_touching = false;
 				drag_speed = Vector2();
@@ -139,7 +139,7 @@ void ScrollContainer::_gui_input(const Ref<InputEvent> &p_gui_input) {
 				drag_touching_deaccel = false;
 				time_since_motion = 0;
 				if (drag_touching) {
-					set_fixed_process(true);
+					set_physics_process(true);
 					time_since_motion = 0;
 				}
 			}
@@ -150,7 +150,7 @@ void ScrollContainer::_gui_input(const Ref<InputEvent> &p_gui_input) {
 				if (drag_speed == Vector2()) {
 					drag_touching_deaccel = false;
 					drag_touching = false;
-					set_fixed_process(false);
+					set_physics_process(false);
 				} else {
 
 					drag_touching_deaccel = true;
@@ -182,19 +182,19 @@ void ScrollContainer::_gui_input(const Ref<InputEvent> &p_gui_input) {
 	}
 }
 
-void ScrollContainer::_update_scrollbar_pos() {
+void ScrollContainer::_update_scrollbar_position() {
 
 	Size2 hmin = h_scroll->get_combined_minimum_size();
 	Size2 vmin = v_scroll->get_combined_minimum_size();
 
-	v_scroll->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_END, vmin.width);
+	v_scroll->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_END, -vmin.width);
 	v_scroll->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 0);
 	v_scroll->set_anchor_and_margin(MARGIN_TOP, ANCHOR_BEGIN, 0);
 	v_scroll->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, 0);
 
 	h_scroll->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_BEGIN, 0);
 	h_scroll->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 0);
-	h_scroll->set_anchor_and_margin(MARGIN_TOP, ANCHOR_END, hmin.height);
+	h_scroll->set_anchor_and_margin(MARGIN_TOP, ANCHOR_END, -hmin.height);
 	h_scroll->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, 0);
 
 	h_scroll->raise();
@@ -205,7 +205,7 @@ void ScrollContainer::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_ENTER_TREE || p_what == NOTIFICATION_THEME_CHANGED) {
 
-		call_deferred("_update_scrollbar_pos");
+		call_deferred("_update_scrollbar_position");
 	};
 
 	if (p_what == NOTIFICATION_SORT_CHILDREN) {
@@ -220,7 +220,7 @@ void ScrollContainer::_notification(int p_what) {
 
 		for (int i = 0; i < get_child_count(); i++) {
 
-			Control *c = get_child(i)->cast_to<Control>();
+			Control *c = Object::cast_to<Control>(get_child(i));
 			if (!c)
 				continue;
 			if (c->is_set_as_toplevel())
@@ -257,14 +257,14 @@ void ScrollContainer::_notification(int p_what) {
 		update_scrollbars();
 	}
 
-	if (p_what == NOTIFICATION_FIXED_PROCESS) {
+	if (p_what == NOTIFICATION_PHYSICS_PROCESS) {
 
 		if (drag_touching) {
 
 			if (drag_touching_deaccel) {
 
 				Vector2 pos = Vector2(h_scroll->get_value(), v_scroll->get_value());
-				pos += drag_speed * get_fixed_process_delta_time();
+				pos += drag_speed * get_physics_process_delta_time();
 
 				bool turnoff_h = false;
 				bool turnoff_v = false;
@@ -294,7 +294,7 @@ void ScrollContainer::_notification(int p_what) {
 
 				float sgn_x = drag_speed.x < 0 ? -1 : 1;
 				float val_x = Math::abs(drag_speed.x);
-				val_x -= 1000 * get_fixed_process_delta_time();
+				val_x -= 1000 * get_physics_process_delta_time();
 
 				if (val_x < 0) {
 					turnoff_h = true;
@@ -302,7 +302,7 @@ void ScrollContainer::_notification(int p_what) {
 
 				float sgn_y = drag_speed.y < 0 ? -1 : 1;
 				float val_y = Math::abs(drag_speed.y);
-				val_y -= 1000 * get_fixed_process_delta_time();
+				val_y -= 1000 * get_physics_process_delta_time();
 
 				if (val_y < 0) {
 					turnoff_v = true;
@@ -311,7 +311,7 @@ void ScrollContainer::_notification(int p_what) {
 				drag_speed = Vector2(sgn_x * val_x, sgn_y * val_y);
 
 				if (turnoff_h && turnoff_v) {
-					set_fixed_process(false);
+					set_physics_process(false);
 					drag_touching = false;
 					drag_touching_deaccel = false;
 				}
@@ -322,10 +322,10 @@ void ScrollContainer::_notification(int p_what) {
 
 					Vector2 diff = drag_accum - last_drag_accum;
 					last_drag_accum = drag_accum;
-					drag_speed = diff / get_fixed_process_delta_time();
+					drag_speed = diff / get_physics_process_delta_time();
 				}
 
-				time_since_motion += get_fixed_process_delta_time();
+				time_since_motion += get_physics_process_delta_time();
 			}
 		}
 	}
@@ -347,11 +347,10 @@ void ScrollContainer::update_scrollbars() {
 	} else {
 
 		v_scroll->show();
+		v_scroll->set_max(min.height);
+		v_scroll->set_page(size.height - hmin.height);
 		scroll.y = v_scroll->get_value();
 	}
-
-	v_scroll->set_max(min.height);
-	v_scroll->set_page(size.height - hmin.height);
 
 	if (!scroll_h || min.width <= size.width - vmin.width) {
 
@@ -423,7 +422,7 @@ String ScrollContainer::get_configuration_warning() const {
 
 	for (int i = 0; i < get_child_count(); i++) {
 
-		Control *c = get_child(i)->cast_to<Control>();
+		Control *c = Object::cast_to<Control>(get_child(i));
 		if (!c)
 			continue;
 		if (c->is_set_as_toplevel())
@@ -448,7 +447,7 @@ void ScrollContainer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_h_scroll_enabled"), &ScrollContainer::is_h_scroll_enabled);
 	ClassDB::bind_method(D_METHOD("set_enable_v_scroll", "enable"), &ScrollContainer::set_enable_v_scroll);
 	ClassDB::bind_method(D_METHOD("is_v_scroll_enabled"), &ScrollContainer::is_v_scroll_enabled);
-	ClassDB::bind_method(D_METHOD("_update_scrollbar_pos"), &ScrollContainer::_update_scrollbar_pos);
+	ClassDB::bind_method(D_METHOD("_update_scrollbar_position"), &ScrollContainer::_update_scrollbar_position);
 	ClassDB::bind_method(D_METHOD("set_h_scroll", "val"), &ScrollContainer::set_h_scroll);
 	ClassDB::bind_method(D_METHOD("get_h_scroll"), &ScrollContainer::get_h_scroll);
 	ClassDB::bind_method(D_METHOD("set_v_scroll", "val"), &ScrollContainer::set_v_scroll);

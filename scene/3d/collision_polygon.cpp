@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -77,7 +77,7 @@ void CollisionPolygon::_notification(int p_what) {
 	switch (p_what) {
 
 		case NOTIFICATION_PARENTED: {
-			parent = get_parent()->cast_to<CollisionObject>();
+			parent = Object::cast_to<CollisionObject>(get_parent());
 			if (parent) {
 				owner_id = parent->create_shape_owner(this);
 				_build_polygon();
@@ -117,7 +117,7 @@ Vector<Point2> CollisionPolygon::get_polygon() const {
 	return polygon;
 }
 
-Rect3 CollisionPolygon::get_item_rect() const {
+AABB CollisionPolygon::get_item_rect() const {
 
 	return aabb;
 }
@@ -147,7 +147,7 @@ bool CollisionPolygon::is_disabled() const {
 
 String CollisionPolygon::get_configuration_warning() const {
 
-	if (!get_parent()->cast_to<CollisionObject>()) {
+	if (!Object::cast_to<CollisionObject>(get_parent())) {
 		return TTR("CollisionPolygon only serves to provide a collision shape to a CollisionObject derived node. Please only use it as a child of Area, StaticBody, RigidBody, KinematicBody, etc. to give them a shape.");
 	}
 
@@ -176,7 +176,7 @@ void CollisionPolygon::_bind_methods() {
 
 CollisionPolygon::CollisionPolygon() {
 
-	aabb = Rect3(Vector3(-1, -1, -1), Vector3(2, 2, 2));
+	aabb = AABB(Vector3(-1, -1, -1), Vector3(2, 2, 2));
 	depth = 1.0;
 	set_notify_local_transform(true);
 	parent = NULL;

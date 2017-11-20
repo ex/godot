@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -48,14 +48,25 @@ class Material : public Resource {
 
 	RID material;
 	Ref<Material> next_pass;
+	int render_priority;
 
 protected:
 	_FORCE_INLINE_ RID _get_material() const { return material; }
 	static void _bind_methods();
+	virtual bool _can_do_next_pass() const { return false; }
+
+	void _validate_property(PropertyInfo &property) const;
 
 public:
+	enum {
+		RENDER_PRIORITY_MAX = VS::MATERIAL_RENDER_PRIORITY_MAX,
+		RENDER_PRIORITY_MIN = VS::MATERIAL_RENDER_PRIORITY_MIN,
+	};
 	void set_next_pass(const Ref<Material> &p_pass);
 	Ref<Material> get_next_pass() const;
+
+	void set_render_priority(int p_priority);
+	int get_render_priority() const;
 
 	virtual RID get_rid() const;
 	Material();
@@ -75,6 +86,8 @@ protected:
 	static void _bind_methods();
 
 	void get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const;
+
+	virtual bool _can_do_next_pass() const;
 
 public:
 	void set_shader(const Ref<Shader> &p_shader);
@@ -104,6 +117,7 @@ public:
 		TEXTURE_AMBIENT_OCCLUSION,
 		TEXTURE_DEPTH,
 		TEXTURE_SUBSURFACE_SCATTERING,
+		TEXTURE_TRANSMISSION,
 		TEXTURE_REFRACTION,
 		TEXTURE_DETAIL_MASK,
 		TEXTURE_DETAIL_ALBEDO,
@@ -127,6 +141,7 @@ public:
 		FEATURE_AMBIENT_OCCLUSION,
 		FEATURE_DEPTH_MAPPING,
 		FEATURE_SUBSURACE_SCATTERING,
+		FEATURE_TRANSMISSION,
 		FEATURE_REFRACTION,
 		FEATURE_DETAIL,
 		FEATURE_MAX
@@ -156,23 +171,24 @@ public:
 	enum Flags {
 		FLAG_UNSHADED,
 		FLAG_USE_VERTEX_LIGHTING,
-		FLAG_ONTOP,
+		FLAG_DISABLE_DEPTH_TEST,
 		FLAG_ALBEDO_FROM_VERTEX_COLOR,
 		FLAG_SRGB_VERTEX_COLOR,
 		FLAG_USE_POINT_SIZE,
 		FLAG_FIXED_SIZE,
 		FLAG_UV1_USE_TRIPLANAR,
 		FLAG_UV2_USE_TRIPLANAR,
+		FLAG_TRIPLANAR_USE_WORLD,
 		FLAG_AO_ON_UV2,
 		FLAG_USE_ALPHA_SCISSOR,
 		FLAG_MAX
 	};
 
 	enum DiffuseMode {
-		DIFFUSE_LAMBERT,
-		DIFFUSE_HALF_LAMBERT,
-		DIFFUSE_OREN_NAYAR,
 		DIFFUSE_BURLEY,
+		DIFFUSE_LAMBERT,
+		DIFFUSE_LAMBERT_WRAP,
+		DIFFUSE_OREN_NAYAR,
 		DIFFUSE_TOON,
 	};
 
@@ -199,16 +215,21 @@ public:
 		TEXTURE_CHANNEL_GRAYSCALE
 	};
 
+	enum EmissionOperator {
+		EMISSION_OP_ADD,
+		EMISSION_OP_MULTIPLY
+	};
+
 private:
 	union MaterialKey {
 
 		struct {
-			uint64_t feature_mask : 11;
+			uint64_t feature_mask : 12;
 			uint64_t detail_uv : 1;
 			uint64_t blend_mode : 2;
 			uint64_t depth_draw_mode : 2;
 			uint64_t cull_mode : 2;
-			uint64_t flags : 11;
+			uint64_t flags : 12;
 			uint64_t detail_blend_mode : 2;
 			uint64_t diffuse_mode : 3;
 			uint64_t specular_mode : 2;
@@ -216,6 +237,9 @@ private:
 			uint64_t deep_parallax : 1;
 			uint64_t billboard_mode : 2;
 			uint64_t grow : 1;
+			uint64_t proximity_fade : 1;
+			uint64_t distance_fade : 1;
+			uint64_t emission_op : 1;
 		};
 
 		uint64_t key;
@@ -258,6 +282,9 @@ private:
 		mk.billboard_mode = billboard_mode;
 		mk.deep_parallax = deep_parallax ? 1 : 0;
 		mk.grow = grow_enabled;
+		mk.proximity_fade = proximity_fade_enabled;
+		mk.distance_fade = distance_fade_enabled;
+		mk.emission_op = emission_op;
 
 		return mk;
 	}
@@ -277,20 +304,25 @@ private:
 		StringName anisotropy;
 		StringName depth_scale;
 		StringName subsurface_scattering_strength;
+		StringName transmission;
 		StringName refraction;
 		StringName point_size;
 		StringName uv1_scale;
 		StringName uv1_offset;
 		StringName uv2_scale;
 		StringName uv2_offset;
-		StringName particle_h_frames;
-		StringName particle_v_frames;
+		StringName particles_anim_h_frames;
+		StringName particles_anim_v_frames;
 		StringName particles_anim_loop;
 		StringName depth_min_layers;
 		StringName depth_max_layers;
 		StringName uv1_blend_sharpness;
 		StringName uv2_blend_sharpness;
 		StringName grow;
+		StringName proximity_fade_distance;
+		StringName distance_fade_min;
+		StringName distance_fade_max;
+		StringName ao_light_affect;
 
 		StringName metallic_texture_channel;
 		StringName roughness_texture_channel;
@@ -328,11 +360,13 @@ private:
 	float anisotropy;
 	float depth_scale;
 	float subsurface_scattering_strength;
+	Color transmission;
 	float refraction;
 	float line_width;
 	float point_size;
 	float alpha_scissor_threshold;
 	bool grow_enabled;
+	float ao_light_affect;
 	float grow;
 	int particles_anim_h_frames;
 	int particles_anim_v_frames;
@@ -352,6 +386,13 @@ private:
 	int deep_parallax_min_layers;
 	int deep_parallax_max_layers;
 
+	bool proximity_fade_enabled;
+	float proximity_fade_distance;
+
+	bool distance_fade_enabled;
+	float distance_fade_max_distance;
+	float distance_fade_min_distance;
+
 	BlendMode blend_mode;
 	BlendMode detail_blend_mode;
 	DepthDrawMode depth_draw_mode;
@@ -360,6 +401,7 @@ private:
 	SpecularMode specular_mode;
 	DiffuseMode diffuse_mode;
 	BillboardMode billboard_mode;
+	EmissionOperator emission_op;
 
 	TextureChannel metallic_texture_channel;
 	TextureChannel roughness_texture_channel;
@@ -381,6 +423,7 @@ private:
 protected:
 	static void _bind_methods();
 	void _validate_property(PropertyInfo &property) const;
+	virtual bool _can_do_next_pass() const { return true; }
 
 public:
 	void set_albedo(const Color &p_albedo);
@@ -410,6 +453,9 @@ public:
 	void set_rim_tint(float p_rim_tint);
 	float get_rim_tint() const;
 
+	void set_ao_light_affect(float p_ao_light_affect);
+	float get_ao_light_affect() const;
+
 	void set_clearcoat(float p_clearcoat);
 	float get_clearcoat() const;
 
@@ -431,8 +477,11 @@ public:
 	void set_depth_deep_parallax_max_layers(int p_layer);
 	int get_depth_deep_parallax_max_layers() const;
 
-	void set_subsurface_scattering_strength(float p_strength);
+	void set_subsurface_scattering_strength(float p_subsurface_scattering_strength);
 	float get_subsurface_scattering_strength() const;
+
+	void set_transmission(const Color &p_transmission);
+	Color get_transmission() const;
 
 	void set_refraction(float p_refraction);
 	float get_refraction() const;
@@ -469,6 +518,8 @@ public:
 
 	void set_texture(TextureParam p_param, const Ref<Texture> &p_texture);
 	Ref<Texture> get_texture(TextureParam p_param) const;
+	// Used only for shader material conversion
+	Ref<Texture> get_texture_by_name(StringName p_name) const;
 
 	void set_feature(Feature p_feature, bool p_enabled);
 	bool get_feature(Feature p_feature) const;
@@ -511,6 +562,26 @@ public:
 	void set_alpha_scissor_threshold(float p_treshold);
 	float get_alpha_scissor_threshold() const;
 
+	void set_on_top_of_alpha();
+
+	void set_proximity_fade(bool p_enable);
+	bool is_proximity_fade_enabled() const;
+
+	void set_proximity_fade_distance(float p_distance);
+	float get_proximity_fade_distance() const;
+
+	void set_distance_fade(bool p_enable);
+	bool is_distance_fade_enabled() const;
+
+	void set_distance_fade_max_distance(float p_distance);
+	float get_distance_fade_max_distance() const;
+
+	void set_distance_fade_min_distance(float p_distance);
+	float get_distance_fade_min_distance() const;
+
+	void set_emission_operator(EmissionOperator p_op);
+	EmissionOperator get_emission_operator() const;
+
 	void set_metallic_texture_channel(TextureChannel p_channel);
 	TextureChannel get_metallic_texture_channel() const;
 	void set_roughness_texture_channel(TextureChannel p_channel);
@@ -525,6 +596,8 @@ public:
 	static void flush_changes();
 
 	static RID get_material_rid_for_2d(bool p_shaded, bool p_transparent, bool p_double_sided, bool p_cut_alpha, bool p_opaque_prepass);
+
+	RID get_shader_rid() const;
 
 	SpatialMaterial();
 	virtual ~SpatialMaterial();
@@ -541,6 +614,7 @@ VARIANT_ENUM_CAST(SpatialMaterial::DiffuseMode)
 VARIANT_ENUM_CAST(SpatialMaterial::SpecularMode)
 VARIANT_ENUM_CAST(SpatialMaterial::BillboardMode)
 VARIANT_ENUM_CAST(SpatialMaterial::TextureChannel)
+VARIANT_ENUM_CAST(SpatialMaterial::EmissionOperator)
 
 //////////////////////
 

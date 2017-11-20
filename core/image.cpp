@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -343,6 +343,11 @@ int Image::get_height() const {
 	return height;
 }
 
+Vector2 Image::get_size() const {
+
+	return Vector2(width, height);
+}
+
 bool Image::has_mipmaps() const {
 
 	return mipmaps;
@@ -525,7 +530,7 @@ static void _scale_cubic(const uint8_t *p_src, uint8_t *p_dst, uint32_t p_src_wi
 	int height = p_src_height;
 	double xfac = (double)width / p_dst_width;
 	double yfac = (double)height / p_dst_height;
-	// coordinates of source points and cooefficiens
+	// coordinates of source points and coefficients
 	double ox, oy, dx, dy, k1, k2;
 	int ox1, oy1, ox2, oy2;
 	// destination pixel values
@@ -556,7 +561,7 @@ static void _scale_cubic(const uint8_t *p_src, uint8_t *p_dst, uint32_t p_src_wi
 			}
 
 			for (int n = -1; n < 3; n++) {
-				// get Y cooefficient
+				// get Y coefficient
 				k1 = _bicubic_interp_kernel(dy - (double)n);
 
 				oy2 = oy1 + n;
@@ -566,7 +571,7 @@ static void _scale_cubic(const uint8_t *p_src, uint8_t *p_dst, uint32_t p_src_wi
 					oy2 = ymax;
 
 				for (int m = -1; m < 3; m++) {
-					// get X cooefficient
+					// get X coefficient
 					k2 = k1 * _bicubic_interp_kernel((double)m - dx);
 
 					ox2 = ox1 + m;
@@ -676,8 +681,8 @@ void Image::resize_to_po2(bool p_square) {
 		ERR_FAIL();
 	}
 
-	int w = nearest_power_of_2(width);
-	int h = nearest_power_of_2(height);
+	int w = next_power_of_2(width);
+	int h = next_power_of_2(height);
 
 	if (w == width && h == height) {
 
@@ -752,22 +757,24 @@ void Image::resize(int p_width, int p_height, Interpolation p_interpolation) {
 
 	_copy_internals_from(dst);
 }
-void Image::crop(int p_width, int p_height) {
 
+void Image::crop_from_point(int p_x, int p_y, int p_width, int p_height) {
 	if (!_can_modify(format)) {
 		ERR_EXPLAIN("Cannot crop in indexed, compressed or custom image formats.");
 		ERR_FAIL();
 	}
+	ERR_FAIL_COND(p_x < 0);
+	ERR_FAIL_COND(p_y < 0);
 	ERR_FAIL_COND(p_width <= 0);
 	ERR_FAIL_COND(p_height <= 0);
-	ERR_FAIL_COND(p_width > MAX_WIDTH);
-	ERR_FAIL_COND(p_height > MAX_HEIGHT);
+	ERR_FAIL_COND(p_x + p_width > MAX_WIDTH);
+	ERR_FAIL_COND(p_y + p_height > MAX_HEIGHT);
 
 	/* to save memory, cropping should be done in-place, however, since this function
 	   will most likely either not be used much, or in critical areas, for now it wont, because
 	   it's a waste of time. */
 
-	if (p_width == width && p_height == height)
+	if (p_width == width && p_height == height && p_x == 0 && p_y == 0)
 		return;
 
 	uint8_t pdata[16]; //largest is 16
@@ -779,9 +786,11 @@ void Image::crop(int p_width, int p_height) {
 		PoolVector<uint8_t>::Read r = data.read();
 		PoolVector<uint8_t>::Write w = dst.data.write();
 
-		for (int y = 0; y < p_height; y++) {
+		int m_h = p_y + p_height;
+		int m_w = p_x + p_width;
+		for (int y = p_y; y < m_h; y++) {
 
-			for (int x = 0; x < p_width; x++) {
+			for (int x = p_x; x < m_w; x++) {
 
 				if ((x >= width || y >= height)) {
 					for (uint32_t i = 0; i < pixel_size; i++)
@@ -790,7 +799,7 @@ void Image::crop(int p_width, int p_height) {
 					_get_pixelb(x, y, pixel_size, r.ptr(), pdata);
 				}
 
-				dst._put_pixelb(x, y, pixel_size, w.ptr(), pdata);
+				dst._put_pixelb(x - p_x, y - p_y, pixel_size, w.ptr(), pdata);
 			}
 		}
 	}
@@ -798,6 +807,11 @@ void Image::crop(int p_width, int p_height) {
 	if (mipmaps > 0)
 		dst.generate_mipmaps();
 	_copy_internals_from(dst);
+}
+
+void Image::crop(int p_width, int p_height) {
+
+	crop_from_point(0, 0, p_width, p_height);
 }
 
 void Image::flip_y() {
@@ -1008,8 +1022,8 @@ void Image::shrink_x2() {
 			copymem(w.ptr(), &r[ofs], new_size);
 		}
 
-		width /= 2;
-		height /= 2;
+		width = MAX(width / 2, 1);
+		height = MAX(height / 2, 1);
 		data = new_img;
 
 	} else {
@@ -1056,11 +1070,10 @@ Error Image::generate_mipmaps() {
 	int size = _get_dst_image_size(width, height, format, mmcount);
 
 	data.resize(size);
-	print_line("to gen mipmaps w " + itos(width) + " h " + itos(height) + " format " + get_format_name(format) + " mipmaps " + itos(mmcount) + " new size is: " + itos(size));
 
 	PoolVector<uint8_t>::Write wp = data.write();
 
-	if (nearest_power_of_2(width) == uint32_t(width) && nearest_power_of_2(height) == uint32_t(height)) {
+	if (next_power_of_2(width) == uint32_t(width) && next_power_of_2(height) == uint32_t(height)) {
 		//use fast code for powers of 2
 		int prev_ofs = 0;
 		int prev_h = height;
@@ -1251,9 +1264,9 @@ void Image::create(const char **p_xpm) {
 
 					if (*line_ptr == '#') {
 						line_ptr++;
-						uint8_t col_r;
-						uint8_t col_g;
-						uint8_t col_b;
+						uint8_t col_r = 0;
+						uint8_t col_g = 0;
+						uint8_t col_b = 0;
 						//uint8_t col_a=255;
 
 						for (int i = 0; i < 6; i++) {
@@ -2215,6 +2228,7 @@ void Image::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_width"), &Image::get_width);
 	ClassDB::bind_method(D_METHOD("get_height"), &Image::get_height);
+	ClassDB::bind_method(D_METHOD("get_size"), &Image::get_size);
 	ClassDB::bind_method(D_METHOD("has_mipmaps"), &Image::has_mipmaps);
 	ClassDB::bind_method(D_METHOD("get_format"), &Image::get_format);
 	ClassDB::bind_method(D_METHOD("get_data"), &Image::get_data);
@@ -2275,62 +2289,62 @@ void Image::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE), "_set_data", "_get_data");
 
-	BIND_CONSTANT(FORMAT_L8); //luminance
-	BIND_CONSTANT(FORMAT_LA8); //luminance-alpha
-	BIND_CONSTANT(FORMAT_R8);
-	BIND_CONSTANT(FORMAT_RG8);
-	BIND_CONSTANT(FORMAT_RGB8);
-	BIND_CONSTANT(FORMAT_RGBA8);
-	BIND_CONSTANT(FORMAT_RGBA4444);
-	BIND_CONSTANT(FORMAT_RGBA5551);
-	BIND_CONSTANT(FORMAT_RF); //float
-	BIND_CONSTANT(FORMAT_RGF);
-	BIND_CONSTANT(FORMAT_RGBF);
-	BIND_CONSTANT(FORMAT_RGBAF);
-	BIND_CONSTANT(FORMAT_RH); //half float
-	BIND_CONSTANT(FORMAT_RGH);
-	BIND_CONSTANT(FORMAT_RGBH);
-	BIND_CONSTANT(FORMAT_RGBAH);
-	BIND_CONSTANT(FORMAT_RGBE9995);
-	BIND_CONSTANT(FORMAT_DXT1); //s3tc bc1
-	BIND_CONSTANT(FORMAT_DXT3); //bc2
-	BIND_CONSTANT(FORMAT_DXT5); //bc3
-	BIND_CONSTANT(FORMAT_RGTC_R);
-	BIND_CONSTANT(FORMAT_RGTC_RG);
-	BIND_CONSTANT(FORMAT_BPTC_RGBA); //btpc bc6h
-	BIND_CONSTANT(FORMAT_BPTC_RGBF); //float /
-	BIND_CONSTANT(FORMAT_BPTC_RGBFU); //unsigned float
-	BIND_CONSTANT(FORMAT_PVRTC2); //pvrtc
-	BIND_CONSTANT(FORMAT_PVRTC2A);
-	BIND_CONSTANT(FORMAT_PVRTC4);
-	BIND_CONSTANT(FORMAT_PVRTC4A);
-	BIND_CONSTANT(FORMAT_ETC); //etc1
-	BIND_CONSTANT(FORMAT_ETC2_R11); //etc2
-	BIND_CONSTANT(FORMAT_ETC2_R11S); //signed ); NOT srgb.
-	BIND_CONSTANT(FORMAT_ETC2_RG11);
-	BIND_CONSTANT(FORMAT_ETC2_RG11S);
-	BIND_CONSTANT(FORMAT_ETC2_RGB8);
-	BIND_CONSTANT(FORMAT_ETC2_RGBA8);
-	BIND_CONSTANT(FORMAT_ETC2_RGB8A1);
-	BIND_CONSTANT(FORMAT_MAX);
+	BIND_ENUM_CONSTANT(FORMAT_L8); //luminance
+	BIND_ENUM_CONSTANT(FORMAT_LA8); //luminance-alpha
+	BIND_ENUM_CONSTANT(FORMAT_R8);
+	BIND_ENUM_CONSTANT(FORMAT_RG8);
+	BIND_ENUM_CONSTANT(FORMAT_RGB8);
+	BIND_ENUM_CONSTANT(FORMAT_RGBA8);
+	BIND_ENUM_CONSTANT(FORMAT_RGBA4444);
+	BIND_ENUM_CONSTANT(FORMAT_RGBA5551);
+	BIND_ENUM_CONSTANT(FORMAT_RF); //float
+	BIND_ENUM_CONSTANT(FORMAT_RGF);
+	BIND_ENUM_CONSTANT(FORMAT_RGBF);
+	BIND_ENUM_CONSTANT(FORMAT_RGBAF);
+	BIND_ENUM_CONSTANT(FORMAT_RH); //half float
+	BIND_ENUM_CONSTANT(FORMAT_RGH);
+	BIND_ENUM_CONSTANT(FORMAT_RGBH);
+	BIND_ENUM_CONSTANT(FORMAT_RGBAH);
+	BIND_ENUM_CONSTANT(FORMAT_RGBE9995);
+	BIND_ENUM_CONSTANT(FORMAT_DXT1); //s3tc bc1
+	BIND_ENUM_CONSTANT(FORMAT_DXT3); //bc2
+	BIND_ENUM_CONSTANT(FORMAT_DXT5); //bc3
+	BIND_ENUM_CONSTANT(FORMAT_RGTC_R);
+	BIND_ENUM_CONSTANT(FORMAT_RGTC_RG);
+	BIND_ENUM_CONSTANT(FORMAT_BPTC_RGBA); //btpc bc6h
+	BIND_ENUM_CONSTANT(FORMAT_BPTC_RGBF); //float /
+	BIND_ENUM_CONSTANT(FORMAT_BPTC_RGBFU); //unsigned float
+	BIND_ENUM_CONSTANT(FORMAT_PVRTC2); //pvrtc
+	BIND_ENUM_CONSTANT(FORMAT_PVRTC2A);
+	BIND_ENUM_CONSTANT(FORMAT_PVRTC4);
+	BIND_ENUM_CONSTANT(FORMAT_PVRTC4A);
+	BIND_ENUM_CONSTANT(FORMAT_ETC); //etc1
+	BIND_ENUM_CONSTANT(FORMAT_ETC2_R11); //etc2
+	BIND_ENUM_CONSTANT(FORMAT_ETC2_R11S); //signed ); NOT srgb.
+	BIND_ENUM_CONSTANT(FORMAT_ETC2_RG11);
+	BIND_ENUM_CONSTANT(FORMAT_ETC2_RG11S);
+	BIND_ENUM_CONSTANT(FORMAT_ETC2_RGB8);
+	BIND_ENUM_CONSTANT(FORMAT_ETC2_RGBA8);
+	BIND_ENUM_CONSTANT(FORMAT_ETC2_RGB8A1);
+	BIND_ENUM_CONSTANT(FORMAT_MAX);
 
-	BIND_CONSTANT(INTERPOLATE_NEAREST);
-	BIND_CONSTANT(INTERPOLATE_BILINEAR);
-	BIND_CONSTANT(INTERPOLATE_CUBIC);
+	BIND_ENUM_CONSTANT(INTERPOLATE_NEAREST);
+	BIND_ENUM_CONSTANT(INTERPOLATE_BILINEAR);
+	BIND_ENUM_CONSTANT(INTERPOLATE_CUBIC);
 
-	BIND_CONSTANT(ALPHA_NONE);
-	BIND_CONSTANT(ALPHA_BIT);
-	BIND_CONSTANT(ALPHA_BLEND);
+	BIND_ENUM_CONSTANT(ALPHA_NONE);
+	BIND_ENUM_CONSTANT(ALPHA_BIT);
+	BIND_ENUM_CONSTANT(ALPHA_BLEND);
 
-	BIND_CONSTANT(COMPRESS_S3TC);
-	BIND_CONSTANT(COMPRESS_PVRTC2);
-	BIND_CONSTANT(COMPRESS_PVRTC4);
-	BIND_CONSTANT(COMPRESS_ETC);
-	BIND_CONSTANT(COMPRESS_ETC2);
+	BIND_ENUM_CONSTANT(COMPRESS_S3TC);
+	BIND_ENUM_CONSTANT(COMPRESS_PVRTC2);
+	BIND_ENUM_CONSTANT(COMPRESS_PVRTC4);
+	BIND_ENUM_CONSTANT(COMPRESS_ETC);
+	BIND_ENUM_CONSTANT(COMPRESS_ETC2);
 
-	BIND_CONSTANT(COMPRESS_SOURCE_GENERIC);
-	BIND_CONSTANT(COMPRESS_SOURCE_SRGB);
-	BIND_CONSTANT(COMPRESS_SOURCE_NORMAL);
+	BIND_ENUM_CONSTANT(COMPRESS_SOURCE_GENERIC);
+	BIND_ENUM_CONSTANT(COMPRESS_SOURCE_SRGB);
+	BIND_ENUM_CONSTANT(COMPRESS_SOURCE_NORMAL);
 }
 
 void Image::set_compress_bc_func(void (*p_compress_func)(Image *, CompressSource)) {
@@ -2468,6 +2482,7 @@ void Image::fix_alpha_edges() {
 					if (rp[3] < alpha_threshold)
 						continue;
 
+					closest_dist = dist;
 					closest_color[0] = rp[0];
 					closest_color[1] = rp[1];
 					closest_color[2] = rp[2];

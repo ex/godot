@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -210,7 +210,7 @@ void StreamPeer::put_double(double p_val) {
 void StreamPeer::put_utf8_string(const String &p_string) {
 
 	CharString cs = p_string.utf8();
-	put_u32(p_string.length());
+	put_u32(cs.length());
 	put_data((const uint8_t *)cs.get_data(), cs.length());
 }
 void StreamPeer::put_var(const Variant &p_variant) {
@@ -405,9 +405,9 @@ void StreamPeer::_bind_methods() {
 
 void StreamPeerBuffer::_bind_methods() {
 
-	ClassDB::bind_method(D_METHOD("seek", "pos"), &StreamPeerBuffer::seek);
+	ClassDB::bind_method(D_METHOD("seek", "position"), &StreamPeerBuffer::seek);
 	ClassDB::bind_method(D_METHOD("get_size"), &StreamPeerBuffer::get_size);
-	ClassDB::bind_method(D_METHOD("get_pos"), &StreamPeerBuffer::get_pos);
+	ClassDB::bind_method(D_METHOD("get_position"), &StreamPeerBuffer::get_position);
 	ClassDB::bind_method(D_METHOD("resize", "size"), &StreamPeerBuffer::resize);
 	ClassDB::bind_method(D_METHOD("set_data_array", "data"), &StreamPeerBuffer::set_data_array);
 	ClassDB::bind_method(D_METHOD("get_data_array"), &StreamPeerBuffer::get_data_array);
@@ -446,6 +446,7 @@ Error StreamPeerBuffer::get_data(uint8_t *p_buffer, int p_bytes) {
 
 	return OK;
 }
+
 Error StreamPeerBuffer::get_partial_data(uint8_t *p_buffer, int p_bytes, int &r_received) {
 
 	if (pointer + p_bytes > data.size()) {
@@ -463,6 +464,8 @@ Error StreamPeerBuffer::get_partial_data(uint8_t *p_buffer, int p_bytes, int &r_
 
 	pointer += r_received;
 	// FIXME: return what? OK or ERR_*
+	// return OK for now so we don't maybe return garbage
+	return OK;
 }
 
 int StreamPeerBuffer::get_available_bytes() const {
@@ -481,7 +484,7 @@ int StreamPeerBuffer::get_size() const {
 	return data.size();
 }
 
-int StreamPeerBuffer::get_pos() const {
+int StreamPeerBuffer::get_position() const {
 
 	return pointer;
 }

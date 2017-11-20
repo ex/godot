@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -29,28 +29,72 @@
 /*************************************************************************/
 #include "property_editor.h"
 
-#include "array_property_edit.h"
-#include "class_db.h"
-#include "create_dialog.h"
-#include "editor_export.h"
-#include "editor_file_system.h"
-#include "editor_help.h"
-#include "editor_node.h"
-#include "editor_settings.h"
-#include "io/image_loader.h"
-#include "io/resource_loader.h"
-#include "multi_node_edit.h"
-#include "os/input.h"
-#include "os/keyboard.h"
-#include "pair.h"
-#include "print_string.h"
-#include "project_settings.h"
-#include "property_selector.h"
+#include "core/class_db.h"
+#include "core/io/image_loader.h"
+#include "core/io/marshalls.h"
+#include "core/io/resource_loader.h"
+#include "core/os/input.h"
+#include "core/os/keyboard.h"
+#include "core/pair.h"
+#include "core/print_string.h"
+#include "core/project_settings.h"
+#include "editor/array_property_edit.h"
+#include "editor/create_dialog.h"
+#include "editor/editor_export.h"
+#include "editor/editor_file_system.h"
+#include "editor/editor_help.h"
+#include "editor/editor_node.h"
+#include "editor/editor_settings.h"
+#include "editor/multi_node_edit.h"
+#include "editor/property_selector.h"
 #include "scene/gui/label.h"
 #include "scene/main/viewport.h"
 #include "scene/resources/font.h"
 #include "scene/resources/packed_scene.h"
 #include "scene/scene_string_names.h"
+
+void EditorResourceConversionPlugin::_bind_methods() {
+
+	MethodInfo mi;
+	mi.name = "_convert";
+	mi.return_val.type = Variant::OBJECT;
+	mi.return_val.class_name = "Resource";
+	mi.return_val.hint = PROPERTY_HINT_RESOURCE_TYPE;
+	mi.return_val.hint_string = "Resource";
+	mi.arguments.push_back(mi.return_val);
+	mi.arguments[0].name = "resource";
+
+	BIND_VMETHOD(mi)
+
+	mi.name = "_handles";
+	mi.return_val = PropertyInfo(Variant::BOOL, "");
+
+	BIND_VMETHOD(MethodInfo(Variant::BOOL, "_converts_to"));
+}
+
+String EditorResourceConversionPlugin::converts_to() const {
+
+	if (get_script_instance())
+		return get_script_instance()->call("_converts_to");
+
+	return "";
+}
+
+bool EditorResourceConversionPlugin::handles(const Ref<Resource> &p_resource) const {
+
+	if (get_script_instance())
+		return get_script_instance()->call("_handles", p_resource);
+
+	return false;
+}
+
+Ref<Resource> EditorResourceConversionPlugin::convert(const Ref<Resource> &p_resource) {
+
+	if (get_script_instance())
+		return get_script_instance()->call("_convert", p_resource);
+
+	return Ref<Resource>();
+}
 
 void CustomPropertyEditor::_notification(int p_what) {
 
@@ -58,11 +102,6 @@ void CustomPropertyEditor::_notification(int p_what) {
 
 		RID ci = get_canvas_item();
 		get_stylebox("panel", "PopupMenu")->draw(ci, Rect2(Point2(), get_size()));
-		/*
-		if (v.get_type()==Variant::COLOR) {
-
-			VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2( 10,10,60, get_size().height-20 ), v );
-		}*/
 	}
 	if (p_what == MainLoop::NOTIFICATION_WM_QUIT_REQUEST) {
 		hide();
@@ -175,7 +214,7 @@ void CustomPropertyEditor::_menu_option(int p_which) {
 
 					Object *inst = ClassDB::instance(orig_type);
 
-					Ref<Resource> res = Ref<Resource>(inst->cast_to<Resource>());
+					Ref<Resource> res = Ref<Resource>(Object::cast_to<Resource>(inst));
 
 					ERR_FAIL_COND(res.is_null());
 
@@ -201,21 +240,10 @@ void CustomPropertyEditor::_menu_option(int p_which) {
 					emit_signal("variant_changed");
 
 				} break;
-				case OBJ_MENU_REIMPORT: {
-
-					RES r = v;
-					/*					if (r.is_valid() && r->get_import_metadata().is_valid()) {
-						Ref<ResourceImportMetadata> rimd = r->get_import_metadata();
-						Ref<EditorImportPlugin> eip = EditorImportExport::get_singleton()->get_import_plugin_by_name(rimd->get_editor());
-						if (eip.is_valid()) {
-							eip->import_dialog(r->get_path());
-						}
-					}*/
-				} break;
 				case OBJ_MENU_NEW_SCRIPT: {
 
-					if (owner->cast_to<Node>())
-						EditorNode::get_singleton()->get_scene_tree_dock()->open_script_dialog(owner->cast_to<Node>());
+					if (Object::cast_to<Node>(owner))
+						EditorNode::get_singleton()->get_scene_tree_dock()->open_script_dialog(Object::cast_to<Node>(owner));
 
 				} break;
 				case OBJ_MENU_SHOW_IN_FILE_SYSTEM: {
@@ -228,6 +256,20 @@ void CustomPropertyEditor::_menu_option(int p_which) {
 				} break;
 				default: {
 
+					if (p_which >= CONVERT_BASE_ID) {
+
+						int to_type = p_which - CONVERT_BASE_ID;
+
+						Vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(RES(v));
+
+						ERR_FAIL_INDEX(to_type, conversions.size());
+
+						Ref<Resource> new_res = conversions[to_type]->convert(v);
+
+						v = new_res;
+						emit_signal("variant_changed");
+						break;
+					}
 					ERR_FAIL_COND(inheritors_array.empty());
 
 					String intype = inheritors_array[p_which - TYPE_BASE_ID];
@@ -242,7 +284,7 @@ void CustomPropertyEditor::_menu_option(int p_which) {
 
 					Object *obj = ClassDB::instance(intype);
 					ERR_BREAK(!obj);
-					Resource *res = obj->cast_to<Resource>();
+					Resource *res = Object::cast_to<Resource>(obj);
 					ERR_BREAK(!res);
 					if (owner && hint == PROPERTY_HINT_RESOURCE_TYPE && hint_text == "Script") {
 						//make visual script the right type
@@ -334,7 +376,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			if (hint == PROPERTY_HINT_RANGE) {
 
 				int c = hint_text.get_slice_count(",");
-				float min = 0, max = 100, step = 1;
+				float min = 0, max = 100, step = type == Variant::REAL ? .01 : 1;
 				if (c >= 1) {
 
 					if (!hint_text.get_slice(",", 0).empty())
@@ -373,7 +415,11 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				menu->clear();
 				Vector<String> options = hint_text.split(",");
 				for (int i = 0; i < options.size(); i++) {
-					menu->add_item(options[i], i);
+					if (options[i].find(":") != -1) {
+						menu->add_item(options[i].get_slicec(':', 0), options[i].get_slicec(':', 1).to_int());
+					} else {
+						menu->add_item(options[i], i);
+					}
 				}
 				menu->set_position(get_position());
 				menu->popup();
@@ -434,13 +480,13 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			} else if (hint == PROPERTY_HINT_EXP_EASING) {
 
 				easing_draw->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_BEGIN, 5 * EDSCALE);
-				easing_draw->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 5 * EDSCALE);
+				easing_draw->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, -5 * EDSCALE);
 				easing_draw->set_anchor_and_margin(MARGIN_TOP, ANCHOR_BEGIN, 5 * EDSCALE);
-				easing_draw->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, 30 * EDSCALE);
+				easing_draw->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, -30 * EDSCALE);
 				type_button->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_BEGIN, 3 * EDSCALE);
-				type_button->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 3 * EDSCALE);
-				type_button->set_anchor_and_margin(MARGIN_TOP, ANCHOR_END, 25 * EDSCALE);
-				type_button->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, 7 * EDSCALE);
+				type_button->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, -3 * EDSCALE);
+				type_button->set_anchor_and_margin(MARGIN_TOP, ANCHOR_END, -25 * EDSCALE);
+				type_button->set_anchor_and_margin(MARGIN_BOTTOM, ANCHOR_END, -7 * EDSCALE);
 				type_button->set_text(TTR("Preset.."));
 				type_button->get_popup()->clear();
 				type_button->get_popup()->add_item(TTR("Linear"), EASING_LINEAR);
@@ -514,8 +560,6 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				text_edit->show();
 				text_edit->set_text(v);
 
-				//action_buttons[0];
-
 				int button_margin = get_constant("button_margin", "Dialogs");
 				int margin = get_constant("margin", "Dialogs");
 
@@ -523,14 +567,13 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				action_buttons[0]->set_anchor(MARGIN_TOP, ANCHOR_END);
 				action_buttons[0]->set_anchor(MARGIN_RIGHT, ANCHOR_END);
 				action_buttons[0]->set_anchor(MARGIN_BOTTOM, ANCHOR_END);
-				action_buttons[0]->set_begin(Point2(70 * EDSCALE, button_margin - 5 * EDSCALE));
-				action_buttons[0]->set_end(Point2(margin, margin));
+				action_buttons[0]->set_begin(Point2(-70 * EDSCALE, -button_margin + 5 * EDSCALE));
+				action_buttons[0]->set_end(Point2(-margin, -margin));
 				action_buttons[0]->set_text(TTR("Close"));
 				action_buttons[0]->show();
 
 			} else if (hint == PROPERTY_HINT_TYPE_STRING) {
 
-				/* FIXME: This is repeated twice, with slightly different behavior! Which one? Check line 644 */
 				if (!create_dialog) {
 					create_dialog = memnew(CreateDialog);
 					create_dialog->connect("create", this, "_create_dialog_callback");
@@ -592,8 +635,8 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				MAKE_PROPSELECT
 
 				Object *obj = ObjectDB::get_instance(hint_text.to_int64());
-				if (obj && obj->cast_to<Script>()) {
-					property_select->select_method_from_script(obj->cast_to<Script>(), v);
+				if (Object::cast_to<Script>(obj)) {
+					property_select->select_method_from_script(Object::cast_to<Script>(obj), v);
 				}
 
 				updating = false;
@@ -640,20 +683,12 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				MAKE_PROPSELECT
 
 				Object *obj = ObjectDB::get_instance(hint_text.to_int64());
-				if (obj && obj->cast_to<Script>()) {
-					property_select->select_property_from_script(obj->cast_to<Script>(), v);
+				if (Object::cast_to<Script>(obj)) {
+					property_select->select_property_from_script(Object::cast_to<Script>(obj), v);
 				}
 
 				updating = false;
 				return false;
-
-			} else if (hint == PROPERTY_HINT_TYPE_STRING) {
-				if (!create_dialog) {
-					/* FIXME: ... and here. See line 529 */
-					create_dialog = memnew(CreateDialog);
-					create_dialog->connect("create", this, "_create_dialog_callback");
-					add_child(create_dialog);
-				}
 
 			} else {
 				List<String> names;
@@ -724,7 +759,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			value_editor[3]->set_text(String::num(q.w));
 
 		} break;
-		case Variant::RECT3: {
+		case Variant::AABB: {
 
 			field_names.push_back("px");
 			field_names.push_back("py");
@@ -734,7 +769,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			field_names.push_back("sz");
 			config_value_editors(6, 3, 16, field_names);
 
-			Rect3 aabb = v;
+			AABB aabb = v;
 			value_editor[0]->set_text(String::num(aabb.position.x));
 			value_editor[1]->set_text(String::num(aabb.position.y));
 			value_editor[2]->set_text(String::num(aabb.position.z));
@@ -821,39 +856,6 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			color_picker->set_edit_alpha(hint != PROPERTY_HINT_COLOR_NO_ALPHA);
 			color_picker->set_pick_color(v);
 			color_picker->set_focus_on_line_edit();
-			/*
-			int ofs=80;
-			int m=10;
-			int h=20;
-			Color c=v;
-			float values[4]={c.r,c.g,c.b,c.a};
-			for (int i=0;i<4;i++) {
-				int y=m+i*h;
-
-				value_editor[i]->show();
-				value_label[i]->show();
-				value_label[i]->set_position(Point2(ofs,y));
-				scroll[i]->set_min(0);
-				scroll[i]->set_max(1.0);
-				scroll[i]->set_page(0);
-				scroll[i]->set_position(Point2(ofs+15,y+Math::floor((h-scroll[i]->get_minimum_size().height)/2.0)));
-				scroll[i]->set_val(values[i]);
-				scroll[i]->set_size(Size2(120,1));
-				scroll[i]->show();
-				value_editor[i]->set_position(Point2(ofs+140,y));
-				value_editor[i]->set_size(Size2(40,h));
-				value_editor[i]->set_text( String::num(values[i],2 ));
-
-			}
-
-			value_label[0]->set_text("R");
-			value_label[1]->set_text("G");
-			value_label[2]->set_text("B");
-			value_label[3]->set_text("A");
-
-			Size2 new_size = value_editor[3]->get_position() + value_editor[3]->get_size() + Point2(10,10);
-			set_size( new_size );
-			*/
 
 		} break;
 
@@ -863,7 +865,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			names.push_back(TTR("Assign"));
 			names.push_back(TTR("Clear"));
 
-			if (owner->is_class("Node") && (v.get_type() == Variant::NODE_PATH) && owner->cast_to<Node>()->has_node(v))
+			if (owner && owner->is_class("Node") && (v.get_type() == Variant::NODE_PATH) && Object::cast_to<Node>(owner)->has_node(v))
 				names.push_back(TTR("Select Node"));
 
 			config_action_buttons(names);
@@ -877,7 +879,7 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 			menu->clear();
 			menu->set_size(Size2(1, 1) * EDSCALE);
 
-			if (p_name == "script" && hint_text == "Script" && owner->cast_to<Node>()) {
+			if (p_name == "script" && hint_text == "Script" && Object::cast_to<Node>(owner)) {
 				menu->add_icon_item(get_icon("Script", "EditorIcons"), TTR("New Script"), OBJ_MENU_NEW_SCRIPT);
 				menu->add_separator();
 			} else if (hint_text != "") {
@@ -920,27 +922,18 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 					menu->add_separator();
 			}
 
-			menu->add_icon_item(get_icon("Load", "EditorIcons"), "Load", OBJ_MENU_LOAD);
+			menu->add_icon_item(get_icon("Load", "EditorIcons"), TTR("Load"), OBJ_MENU_LOAD);
 
 			if (!RES(v).is_null()) {
 
-				menu->add_icon_item(get_icon("Edit", "EditorIcons"), "Edit", OBJ_MENU_EDIT);
-				menu->add_icon_item(get_icon("Del", "EditorIcons"), "Clear", OBJ_MENU_CLEAR);
-				menu->add_icon_item(get_icon("Duplicate", "EditorIcons"), "Make Unique", OBJ_MENU_MAKE_UNIQUE);
+				menu->add_icon_item(get_icon("Edit", "EditorIcons"), TTR("Edit"), OBJ_MENU_EDIT);
+				menu->add_icon_item(get_icon("Clear", "EditorIcons"), TTR("Clear"), OBJ_MENU_CLEAR);
+				menu->add_icon_item(get_icon("Duplicate", "EditorIcons"), TTR("Make Unique"), OBJ_MENU_MAKE_UNIQUE);
 				RES r = v;
 				if (r.is_valid() && r->get_path().is_resource_file()) {
-					/*if (r->get_import_metadata().is_valid()) {
-						menu->add_separator();
-						menu->add_icon_item(get_icon("ReloadSmall","EditorIcons"),"Re-Import",OBJ_MENU_REIMPORT);
-					}*/
 					menu->add_separator();
 					menu->add_item(TTR("Show in File System"), OBJ_MENU_SHOW_IN_FILE_SYSTEM);
 				}
-				/*if (r.is_valid() && r->get_path().is_resource_file()) {
-					menu->set_item_tooltip(1,r->get_path());
-				} else if (r.is_valid()) {
-					menu->set_item_tooltip(1,r->get_name()+" ("+r->get_type()+")");
-				}*/
 			} else {
 			}
 
@@ -968,6 +961,27 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 				if (paste_valid) {
 
 					menu->add_item(TTR("Paste"), OBJ_MENU_PASTE);
+				}
+			}
+
+			if (!RES(v).is_null()) {
+
+				Vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(RES(v));
+				if (conversions.size()) {
+					menu->add_separator();
+				}
+				for (int i = 0; i < conversions.size(); i++) {
+					String what = conversions[i]->converts_to();
+					Ref<Texture> icon;
+					if (has_icon(what, "EditorIcons")) {
+
+						icon = get_icon(what, "EditorIcons");
+					} else {
+
+						icon = get_icon(what, "Resource");
+					}
+
+					menu->add_icon_item(icon, vformat(TTR("Convert To %s"), what), CONVERT_BASE_ID + i);
 				}
 			}
 
@@ -1005,14 +1019,6 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 	updating = false;
 	return true;
 }
-
-////void CustomPropertyEditor::_save_properties_values(List<String> p_names) {
-////
-////	field_names=p_names;
-////	for (int i=0;i<p_names.size();i++) {
-////		field_values.push_back(v.get(p_names[i]));
-////	}
-////}
 
 void CustomPropertyEditor::_file_selected(String p_file) {
 
@@ -1092,18 +1098,13 @@ void CustomPropertyEditor::_type_create_selected(int p_idx) {
 
 		ERR_FAIL_INDEX(p_idx, inheritors_array.size());
 
-		//List<String> inheritors;
-		//ClassDB::get_inheriters_from(hint_text,&inheritors);
-		//inheritors.push_front(hint_text);
-
-		//ERR_FAIL_INDEX( p_idx, inheritors.size() );
 		String intype = inheritors_array[p_idx];
 
 		Object *obj = ClassDB::instance(intype);
 
 		ERR_FAIL_COND(!obj);
 
-		Resource *res = obj->cast_to<Resource>();
+		Resource *res = Object::cast_to<Resource>(obj);
 		ERR_FAIL_COND(!res);
 
 		v = Ref<Resource>(res).get_ref_ptr();
@@ -1123,8 +1124,8 @@ void CustomPropertyEditor::_node_path_selected(NodePath p_path) {
 	if (picking_viewport) {
 
 		Node *to_node = get_node(p_path);
-		if (!to_node->cast_to<Viewport>()) {
-			EditorNode::get_singleton()->show_warning("Selected node is not a Viewport!");
+		if (!Object::cast_to<Viewport>(to_node)) {
+			EditorNode::get_singleton()->show_warning(TTR("Selected node is not a Viewport!"));
 			return;
 		}
 
@@ -1153,9 +1154,9 @@ void CustomPropertyEditor::_node_path_selected(NodePath p_path) {
 		Node *node = NULL;
 
 		if (owner->is_class("Node"))
-			node = owner->cast_to<Node>();
+			node = Object::cast_to<Node>(owner);
 		else if (owner->is_class("ArrayPropertyEdit"))
-			node = owner->cast_to<ArrayPropertyEdit>()->get_node();
+			node = Object::cast_to<ArrayPropertyEdit>(owner)->get_node();
 
 		if (!node) {
 			v = p_path;
@@ -1275,9 +1276,9 @@ void CustomPropertyEditor::_action_pressed(int p_which) {
 				hide();
 			} else if (p_which == 2) {
 
-				if (owner->is_class("Node") && (v.get_type() == Variant::NODE_PATH) && owner->cast_to<Node>()->has_node(v)) {
+				if (owner->is_class("Node") && (v.get_type() == Variant::NODE_PATH) && Object::cast_to<Node>(owner)->has_node(v)) {
 
-					Node *target_node = owner->cast_to<Node>()->get_node(v);
+					Node *target_node = Object::cast_to<Node>(owner)->get_node(v);
 					EditorNode::get_singleton()->get_editor_selection()->clear();
 					EditorNode::get_singleton()->get_scene_tree_dock()->set_selected(target_node);
 				}
@@ -1298,7 +1299,7 @@ void CustomPropertyEditor::_action_pressed(int p_which) {
 
 					Object *obj = ClassDB::instance(intype);
 					ERR_BREAK(!obj);
-					Resource *res = obj->cast_to<Resource>();
+					Resource *res = Object::cast_to<Resource>(obj);
 					ERR_BREAK(!res);
 
 					v = Ref<Resource>(res).get_ref_ptr();
@@ -1381,33 +1382,6 @@ void CustomPropertyEditor::_action_pressed(int p_which) {
 	}
 }
 
-void CustomPropertyEditor::_scroll_modified(double p_value) {
-
-	if (updating)
-		return;
-	/*
-	switch(type) {
-
-		case Variant::COLOR: {
-
-			for (int i=0;i<4;i++) {
-
-				value_editor[i]->set_text( String::num(scroll[i]->get_val(),2) );
-			}
-			Color c;
-			c.r=scroll[0]->get_val();
-			c.g=scroll[1]->get_val();
-			c.b=scroll[2]->get_val();
-			c.a=scroll[3]->get_val();
-			v=c;
-			update();
-			emit_signal("variant_changed");
-		} break;
-		default: {}
-	}
-	*/
-}
-
 void CustomPropertyEditor::_drag_easing(const Ref<InputEvent> &p_ev) {
 
 	Ref<InputEventMouseMotion> mm = p_ev;
@@ -1432,7 +1406,6 @@ void CustomPropertyEditor::_drag_easing(const Ref<InputEvent> &p_ev) {
 		val = Math::log(val) / Math::log((float)2.0);
 		//logspace
 		val += rel * 0.05;
-		//
 
 		val = Math::pow(2.0f, val);
 		if (sg)
@@ -1440,11 +1413,8 @@ void CustomPropertyEditor::_drag_easing(const Ref<InputEvent> &p_ev) {
 
 		v = val;
 		easing_draw->update();
-		//emit_signal("variant_changed");
 		emit_signal("variant_changed");
 	}
-	//	if (p_ev.type == Ref<InputEvent>::MOUSE_BUTTON && p_ev->get_button_index() == BUTTON_LEFT) {
-	//	}
 }
 
 void CustomPropertyEditor::_draw_easing() {
@@ -1455,7 +1425,6 @@ void CustomPropertyEditor::_draw_easing() {
 	Rect2 r(Point2(), s);
 	r = r.grow(3);
 	get_stylebox("normal", "LineEdit")->draw(ci, r);
-	//VisualServer::get_singleton()->canvas_item_add
 
 	int points = 48;
 
@@ -1507,6 +1476,7 @@ void CustomPropertyEditor::_modified(String p_string) {
 
 	if (updating)
 		return;
+
 	updating = true;
 	switch (type) {
 		case Variant::INT: {
@@ -1619,7 +1589,7 @@ void CustomPropertyEditor::_modified(String p_string) {
 			_emit_changed_whole_or_field();
 
 		} break;
-		case Variant::RECT3: {
+		case Variant::AABB: {
 
 			Vector3 pos;
 			Vector3 size;
@@ -1639,7 +1609,7 @@ void CustomPropertyEditor::_modified(String p_string) {
 				size.y = value_editor[4]->get_text().to_double();
 				size.z = value_editor[5]->get_text().to_double();
 			}
-			v = Rect3(pos, size);
+			v = AABB(pos, size);
 			_emit_changed_whole_or_field();
 
 		} break;
@@ -1703,20 +1673,7 @@ void CustomPropertyEditor::_modified(String p_string) {
 
 		} break;
 		case Variant::COLOR: {
-			/*
-			for (int i=0;i<4;i++) {
 
-				scroll[i]->set_val( value_editor[i]->get_text().to_double() );
-			}
-			Color c;
-			c.r=value_editor[0]->get_text().to_double();
-			c.g=value_editor[1]->get_text().to_double();
-			c.b=value_editor[2]->get_text().to_double();
-			c.a=value_editor[3]->get_text().to_double();
-			v=c;
-			update();
-			emit_signal("variant_changed");
-			*/
 		} break;
 
 		case Variant::NODE_PATH: {
@@ -1774,7 +1731,7 @@ void CustomPropertyEditor::_focus_enter() {
 		case Variant::VECTOR3:
 		case Variant::PLANE:
 		case Variant::QUAT:
-		case Variant::RECT3:
+		case Variant::AABB:
 		case Variant::TRANSFORM2D:
 		case Variant::BASIS:
 		case Variant::TRANSFORM: {
@@ -1799,7 +1756,7 @@ void CustomPropertyEditor::_focus_exit() {
 		case Variant::VECTOR3:
 		case Variant::PLANE:
 		case Variant::QUAT:
-		case Variant::RECT3:
+		case Variant::AABB:
 		case Variant::TRANSFORM2D:
 		case Variant::BASIS:
 		case Variant::TRANSFORM: {
@@ -1813,19 +1770,19 @@ void CustomPropertyEditor::_focus_exit() {
 
 void CustomPropertyEditor::config_action_buttons(const List<String> &p_strings) {
 
-	int w = 100;
-	int h = 18;
-	int m = 5;
+	int cell_width = 60;
+	int cell_height = 25;
+	int cell_margin = 5;
 
-	set_size(Size2(w, m * 2 + (h + m) * p_strings.size()));
+	set_size(Size2(cell_margin + (cell_width + cell_margin) * p_strings.size(), (cell_margin * 2) + cell_height) * EDSCALE);
 
 	for (int i = 0; i < MAX_ACTION_BUTTONS; i++) {
 
 		if (i < p_strings.size()) {
 			action_buttons[i]->show();
 			action_buttons[i]->set_text(p_strings[i]);
-			action_buttons[i]->set_position(Point2(m, m + i * (h + m)));
-			action_buttons[i]->set_size(Size2(w - m * 2, h));
+			action_buttons[i]->set_position(Point2(cell_margin + (cell_width + cell_margin) * i, cell_margin) * EDSCALE);
+			action_buttons[i]->set_size(Size2(cell_width, cell_height - cell_margin * 2) * EDSCALE);
 			action_buttons[i]->set_flat(true);
 		} else {
 			action_buttons[i]->hide();
@@ -1835,13 +1792,14 @@ void CustomPropertyEditor::config_action_buttons(const List<String> &p_strings) 
 
 void CustomPropertyEditor::config_value_editors(int p_amount, int p_columns, int p_label_w, const List<String> &p_strings) {
 
-	int w = 80;
-	int h = 20;
-	int m = 10;
+	int cell_width = 95;
+	int cell_height = 25;
+	int cell_margin = 5;
+	int hor_spacing = 5; // Spacing between labels and their values
 
 	int rows = ((p_amount - 1) / p_columns) + 1;
 
-	set_size(Size2(m * (1 + p_columns) + (w + p_label_w) * p_columns, m * (1 + rows) + h * rows));
+	set_size(Size2(cell_margin + p_label_w + (cell_width + cell_margin + p_label_w) * p_columns, cell_margin + (cell_height + cell_margin) * rows) * EDSCALE);
 
 	for (int i = 0; i < MAX_VALUE_EDITORS; i++) {
 
@@ -1852,9 +1810,9 @@ void CustomPropertyEditor::config_value_editors(int p_amount, int p_columns, int
 			value_editor[i]->show();
 			value_label[i]->show();
 			value_label[i]->set_text(i < p_strings.size() ? p_strings[i] : String(""));
-			value_editor[i]->set_position(Point2(m + p_label_w + c * (w + m + p_label_w), m + r * (h + m)));
-			value_editor[i]->set_size(Size2(w, h));
-			value_label[i]->set_position(Point2(m + c * (w + m + p_label_w), m + r * (h + m)));
+			value_editor[i]->set_position(Point2(cell_margin + p_label_w + hor_spacing + (cell_width + cell_margin + p_label_w + hor_spacing) * c, cell_margin + (cell_height + cell_margin) * r) * EDSCALE);
+			value_editor[i]->set_size(Size2(cell_width, cell_height));
+			value_label[i]->set_position(Point2(cell_margin + (cell_width + cell_margin + p_label_w + hor_spacing) * c, cell_margin + (cell_height + cell_margin) * r) * EDSCALE);
 			value_editor[i]->set_editable(!read_only);
 		} else {
 			value_editor[i]->hide();
@@ -1869,7 +1827,6 @@ void CustomPropertyEditor::_bind_methods() {
 	ClassDB::bind_method("_focus_exit", &CustomPropertyEditor::_focus_exit);
 	ClassDB::bind_method("_modified", &CustomPropertyEditor::_modified);
 	ClassDB::bind_method("_range_modified", &CustomPropertyEditor::_range_modified);
-	ClassDB::bind_method("_scroll_modified", &CustomPropertyEditor::_scroll_modified);
 	ClassDB::bind_method("_action_pressed", &CustomPropertyEditor::_action_pressed);
 	ClassDB::bind_method("_file_selected", &CustomPropertyEditor::_file_selected);
 	ClassDB::bind_method("_type_create_selected", &CustomPropertyEditor::_type_create_selected);
@@ -1913,7 +1870,6 @@ CustomPropertyEditor::CustomPropertyEditor() {
 		scroll[i]->set_max(1.0);
 		scroll[i]->set_step(0.01);
 		add_child(scroll[i]);
-		scroll[i]->connect("value_changed", this, "_scroll_modified");
 	}
 
 	checks20gc = memnew(GridContainer);
@@ -1938,10 +1894,8 @@ CustomPropertyEditor::CustomPropertyEditor() {
 
 	text_edit = memnew(TextEdit);
 	add_child(text_edit);
-	text_edit->set_area_as_parent_rect();
-	for (int i = 0; i < 4; i++)
-		text_edit->set_margin((Margin)i, 5);
-	text_edit->set_margin(MARGIN_BOTTOM, 30);
+	text_edit->set_anchors_and_margins_preset(Control::PRESET_WIDE, Control::PRESET_MODE_MINSIZE, 5);
+	text_edit->set_margin(MARGIN_BOTTOM, -30);
 
 	text_edit->hide();
 	text_edit->connect("text_changed", this, "_text_edit_changed");
@@ -1969,7 +1923,6 @@ CustomPropertyEditor::CustomPropertyEditor() {
 	error = memnew(ConfirmationDialog);
 	error->set_title(TTR("Error!"));
 	add_child(error);
-	//error->get_cancel()->hide();
 
 	scene_tree = memnew(SceneTreeDialog);
 	add_child(scene_tree);
@@ -1985,7 +1938,6 @@ CustomPropertyEditor::CustomPropertyEditor() {
 	easing_draw->hide();
 	easing_draw->connect("draw", this, "_draw_easing");
 	easing_draw->connect("gui_input", this, "_drag_easing");
-	//easing_draw->emit_signal(SceneStringNames::get_singleton()->input_event,InputEvent());
 	easing_draw->set_default_cursor_shape(Control::CURSOR_MOVE);
 
 	type_button = memnew(MenuButton);
@@ -2001,12 +1953,12 @@ CustomPropertyEditor::CustomPropertyEditor() {
 
 	spinbox = memnew(SpinBox);
 	add_child(spinbox);
-	spinbox->set_area_as_parent_rect(5);
+	spinbox->set_anchors_and_margins_preset(Control::PRESET_WIDE, Control::PRESET_MODE_MINSIZE, 5);
 	spinbox->connect("value_changed", this, "_range_modified");
 
 	slider = memnew(HSlider);
 	add_child(slider);
-	slider->set_area_as_parent_rect(5);
+	slider->set_anchors_and_margins_preset(Control::PRESET_WIDE, Control::PRESET_MODE_MINSIZE, 5);
 	slider->connect("value_changed", this, "_range_modified");
 
 	create_dialog = NULL;
@@ -2018,7 +1970,7 @@ bool PropertyEditor::_might_be_in_instance() {
 	if (!obj)
 		return false;
 
-	Node *node = obj->cast_to<Node>();
+	Node *node = Object::cast_to<Node>(obj);
 
 	Node *edited_scene = EditorNode::get_singleton()->get_edited_scene();
 
@@ -2046,7 +1998,7 @@ bool PropertyEditor::_might_be_in_instance() {
 
 bool PropertyEditor::_get_instanced_node_original_property(const StringName &p_prop, Variant &value) {
 
-	Node *node = obj->cast_to<Node>();
+	Node *node = Object::cast_to<Node>(obj);
 
 	if (!node)
 		return false;
@@ -2056,8 +2008,6 @@ bool PropertyEditor::_get_instanced_node_original_property(const StringName &p_p
 	Node *edited_scene = EditorNode::get_singleton()->get_edited_scene();
 
 	bool found = false;
-
-	//print_line("for prop - "+String(p_prop));
 
 	while (node) {
 
@@ -2069,13 +2019,11 @@ bool PropertyEditor::_get_instanced_node_original_property(const StringName &p_p
 		} else {
 			ss = node->get_scene_instance_state();
 		}
-		//print_line("at - "+String(edited_scene->get_path_to(node)));
 
 		if (ss.is_valid()) {
 
 			NodePath np = node->get_path_to(orig);
 			int node_idx = ss->find_node_by_path(np);
-			//print_line("\t valid, nodeidx "+itos(node_idx));
 			if (node_idx >= 0) {
 				bool lfound = false;
 				Variant lvar;
@@ -2084,7 +2032,6 @@ bool PropertyEditor::_get_instanced_node_original_property(const StringName &p_p
 
 					found = true;
 					value = lvar;
-					//print_line("\t found value "+String(value));
 				}
 			}
 		}
@@ -2101,14 +2048,12 @@ bool PropertyEditor::_get_instanced_node_original_property(const StringName &p_p
 bool PropertyEditor::_is_property_different(const Variant &p_current, const Variant &p_orig, int p_usage) {
 
 	{
-		Node *node = obj->cast_to<Node>();
+		Node *node = Object::cast_to<Node>(obj);
 		if (!node)
 			return false;
 
 		Node *edited_scene = EditorNode::get_singleton()->get_edited_scene();
 		bool found_state = false;
-
-		//print_line("for prop - "+String(p_prop));
 
 		while (node) {
 
@@ -2248,8 +2193,6 @@ void PropertyEditor::set_item_text(TreeItem *p_item, int p_type, const String &p
 				break;
 			}
 
-			//p_item->set_cell_mode( 1, TreeItem::CELL_MODE_RANGE );
-
 			if (p_type == Variant::REAL) {
 				p_item->set_range(1, obj->get(p_name));
 
@@ -2299,7 +2242,7 @@ void PropertyEditor::set_item_text(TreeItem *p_item, int p_type, const String &p
 		case Variant::VECTOR3:
 		case Variant::QUAT:
 		case Variant::VECTOR2:
-		case Variant::RECT3:
+		case Variant::AABB:
 		case Variant::RECT2:
 		case Variant::TRANSFORM2D:
 		case Variant::BASIS:
@@ -2311,7 +2254,6 @@ void PropertyEditor::set_item_text(TreeItem *p_item, int p_type, const String &p
 		case Variant::COLOR: {
 
 			tree->update();
-			//p_item->set_text(1,obj->get(p_name));
 
 		} break;
 		case Variant::NODE_PATH: {
@@ -2320,7 +2262,15 @@ void PropertyEditor::set_item_text(TreeItem *p_item, int p_type, const String &p
 		} break;
 		case Variant::OBJECT: {
 
-			if (obj->get(p_name).get_type() == Variant::NIL || obj->get(p_name).operator RefPtr().is_null()) {
+			Ref<EncodedObjectAsID> encoded = obj->get(p_name); //for debugger and remote tools
+
+			if (encoded.is_valid()) {
+
+				p_item->set_text(1, "Object: " + itos(encoded->get_object_id()));
+				p_item->set_icon(1, Ref<Texture>());
+				p_item->set_custom_as_button(1, true);
+
+			} else if (obj->get(p_name).get_type() == Variant::NIL || obj->get(p_name).operator RefPtr().is_null()) {
 				p_item->set_text(1, "<null>");
 				p_item->set_icon(1, Ref<Texture>());
 				p_item->set_custom_as_button(1, false);
@@ -2408,29 +2358,6 @@ void PropertyEditor::_check_reload_status(const String &p_name, TreeItem *item) 
 		}
 	}
 
-	if (_might_be_in_instance()) {
-
-		Variant vorig;
-		Dictionary d = item->get_metadata(0);
-		int usage = d.has("usage") ? int(int(d["usage"]) & (PROPERTY_USAGE_STORE_IF_NONONE | PROPERTY_USAGE_STORE_IF_NONZERO)) : 0;
-
-		if (_get_instanced_node_original_property(p_name, vorig) || usage) {
-			Variant v = obj->get(p_name);
-
-			bool changed = _is_property_different(v, vorig, usage);
-
-			//if ((found!=-1 && !is_disabled)!=changed) {
-
-			if (changed) {
-
-				has_reload = true;
-			} else {
-			}
-
-			//}
-		}
-	}
-
 	if (obj->call("property_can_revert", p_name).operator bool()) {
 
 		has_reload = true;
@@ -2446,7 +2373,6 @@ void PropertyEditor::_check_reload_status(const String &p_name, TreeItem *item) 
 		}
 	}
 
-	//print_line("found: "+itos(found)+" has reload: "+itos(has_reload)+" is_disabled "+itos(is_disabled));
 	if (found != -1 && !has_reload) {
 
 		if (!is_disabled) {
@@ -2492,6 +2418,7 @@ bool PropertyEditor::_is_drop_valid(const Dictionary &p_drag_data, const Diction
 				if (files.size() == 1) {
 					String file = files[0];
 					String ftype = EditorFileSystem::get_singleton()->get_file_type(file);
+
 					if (ftype != "") {
 
 						for (int i = 0; i < allowed_type.get_slice_count(","); i++) {
@@ -2511,7 +2438,7 @@ bool PropertyEditor::_is_drop_valid(const Dictionary &p_drag_data, const Diction
 void PropertyEditor::_mark_drop_fields(TreeItem *p_at) {
 
 	if (_is_drop_valid(get_viewport()->gui_get_drag_data(), p_at->get_metadata(0)))
-		p_at->set_custom_bg_color(1, Color(0.7, 0.5, 0.2), true);
+		p_at->set_custom_bg_color(1, get_color("accent_color", "Editor"), true);
 
 	if (p_at->get_children()) {
 		_mark_drop_fields(p_at->get_children());
@@ -2524,7 +2451,7 @@ void PropertyEditor::_mark_drop_fields(TreeItem *p_at) {
 
 Variant PropertyEditor::get_drag_data_fw(const Point2 &p_point, Control *p_from) {
 
-	TreeItem *item = tree->get_item_at_pos(p_point);
+	TreeItem *item = tree->get_item_at_position(p_point);
 	if (!item)
 		return Variant();
 
@@ -2532,7 +2459,7 @@ Variant PropertyEditor::get_drag_data_fw(const Point2 &p_point, Control *p_from)
 	if (!d.has("name"))
 		return Variant();
 
-	int col = tree->get_column_at_pos(p_point);
+	int col = tree->get_column_at_position(p_point);
 	if (col == 0) {
 
 		Dictionary dp;
@@ -2563,11 +2490,11 @@ Variant PropertyEditor::get_drag_data_fw(const Point2 &p_point, Control *p_from)
 
 bool PropertyEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
 
-	TreeItem *item = tree->get_item_at_pos(p_point);
+	TreeItem *item = tree->get_item_at_position(p_point);
 	if (!item)
 		return false;
 
-	int col = tree->get_column_at_pos(p_point);
+	int col = tree->get_column_at_position(p_point);
 	if (col != 1)
 		return false;
 
@@ -2575,11 +2502,11 @@ bool PropertyEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_da
 }
 void PropertyEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
 
-	TreeItem *item = tree->get_item_at_pos(p_point);
+	TreeItem *item = tree->get_item_at_position(p_point);
 	if (!item)
 		return;
 
-	int col = tree->get_column_at_pos(p_point);
+	int col = tree->get_column_at_position(p_point);
 	if (col != 1)
 		return;
 
@@ -2663,10 +2590,10 @@ void PropertyEditor::_notification(int p_what) {
 		}
 	}
 
-	if (p_what == NOTIFICATION_FIXED_PROCESS) {
+	if (p_what == NOTIFICATION_PHYSICS_PROCESS) {
 
 		if (refresh_countdown > 0) {
-			refresh_countdown -= get_fixed_process_delta_time();
+			refresh_countdown -= get_physics_process_delta_time();
 			if (refresh_countdown <= 0) {
 				TreeItem *root = tree->get_root();
 				_refresh_item(root);
@@ -2718,7 +2645,6 @@ TreeItem *PropertyEditor::get_parent_node(String p_path, HashMap<String, TreeIte
 		item = item_paths.get(p_path);
 	} else {
 
-		//printf("path %s parent path %s - item name %s\n",p_path.ascii().get_data(),p_path.left( p_path.find_last("/") ).ascii().get_data(),p_path.right( p_path.find_last("/") ).ascii().get_data() );
 		TreeItem *parent = get_parent_node(p_path.left(p_path.find_last("/")), item_paths, root, NULL);
 		item = tree->create_item(parent);
 
@@ -2768,64 +2694,6 @@ void PropertyEditor::_refresh_item(TreeItem *p_item) {
 	if (name != String()) {
 
 		_check_reload_status(name, p_item);
-#if 0
-		bool has_reload=false;
-
-		int found=-1;
-		for(int i=0;i<p_item->get_button_count(1);i++) {
-
-			if (p_item->get_button_id(1,i)==3) {
-				found=i;
-				break;
-			}
-		}
-
-		if (_might_be_in_instance()) {
-
-			Variant vorig;
-			Dictionary d=p_item->get_metadata(0);
-			int usage = d.has("usage")?int(int(d["usage"])&(PROPERTY_USAGE_STORE_IF_NONONE|PROPERTY_USAGE_STORE_IF_NONZERO)):0;
-
-
-			if (_get_instanced_node_original_property(name,vorig) || usage) {
-				Variant v = obj->get(name);
-
-
-				bool changed = _is_property_different(v,vorig,usage);
-
-				if ((found!=-1)!=changed) {
-
-					if (changed) {
-
-						has_reload=true;
-
-					} else {
-
-						//p_item->erase_button(1,found);
-					}
-
-				}
-
-			}
-
-		}
-
-		if (!has_reload && !obj->get_script().is_null()) {
-			Ref<Script> scr = obj->get_script();
-			Variant orig_value;
-			if (scr->get_property_default_value(name,orig_value)) {
-				if (orig_value!=obj->get(name)) {
-					has_reload=true;
-				}
-			}
-		}
-
-		if (!has_reload && found!=-1) {
-			p_item->erase_button(1,found);
-		} else if (has_reload && found==-1) {
-			p_item->add_button(1,get_icon("ReloadSmall","EditorIcons"),3);
-		}
-#endif
 		Dictionary d = p_item->get_metadata(0);
 		set_item_text(p_item, d["type"], d["name"], d["hint"], d["hint_text"]);
 	}
@@ -2859,52 +2727,13 @@ void PropertyEditor::update_tree() {
 	TreeItem *root = tree->create_item(NULL);
 	tree->set_hide_root(true);
 
-	/*
-	TreeItem *title = tree->create_item(root);
-
-	title->set_custom_bg_color(0,get_color("prop_section","Editor"));
-	title->set_text(0,"Property"); // todo, fetch name if ID exists in database
-	title->set_editable(0,false);
-	title->set_selectable(0,false);
-	title->set_custom_bg_color(1,get_color("prop_section","Editor"));
-	title->set_text(1,"Value"); // todo, fetch name if ID exists in database
-	title->set_editable(1,false);
-	title->set_selectable(1,false);
-*/
-
-	/*
-	if (obj->cast_to<Node>() || obj->cast_to<Resource>()) {
-		TreeItem *type = tree->create_item(root);
-
-		type->set_text(0,"Type"); // todo, fetch name if ID exists in database
-		type->set_text(1,obj->get_type()); // todo, fetch name if ID exists in database
-		if (has_icon(obj->get_type(),"EditorIcons"))
-			type->set_icon(1,get_icon(obj->get_type(),"EditorIcons") );
-		else
-			type->set_icon(1,get_icon("Object","EditorIcons") );
-
-		type->set_selectable(0,false);
-		type->set_selectable(1,false);
-
-
-		TreeItem *name = tree->create_item(root);
-
-		name->set_text(0,"Name"); // todo, fetch name if ID exists in database
-		if (obj->is_type("Resource"))
-			name->set_text(1,obj->cast_to<Resource>()->get_name());
-		else if (obj->is_type("Node"))
-			name->set_text(1,obj->cast_to<Node>()->get_name());
-		name->set_selectable(0,false);
-		name->set_selectable(1,false);
-	}
-*/
 	List<PropertyInfo> plist;
 	obj->get_property_list(&plist, true);
 
 	bool draw_red = false;
 
 	{
-		Node *nod = obj->cast_to<Node>();
+		Node *nod = Object::cast_to<Node>(obj);
 		Node *es = EditorNode::get_singleton()->get_edited_scene();
 		if (nod && es != nod && nod->get_owner() != es) {
 			draw_red = true;
@@ -2988,9 +2817,8 @@ void PropertyEditor::update_tree() {
 
 				sep->set_tooltip(0, TTR("Class:") + " " + p.name + ":\n\n" + class_descr_cache[type]);
 			}
-			//sep->set_custom_color(0,Color(1,1,1));
-
 			continue;
+
 		} else if (!(p.usage & PROPERTY_USAGE_EDITOR))
 			continue;
 
@@ -3042,12 +2870,7 @@ void PropertyEditor::update_tree() {
 				continue;
 		}
 
-		//printf("property %s\n",basename.ascii().get_data());
 		TreeItem *parent = get_parent_node(path, item_path, root, current_category);
-		/*
-		if (parent->get_parent()==root)
-			parent=root;
-		*/
 		int level = 0;
 		if (parent != root) {
 			level++;
@@ -3067,7 +2890,6 @@ void PropertyEditor::update_tree() {
 
 		if (level > 0) {
 			item->set_custom_bg_color(0, col);
-			//item->set_custom_bg_color(1,col);
 		}
 		item->set_editable(0, false);
 		item->set_selectable(0, property_selectable);
@@ -3129,7 +2951,6 @@ void PropertyEditor::update_tree() {
 				item->set_tooltip(0, TTR("Property:") + " " + p.name + "\n\n" + descr);
 			}
 		}
-		//EditorHelp::get_doc_data();
 
 		Dictionary d;
 		d["name"] = p.name;
@@ -3142,14 +2963,13 @@ void PropertyEditor::update_tree() {
 		item->set_metadata(1, p.name);
 
 		if (draw_red)
-			item->set_custom_color(0, Color(0.8, 0.4, 0.20));
+			item->set_custom_color(0, get_color("error_color", "Editor"));
 
 		if (p.name == selected_property) {
 
 			item->select(1);
 		}
 
-		//printf("property %s type %i\n",p.name.ascii().get_data(),p.type);
 		switch (p.type) {
 
 			case Variant::BOOL: {
@@ -3189,7 +3009,6 @@ void PropertyEditor::update_tree() {
 
 					item->set_cell_mode(1, TreeItem::CELL_MODE_CUSTOM);
 					item->set_editable(1, !read_only);
-					//item->set_icon( 0, get_icon("Curve","EditorIcons"));
 
 					Vector<String> values = p.hint_string.split(",");
 					String flags;
@@ -3218,7 +3037,7 @@ void PropertyEditor::update_tree() {
 				if (p.hint == PROPERTY_HINT_SPRITE_FRAME || p.hint == PROPERTY_HINT_RANGE || p.hint == PROPERTY_HINT_EXP_RANGE) {
 
 					int c = p.hint_string.get_slice_count(",");
-					float min = 0, max = 100, step = 1;
+					float min = 0, max = 100, step = p.type == Variant::REAL ? .01 : 1;
 					if (c >= 1) {
 
 						min = p.hint_string.get_slice(",", 0).to_double();
@@ -3236,7 +3055,6 @@ void PropertyEditor::update_tree() {
 					item->set_range_config(1, min, max, step, p.hint == PROPERTY_HINT_EXP_RANGE);
 				} else if (p.hint == PROPERTY_HINT_ENUM) {
 
-					//int c = p.hint_string.get_slice_count(",");
 					item->set_text(1, p.hint_string);
 					if (show_type_icons)
 						item->set_icon(0, get_icon("Enum", "EditorIcons"));
@@ -3245,7 +3063,6 @@ void PropertyEditor::update_tree() {
 					break;
 				} else if (p.hint == PROPERTY_HINT_OBJECT_ID) {
 
-					//int c = p.hint_string.get_slice_count(",");
 					item->set_cell_mode(1, TreeItem::CELL_MODE_CUSTOM);
 
 					String type = p.hint_string;
@@ -3554,13 +3371,13 @@ void PropertyEditor::update_tree() {
 					item->set_icon(0, get_icon("Plane", "EditorIcons"));
 
 			} break;
-			case Variant::RECT3: {
+			case Variant::AABB: {
 
 				item->set_cell_mode(1, TreeItem::CELL_MODE_CUSTOM);
 				item->set_editable(1, true);
-				item->set_text(1, "Rect3");
+				item->set_text(1, "AABB");
 				if (show_type_icons)
-					item->set_icon(0, get_icon("Rect3", "EditorIcons"));
+					item->set_icon(0, get_icon("AABB", "EditorIcons"));
 			} break;
 
 			case Variant::QUAT: {
@@ -3576,7 +3393,6 @@ void PropertyEditor::update_tree() {
 
 				item->set_cell_mode(1, TreeItem::CELL_MODE_CUSTOM);
 				item->set_editable(1, !read_only);
-				//item->set_text(1,obj->get(p.name));
 				item->set_custom_draw(1, this, "_draw_transparency");
 				if (show_type_icons)
 					item->set_icon(0, get_icon("Color", "EditorIcons"));
@@ -3595,14 +3411,22 @@ void PropertyEditor::update_tree() {
 
 				item->set_cell_mode(1, TreeItem::CELL_MODE_CUSTOM);
 				item->set_editable(1, !read_only);
-				//item->add_button(1, get_icon("EditResource", "EditorIcons"));
 				String type;
 				if (p.hint == PROPERTY_HINT_RESOURCE_TYPE)
 					type = p.hint_string;
 
 				RES res = obj->get(p.name).operator RefPtr();
 
-				if (obj->get(p.name).get_type() == Variant::NIL || res.is_null()) {
+				Ref<EncodedObjectAsID> encoded = obj->get(p.name); //for debugger and remote tools
+
+				if (encoded.is_valid()) {
+
+					item->set_text(1, "Object: " + itos(encoded->get_object_id()));
+					item->set_icon(1, Ref<Texture>());
+					item->set_custom_as_button(1, true);
+					item->set_editable(1, true);
+
+				} else if (obj->get(p.name).get_type() == Variant::NIL || res.is_null()) {
 					item->set_text(1, "<null>");
 					item->set_icon(1, Ref<Texture>());
 					item->set_custom_as_button(1, false);
@@ -3651,14 +3475,11 @@ void PropertyEditor::update_tree() {
 				if (type != String()) {
 					if (type.find(",") != -1)
 						type = type.get_slice(",", 0);
-					//printf("prop %s , type %s\n",p.name.ascii().get_data(),p.hint_string.ascii().get_data());
 					if (has_icon(type, "EditorIcons"))
 						item->set_icon(0, get_icon(type, "EditorIcons"));
 					else
 						item->set_icon(0, get_icon("Object", "EditorIcons"));
 				}
-
-				//item->double_click_signal.connect( Method1<int>( Method2<int,String>( this, &Editoritem_obj_edited ), p.name ) );
 
 			} break;
 			default: {};
@@ -3686,7 +3507,6 @@ void PropertyEditor::update_tree() {
 				Variant v = obj->get(p.name);
 
 				if (_is_property_different(v, vorig, usage)) {
-					//print_line("FOR "+String(p.name)+" RELOAD WITH: "+String(v)+"("+Variant::get_type_name(v.get_type())+")=="+String(vorig)+"("+Variant::get_type_name(vorig.get_type())+")");
 					item->add_button(1, get_icon("ReloadSmall", "EditorIcons"), 3);
 					has_reload = true;
 				}
@@ -3718,19 +3538,19 @@ void PropertyEditor::update_tree() {
 
 void PropertyEditor::_draw_transparency(Object *t, const Rect2 &p_rect) {
 
-	TreeItem *ti = t->cast_to<TreeItem>();
+	TreeItem *ti = Object::cast_to<TreeItem>(t);
 	if (!ti)
 		return;
 
 	Color color = obj->get(ti->get_metadata(1));
-	Ref<Texture> arrow = tree->get_icon("select_arrow");
+	Ref<Texture> arrow = tree->get_icon("select_option");
 
 	// make a little space between consecutive color fields
 	Rect2 area = p_rect;
 	area.position.y += 1;
 	area.size.height -= 2;
 	area.size.width -= arrow->get_size().width + 5;
-	tree->draw_texture_rect(get_icon("Transparent", "EditorIcons"), area, true);
+	tree->draw_texture_rect(get_icon("GuiMiniCheckerboard", "EditorIcons"), area, true);
 	tree->draw_rect(area, color);
 }
 
@@ -3739,7 +3559,7 @@ void PropertyEditor::_item_folded(Object *item_obj) {
 	if (updating_folding)
 		return;
 
-	TreeItem *item = item_obj->cast_to<TreeItem>();
+	TreeItem *item = Object::cast_to<TreeItem>(item_obj);
 
 	obj->editor_set_section_unfold(item->get_metadata(0), !item->is_collapsed());
 }
@@ -3765,7 +3585,7 @@ void PropertyEditor::_edit_set(const String &p_name, const Variant &p_value, boo
 		}
 	}
 
-	if (!undo_redo || obj->cast_to<ArrayPropertyEdit>()) { //kind of hacky
+	if (!undo_redo || Object::cast_to<ArrayPropertyEdit>(obj)) { //kind of hacky
 
 		obj->set(p_name, p_value);
 		if (p_refresh_all)
@@ -3775,9 +3595,9 @@ void PropertyEditor::_edit_set(const String &p_name, const Variant &p_value, boo
 
 		emit_signal(_prop_edited, p_name);
 
-	} else if (obj->cast_to<MultiNodeEdit>()) {
+	} else if (Object::cast_to<MultiNodeEdit>(obj)) {
 
-		obj->cast_to<MultiNodeEdit>()->set_property_field(p_name, p_value, p_changed_field);
+		Object::cast_to<MultiNodeEdit>(obj)->set_property_field(p_name, p_value, p_changed_field);
 		_changed_callbacks(obj, p_name);
 		emit_signal(_prop_edited, p_name);
 	} else {
@@ -3795,7 +3615,7 @@ void PropertyEditor::_edit_set(const String &p_name, const Variant &p_value, boo
 			undo_redo->add_undo_method(this, "_changed_callback", obj, p_name);
 		}
 
-		Resource *r = obj->cast_to<Resource>();
+		Resource *r = Object::cast_to<Resource>(obj);
 		if (r) {
 			if (!r->is_edited() && String(p_name) != "resource/edited") {
 				undo_redo->add_do_method(r, "set_edited", true);
@@ -3898,7 +3718,7 @@ void PropertyEditor::_item_edited() {
 				_edit_set(name, item->get_text(1), refresh_all);
 			}
 		} break;
-		// math types
+			// math types
 
 		case Variant::VECTOR3: {
 
@@ -3909,7 +3729,7 @@ void PropertyEditor::_item_edited() {
 		case Variant::QUAT: {
 
 		} break;
-		case Variant::RECT3: {
+		case Variant::AABB: {
 
 		} break;
 		case Variant::BASIS: {
@@ -3918,9 +3738,8 @@ void PropertyEditor::_item_edited() {
 		case Variant::TRANSFORM: {
 
 		} break;
-
 		case Variant::COLOR: {
-			//_edit_set(name,item->get_custom_bg_color(0));
+
 		} break;
 
 		case Variant::NODE_PATH: {
@@ -3930,6 +3749,13 @@ void PropertyEditor::_item_edited() {
 		case Variant::OBJECT: {
 			if (!item->is_custom_set_as_button(1))
 				break;
+
+			Ref<EncodedObjectAsID> encoded = obj->get(name); //for debugger and remote tools
+
+			if (encoded.is_valid()) {
+
+				emit_signal("object_id_selected", encoded->get_object_id());
+			}
 
 			RES res = obj->get(name);
 			if (res.is_valid()) {
@@ -3999,7 +3825,6 @@ void PropertyEditor::_custom_editor_request(bool p_arrow) {
 	ERR_FAIL_COND(!item);
 	Dictionary d = item->get_metadata(0);
 
-	//int type=d["type"];
 	String name = d["name"];
 	Variant::Type type = Variant::NIL;
 	if (d.has("type"))
@@ -4039,7 +3864,7 @@ void PropertyEditor::edit(Object *p_object) {
 
 void PropertyEditor::_set_range_def(Object *p_item, String prop, float p_frame) {
 
-	TreeItem *ti = p_item->cast_to<TreeItem>();
+	TreeItem *ti = Object::cast_to<TreeItem>(p_item);
 	ERR_FAIL_COND(!ti);
 
 	ti->call_deferred("set_range", 1, p_frame);
@@ -4047,7 +3872,8 @@ void PropertyEditor::_set_range_def(Object *p_item, String prop, float p_frame) 
 }
 
 void PropertyEditor::_edit_button(Object *p_item, int p_column, int p_button) {
-	TreeItem *ti = p_item->cast_to<TreeItem>();
+
+	TreeItem *ti = Object::cast_to<TreeItem>(p_item);
 	ERR_FAIL_COND(!ti);
 
 	Dictionary d = ti->get_metadata(0);
@@ -4064,7 +3890,6 @@ void PropertyEditor::_edit_button(Object *p_item, int p_column, int p_button) {
 			return;
 		String prop = d["name"];
 		emit_signal("property_keyed", prop, obj->get(prop), true);
-		//set_range(p_column, ti->get_range(p_column)+1.0 );
 		call_deferred("_set_range_def", ti, prop, ti->get_range(p_column) + 1.0);
 	} else if (p_button == 3) {
 
@@ -4125,7 +3950,6 @@ void PropertyEditor::_edit_button(Object *p_item, int p_column, int p_button) {
 
 			Variant v = obj->get(n);
 			custom_editor->edit(obj, n, (Variant::Type)t, v, h, ht);
-			//Rect2 where=tree->get_custom_popup_rect();
 			if (h == PROPERTY_HINT_FILE || h == PROPERTY_HINT_DIR || h == PROPERTY_HINT_GLOBAL_DIR || h == PROPERTY_HINT_GLOBAL_FILE) {
 
 				Rect2 where = tree->get_item_rect(ti, 1);
@@ -4147,7 +3971,6 @@ void PropertyEditor::_edit_button(Object *p_item, int p_column, int p_button) {
 		} else if (t == Variant::INT && h == PROPERTY_HINT_OBJECT_ID) {
 
 			emit_signal("object_id_selected", obj->get(n));
-			print_line("OBJ ID SELECTED");
 
 		} else if (t == Variant::ARRAY || t == Variant::POOL_INT_ARRAY || t == Variant::POOL_REAL_ARRAY || t == Variant::POOL_STRING_ARRAY || t == Variant::POOL_VECTOR2_ARRAY || t == Variant::POOL_VECTOR3_ARRAY || t == Variant::POOL_COLOR_ARRAY || t == Variant::POOL_BYTE_ARRAY) {
 
@@ -4169,7 +3992,6 @@ void PropertyEditor::_edit_button(Object *p_item, int p_column, int p_button) {
 void PropertyEditor::_node_removed(Node *p_node) {
 
 	if (p_node == obj) {
-
 		edit(NULL);
 	}
 }
@@ -4183,9 +4005,9 @@ void PropertyEditor::set_keying(bool p_active) {
 	update_tree();
 }
 
-void PropertyEditor::_draw_flags(Object *t, const Rect2 &p_rect) {
+void PropertyEditor::_draw_flags(Object *p_object, const Rect2 &p_rect) {
 
-	TreeItem *ti = t->cast_to<TreeItem>();
+	TreeItem *ti = Object::cast_to<TreeItem>(p_object);
 	if (!ti)
 		return;
 
@@ -4237,7 +4059,7 @@ void PropertyEditor::_resource_preview_done(const String &p_path, const Ref<Text
 	if (!obj)
 		return;
 
-	TreeItem *ti = obj->cast_to<TreeItem>();
+	TreeItem *ti = Object::cast_to<TreeItem>(obj);
 
 	ERR_FAIL_COND(!ti);
 
@@ -4343,7 +4165,7 @@ void PropertyEditor::set_use_filter(bool p_use) {
 void PropertyEditor::register_text_enter(Node *p_line_edit) {
 
 	ERR_FAIL_NULL(p_line_edit);
-	search_box = p_line_edit->cast_to<LineEdit>();
+	search_box = Object::cast_to<LineEdit>(p_line_edit);
 
 	if (search_box)
 		search_box->connect("text_changed", this, "_filter_changed");
@@ -4401,8 +4223,6 @@ PropertyEditor::PropertyEditor() {
 	tree->set_column_min_width(0, 30);
 	tree->set_column_expand(1, true);
 	tree->set_column_min_width(1, 18);
-
-	//tree->set_hide_root(true);
 	add_child(tree);
 
 	tree->connect("item_edited", this, "_item_edited", varray(), CONNECT_DEFERRED);
@@ -4412,7 +4232,7 @@ PropertyEditor::PropertyEditor() {
 
 	tree->set_drag_forwarding(this);
 
-	set_fixed_process(true);
+	set_physics_process(true);
 
 	custom_editor = memnew(CustomPropertyEditor);
 	add_child(custom_editor);
@@ -4442,7 +4262,7 @@ PropertyEditor::PropertyEditor() {
 	use_filter = false;
 	subsection_selectable = false;
 	property_selectable = false;
-	show_type_icons = EDITOR_DEF("interface/show_type_icons", false);
+	show_type_icons = false; // maybe one day will return.
 }
 
 PropertyEditor::~PropertyEditor() {
@@ -4471,7 +4291,6 @@ class SectionedPropertyEditorFilter : public Object {
 
 		bool valid;
 		edited->set(name, p_value, &valid);
-		//_change_notify(p_name.operator String().utf8().get_data());
 		return valid;
 	}
 
@@ -4766,19 +4585,19 @@ double PropertyValueEvaluator::eval(const String &p_text) {
 		return _default_eval(p_text);
 	}
 
-	ScriptInstance *script_instance = script->instance_create(this);
+	Object dummy;
+	ScriptInstance *script_instance = script->instance_create(&dummy);
 	if (!script_instance)
 		return _default_eval(p_text);
 
 	Variant::CallError call_err;
-	script_instance->call("set_this", obj);
-	double result = script_instance->call("e", NULL, 0, call_err);
+	Variant arg = obj;
+	const Variant *args[] = { &arg };
+	double result = script_instance->call("eval", args, 1, call_err);
 	if (call_err.error == Variant::CallError::CALL_OK) {
 		return result;
 	}
 	print_line("[PropertyValueEvaluator]: Error eval! Error code: " + itos(call_err.error));
-
-	memdelete(script_instance);
 
 	return _default_eval(p_text);
 }
@@ -4788,9 +4607,7 @@ void PropertyValueEvaluator::edit(Object *p_obj) {
 }
 
 String PropertyValueEvaluator::_build_script(const String &p_text) {
-	String script_text = "tool\nvar this\nfunc set_this(p_this):\n\tthis=p_this\nfunc e():\n\treturn ";
-	script_text += p_text.strip_edges();
-	script_text += "\n";
+	String script_text = "tool\nextends Object\nfunc eval(s):\n\tself = s\n\treturn " + p_text.strip_edges() + "\n";
 	return script_text;
 }
 

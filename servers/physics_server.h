@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -71,16 +71,16 @@ public:
 
 	virtual int get_contact_count() const = 0;
 
-	virtual Vector3 get_contact_local_pos(int p_contact_idx) const = 0;
+	virtual Vector3 get_contact_local_position(int p_contact_idx) const = 0;
 	virtual Vector3 get_contact_local_normal(int p_contact_idx) const = 0;
 	virtual int get_contact_local_shape(int p_contact_idx) const = 0;
 
 	virtual RID get_contact_collider(int p_contact_idx) const = 0;
-	virtual Vector3 get_contact_collider_pos(int p_contact_idx) const = 0;
+	virtual Vector3 get_contact_collider_position(int p_contact_idx) const = 0;
 	virtual ObjectID get_contact_collider_id(int p_contact_idx) const = 0;
 	virtual Object *get_contact_collider_object(int p_contact_idx) const;
 	virtual int get_contact_collider_shape(int p_contact_idx) const = 0;
-	virtual Vector3 get_contact_collider_velocity_at_pos(int p_contact_idx) const = 0;
+	virtual Vector3 get_contact_collider_velocity_at_position(int p_contact_idx) const = 0;
 
 	virtual real_t get_step() const = 0;
 	virtual void integrate_forces();
@@ -96,6 +96,7 @@ class PhysicsShapeQueryParameters : public Reference {
 
 	GDCLASS(PhysicsShapeQueryParameters, Reference);
 	friend class PhysicsDirectSpaceState;
+
 	RID shape;
 	Transform transform;
 	float margin;
@@ -133,8 +134,6 @@ class PhysicsDirectSpaceState : public Object {
 
 	GDCLASS(PhysicsDirectSpaceState, Object);
 
-	//Variant _intersect_ray(const Vector3& p_from, const Vector3& p_to,const Vector<RID>& p_exclude=Vector<RID>(),uint32_t p_collision_mask=0);
-	//Variant _intersect_shape(const RID& p_shape, const Transform& p_xform,int p_result_max=64,const Vector<RID>& p_exclude=Vector<RID>(),uint32_t p_collision_mask=0);
 public:
 	enum ObjectTypeMask {
 		TYPE_MASK_STATIC_BODY = 1 << 0,
@@ -200,6 +199,8 @@ public:
 
 	PhysicsDirectSpaceState();
 };
+
+VARIANT_ENUM_CAST(PhysicsDirectSpaceState::ObjectTypeMask);
 
 class PhysicsShapeQueryResult : public Reference {
 
@@ -275,7 +276,7 @@ public:
 	virtual void space_set_param(RID p_space, SpaceParameter p_param, real_t p_value) = 0;
 	virtual real_t space_get_param(RID p_space, SpaceParameter p_param) const = 0;
 
-	// this function only works on fixed process, errors and returns null otherwise
+	// this function only works on physics process, errors and returns null otherwise
 	virtual PhysicsDirectSpaceState *space_get_direct_state(RID p_space) = 0;
 
 	virtual void space_set_debug_contacts(RID p_space, int p_max_contacts) = 0;
@@ -356,7 +357,7 @@ public:
 		BODY_MODE_STATIC,
 		BODY_MODE_KINEMATIC,
 		BODY_MODE_RIGID,
-		//BODY_MODE_SOFT
+		BODY_MODE_SOFT,
 		BODY_MODE_CHARACTER
 	};
 
@@ -409,6 +410,9 @@ public:
 
 	virtual void body_set_param(RID p_body, BodyParameter p_param, float p_value) = 0;
 	virtual float body_get_param(RID p_body, BodyParameter p_param) const = 0;
+
+	virtual void body_set_kinematic_safe_margin(RID p_body, real_t p_margin) = 0;
+	virtual real_t body_get_kinematic_safe_margin(RID p_body) const = 0;
 
 	//state
 	enum BodyState {
@@ -463,6 +467,9 @@ public:
 	virtual void body_set_ray_pickable(RID p_body, bool p_enable) = 0;
 	virtual bool body_is_ray_pickable(RID p_body) const = 0;
 
+	// this function only works on physics process, errors and returns null otherwise
+	virtual PhysicsDirectBodyState *body_get_direct_state(RID p_body) = 0;
+
 	struct MotionResult {
 
 		Vector3 motion;
@@ -478,7 +485,7 @@ public:
 		Variant collider_metadata;
 	};
 
-	virtual bool body_test_motion(RID p_body, const Transform &p_from, const Vector3 &p_motion, float p_margin = 0.001, MotionResult *r_result = NULL) = 0;
+	virtual bool body_test_motion(RID p_body, const Transform &p_from, const Vector3 &p_motion, MotionResult *r_result = NULL) = 0;
 
 	/* JOINT API */
 
@@ -623,37 +630,6 @@ public:
 	virtual void generic_6dof_joint_set_flag(RID p_joint, Vector3::Axis, G6DOFJointAxisFlag p_flag, bool p_enable) = 0;
 	virtual bool generic_6dof_joint_get_flag(RID p_joint, Vector3::Axis, G6DOFJointAxisFlag p_flag) = 0;
 
-#if 0
-	enum JointType {
-
-		JOINT_PIN,
-		JOINT_GROOVE,
-		JOINT_DAMPED_SPRING
-	};
-
-	enum JointParam {
-		JOINT_PARAM_BIAS,
-		JOINT_PARAM_MAX_BIAS,
-		JOINT_PARAM_MAX_FORCE,
-	};
-
-	virtual void joint_set_param(RID p_joint, JointParam p_param, real_t p_value)=0;
-	virtual real_t joint_get_param(RID p_joint,JointParam p_param) const=0;
-
-	virtual RID pin_joint_create(const Vector3& p_anchor,RID p_body_a,RID p_body_b=RID())=0;
-	virtual RID groove_joint_create(const Vector3& p_a_groove1,const Vector3& p_a_groove2, const Vector3& p_b_anchor, RID p_body_a,RID p_body_b)=0;
-	virtual RID damped_spring_joint_create(const Vector3& p_anchor_a,const Vector3& p_anchor_b,RID p_body_a,RID p_body_b=RID())=0;
-
-	enum DampedStringParam {
-		DAMPED_STRING_REST_LENGTH,
-		DAMPED_STRING_STIFFNESS,
-		DAMPED_STRING_DAMPING
-	};
-	virtual void damped_string_joint_set_param(RID p_joint, DampedStringParam p_param, real_t p_value)=0;
-	virtual real_t damped_string_joint_get_param(RID p_joint, DampedStringParam p_param) const=0;
-
-	virtual JointType joint_get_type(RID p_joint) const=0;
-#endif
 	/* QUERY API */
 
 	enum AreaBodyStatus {
@@ -685,6 +661,43 @@ public:
 	~PhysicsServer();
 };
 
+typedef PhysicsServer *(*CreatePhysicsServerCallback)();
+
+class PhysicsServerManager {
+	struct ClassInfo {
+		String name;
+		CreatePhysicsServerCallback create_callback;
+
+		ClassInfo()
+			: name(""), create_callback(NULL) {}
+
+		ClassInfo(String p_name, CreatePhysicsServerCallback p_create_callback)
+			: name(p_name), create_callback(p_create_callback) {}
+
+		ClassInfo(const ClassInfo &p_ci)
+			: name(p_ci.name), create_callback(p_ci.create_callback) {}
+	};
+
+	static Vector<ClassInfo> physics_servers;
+	static int default_server_id;
+	static int default_server_priority;
+
+public:
+	static const String setting_property_name;
+
+private:
+	static void on_servers_changed();
+
+public:
+	static void register_server(const String &p_name, CreatePhysicsServerCallback p_creat_callback);
+	static void set_default_server(const String &p_name, int p_priority = 0);
+	static int find_server_id(const String &p_name);
+	static int get_servers_count();
+	static String get_server_name(int p_id);
+	static PhysicsServer *new_default_server();
+	static PhysicsServer *new_server(const String &p_name);
+};
+
 VARIANT_ENUM_CAST(PhysicsServer::ShapeType);
 VARIANT_ENUM_CAST(PhysicsServer::SpaceParameter);
 VARIANT_ENUM_CAST(PhysicsServer::AreaParameter);
@@ -701,7 +714,6 @@ VARIANT_ENUM_CAST(PhysicsServer::SliderJointParam);
 VARIANT_ENUM_CAST(PhysicsServer::ConeTwistJointParam);
 VARIANT_ENUM_CAST(PhysicsServer::G6DOFJointAxisParam);
 VARIANT_ENUM_CAST(PhysicsServer::G6DOFJointAxisFlag);
-//VARIANT_ENUM_CAST( PhysicsServer::ObjectType );
 VARIANT_ENUM_CAST(PhysicsServer::AreaBodyStatus);
 VARIANT_ENUM_CAST(PhysicsServer::ProcessInfo);
 

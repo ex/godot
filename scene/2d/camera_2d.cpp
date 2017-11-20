@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -38,7 +38,7 @@ void Camera2D::_update_scroll() {
 	if (!is_inside_tree())
 		return;
 
-	if (get_tree()->is_editor_hint()) {
+	if (Engine::get_singleton()->is_editor_hint()) {
 		update(); //will just be drawn
 		return;
 	}
@@ -52,7 +52,11 @@ void Camera2D::_update_scroll() {
 		if (viewport) {
 			viewport->set_canvas_transform(xform);
 		}
-		get_tree()->call_group_flags(SceneTree::GROUP_CALL_REALTIME, group_name, "_camera_moved", xform);
+
+		Size2 screen_size = viewport->get_visible_rect().size;
+		Point2 screen_offset = (anchor_mode == ANCHOR_MODE_DRAG_CENTER ? (screen_size * 0.5) : Point2());
+
+		get_tree()->call_group_flags(SceneTree::GROUP_CALL_REALTIME, group_name, "_camera_moved", xform, screen_offset);
 	};
 }
 
@@ -85,7 +89,7 @@ Transform2D Camera2D::get_camera_transform() {
 
 		if (anchor_mode == ANCHOR_MODE_DRAG_CENTER) {
 
-			if (h_drag_enabled && !get_tree()->is_editor_hint()) {
+			if (h_drag_enabled && !Engine::get_singleton()->is_editor_hint()) {
 				camera_pos.x = MIN(camera_pos.x, (new_camera_pos.x + screen_size.x * 0.5 * drag_margin[MARGIN_RIGHT]));
 				camera_pos.x = MAX(camera_pos.x, (new_camera_pos.x - screen_size.x * 0.5 * drag_margin[MARGIN_LEFT]));
 			} else {
@@ -97,7 +101,7 @@ Transform2D Camera2D::get_camera_transform() {
 				}
 			}
 
-			if (v_drag_enabled && !get_tree()->is_editor_hint()) {
+			if (v_drag_enabled && !Engine::get_singleton()->is_editor_hint()) {
 
 				camera_pos.y = MIN(camera_pos.y, (new_camera_pos.y + screen_size.y * 0.5 * drag_margin[MARGIN_BOTTOM]));
 				camera_pos.y = MAX(camera_pos.y, (new_camera_pos.y - screen_size.y * 0.5 * drag_margin[MARGIN_TOP]));
@@ -136,9 +140,9 @@ Transform2D Camera2D::get_camera_transform() {
 				camera_pos.y -= screen_rect.position.y - limit[MARGIN_TOP];
 		}
 
-		if (smoothing_enabled && !get_tree()->is_editor_hint()) {
+		if (smoothing_enabled && !Engine::get_singleton()->is_editor_hint()) {
 
-			float c = smoothing * get_fixed_process_delta_time();
+			float c = smoothing * get_physics_process_delta_time();
 			smoothed_camera_pos = ((camera_pos - smoothed_camera_pos) * c) + smoothed_camera_pos;
 			ret_camera_pos = smoothed_camera_pos;
 			//camera_pos=camera_pos*(1.0-smoothing)+new_camera_pos*smoothing;
@@ -212,14 +216,14 @@ void Camera2D::_notification(int p_what) {
 
 	switch (p_what) {
 
-		case NOTIFICATION_FIXED_PROCESS: {
+		case NOTIFICATION_PHYSICS_PROCESS: {
 
 			_update_scroll();
 
 		} break;
 		case NOTIFICATION_TRANSFORM_CHANGED: {
 
-			if (!is_fixed_processing())
+			if (!is_physics_processing())
 				_update_scroll();
 
 		} break;
@@ -240,8 +244,8 @@ void Camera2D::_notification(int p_what) {
 			add_to_group(group_name);
 			add_to_group(canvas_group_name);
 
-			if (get_tree()->is_editor_hint()) {
-				set_fixed_process(false);
+			if (Engine::get_singleton()->is_editor_hint()) {
+				set_physics_process(false);
 			}
 
 			_update_scroll();
@@ -262,7 +266,7 @@ void Camera2D::_notification(int p_what) {
 		} break;
 		case NOTIFICATION_DRAW: {
 
-			if (!is_inside_tree() || !get_tree()->is_editor_hint())
+			if (!is_inside_tree() || !Engine::get_singleton()->is_editor_hint())
 				break;
 
 			if (screen_drawing_enabled) {
@@ -452,7 +456,7 @@ float Camera2D::get_drag_margin(Margin p_margin) const {
 	return drag_margin[p_margin];
 }
 
-Vector2 Camera2D::get_camera_pos() const {
+Vector2 Camera2D::get_camera_position() const {
 
 	return camera_pos;
 }
@@ -497,10 +501,10 @@ void Camera2D::align() {
 void Camera2D::set_follow_smoothing(float p_speed) {
 
 	smoothing = p_speed;
-	if (smoothing > 0 && !(is_inside_tree() && get_tree()->is_editor_hint()))
-		set_fixed_process(true);
+	if (smoothing > 0 && !(is_inside_tree() && Engine::get_singleton()->is_editor_hint()))
+		set_physics_process(true);
 	else
-		set_fixed_process(false);
+		set_physics_process(false);
 }
 
 float Camera2D::get_follow_smoothing() const {
@@ -552,11 +556,11 @@ float Camera2D::get_h_offset() const {
 	return h_ofs;
 }
 
-void Camera2D::_set_old_smoothing(float p_val) {
+void Camera2D::_set_old_smoothing(float p_enable) {
 	//compatibility
-	if (p_val > 0) {
+	if (p_enable > 0) {
 		smoothing_enabled = true;
-		set_follow_smoothing(p_val);
+		set_follow_smoothing(p_enable);
 	}
 }
 
@@ -577,7 +581,7 @@ void Camera2D::set_custom_viewport(Node *p_viewport) {
 		remove_from_group(canvas_group_name);
 	}
 
-	custom_viewport = p_viewport->cast_to<Viewport>();
+	custom_viewport = Object::cast_to<Viewport>(p_viewport);
 
 	if (custom_viewport) {
 		custom_viewport_id = custom_viewport->get_instance_id();
@@ -673,7 +677,7 @@ void Camera2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_drag_margin", "margin", "drag_margin"), &Camera2D::set_drag_margin);
 	ClassDB::bind_method(D_METHOD("get_drag_margin", "margin"), &Camera2D::get_drag_margin);
 
-	ClassDB::bind_method(D_METHOD("get_camera_pos"), &Camera2D::get_camera_pos);
+	ClassDB::bind_method(D_METHOD("get_camera_position"), &Camera2D::get_camera_position);
 	ClassDB::bind_method(D_METHOD("get_camera_screen_center"), &Camera2D::get_camera_screen_center);
 
 	ClassDB::bind_method(D_METHOD("set_zoom", "zoom"), &Camera2D::set_zoom);
@@ -735,8 +739,8 @@ void Camera2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editor_draw_limits"), "set_limit_drawing_enabled", "is_limit_drawing_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editor_draw_drag_margin"), "set_margin_drawing_enabled", "is_margin_drawing_enabled");
 
-	BIND_CONSTANT(ANCHOR_MODE_DRAG_CENTER);
-	BIND_CONSTANT(ANCHOR_MODE_FIXED_TOP_LEFT);
+	BIND_ENUM_CONSTANT(ANCHOR_MODE_FIXED_TOP_LEFT);
+	BIND_ENUM_CONSTANT(ANCHOR_MODE_DRAG_CENTER);
 }
 
 Camera2D::Camera2D() {

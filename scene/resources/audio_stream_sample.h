@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -71,8 +71,8 @@ public:
 
 	virtual int get_loop_count() const; //times it looped
 
-	virtual float get_pos() const;
-	virtual void seek_pos(float p_time);
+	virtual float get_playback_position() const;
+	virtual void seek(float p_time);
 
 	virtual void mix(AudioFrame *p_buffer, float p_rate_scale, int p_frames);
 

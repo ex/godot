@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -137,7 +137,7 @@ public:
 	void set_custom_viewport(Node *p_viewport);
 	Node *get_custom_viewport() const;
 
-	Vector2 get_camera_pos() const;
+	Vector2 get_camera_position() const;
 	void force_update_scroll();
 	void reset_smoothing();
 	void align();

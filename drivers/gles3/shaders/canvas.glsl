@@ -105,20 +105,26 @@ VERTEX_SHADER_GLOBALS
 
 void main() {
 
-	vec4 vertex_color = color_attrib;
+	vec4 color = color_attrib;
 
 #ifdef USE_INSTANCING
 	mat4 extra_matrix2 = extra_matrix * transpose(mat4(instance_xform0,instance_xform1,instance_xform2,vec4(0.0,0.0,0.0,1.0)));
-	vertex_color*=instance_color;
+	color*=instance_color;
+	vec4 instance_custom = instance_custom_data;
+
 #else
 	mat4 extra_matrix2 = extra_matrix;
+	vec4 instance_custom = vec4(0.0);
 #endif
 
 #ifdef USE_TEXTURE_RECT
 
-
-	uv_interp = src_rect.xy + abs(src_rect.zw) * vertex;
-	highp vec4 outvec = vec4(dst_rect.xy + dst_rect.zw * mix(vertex,vec2(1.0,1.0)-vertex,lessThan(src_rect.zw,vec2(0.0,0.0))),0.0,1.0);
+	if (dst_rect.z < 0.0) { // Transpose is encoded as negative dst_rect.z
+		uv_interp = src_rect.xy + abs(src_rect.zw) * vertex.yx;
+	} else {
+		uv_interp = src_rect.xy + abs(src_rect.zw) * vertex;
+	}
+	highp vec4 outvec = vec4(dst_rect.xy + abs(dst_rect.zw) * mix(vertex,vec2(1.0,1.0)-vertex,lessThan(src_rect.zw,vec2(0.0,0.0))),0.0,1.0);
 
 #else
 	uv_interp = uv_attrib;
@@ -132,18 +138,17 @@ void main() {
 
 	//compute h and v frames and adjust UV interp for animation
 	int total_frames = h_frames * v_frames;
-	int frame = min(int(float(total_frames) *instance_custom_data.z),total_frames-1);
+	int frame = min(int(float(total_frames) *instance_custom.z),total_frames-1);
 	float frame_w = 1.0/float(h_frames);
 	float frame_h = 1.0/float(v_frames);
 	uv_interp.x = uv_interp.x * frame_w + frame_w * float(frame % h_frames);
-	uv_interp.y = uv_interp.y * frame_h + frame_h * float(frame / v_frames);
+	uv_interp.y = uv_interp.y * frame_h + frame_h * float(frame / h_frames);
 
 #endif
 
 #define extra_matrix extra_matrix2
 
 {
-	vec2 src_vtx=outvec.xy;
 
 VERTEX_SHADER_CODE
 
@@ -162,7 +167,7 @@ VERTEX_SHADER_CODE
 
 #undef extra_matrix
 
-	color_interp = vertex_color;
+	color_interp = color;
 
 #ifdef USE_PIXEL_SNAP
 
@@ -376,8 +381,7 @@ void main() {
 
 	if (clip_rect_uv) {
 
-		vec2 half_texpixel = color_texpixel_size * 0.5;
-		uv = clamp(uv,src_rect.xy+half_texpixel,src_rect.xy+abs(src_rect.zw)-color_texpixel_size);
+		uv = clamp(uv,src_rect.xy,src_rect.xy+abs(src_rect.zw));
 	}
 
 #endif
@@ -572,6 +576,18 @@ FRAGMENT_SHADER_CODE
 
 #ifdef SHADOW_FILTER_PCF5
 
+		SHADOW_TEST(su+shadowpixel_size*2.0);
+		SHADOW_TEST(su+shadowpixel_size);
+		SHADOW_TEST(su);
+		SHADOW_TEST(su-shadowpixel_size);
+		SHADOW_TEST(su-shadowpixel_size*2.0);
+		shadow_attenuation/=5.0;
+
+#endif
+
+
+#ifdef SHADOW_FILTER_PCF7
+
 		SHADOW_TEST(su+shadowpixel_size*3.0);
 		SHADOW_TEST(su+shadowpixel_size*2.0);
 		SHADOW_TEST(su+shadowpixel_size);
@@ -579,7 +595,7 @@ FRAGMENT_SHADER_CODE
 		SHADOW_TEST(su-shadowpixel_size);
 		SHADOW_TEST(su-shadowpixel_size*2.0);
 		SHADOW_TEST(su-shadowpixel_size*3.0);
-		shadow_attenuation/=5.0;
+		shadow_attenuation/=7.0;
 
 #endif
 
@@ -635,4 +651,3 @@ FRAGMENT_SHADER_CODE
 	frag_color = color;
 
 }
-

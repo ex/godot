@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -46,7 +46,7 @@ Node *SceneTreeEditor::get_scene_node() {
 
 void SceneTreeEditor::_cell_button_pressed(Object *p_item, int p_column, int p_id) {
 
-	TreeItem *item = p_item->cast_to<TreeItem>();
+	TreeItem *item = Object::cast_to<TreeItem>(p_item);
 	ERR_FAIL_COND(!item);
 
 	NodePath np = item->get_metadata(0);
@@ -88,7 +88,7 @@ void SceneTreeEditor::_cell_button_pressed(Object *p_item, int p_column, int p_i
 
 	} else if (p_id == BUTTON_LOCK) {
 
-		if (n->is_class("CanvasItem")) {
+		if (n->is_class("CanvasItem") || n->is_class("Spatial")) {
 			n->set_meta("_edit_lock_", Variant());
 			_update_tree();
 			emit_signal("node_changed");
@@ -185,7 +185,7 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 	if (part_of_subscene) {
 
 		//item->set_selectable(0,marked_selectable);
-		item->set_custom_color(0, get_color("error_color", "Editor").linear_interpolate(get_color("warning_color", "Editor"), 0.4));
+		item->set_custom_color(0, get_color("disabled_font_color", "Editor"));
 
 	} else if (marked.has(p_node)) {
 
@@ -215,9 +215,9 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 		bool has_groups = p_node->has_persistent_groups();
 
 		if (has_connections && has_groups) {
-			item->add_button(0, get_icon("ConnectionAndGroups", "EditorIcons"), BUTTON_SIGNALS, false, TTR("Node has connection(s) and group(s)\nClick to show signals dock."));
+			item->add_button(0, get_icon("SignalsAndGroups", "EditorIcons"), BUTTON_SIGNALS, false, TTR("Node has connection(s) and group(s)\nClick to show signals dock."));
 		} else if (has_connections) {
-			item->add_button(0, get_icon("Connect", "EditorIcons"), BUTTON_SIGNALS, false, TTR("Node has connections.\nClick to show signals dock."));
+			item->add_button(0, get_icon("Signals", "EditorIcons"), BUTTON_SIGNALS, false, TTR("Node has connections.\nClick to show signals dock."));
 		} else if (has_groups) {
 			item->add_button(0, get_icon("Groups", "EditorIcons"), BUTTON_GROUPS, false, TTR("Node is in group(s).\nClick to show groups dock."));
 		}
@@ -265,6 +265,10 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 
 			_update_visibility_color(p_node, item);
 		} else if (p_node->is_class("Spatial")) {
+
+			bool is_locked = p_node->has_meta("_edit_lock_");
+			if (is_locked)
+				item->add_button(0, get_icon("Lock", "EditorIcons"), BUTTON_LOCK, false, TTR("Node is locked.\nClick to unlock"));
 
 			bool v = p_node->call("is_visible");
 			if (v)
@@ -345,7 +349,7 @@ void SceneTreeEditor::_update_visibility_color(Node *p_node, TreeItem *p_item) {
 		Color color(1, 1, 1, 1);
 		bool visible_on_screen = p_node->call("is_visible_in_tree");
 		if (!visible_on_screen) {
-			color = Color(0.6, 0.6, 0.6, 1);
+			color.a = 0.6;
 		}
 		int idx = p_item->get_button_by_id(0, BUTTON_VISIBILITY);
 		p_item->set_button_color(0, idx, color);
@@ -354,7 +358,11 @@ void SceneTreeEditor::_update_visibility_color(Node *p_node, TreeItem *p_item) {
 
 void SceneTreeEditor::_node_script_changed(Node *p_node) {
 
-	_update_tree();
+	if (tree_dirty)
+		return;
+
+	MessageQueue::get_singleton()->push_call(this, "_update_tree");
+	tree_dirty = true;
 	/*
 	changes the order :|
 	TreeItem* item=p_node?_find(tree->get_root(),p_node->get_path()):NULL;
@@ -475,7 +483,7 @@ void SceneTreeEditor::_selected_changed() {
 
 void SceneTreeEditor::_cell_multi_selected(Object *p_object, int p_cell, bool p_selected) {
 
-	TreeItem *item = p_object->cast_to<TreeItem>();
+	TreeItem *item = Object::cast_to<TreeItem>(p_object);
 	ERR_FAIL_COND(!item);
 
 	NodePath np = item->get_metadata(0);
@@ -573,8 +581,10 @@ void SceneTreeEditor::set_selected(Node *p_node, bool p_emit_selected) {
 			selected = NULL;
 		_update_tree();
 		selected = p_node;
-		if (p_emit_selected)
-			emit_signal("node_selected");
+	}
+
+	if (p_emit_selected) {
+		emit_signal("node_selected");
 	}
 }
 
@@ -582,7 +592,7 @@ void SceneTreeEditor::_rename_node(ObjectID p_node, const String &p_name) {
 
 	Object *o = ObjectDB::get_instance(p_node);
 	ERR_FAIL_COND(!o);
-	Node *n = o->cast_to<Node>();
+	Node *n = Object::cast_to<Node>(o);
 	ERR_FAIL_COND(!n);
 	TreeItem *item = _find(tree->get_root(), n->get_path());
 	ERR_FAIL_COND(!item);
@@ -730,7 +740,7 @@ void SceneTreeEditor::_cell_collapsed(Object *p_obj) {
 	if (!can_rename)
 		return;
 
-	TreeItem *ti = p_obj->cast_to<TreeItem>();
+	TreeItem *ti = Object::cast_to<TreeItem>(p_obj);
 	if (!ti)
 		return;
 
@@ -815,11 +825,11 @@ bool SceneTreeEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_d
 	if (!d.has("type"))
 		return false;
 
-	TreeItem *item = tree->get_item_at_pos(p_point);
+	TreeItem *item = tree->get_item_at_position(p_point);
 	if (!item)
 		return false;
 
-	int section = tree->get_drop_section_at_pos(p_point);
+	int section = tree->get_drop_section_at_position(p_point);
 	if (section < -1 || (section == -1 && !item->get_parent()))
 		return false;
 
@@ -858,10 +868,10 @@ void SceneTreeEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data,
 	if (!can_drop_data_fw(p_point, p_data, p_from))
 		return;
 
-	TreeItem *item = tree->get_item_at_pos(p_point);
+	TreeItem *item = tree->get_item_at_position(p_point);
 	if (!item)
 		return;
-	int section = tree->get_drop_section_at_pos(p_point);
+	int section = tree->get_drop_section_at_position(p_point);
 	if (section < -1)
 		return;
 
@@ -948,7 +958,7 @@ void SceneTreeEditor::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("nodes_rearranged", PropertyInfo(Variant::ARRAY, "paths"), PropertyInfo(Variant::NODE_PATH, "to_path"), PropertyInfo(Variant::INT, "type")));
 	ADD_SIGNAL(MethodInfo("files_dropped", PropertyInfo(Variant::POOL_STRING_ARRAY, "files"), PropertyInfo(Variant::NODE_PATH, "to_path"), PropertyInfo(Variant::INT, "type")));
 	ADD_SIGNAL(MethodInfo("script_dropped", PropertyInfo(Variant::STRING, "file"), PropertyInfo(Variant::NODE_PATH, "to_path")));
-	ADD_SIGNAL(MethodInfo("rmb_pressed", PropertyInfo(Variant::VECTOR2, "pos")));
+	ADD_SIGNAL(MethodInfo("rmb_pressed", PropertyInfo(Variant::VECTOR2, "position")));
 
 	ADD_SIGNAL(MethodInfo("open"));
 	ADD_SIGNAL(MethodInfo("open_script"));
@@ -1002,7 +1012,7 @@ SceneTreeEditor::SceneTreeEditor(bool p_label, bool p_can_rename, bool p_can_ope
 
 	warning = memnew(AcceptDialog);
 	add_child(warning);
-	warning->set_title("Node Configuration Warning!");
+	warning->set_title(TTR("Node Configuration Warning!"));
 
 	show_enabled_subscene = false;
 

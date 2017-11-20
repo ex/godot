@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -32,9 +32,9 @@
 
 #include "engine.h"
 #include "image.h"
+#include "io/logger.h"
 #include "list.h"
 #include "os/main_loop.h"
-#include "power.h"
 #include "ustring.h"
 #include "vector.h"
 #include <stdarg.h>
@@ -62,8 +62,21 @@ class OS {
 
 	void *_stack_bottom;
 
+	Logger *_logger;
+
+protected:
+	void _set_logger(Logger *p_logger);
+
 public:
 	typedef void (*ImeCallback)(void *p_inp, String p_text, Point2 p_selection);
+
+	enum PowerState {
+		POWERSTATE_UNKNOWN, /**< cannot determine power status */
+		POWERSTATE_ON_BATTERY, /**< Not plugged in, running on the battery */
+		POWERSTATE_NO_BATTERY, /**< Plugged in, no battery available */
+		POWERSTATE_CHARGING, /**< Plugged in, charging battery */
+		POWERSTATE_CHARGED /**< Plugged in, battery charged */
+	};
 
 	enum RenderThreadMode {
 
@@ -77,13 +90,15 @@ public:
 		bool fullscreen;
 		bool resizable;
 		bool borderless_window;
+		bool maximized;
 		float get_aspect() const { return (float)width / (float)height; }
-		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless_window = false) {
+		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless_window = false, bool p_maximized = false) {
 			width = p_width;
 			height = p_height;
 			fullscreen = p_fullscreen;
 			resizable = p_resizable;
 			borderless_window = p_borderless_window;
+			maximized = p_maximized;
 		}
 	};
 
@@ -96,11 +111,10 @@ protected:
 	virtual int get_video_driver_count() const = 0;
 	virtual const char *get_video_driver_name(int p_driver) const = 0;
 
-	virtual VideoMode get_default_video_mode() const = 0;
-
 	virtual int get_audio_driver_count() const = 0;
 	virtual const char *get_audio_driver_name(int p_driver) const = 0;
 
+	virtual void initialize_logger();
 	virtual void initialize_core() = 0;
 	virtual void initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) = 0;
 
@@ -112,7 +126,7 @@ protected:
 
 	virtual void set_cmdline(const char *p_execpath, const List<String> &p_args);
 
-	void _ensure_data_dir();
+	void _ensure_user_data_dir();
 	virtual bool _check_internal_feature_support(const String &p_feature) = 0;
 
 public:
@@ -120,18 +134,10 @@ public:
 
 	static OS *get_singleton();
 
-	enum ErrorType {
-		ERR_ERROR,
-		ERR_WARNING,
-		ERR_SCRIPT,
-		ERR_SHADER
-	};
+	void print_error(const char *p_function, const char *p_file, int p_line, const char *p_code, const char *p_rationale, Logger::ErrorType p_type = Logger::ERR_ERROR);
+	void print(const char *p_format, ...);
+	void printerr(const char *p_format, ...);
 
-	virtual void print_error(const char *p_function, const char *p_file, int p_line, const char *p_code, const char *p_rationale, ErrorType p_type = ERR_ERROR);
-
-	virtual void print(const char *p_format, ...);
-	virtual void printerr(const char *p_format, ...);
-	virtual void vprint(const char *p_format, va_list p_list, bool p_stderr = false) = 0;
 	virtual void alert(const String &p_alert, const String &p_title = "ALERT!") = 0;
 	virtual String get_stdin_string(bool p_block = true) = 0;
 
@@ -149,7 +155,7 @@ public:
 	virtual void set_mouse_mode(MouseMode p_mode);
 	virtual MouseMode get_mouse_mode() const;
 
-	virtual void warp_mouse_pos(const Point2 &p_to) {}
+	virtual void warp_mouse_position(const Point2 &p_to) {}
 	virtual Point2 get_mouse_position() const = 0;
 	virtual int get_mouse_button_state() const = 0;
 	virtual void set_window_title(const String &p_title) = 0;
@@ -164,9 +170,9 @@ public:
 	virtual int get_screen_count() const { return 1; }
 	virtual int get_current_screen() const { return 0; }
 	virtual void set_current_screen(int p_screen) {}
-	virtual Point2 get_screen_position(int p_screen = 0) const { return Point2(); }
-	virtual Size2 get_screen_size(int p_screen = 0) const { return get_window_size(); }
-	virtual int get_screen_dpi(int p_screen = 0) const { return 72; }
+	virtual Point2 get_screen_position(int p_screen = -1) const { return Point2(); }
+	virtual Size2 get_screen_size(int p_screen = -1) const { return get_window_size(); }
+	virtual int get_screen_dpi(int p_screen = -1) const { return 72; }
 	virtual Point2 get_window_position() const { return Vector2(); }
 	virtual void set_window_position(const Point2 &p_position) {}
 	virtual Size2 get_window_size() const = 0;
@@ -196,9 +202,8 @@ public:
 	virtual void set_low_processor_usage_mode(bool p_enabled);
 	virtual bool is_in_low_processor_usage_mode() const;
 
-	virtual String get_installed_templates_path() const { return ""; }
 	virtual String get_executable_path() const;
-	virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL) = 0;
+	virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL, bool read_stderr = false) = 0;
 	virtual Error kill(const ProcessID &p_pid) = 0;
 	virtual int get_process_id() const;
 
@@ -277,7 +282,12 @@ public:
 
 	virtual bool can_draw() const = 0;
 
+	virtual bool is_userfs_persistent() const { return true; }
+
 	bool is_stdout_verbose() const;
+
+	virtual void disable_crash_handler() {}
+	virtual bool is_disable_crash_handler() const { return false; }
 
 	enum CursorShape {
 		CURSOR_ARROW,
@@ -304,6 +314,9 @@ public:
 	virtual void show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2());
 	virtual void hide_virtual_keyboard();
 
+	// returns height of the currently shown virtual keyboard (0 if keyboard is hidden)
+	virtual int get_virtual_keyboard_height() const;
+
 	virtual void set_cursor_shape(CursorShape p_shape) = 0;
 
 	virtual bool get_swap_ok_cancel() { return false; }
@@ -322,7 +335,13 @@ public:
 	virtual String get_locale() const;
 
 	String get_safe_application_name() const;
-	virtual String get_data_dir() const;
+	virtual String get_godot_dir_name() const;
+
+	virtual String get_data_path() const;
+	virtual String get_config_path() const;
+	virtual String get_cache_path() const;
+
+	virtual String get_user_data_dir() const;
 	virtual String get_resource_dir() const;
 
 	enum SystemDir {
@@ -337,6 +356,8 @@ public:
 	};
 
 	virtual String get_system_dir(SystemDir p_dir) const;
+
+	virtual Error move_to_trash(const String &p_path) { return FAILED; }
 
 	virtual void set_no_window_mode(bool p_enable);
 	virtual bool is_no_window_mode_enabled() const;
@@ -393,6 +414,7 @@ public:
 		LATIN_KEYBOARD_QZERTY,
 		LATIN_KEYBOARD_DVORAK,
 		LATIN_KEYBOARD_NEO,
+		LATIN_KEYBOARD_COLEMAK,
 	};
 
 	virtual LatinKeyboardVariant get_latin_keyboard_variant() const;
@@ -410,11 +432,11 @@ public:
 	virtual void set_use_vsync(bool p_enable);
 	virtual bool is_vsync_enabled() const;
 
-	virtual PowerState get_power_state();
+	virtual OS::PowerState get_power_state();
 	virtual int get_power_seconds_left();
 	virtual int get_power_percent_left();
 
-	bool check_feature_support(const String &p_feature);
+	bool has_feature(const String &p_feature);
 
 	/**
 	 * Returns the stack bottom of the main thread of the application.
@@ -428,6 +450,6 @@ public:
 	virtual ~OS();
 };
 
-VARIANT_ENUM_CAST(PowerState);
+VARIANT_ENUM_CAST(OS::PowerState);
 
 #endif

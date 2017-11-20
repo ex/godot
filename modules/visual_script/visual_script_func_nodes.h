@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -70,7 +70,7 @@ private:
 	MethodInfo method_cache;
 	void _update_method_cache();
 
-	void _set_argument_cache(const Dictionary &p_args);
+	void _set_argument_cache(const Dictionary &p_cache);
 	Dictionary _get_argument_cache() const;
 
 protected:

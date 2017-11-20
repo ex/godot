@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 Import('env')
+from compat import isbasestring
 
 # Not building in a separate env as scene needs it
 
 # Thirdparty source files
-if (env['builtin_freetype'] != 'no'):
+if env['builtin_freetype']:
     thirdparty_dir = "#thirdparty/freetype/"
     thirdparty_sources = [
         "src/autofit/autofit.c",
@@ -64,7 +65,7 @@ if (env['builtin_freetype'] != 'no'):
     env.Append(CPPPATH=[thirdparty_dir, thirdparty_dir + "/include"])
 
     # also requires libpng headers
-    if (env['builtin_libpng'] != 'no'):
+    if env['builtin_libpng']:
         env.Append(CPPPATH=["#thirdparty/libpng"])
 
     lib = env.Library("freetype_builtin", thirdparty_sources)
@@ -74,7 +75,7 @@ if (env['builtin_freetype'] != 'no'):
     # and then plain strings for system library. We insert between the two.
     inserted = False
     for idx, linklib in enumerate(env["LIBS"]):
-        if isinstance(linklib, basestring): # first system lib such as "X11", otherwise SCons lib object
+        if isbasestring(linklib): # first system lib such as "X11", otherwise SCons lib object
             env["LIBS"].insert(idx, lib)
             inserted = True
             break

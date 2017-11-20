@@ -1,9 +1,9 @@
 /*************************************************************************/
-/*  image_loader_jpegd.h                                                 */
+/*  image_loader_tga.h                                                   */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -75,7 +75,7 @@ class ImageLoaderTGA : public ImageFormatLoader {
 	static Error convert_to_image(Ref<Image> p_image, const uint8_t *p_buffer, const tga_header_s &p_header, const uint8_t *p_palette, const bool p_is_monochrome);
 
 public:
-	virtual Error load_image(Ref<Image> p_image, FileAccess *f, bool p_force_linear);
+	virtual Error load_image(Ref<Image> p_image, FileAccess *f, bool p_force_linear, float p_scale);
 	virtual void get_recognized_extensions(List<String> *p_extensions) const;
 	ImageLoaderTGA();
 };

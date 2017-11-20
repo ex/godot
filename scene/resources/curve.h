@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -31,56 +31,6 @@
 #define CURVE_H
 
 #include "resource.h"
-#if 0
-class Curve2D : public Resource {
-
-	GDCLASS(Curve2D,Resource);
-
-	struct Point {
-
-		Vector2 in;
-		Vector2 out;
-		Vector2 pos;
-	};
-
-
-	Vector<Point> points;
-
-protected:
-
-	static void _bind_methods();
-
-	void set_points_in(const Vector2Array& p_points_in);
-	void set_points_out(const Vector2Array& p_points_out);
-	void set_points_pos(const Vector2Array& p_points_pos);
-
-	Vector2Array get_points_in() const;
-	Vector2Array get_points_out() const;
-	Vector2Array get_points_pos() const;
-
-public:
-
-
-	int get_point_count() const;
-	void add_point(const Vector2& p_pos, const Vector2& p_in=Vector2(), const Vector2& p_out=Vector2());
-	void set_point_pos(int p_index, const Vector2& p_pos);
-	Vector2 get_point_pos(int p_index) const;
-	void set_point_in(int p_index, const Vector2& p_in);
-	Vector2 get_point_in(int p_index) const;
-	void set_point_out(int p_index, const Vector2& p_out);
-	Vector2 get_point_out(int p_index) const;
-	void remove_point(int p_index);
-
-	Vector2 interpolate(int p_index, float p_offset) const;
-	Vector2 interpolatef(real_t p_findex) const;
-	PoolVector<Point2> bake(int p_subdivs=10) const;
-	void advance(real_t p_distance,int &r_index, real_t &r_pos) const;
-	void get_approx_position_from_offset(real_t p_offset,int &r_index, real_t &r_pos,int p_subdivs=16) const;
-
-	Curve2D();
-};
-
-#endif
 
 // y(x) curve
 class Curve : public Resource {
@@ -142,7 +92,7 @@ public:
 
 	void set_point_value(int p_index, real_t pos);
 	int set_point_offset(int p_index, float offset);
-	Vector2 get_point_pos(int p_index) const;
+	Vector2 get_point_position(int p_index) const;
 
 	Point get_point(int p_index) const;
 
@@ -174,7 +124,7 @@ public:
 
 	void bake();
 	int get_bake_resolution() const { return _bake_resolution; }
-	void set_bake_resolution(int p_interval);
+	void set_bake_resolution(int p_resolution);
 	real_t interpolate_baked(real_t offset);
 
 protected:
@@ -230,8 +180,8 @@ protected:
 public:
 	int get_point_count() const;
 	void add_point(const Vector2 &p_pos, const Vector2 &p_in = Vector2(), const Vector2 &p_out = Vector2(), int p_atpos = -1);
-	void set_point_pos(int p_index, const Vector2 &p_pos);
-	Vector2 get_point_pos(int p_index) const;
+	void set_point_position(int p_index, const Vector2 &p_pos);
+	Vector2 get_point_position(int p_index) const;
 	void set_point_in(int p_index, const Vector2 &p_in);
 	Vector2 get_point_in(int p_index) const;
 	void set_point_out(int p_index, const Vector2 &p_out);
@@ -242,7 +192,7 @@ public:
 	Vector2 interpolate(int p_index, float p_offset) const;
 	Vector2 interpolatef(real_t p_findex) const;
 
-	void set_bake_interval(float p_distance);
+	void set_bake_interval(float p_tolerance);
 	float get_bake_interval() const;
 
 	float get_baked_length() const;
@@ -295,8 +245,8 @@ protected:
 public:
 	int get_point_count() const;
 	void add_point(const Vector3 &p_pos, const Vector3 &p_in = Vector3(), const Vector3 &p_out = Vector3(), int p_atpos = -1);
-	void set_point_pos(int p_index, const Vector3 &p_pos);
-	Vector3 get_point_pos(int p_index) const;
+	void set_point_position(int p_index, const Vector3 &p_pos);
+	Vector3 get_point_position(int p_index) const;
 	void set_point_tilt(int p_index, float p_tilt);
 	float get_point_tilt(int p_index) const;
 	void set_point_in(int p_index, const Vector3 &p_in);
@@ -309,7 +259,7 @@ public:
 	Vector3 interpolate(int p_index, float p_offset) const;
 	Vector3 interpolatef(real_t p_findex) const;
 
-	void set_bake_interval(float p_distance);
+	void set_bake_interval(float p_tolerance);
 	float get_bake_interval() const;
 
 	float get_baked_length() const;

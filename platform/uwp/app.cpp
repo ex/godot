@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -512,7 +512,7 @@ void App::UpdateWindowSize(Size size) {
 
 char **App::get_command_line(unsigned int *out_argc) {
 
-	static char *fail_cl[] = { "-path", "game", NULL };
+	static char *fail_cl[] = { "--path", "game", NULL };
 	*out_argc = 2;
 
 	FILE *f = _wfopen(L"__cl__.cl", L"rb");

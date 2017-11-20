@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
@@ -155,7 +155,7 @@ Color MultiMesh::get_instance_color(int p_instance) const {
 	return VisualServer::get_singleton()->multimesh_instance_get_color(multimesh, p_instance);
 }
 
-Rect3 MultiMesh::get_aabb() const {
+AABB MultiMesh::get_aabb() const {
 
 	return VisualServer::get_singleton()->multimesh_get_aabb(multimesh);
 }
@@ -213,11 +213,12 @@ void MultiMesh::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::POOL_VECTOR3_ARRAY, "transform_array", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "_set_transform_array", "_get_transform_array");
 	ADD_PROPERTY(PropertyInfo(Variant::POOL_COLOR_ARRAY, "color_array", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "_set_color_array", "_get_color_array");
 
-	BIND_CONSTANT(TRANSFORM_2D);
-	BIND_CONSTANT(TRANSFORM_3D);
-	BIND_CONSTANT(COLOR_NONE);
-	BIND_CONSTANT(COLOR_8BIT);
-	BIND_CONSTANT(COLOR_FLOAT);
+	BIND_ENUM_CONSTANT(TRANSFORM_2D);
+	BIND_ENUM_CONSTANT(TRANSFORM_3D);
+
+	BIND_ENUM_CONSTANT(COLOR_NONE);
+	BIND_ENUM_CONSTANT(COLOR_8BIT);
+	BIND_ENUM_CONSTANT(COLOR_FLOAT);
 }
 
 MultiMesh::MultiMesh() {

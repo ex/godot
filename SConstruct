@@ -1,7 +1,6 @@
-
 #!/usr/bin/env python
 
-EnsureSConsVersion(0, 14)
+EnsureSConsVersion(0, 98, 1)
 
 
 import string
@@ -11,7 +10,8 @@ import glob
 import sys
 import methods
 
-methods.update_version()
+# moved below to compensate with module version string
+# methods.update_version()
 
 # scan possible build platforms
 
@@ -22,6 +22,7 @@ platform_flags = {}  # flags for each platform
 active_platforms = []
 active_platform_ids = []
 platform_exporters = []
+platform_apis = []
 global_defaults = []
 
 for x in glob.glob("platform/*"):
@@ -34,6 +35,8 @@ for x in glob.glob("platform/*"):
 
     if (os.path.exists(x + "/export/export.cpp")):
         platform_exporters.append(x[9:])
+    if (os.path.exists(x + "/api/api.cpp")):
+        platform_apis.append(x[9:])
     if (os.path.exists(x + "/globals/global_defaults.cpp")):
         global_defaults.append(x[9:])
     if (detect.is_active()):
@@ -72,6 +75,7 @@ env_base.AppendENVPath('PATH', os.getenv('PATH'))
 env_base.AppendENVPath('PKG_CONFIG_PATH', os.getenv('PKG_CONFIG_PATH'))
 env_base.global_defaults = global_defaults
 env_base.android_maven_repos = []
+env_base.android_flat_dirs = []
 env_base.android_dependencies = []
 env_base.android_gradle_plugins = []
 env_base.android_gradle_classpath = []
@@ -86,6 +90,7 @@ env_base.android_appattributes_chunk = ""
 env_base.disabled_modules = []
 env_base.use_ptrcall = False
 env_base.split_drivers = False
+env_base.module_version_string = ""
 
 # To decide whether to rebuild a file, use the MD5 sum only if the timestamp has changed.
 # http://scons.org/doc/production/HTML/scons-user/ch06.html#idm139837621851792
@@ -96,6 +101,7 @@ env_base.SetOption('implicit_cache', 1)
 
 
 env_base.__class__.android_add_maven_repository = methods.android_add_maven_repository
+env_base.__class__.android_add_flat_dir = methods.android_add_flat_dir
 env_base.__class__.android_add_dependency = methods.android_add_dependency
 env_base.__class__.android_add_java_dir = methods.android_add_java_dir
 env_base.__class__.android_add_res_dir = methods.android_add_res_dir
@@ -108,6 +114,8 @@ env_base.__class__.android_add_to_attributes = methods.android_add_to_attributes
 env_base.__class__.android_add_gradle_plugin = methods.android_add_gradle_plugin
 env_base.__class__.android_add_gradle_classpath = methods.android_add_gradle_classpath
 env_base.__class__.disable_module = methods.disable_module
+
+env_base.__class__.add_module_version_string = methods.add_module_version_string
 
 env_base.__class__.add_source_files = methods.add_source_files
 env_base.__class__.use_windows_spawn_fix = methods.use_windows_spawn_fix
@@ -132,43 +140,47 @@ opts = Variables(customs, ARGUMENTS)
 
 # Target build options
 opts.Add('arch', "Platform-dependent architecture (arm/arm64/x86/x64/mips/etc)", '')
-opts.Add('bits', "Target platform bits (default/32/64/fat)", 'default')
+opts.Add(EnumVariable('bits', "Target platform bits", 'default', ('default', '32', '64', 'fat')))
 opts.Add('p', "Platform (alias for 'platform')", '')
-opts.Add('platform', "Target platform: any in " + str(platform_list), '')
-opts.Add('target', "Compilation target (debug/release_debug/release)", 'debug')
-opts.Add('tools', "Build the tools a.k.a. the Godot editor (yes/no)", 'yes')
+opts.Add('platform', "Target platform (%s)" % ('|'.join(platform_list), ), '')
+opts.Add(EnumVariable('target', "Compilation target", 'debug', ('debug', 'release_debug', 'release')))
+opts.Add(BoolVariable('tools', "Build the tools a.k.a. the Godot editor", True))
+opts.Add(BoolVariable('use_lto', 'Use linking time optimization', False))
 
 # Components
-opts.Add('deprecated', "Enable deprecated features (yes/no)", 'yes')
-opts.Add('gdscript', "Build GDSCript support (yes/no)", 'yes')
-opts.Add('minizip', "Build minizip archive support (yes/no)", 'yes')
-opts.Add('xaudio2', "XAudio2 audio driver (yes/no)", 'no')
-opts.Add('xml', "XML format support for resources (yes/no)", 'yes')
+opts.Add(BoolVariable('deprecated', "Enable deprecated features", True))
+opts.Add(BoolVariable('gdscript', "Build GDSCript support", True))
+opts.Add(BoolVariable('minizip', "Build minizip archive support", True))
+opts.Add(BoolVariable('xaudio2', "XAudio2 audio driver", False))
+opts.Add(BoolVariable('xml', "XML format support for resources", True))
 
 # Advanced options
-opts.Add('disable_3d', "Disable 3D nodes for smaller executable (yes/no)", 'no')
-opts.Add('disable_advanced_gui', "Disable advance 3D gui nodes and behaviors (yes/no)", 'no')
+opts.Add(BoolVariable('disable_3d', "Disable 3D nodes for smaller executable", False))
+opts.Add(BoolVariable('disable_advanced_gui', "Disable advance 3D gui nodes and behaviors", False))
 opts.Add('extra_suffix', "Custom extra suffix added to the base filename of all generated binary files", '')
 opts.Add('unix_global_settings_path', "UNIX-specific path to system-wide settings. Currently only used for templates", '')
-opts.Add('verbose', "Enable verbose output for the compilation (yes/no)", 'no')
-opts.Add('vsproj', "Generate Visual Studio Project. (yes/no)", 'no')
-opts.Add('warnings', "Set the level of warnings emitted during compilation (extra/all/moderate/no)", 'no')
-opts.Add('progress', "Show a progress indicator during build (yes/no)", 'yes')
-opts.Add('dev', "If yes, alias for verbose=yes warnings=all (yes/no)", 'no')
+opts.Add(BoolVariable('verbose', "Enable verbose output for the compilation", False))
+opts.Add(BoolVariable('vsproj', "Generate Visual Studio Project.", False))
+opts.Add(EnumVariable('warnings', "Set the level of warnings emitted during compilation", 'no', ('extra', 'all', 'moderate', 'no')))
+opts.Add(BoolVariable('progress', "Show a progress indicator during build", True))
+opts.Add(BoolVariable('dev', "If yes, alias for verbose=yes warnings=all", False))
 
 # Thirdparty libraries
-opts.Add('builtin_enet', "Use the builtin enet library (yes/no)", 'yes')
-opts.Add('builtin_freetype', "Use the builtin freetype library (yes/no)", 'yes')
-opts.Add('builtin_libogg', "Use the builtin libogg library (yes/no)", 'yes')
-opts.Add('builtin_libpng', "Use the builtin libpng library (yes/no)", 'yes')
-opts.Add('builtin_libtheora', "Use the builtin libtheora library (yes/no)", 'yes')
-opts.Add('builtin_libvorbis', "Use the builtin libvorbis library (yes/no)", 'yes')
-opts.Add('builtin_libvpx', "Use the builtin libvpx library (yes/no)", 'yes')
-opts.Add('builtin_libwebp', "Use the builtin libwebp library (yes/no)", 'yes')
-opts.Add('builtin_openssl', "Use the builtin openssl library (yes/no)", 'yes')
-opts.Add('builtin_opus', "Use the builtin opus library (yes/no)", 'yes')
-opts.Add('builtin_squish', "Use the builtin squish library (yes/no)", 'yes')
-opts.Add('builtin_zlib', "Use the builtin zlib library (yes/no)", 'yes')
+opts.Add(BoolVariable('builtin_enet', "Use the builtin enet library", True))
+opts.Add(BoolVariable('builtin_freetype', "Use the builtin freetype library", True))
+opts.Add(BoolVariable('builtin_libogg', "Use the builtin libogg library", True))
+opts.Add(BoolVariable('builtin_libpng', "Use the builtin libpng library", True))
+opts.Add(BoolVariable('builtin_libtheora', "Use the builtin libtheora library", True))
+opts.Add(BoolVariable('builtin_libvorbis', "Use the builtin libvorbis library", True))
+opts.Add(BoolVariable('builtin_libvpx', "Use the builtin libvpx library", True))
+opts.Add(BoolVariable('builtin_libwebp', "Use the builtin libwebp library", True))
+opts.Add(BoolVariable('builtin_openssl', "Use the builtin openssl library", True))
+opts.Add(BoolVariable('builtin_opus', "Use the builtin opus library", True))
+opts.Add(BoolVariable('builtin_pcre2', "Use the builtin pcre2 library)", True))
+opts.Add(BoolVariable('builtin_recast', "Use the builtin recast library", True))
+opts.Add(BoolVariable('builtin_squish', "Use the builtin squish library", True))
+opts.Add(BoolVariable('builtin_zlib', "Use the builtin zlib library", True))
+opts.Add(BoolVariable('builtin_zstd', "Use the builtin zstd library", True))
 
 # Environment setup
 opts.Add("CXX", "C++ compiler")
@@ -183,10 +195,19 @@ opts.Add("LINKFLAGS", "Custom flags for the linker")
 for k in platform_opts.keys():
     opt_list = platform_opts[k]
     for o in opt_list:
-        opts.Add(o[0], o[1], o[2])
+        opts.Add(o)
 
 for x in module_list:
-    opts.Add('module_' + x + '_enabled', "Enable module '" + x + "' (yes/no)", "yes")
+    module_enabled = True
+    tmppath = "./modules/" + x
+    sys.path.append(tmppath)
+    import config
+    enabled_attr = getattr(config, "is_enabled", None)
+    if (callable(enabled_attr) and not config.is_enabled()):
+        module_enabled = False
+    sys.path.remove(tmppath)
+    sys.modules.pop('config')
+    opts.Add(BoolVariable('module_' + x + '_enabled', "Enable module '%s'" % (x, ), module_enabled))
 
 opts.Update(env_base)  # update environment
 Help(opts.GenerateHelpText(env_base))  # generate help
@@ -197,6 +218,7 @@ env_base.Append(CPPPATH=['#core', '#core/math', '#editor', '#drivers', '#'])
 
 # configure ENV for platform
 env_base.platform_exporters = platform_exporters
+env_base.platform_apis = platform_apis
 
 """
 sys.path.append("./platform/"+env_base["platform"])
@@ -210,7 +232,7 @@ if (env_base['target'] == 'debug'):
     env_base.Append(CPPFLAGS=['-DDEBUG_MEMORY_ALLOC'])
     env_base.Append(CPPFLAGS=['-DSCI_NAMESPACE'])
 
-if (env_base['deprecated'] == 'no'):
+if not env_base['deprecated']:
     env_base.Append(CPPFLAGS=['-DDISABLE_DEPRECATED'])
 
 env_base.platforms = {}
@@ -233,12 +255,12 @@ if selected_platform in platform_list:
         env = detect.create(env_base)
     else:
         env = env_base.Clone()
-    
-    if (env["dev"] == "yes"):
-        env["warnings"] = "all"
-        env["verbose"] = "yes"
 
-    if env['vsproj'] == "yes":
+    if env['dev']:
+        env["warnings"] = "all"
+        env['verbose'] = True
+
+    if env['vsproj']:
         env.vs_incs = []
         env.vs_srcs = []
 
@@ -252,9 +274,12 @@ if selected_platform in platform_list:
                 if len(pieces) > 0:
                     basename = pieces[0]
                     basename = basename.replace('\\\\', '/')
-                    env.vs_srcs = env.vs_srcs + [basename + ".cpp"]
-                    env.vs_incs = env.vs_incs + [basename + ".h"]
-                    # print basename
+                    if os.path.isfile(basename + ".h"):
+                        env.vs_incs = env.vs_incs + [basename + ".h"]
+                    if os.path.isfile(basename + ".c"):
+                        env.vs_srcs = env.vs_srcs + [basename + ".c"]
+                    elif os.path.isfile(basename + ".cpp"):
+                        env.vs_srcs = env.vs_srcs + [basename + ".cpp"]
         env.AddToVSProject = AddToVSProject
 
     env.extra_suffix = ""
@@ -265,17 +290,17 @@ if selected_platform in platform_list:
     CCFLAGS = env.get('CCFLAGS', '')
     env['CCFLAGS'] = ''
 
-    env.Append(CCFLAGS=string.split(str(CCFLAGS)))
+    env.Append(CCFLAGS=str(CCFLAGS).split())
 
     CFLAGS = env.get('CFLAGS', '')
     env['CFLAGS'] = ''
 
-    env.Append(CFLAGS=string.split(str(CFLAGS)))
+    env.Append(CFLAGS=str(CFLAGS).split())
 
     LINKFLAGS = env.get('LINKFLAGS', '')
     env['LINKFLAGS'] = ''
 
-    env.Append(LINKFLAGS=string.split(str(LINKFLAGS)))
+    env.Append(LINKFLAGS=str(LINKFLAGS).split())
 
     flag_list = platform_flags[selected_platform]
     for f in flag_list:
@@ -288,7 +313,9 @@ if selected_platform in platform_list:
     if (env["warnings"] == 'yes'):
         print("WARNING: warnings=yes is deprecated; assuming warnings=all")
 
+    env.msvc = 0
     if (os.name == "nt" and os.getenv("VCINSTALLDIR") and (platform_arg == "windows" or platform_arg == "uwp")): # MSVC, needs to stand out of course
+        env.msvc = 1
         disable_nonessential_warnings = ['/wd4267', '/wd4244', '/wd4305', '/wd4800'] # Truncations, narrowing conversions...
         if (env["warnings"] == 'extra'):
             env.Append(CCFLAGS=['/Wall']) # Implies /W4
@@ -314,19 +341,19 @@ if selected_platform in platform_list:
     suffix = "." + selected_platform
 
     if (env["target"] == "release"):
-        if (env["tools"] == "yes"):
+        if env["tools"]:
             print("Tools can only be built with targets 'debug' and 'release_debug'.")
             sys.exit(255)
         suffix += ".opt"
         env.Append(CCFLAGS=['-DNDEBUG'])
 
     elif (env["target"] == "release_debug"):
-        if (env["tools"] == "yes"):
+        if env["tools"]:
             suffix += ".opt.tools"
         else:
             suffix += ".opt.debug"
     else:
-        if (env["tools"] == "yes"):
+        if env["tools"]:
             suffix += ".tools"
         else:
             suffix += ".debug"
@@ -342,18 +369,14 @@ if selected_platform in platform_list:
 
     suffix += env.extra_suffix
 
-    env["PROGSUFFIX"] = suffix + env["PROGSUFFIX"]
-    env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
-    env["LIBSUFFIX"] = suffix + env["LIBSUFFIX"]
-    env["SHLIBSUFFIX"] = suffix + env["SHLIBSUFFIX"]
-
     sys.path.remove("./platform/" + selected_platform)
     sys.modules.pop('detect')
 
     env.module_list = []
+    env.doc_class_path = {}
 
     for x in module_list:
-        if env['module_' + x + '_enabled'] != "yes":
+        if not env['module_' + x + '_enabled']:
             continue
         tmppath = "./modules/" + x
         sys.path.append(tmppath)
@@ -362,8 +385,25 @@ if selected_platform in platform_list:
         if (config.can_build(selected_platform)):
             config.configure(env)
             env.module_list.append(x)
+            try:
+                 doc_classes = config.get_doc_classes()
+                 doc_path = config.get_doc_path()
+                 for c in doc_classes:
+                     env.doc_class_path[c] = "modules/" + x + "/" + doc_path
+            except:
+                pass
+
         sys.path.remove(tmppath)
         sys.modules.pop('config')
+
+    methods.update_version(env.module_version_string)
+
+    suffix += env.module_version_string
+
+    env["PROGSUFFIX"] = suffix + env["PROGSUFFIX"]
+    env["OBJSUFFIX"] = suffix + env["OBJSUFFIX"]
+    env["LIBSUFFIX"] = suffix + env["LIBSUFFIX"]
+    env["SHLIBSUFFIX"] = suffix + env["SHLIBSUFFIX"]
 
     if (env.use_ptrcall):
         env.Append(CPPFLAGS=['-DPTRCALL_ENABLED'])
@@ -371,22 +411,22 @@ if selected_platform in platform_list:
     # to test 64 bits compiltion
     # env.Append(CPPFLAGS=['-m64'])
 
-    if (env['tools'] == 'yes'):
+    if env['tools']:
         env.Append(CPPFLAGS=['-DTOOLS_ENABLED'])
-    if (env['disable_3d'] == 'yes'):
+    if env['disable_3d']:
         env.Append(CPPFLAGS=['-D_3D_DISABLED'])
-    if (env['gdscript'] == 'yes'):
+    if env['gdscript']:
         env.Append(CPPFLAGS=['-DGDSCRIPT_ENABLED'])
-    if (env['disable_advanced_gui'] == 'yes'):
+    if env['disable_advanced_gui']:
         env.Append(CPPFLAGS=['-DADVANCED_GUI_DISABLED'])
 
-    if (env['minizip'] == 'yes'):
+    if env['minizip']:
         env.Append(CPPFLAGS=['-DMINIZIP_ENABLED'])
 
-    if (env['xml'] == 'yes'):
+    if env['xml']:
         env.Append(CPPFLAGS=['-DXML_ENABLED'])
 
-    if (env['verbose'] == 'no'):
+    if not env['verbose']:
         methods.no_verbose(sys, env)
 
     if (True): # FIXME: detect GLES3
@@ -402,51 +442,27 @@ if selected_platform in platform_list:
     SConscript("editor/SCsub")
     SConscript("drivers/SCsub")
 
+    SConscript("platform/SCsub")
     SConscript("modules/SCsub")
     SConscript("main/SCsub")
 
     SConscript("platform/" + selected_platform + "/SCsub")  # build selected platform
 
     # Microsoft Visual Studio Project Generation
-    if (env['vsproj']) == "yes":
+    if env['vsproj']:
+        env['CPPPATH'] = [Dir(path) for path in env['CPPPATH']]
+        methods.generate_vs_project(env, GetOption("num_jobs"))
+        methods.generate_cpp_hint_file("cpp.hint")
 
-        AddToVSProject(env.core_sources)
-        AddToVSProject(env.main_sources)
-        AddToVSProject(env.modules_sources)
-        AddToVSProject(env.scene_sources)
-        AddToVSProject(env.servers_sources)
-        AddToVSProject(env.editor_sources)
-
-        # this env flag won't work, it needs to be set in env_base=Environment(MSVC_VERSION='9.0')
-        # Even then, SCons still seems to ignore it and builds with the latest MSVC...
-        # That said, it's not needed to be set so far but I'm leaving it here so that this comment
-        # has a purpose.
-        # env['MSVS_VERSION']='9.0'
-
-        # Calls a CMD with /C(lose) and /V(delayed environment variable expansion) options.
-        # And runs vcvarsall bat for the proper architecture and scons for proper configuration
-        env['MSVSBUILDCOM'] = 'cmd /V /C set "plat=$(PlatformTarget)" ^& (if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64")) ^& set "tools=yes" ^& (if "$(Configuration)"=="release" (set "tools=no")) ^& call "$(VCInstallDir)vcvarsall.bat" !plat! ^& scons platform=windows target=$(Configuration) tools=!tools! -j2'
-        env['MSVSREBUILDCOM'] = 'cmd /V /C set "plat=$(PlatformTarget)" ^& (if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64")) ^& set "tools=yes" ^& (if "$(Configuration)"=="release" (set "tools=no")) & call "$(VCInstallDir)vcvarsall.bat" !plat! ^& scons platform=windows target=$(Configuration) tools=!tools! vsproj=yes -j2'
-        env['MSVSCLEANCOM'] = 'cmd /V /C set "plat=$(PlatformTarget)" ^& (if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64")) ^& set "tools=yes" ^& (if "$(Configuration)"=="release" (set "tools=no")) ^& call "$(VCInstallDir)vcvarsall.bat" !plat! ^& scons --clean platform=windows target=$(Configuration) tools=!tools! -j2'
-
-        # This version information (Win32, x64, Debug, Release, Release_Debug seems to be
-        # required for Visual Studio to understand that it needs to generate an NMAKE
-        # project. Do not modify without knowing what you are doing.
-        debug_variants = ['debug|Win32'] + ['debug|x64']
-        release_variants = ['release|Win32'] + ['release|x64']
-        release_debug_variants = ['release_debug|Win32'] + ['release_debug|x64']
-        variants = debug_variants + release_variants + release_debug_variants
-        debug_targets = ['bin\\godot.windows.tools.32.exe'] + ['bin\\godot.windows.tools.64.exe']
-        release_targets = ['bin\\godot.windows.opt.32.exe'] + ['bin\\godot.windows.opt.64.exe']
-        release_debug_targets = ['bin\\godot.windows.opt.tools.32.exe'] + ['bin\\godot.windows.opt.tools.64.exe']
-        targets = debug_targets + release_targets + release_debug_targets
-        msvproj = env.MSVSProject(target=['#godot' + env['MSVSPROJECTSUFFIX']],
-                                  incs=env.vs_incs,
-                                  srcs=env.vs_srcs,
-                                  runfile=targets,
-                                  buildtarget=targets,
-                                  auto_build_solution=1,
-                                  variant=variants)
+    # Check for the existence of headers
+    conf = Configure(env)
+    if ("check_c_headers" in env):
+        for header in env["check_c_headers"]:
+            if (conf.CheckCHeader(header[0])):
+                if (env.msvc):
+                    env.Append(CCFLAGS=['/D' + header[1]])
+                else:
+                    env.Append(CCFLAGS=['-D' + header[1]])
 
 else:
 
@@ -482,7 +498,7 @@ def progress_finish(target, source, env):
     with open(node_count_fname, 'w') as f:
         f.write('%d\n' % node_count)
 
-if ('env' in locals() and env["progress"] == "yes"):
+if 'env' in locals() and env['progress']:
     try:
         with open(node_count_fname) as f:
             node_count_max = int(f.readline())
