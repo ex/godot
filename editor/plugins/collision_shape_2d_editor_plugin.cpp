@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "collision_shape_2d_editor_plugin.h"
 
 #include "canvas_item_editor_plugin.h"
@@ -414,7 +415,7 @@ void CollisionShape2DEditor::_get_current_shape_type() {
 	canvas_item_editor->get_viewport_control()->update();
 }
 
-void CollisionShape2DEditor::forward_draw_over_canvas(Control *p_canvas) {
+void CollisionShape2DEditor::forward_draw_over_viewport(Control *p_overlay) {
 
 	if (!node) {
 		return;
@@ -448,8 +449,8 @@ void CollisionShape2DEditor::forward_draw_over_canvas(Control *p_canvas) {
 			handles[0] = Point2(radius, -height);
 			handles[1] = Point2(0, -(height + radius));
 
-			p_canvas->draw_texture(h, gt.xform(handles[0]) - size);
-			p_canvas->draw_texture(h, gt.xform(handles[1]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[0]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[1]) - size);
 
 		} break;
 
@@ -459,7 +460,7 @@ void CollisionShape2DEditor::forward_draw_over_canvas(Control *p_canvas) {
 			handles.resize(1);
 			handles[0] = Point2(shape->get_radius(), 0);
 
-			p_canvas->draw_texture(h, gt.xform(handles[0]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[0]) - size);
 
 		} break;
 
@@ -478,8 +479,8 @@ void CollisionShape2DEditor::forward_draw_over_canvas(Control *p_canvas) {
 			handles[0] = shape->get_normal() * shape->get_d();
 			handles[1] = shape->get_normal() * (shape->get_d() + 30.0);
 
-			p_canvas->draw_texture(h, gt.xform(handles[0]) - size);
-			p_canvas->draw_texture(h, gt.xform(handles[1]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[0]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[1]) - size);
 
 		} break;
 
@@ -489,7 +490,7 @@ void CollisionShape2DEditor::forward_draw_over_canvas(Control *p_canvas) {
 			handles.resize(1);
 			handles[0] = Point2(0, shape->get_length());
 
-			p_canvas->draw_texture(h, gt.xform(handles[0]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[0]) - size);
 
 		} break;
 
@@ -501,8 +502,8 @@ void CollisionShape2DEditor::forward_draw_over_canvas(Control *p_canvas) {
 			handles[0] = Point2(ext.x, 0);
 			handles[1] = Point2(0, -ext.y);
 
-			p_canvas->draw_texture(h, gt.xform(handles[0]) - size);
-			p_canvas->draw_texture(h, gt.xform(handles[1]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[0]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[1]) - size);
 
 		} break;
 
@@ -513,8 +514,8 @@ void CollisionShape2DEditor::forward_draw_over_canvas(Control *p_canvas) {
 			handles[0] = shape->get_a();
 			handles[1] = shape->get_b();
 
-			p_canvas->draw_texture(h, gt.xform(handles[0]) - size);
-			p_canvas->draw_texture(h, gt.xform(handles[1]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[0]) - size);
+			p_overlay->draw_texture(h, gt.xform(handles[1]) - size);
 
 		} break;
 	}

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifndef ABSTRACT_POLYGON_2D_EDITOR_H
 #define ABSTRACT_POLYGON_2D_EDITOR_H
 
@@ -136,7 +137,7 @@ protected:
 
 public:
 	bool forward_gui_input(const Ref<InputEvent> &p_event);
-	void forward_draw_over_canvas(Control *p_canvas);
+	void forward_draw_over_viewport(Control *p_overlay);
 
 	void edit(Node *p_polygon);
 	AbstractPolygon2DEditor(EditorNode *p_editor, bool p_wip_destructive = true);
@@ -152,7 +153,7 @@ class AbstractPolygon2DEditorPlugin : public EditorPlugin {
 
 public:
 	virtual bool forward_canvas_gui_input(const Ref<InputEvent> &p_event) { return polygon_editor->forward_gui_input(p_event); }
-	virtual void forward_draw_over_canvas(Control *p_canvas) { polygon_editor->forward_draw_over_canvas(p_canvas); }
+	virtual void forward_draw_over_viewport(Control *p_overlay) { polygon_editor->forward_draw_over_viewport(p_overlay); }
 
 	bool has_main_screen() const { return false; }
 	virtual String get_name() const { return klass; }

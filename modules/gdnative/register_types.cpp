@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "register_types.h"
 #include "gdnative/gdnative.h"
 
@@ -45,7 +46,8 @@
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_node.h"
-#include "gd_native_library_editor.h"
+#include "gdnative_library_editor_plugin.h"
+#include "gdnative_library_singleton_editor.h"
 // Class used to discover singleton gdnative files
 
 static void actual_discoverer_handler();
@@ -99,20 +101,41 @@ static Set<String> get_gdnative_singletons(EditorFileSystemDirectory *p_dir) {
 }
 
 static void actual_discoverer_handler() {
+
 	EditorFileSystemDirectory *dir = EditorFileSystem::get_singleton()->get_filesystem();
 
 	Set<String> file_paths = get_gdnative_singletons(dir);
 
+	bool changed = false;
+	Array current_files;
+	if (ProjectSettings::get_singleton()->has_setting("gdnative/singletons")) {
+		current_files = ProjectSettings::get_singleton()->get("gdnative/singletons");
+	}
 	Array files;
 	files.resize(file_paths.size());
 	int i = 0;
 	for (Set<String>::Element *E = file_paths.front(); E; i++, E = E->next()) {
+		if (!current_files.has(E->get())) {
+			changed = true;
+		}
 		files.set(i, E->get());
 	}
 
-	ProjectSettings::get_singleton()->set("gdnative/singletons", files);
+	// Check for removed files
+	if (!changed) {
+		for (int i = 0; i < current_files.size(); i++) {
+			if (!file_paths.has(current_files[i])) {
+				changed = true;
+				break;
+			}
+		}
+	}
 
-	ProjectSettings::get_singleton()->save();
+	if (changed) {
+
+		ProjectSettings::get_singleton()->set("gdnative/singletons", files);
+		ProjectSettings::get_singleton()->save();
+	}
 }
 
 static GDNativeSingletonDiscover *discoverer = NULL;
@@ -121,6 +144,11 @@ class GDNativeExportPlugin : public EditorExportPlugin {
 
 protected:
 	virtual void _export_file(const String &p_path, const String &p_type, const Set<String> &p_features);
+};
+
+struct LibrarySymbol {
+	char *name;
+	bool is_required;
 };
 
 void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_type, const Set<String> &p_features) {
@@ -136,7 +164,6 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 
 	Ref<ConfigFile> config = lib->get_config_file();
 
-	String entry_lib_path;
 	{
 
 		List<String> entry_keys;
@@ -161,14 +188,12 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 				continue;
 			}
 
-			entry_lib_path = config->get_value("entry", key);
-			break;
+			String entry_lib_path = config->get_value("entry", key);
+			add_shared_object(entry_lib_path, tags);
 		}
 	}
 
-	Vector<String> dependency_paths;
 	{
-
 		List<String> dependency_keys;
 		config->get_section_keys("dependencies", &dependency_keys);
 
@@ -191,53 +216,60 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 				continue;
 			}
 
-			dependency_paths = config->get_value("dependencies", key);
-			break;
+			Vector<String> dependency_paths = config->get_value("dependencies", key);
+			for (int i = 0; i < dependency_paths.size(); i++) {
+				add_shared_object(dependency_paths[i], tags);
+			}
 		}
 	}
 
-	bool is_statically_linked = false;
-	{
+	if (p_features.has("iOS")) {
+		// Register symbols in the "fake" dynamic lookup table, because dlsym does not work well on iOS.
+		LibrarySymbol expected_symbols[] = {
+			{ "gdnative_init", true },
+			{ "gdnative_terminate", false },
+			{ "nativescript_init", false },
+			{ "nativescript_frame", false },
+			{ "nativescript_thread_enter", false },
+			{ "nativescript_thread_exit", false },
+			{ "gdnative_singleton", false }
+		};
+		String declare_pattern = "extern \"C\" void $name(void)$weak;\n";
+		String additional_code = "extern void register_dynamic_symbol(char *name, void *address);\n"
+								 "extern void add_ios_init_callback(void (*cb)());\n";
+		String linker_flags = "";
+		for (int i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
+			String full_name = lib->get_symbol_prefix() + expected_symbols[i].name;
+			String code = declare_pattern.replace("$name", full_name);
+			code = code.replace("$weak", expected_symbols[i].is_required ? "" : " __attribute__((weak))");
+			additional_code += code;
 
-		List<String> static_linking_keys;
-		config->get_section_keys("static_linking", &static_linking_keys);
-
-		for (List<String>::Element *E = static_linking_keys.front(); E; E = E->next()) {
-			String key = E->get();
-
-			Vector<String> tags = key.split(".");
-
-			bool skip = false;
-
-			for (int i = 0; i < tags.size(); i++) {
-				bool has_feature = p_features.has(tags[i]);
-
-				if (!has_feature) {
-					skip = true;
-					break;
+			if (!expected_symbols[i].is_required) {
+				if (linker_flags.length() > 0) {
+					linker_flags += " ";
 				}
+				linker_flags += "-Wl,-U,_" + full_name;
 			}
-
-			if (skip) {
-				continue;
-			}
-
-			is_statically_linked = config->get_value("static_linking", key);
-			break;
 		}
-	}
 
-	if (!is_statically_linked)
-		add_shared_object(entry_lib_path);
+		additional_code += String("void $prefixinit() {\n").replace("$prefix", lib->get_symbol_prefix());
+		String register_pattern = "  if (&$name) register_dynamic_symbol((char *)\"$name\", (void *)$name);\n";
+		for (int i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
+			String full_name = lib->get_symbol_prefix() + expected_symbols[i].name;
+			additional_code += register_pattern.replace("$name", full_name);
+		}
+		additional_code += "}\n";
+		additional_code += String("struct $prefixstruct {$prefixstruct() {add_ios_init_callback($prefixinit);}};\n").replace("$prefix", lib->get_symbol_prefix());
+		additional_code += String("$prefixstruct $prefixstruct_instance;\n").replace("$prefix", lib->get_symbol_prefix());
 
-	for (int i = 0; i < dependency_paths.size(); i++) {
-		add_shared_object(dependency_paths[i]);
+		add_ios_cpp_code(additional_code);
+		add_ios_linker_flags(linker_flags);
 	}
 }
 
 static void editor_init_callback() {
 
-	GDNativeLibraryEditor *library_editor = memnew(GDNativeLibraryEditor);
+	GDNativeLibrarySingletonEditor *library_editor = memnew(GDNativeLibrarySingletonEditor);
 	library_editor->set_name(TTR("GDNative"));
 	ProjectSettingsEditor::get_singleton()->get_tabs()->add_child(library_editor);
 
@@ -248,6 +280,8 @@ static void editor_init_callback() {
 	export_plugin.instance();
 
 	EditorExport::get_singleton()->add_export_plugin(export_plugin);
+
+	EditorNode::get_singleton()->add_editor_plugin(memnew(GDNativeLibraryEditorPlugin(EditorNode::get_singleton())));
 }
 
 #endif
@@ -271,9 +305,7 @@ void register_gdnative_types() {
 
 #ifdef TOOLS_ENABLED
 
-	if (Engine::get_singleton()->is_editor_hint()) {
-		EditorNode::add_init_callback(editor_init_callback);
-	}
+	EditorNode::add_init_callback(editor_init_callback);
 #endif
 
 	ClassDB::register_class<GDNativeLibrary>();

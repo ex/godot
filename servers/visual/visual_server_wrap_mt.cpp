@@ -5,7 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -26,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "visual_server_wrap_mt.h"
 #include "os/os.h"
 #include "project_settings.h"
@@ -37,14 +39,7 @@ void VisualServerWrapMT::thread_exit() {
 
 void VisualServerWrapMT::thread_draw() {
 
-	draw_mutex->lock();
-
-	draw_pending--;
-	bool draw = (draw_pending == 0); // only draw when no more flushes are pending
-
-	draw_mutex->unlock();
-
-	if (draw) {
+	if (!atomic_decrement(&draw_pending)) {
 
 		visual_server->draw();
 	}
@@ -52,11 +47,7 @@ void VisualServerWrapMT::thread_draw() {
 
 void VisualServerWrapMT::thread_flush() {
 
-	draw_mutex->lock();
-
-	draw_pending--;
-
-	draw_mutex->unlock();
+	atomic_decrement(&draw_pending);
 }
 
 void VisualServerWrapMT::_thread_callback(void *_instance) {
@@ -92,36 +83,23 @@ void VisualServerWrapMT::sync() {
 
 	if (create_thread) {
 
-		/* TODO: sync with the thread */
-
-		/*
-		ERR_FAIL_COND(!draw_mutex);
-		draw_mutex->lock();
-		draw_pending++; //cambiar por un saferefcount
-		draw_mutex->unlock();
-		*/
-		//command_queue.push( this, &VisualServerWrapMT::thread_flush);
+		atomic_increment(&draw_pending);
+		command_queue.push_and_sync(this, &VisualServerWrapMT::thread_flush);
 	} else {
 
 		command_queue.flush_all(); //flush all pending from other threads
 	}
 }
 
-void VisualServerWrapMT::draw() {
+void VisualServerWrapMT::draw(bool p_swap_buffers) {
 
 	if (create_thread) {
 
-		/* TODO: Make it draw
-		ERR_FAIL_COND(!draw_mutex);
-		draw_mutex->lock();
-		draw_pending++; //cambiar por un saferefcount
-		draw_mutex->unlock();
-
-		command_queue.push( this, &VisualServerWrapMT::thread_draw);
-		*/
+		atomic_increment(&draw_pending);
+		command_queue.push(this, &VisualServerWrapMT::thread_draw);
 	} else {
 
-		visual_server->draw();
+		visual_server->draw(p_swap_buffers);
 	}
 }
 
@@ -129,7 +107,6 @@ void VisualServerWrapMT::init() {
 
 	if (create_thread) {
 
-		draw_mutex = Mutex::create();
 		print_line("CREATING RENDER THREAD");
 		OS::get_singleton()->release_rendering_thread();
 		if (create_thread) {
@@ -181,18 +158,24 @@ void VisualServerWrapMT::finish() {
 	canvas_item_free_cached_ids();
 	canvas_light_occluder_free_cached_ids();
 	canvas_occluder_polygon_free_cached_ids();
-
-	if (draw_mutex)
-		memdelete(draw_mutex);
 }
 
-VisualServerWrapMT::VisualServerWrapMT(VisualServer *p_contained, bool p_create_thread)
-	: command_queue(p_create_thread) {
+void VisualServerWrapMT::set_use_vsync_callback(bool p_enable) {
+
+	singleton_mt->call_set_use_vsync(p_enable);
+}
+
+VisualServerWrapMT *VisualServerWrapMT::singleton_mt = NULL;
+
+VisualServerWrapMT::VisualServerWrapMT(VisualServer *p_contained, bool p_create_thread) :
+		command_queue(p_create_thread) {
+
+	singleton_mt = this;
+	OS::switch_vsync_function = set_use_vsync_callback; //as this goes to another thread, make sure it goes properly
 
 	visual_server = p_contained;
 	create_thread = p_create_thread;
 	thread = NULL;
-	draw_mutex = NULL;
 	draw_pending = 0;
 	draw_thread_up = false;
 	alloc_mutex = Mutex::create();

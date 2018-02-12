@@ -5,6 +5,7 @@
       "major": 1,
       "minor": 0
     },
+    "next": null,
     "api": [
       {
         "name": "godot_color_new_rgba",
@@ -387,7 +388,7 @@
         ]
       },
       {
-        "name": "godot_vector2_operator_substract",
+        "name": "godot_vector2_operator_subtract",
         "return_type": "godot_vector2",
         "arguments": [
           ["const godot_vector2 *", "p_self"],
@@ -663,7 +664,7 @@
         ]
       },
       {
-        "name": "godot_quat_operator_substract",
+        "name": "godot_quat_operator_subtract",
         "return_type": "godot_quat",
         "arguments": [
           ["const godot_quat *", "p_self"],
@@ -907,7 +908,7 @@
         ]
       },
       {
-        "name": "godot_basis_operator_substract",
+        "name": "godot_basis_operator_subtract",
         "return_type": "godot_basis",
         "arguments": [
           ["const godot_basis *", "p_self"],
@@ -1142,7 +1143,7 @@
         ]
       },
       {
-        "name": "godot_vector3_operator_substract",
+        "name": "godot_vector3_operator_subtract",
         "return_type": "godot_vector3",
         "arguments": [
           ["const godot_vector3 *", "p_self"],
@@ -2090,6 +2091,13 @@
         ]
       },
       {
+        "name": "godot_pool_byte_array_read_access_copy",
+        "return_type": "godot_pool_byte_array_read_access *",
+        "arguments": [
+          ["const godot_pool_byte_array_read_access *", "p_read"]
+        ]
+      },
+      {
         "name": "godot_pool_byte_array_read_access_ptr",
         "return_type": "const uint8_t *",
         "arguments": [
@@ -2109,6 +2117,13 @@
         "return_type": "void",
         "arguments": [
           ["godot_pool_byte_array_read_access *", "p_read"]
+        ]
+      },
+      {
+        "name": "godot_pool_int_array_read_access_copy",
+        "return_type": "godot_pool_int_array_read_access *",
+        "arguments": [
+          ["const godot_pool_int_array_read_access *", "p_read"]
         ]
       },
       {
@@ -2134,6 +2149,13 @@
         ]
       },
       {
+        "name": "godot_pool_real_array_read_access_copy",
+        "return_type": "godot_pool_real_array_read_access *",
+        "arguments": [
+          ["const godot_pool_real_array_read_access *", "p_read"]
+        ]
+      },
+      {
         "name": "godot_pool_real_array_read_access_ptr",
         "return_type": "const godot_real *",
         "arguments": [
@@ -2153,6 +2175,13 @@
         "return_type": "void",
         "arguments": [
           ["godot_pool_real_array_read_access *", "p_read"]
+        ]
+      },
+      {
+        "name": "godot_pool_string_array_read_access_copy",
+        "return_type": "godot_pool_string_array_read_access *",
+        "arguments": [
+          ["const godot_pool_string_array_read_access *", "p_read"]
         ]
       },
       {
@@ -2178,6 +2207,13 @@
         ]
       },
       {
+        "name": "godot_pool_vector2_array_read_access_copy",
+        "return_type": "godot_pool_vector2_array_read_access *",
+        "arguments": [
+          ["const godot_pool_vector2_array_read_access *", "p_read"]
+        ]
+      },
+      {
         "name": "godot_pool_vector2_array_read_access_ptr",
         "return_type": "const godot_vector2 *",
         "arguments": [
@@ -2197,6 +2233,13 @@
         "return_type": "void",
         "arguments": [
           ["godot_pool_vector2_array_read_access *", "p_read"]
+        ]
+      },
+      {
+        "name": "godot_pool_vector3_array_read_access_copy",
+        "return_type": "godot_pool_vector3_array_read_access *",
+        "arguments": [
+          ["const godot_pool_vector3_array_read_access *", "p_read"]
         ]
       },
       {
@@ -2222,6 +2265,13 @@
         ]
       },
       {
+        "name": "godot_pool_color_array_read_access_copy",
+        "return_type": "godot_pool_color_array_read_access *",
+        "arguments": [
+          ["const godot_pool_color_array_read_access *", "p_read"]
+        ]
+      },
+      {
         "name": "godot_pool_color_array_read_access_ptr",
         "return_type": "const godot_color *",
         "arguments": [
@@ -2241,6 +2291,13 @@
         "return_type": "void",
         "arguments": [
           ["godot_pool_color_array_read_access *", "p_read"]
+        ]
+      },
+      {
+        "name": "godot_pool_byte_array_write_access_copy",
+        "return_type": "godot_pool_byte_array_write_access *",
+        "arguments": [
+          ["const godot_pool_byte_array_write_access *", "p_write"]
         ]
       },
       {
@@ -2266,6 +2323,13 @@
         ]
       },
       {
+        "name": "godot_pool_int_array_write_access_copy",
+        "return_type": "godot_pool_int_array_write_access *",
+        "arguments": [
+          ["const godot_pool_int_array_write_access *", "p_write"]
+        ]
+      },
+      {
         "name": "godot_pool_int_array_write_access_ptr",
         "return_type": "godot_int *",
         "arguments": [
@@ -2285,6 +2349,13 @@
         "return_type": "void",
         "arguments": [
           ["godot_pool_int_array_write_access *", "p_write"]
+        ]
+      },
+      {
+        "name": "godot_pool_real_array_write_access_copy",
+        "return_type": "godot_pool_real_array_write_access *",
+        "arguments": [
+          ["const godot_pool_real_array_write_access *", "p_write"]
         ]
       },
       {
@@ -2310,6 +2381,13 @@
         ]
       },
       {
+        "name": "godot_pool_string_array_write_access_copy",
+        "return_type": "godot_pool_string_array_write_access *",
+        "arguments": [
+          ["const godot_pool_string_array_write_access *", "p_write"]
+        ]
+      },
+      {
         "name": "godot_pool_string_array_write_access_ptr",
         "return_type": "godot_string *",
         "arguments": [
@@ -2329,6 +2407,13 @@
         "return_type": "void",
         "arguments": [
           ["godot_pool_string_array_write_access *", "p_write"]
+        ]
+      },
+      {
+        "name": "godot_pool_vector2_array_write_access_copy",
+        "return_type": "godot_pool_vector2_array_write_access *",
+        "arguments": [
+          ["const godot_pool_vector2_array_write_access *", "p_write"]
         ]
       },
       {
@@ -2354,6 +2439,13 @@
         ]
       },
       {
+        "name": "godot_pool_vector3_array_write_access_copy",
+        "return_type": "godot_pool_vector3_array_write_access *",
+        "arguments": [
+          ["const godot_pool_vector3_array_write_access *", "p_write"]
+        ]
+      },
+      {
         "name": "godot_pool_vector3_array_write_access_ptr",
         "return_type": "godot_vector3 *",
         "arguments": [
@@ -2373,6 +2465,13 @@
         "return_type": "void",
         "arguments": [
           ["godot_pool_vector3_array_write_access *", "p_write"]
+        ]
+      },
+      {
+        "name": "godot_pool_color_array_write_access_copy",
+        "return_type": "godot_pool_color_array_write_access *",
+        "arguments": [
+          ["const godot_pool_color_array_write_access *", "p_write"]
         ]
       },
       {
@@ -2680,6 +2779,26 @@
         ]
       },
       {
+        "name": "godot_array_bsearch",
+        "return_type": "godot_int",
+        "arguments": [
+          ["godot_array *", "p_self"],
+          ["const godot_variant *", "p_value"],
+          ["const godot_bool", "p_before"]
+        ]
+      },
+      {
+        "name": "godot_array_bsearch_custom",
+        "return_type": "godot_int",
+        "arguments": [
+          ["godot_array *", "p_self"],
+          ["const godot_variant *", "p_value"],
+          ["godot_object *", "p_obj"],
+          ["const godot_string *", "p_func"],
+          ["const godot_bool", "p_before"]
+        ]
+      },
+      {
         "name": "godot_array_destroy",
         "return_type": "void",
         "arguments": [
@@ -2898,7 +3017,7 @@
         ]
       },
       {
-        "name": "godot_node_path_get_property",
+        "name": "godot_node_path_get_concatenated_subnames",
         "return_type": "godot_string",
         "arguments": [
           ["const godot_node_path *", "p_self"]
@@ -3496,7 +3615,7 @@
         "return_type": "void",
         "arguments": [
           ["godot_transform *", "p_self"],
-          ["godot_basis *", "p_v"]
+          ["const godot_basis *", "p_v"]
         ]
       },
       {
@@ -3511,7 +3630,7 @@
         "return_type": "void",
         "arguments": [
           ["godot_transform *", "p_self"],
-          ["godot_vector3 *", "p_v"]
+          ["const godot_vector3 *", "p_v"]
         ]
       },
       {
@@ -3845,7 +3964,7 @@
         "name": "godot_variant_new_bool",
         "return_type": "void",
         "arguments": [
-          ["godot_variant *", "p_v"],
+          ["godot_variant *", "r_dest"],
           ["const godot_bool", "p_b"]
         ]
       },
@@ -4304,6 +4423,27 @@
         ]
       },
       {
+        "name": "godot_char_string_length",
+        "return_type": "godot_int",
+        "arguments": [
+          ["const godot_char_string *", "p_cs"]
+        ]
+      },
+      {
+        "name": "godot_char_string_get_data",
+        "return_type": "const char *",
+        "arguments": [
+          ["const godot_char_string *", "p_cs"]
+        ]
+      },
+      {
+        "name": "godot_char_string_destroy",
+        "return_type": "void",
+        "arguments": [
+          ["godot_char_string *", "p_cs"]
+        ]
+      },
+      {
         "name": "godot_string_new",
         "return_type": "void",
         "arguments": [
@@ -4319,30 +4459,12 @@
         ]
       },
       {
-        "name": "godot_string_new_data",
-        "return_type": "void",
-        "arguments": [
-          ["godot_string *", "r_dest"],
-          ["const char *", "p_contents"],
-          ["const int", "p_size"]
-        ]
-      },
-      {
-        "name": "godot_string_new_unicode_data",
+        "name": "godot_string_new_with_wide_string",
         "return_type": "void",
         "arguments": [
           ["godot_string *", "r_dest"],
           ["const wchar_t *", "p_contents"],
           ["const int", "p_size"]
-        ]
-      },
-      {
-        "name": "godot_string_get_data",
-        "return_type": "void",
-        "arguments": [
-          ["const godot_string *", "p_self"],
-          ["char *", "p_dest"],
-          ["int *", "p_size"]
         ]
       },
       {
@@ -4362,7 +4484,7 @@
         ]
       },
       {
-        "name": "godot_string_unicode_str",
+	"name": "godot_string_wide_str",
         "return_type": "const wchar_t *",
         "arguments": [
           ["const godot_string *", "p_self"]
@@ -4397,6 +4519,30 @@
         "return_type": "godot_int",
         "arguments": [
           ["const godot_string *", "p_self"]
+        ]
+      },
+      {
+        "name": "godot_string_casecmp_to",
+        "return_type": "signed char",
+        "arguments": [
+          ["const godot_string *", "p_self"],
+          ["const godot_string *", "p_str"]
+        ]
+      },
+      {
+        "name": "godot_string_nocasecmp_to",
+        "return_type": "signed char",
+        "arguments": [
+          ["const godot_string *", "p_self"],
+          ["const godot_string *", "p_str"]
+        ]
+      },
+      {
+        "name": "godot_string_naturalnocasecmp_to",
+        "return_type": "signed char",
+        "arguments": [
+          ["const godot_string *", "p_self"],
+          ["const godot_string *", "p_str"]
         ]
       },
       {
@@ -5105,26 +5251,23 @@
       },
       {
         "name": "godot_string_ascii",
-        "return_type": "void",
+        "return_type": "godot_char_string",
         "arguments": [
-          ["godot_string *", "p_self"],
-          ["char *", "result"]
+	  ["const godot_string *", "p_self"]
         ]
       },
       {
         "name": "godot_string_ascii_extended",
-        "return_type": "void",
+        "return_type": "godot_char_string",
         "arguments": [
-          ["godot_string *", "p_self"],
-          ["char *", "result"]
+	  ["const godot_string *", "p_self"]
         ]
       },
       {
         "name": "godot_string_utf8",
-        "return_type": "void",
+        "return_type": "godot_char_string",
         "arguments": [
-          ["godot_string *", "p_self"],
-          ["char *", "result"]
+	  ["const godot_string *", "p_self"]
         ]
       },
       {
@@ -5549,6 +5692,12 @@
         ]
       },
       {
+        "name": "godot_get_global_constants",
+        "return_type": "godot_dictionary",
+        "arguments": [
+        ]
+      },
+      {
         "name": "godot_register_native_call_type",
         "return_type": "void",
         "arguments": [
@@ -5613,6 +5762,104 @@
       "version": {
         "major": 1,
         "minor": 0
+      },
+      "next": {
+	"type": "NATIVESCRIPT",
+	"version": {
+	  "major": 1,
+	  "minor": 1
+	},
+	"next": null,
+	"api": [
+          {
+	    "name": "godot_nativescript_set_method_argument_information",
+            "return_type": "void",
+            "arguments": [
+              ["void *", "p_gdnative_handle"],
+              ["const char *", "p_name"],
+              ["const char *", "p_function_name"],
+              ["int", "p_num_args"],
+              ["const godot_method_arg *", "p_args"]
+            ]
+          },
+          {
+	    "name": "godot_nativescript_set_class_documentation",
+            "return_type": "void",
+            "arguments": [
+              ["void *", "p_gdnative_handle"],
+              ["const char *", "p_name"],
+              ["godot_string", "p_documentation"]
+            ]
+          },
+          {
+	    "name": "godot_nativescript_set_method_documentation",
+            "return_type": "void",
+            "arguments": [
+              ["void *", "p_gdnative_handle"],
+              ["const char *", "p_name"],
+              ["const char *", "p_function_name"],
+              ["godot_string", "p_documentation"]
+            ]
+          },
+          {
+	    "name": "godot_nativescript_set_property_documentation",
+            "return_type": "void",
+            "arguments": [
+              ["void *", "p_gdnative_handle"],
+              ["const char *", "p_name"],
+              ["const char *", "p_path"],
+              ["godot_string", "p_documentation"]
+            ]
+          },
+          {
+	    "name": "godot_nativescript_set_signal_documentation",
+            "return_type": "void",
+            "arguments": [
+              ["void *", "p_gdnative_handle"],
+              ["const char *", "p_name"],
+              ["const char *", "p_signal_name"],
+              ["godot_string", "p_documentation"]
+            ]
+          },
+          {
+            "name": "godot_nativescript_set_type_tag",
+            "return_type": "void",
+            "arguments": [
+              ["void *", "p_gdnative_handle"],
+              ["const char *", "p_name"],
+              ["const void *", "p_type_tag"]
+            ]
+          },
+          {
+            "name": "godot_nativescript_get_type_tag",
+            "return_type": "const void *",
+            "arguments": [
+              ["const godot_object *", "p_object"]
+            ]
+          },
+          {
+            "name": "godot_nativescript_register_instance_binding_data_functions",
+            "return_type": "int",
+            "arguments": [
+              ["godot_instance_binding_functions", "p_binding_functions"]
+            ]
+          },
+          {
+            "name": "godot_nativescript_unregister_instance_binding_data_functions",
+            "return_type": "void",
+            "arguments": [
+              ["int", "p_idx"]
+            ]
+          },
+          {
+            "name": "godot_nativescript_get_instance_binding_data",
+            "return_type": "void *",
+            "arguments": [
+              ["int", "p_idx"],
+	      ["godot_object *", "p_object"]
+            ]
+          }
+	]
       },
       "api": [
         {
@@ -5684,6 +5931,7 @@
         "major": 1,
         "minor": 0
       },
+      "next": null,
       "api": [
         {
           "name": "godot_pluginscript_register_language",
@@ -5700,6 +5948,7 @@
         "major": 1,
         "minor": 0
       },
+      "next": null,
       "api": [
         {
           "name": "godot_arvr_register_interface",

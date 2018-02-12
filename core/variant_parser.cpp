@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "variant_parser.h"
 
 #include "core/string_buffer.h"
@@ -177,7 +178,7 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 			};
 			case '#': {
 
-				StringBuffer color_str;
+				StringBuffer<> color_str;
 				color_str += '#';
 				while (true) {
 					CharType ch = p_stream->get_char();
@@ -298,7 +299,7 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 				if (cchar == '-' || (cchar >= '0' && cchar <= '9')) {
 					//a number
 
-					StringBuffer num;
+					StringBuffer<> num;
 #define READING_SIGN 0
 #define READING_INT 1
 #define READING_DEC 2
@@ -377,7 +378,7 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 
 				} else if ((cchar >= 'A' && cchar <= 'Z') || (cchar >= 'a' && cchar <= 'z') || cchar == '_') {
 
-					StringBuffer id;
+					StringBuffer<> id;
 					bool first = true;
 
 					while ((cchar >= 'A' && cchar <= 'Z') || (cchar >= 'a' && cchar <= 'z') || cchar == '_' || (!first && cchar >= '0' && cchar <= '9')) {

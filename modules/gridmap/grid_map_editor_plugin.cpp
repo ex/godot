@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "grid_map_editor_plugin.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
@@ -621,6 +622,16 @@ bool GridMapEditor::forward_spatial_input_event(Camera *p_camera, const Ref<Inpu
 	if (mm.is_valid()) {
 
 		return do_input_action(p_camera, mm->get_position(), false);
+	}
+
+	Ref<InputEventPanGesture> pan_gesture = p_event;
+	if (pan_gesture.is_valid()) {
+
+		if (pan_gesture->get_command() || pan_gesture->get_shift()) {
+			const real_t delta = pan_gesture->get_delta().y;
+			floor->set_value(floor->get_value() + SGN(delta));
+			return true;
+		}
 	}
 
 	return false;

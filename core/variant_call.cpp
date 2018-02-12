@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "variant.h"
 
 #include "core_string_names.h"
@@ -101,9 +102,10 @@ struct _VariantCall {
 				const Variant *newargs[VARIANT_ARG_MAX];
 				for (int i = 0; i < p_argcount; i++)
 					newargs[i] = p_args[i];
-				int defargcount = def_argcount;
+				// fill in any remaining parameters with defaults
+				int first_default_arg = arg_count - def_argcount;
 				for (int i = p_argcount; i < arg_count; i++)
-					newargs[i] = &default_args[defargcount - (i - p_argcount) - 1]; //default arguments
+					newargs[i] = &default_args[i - first_default_arg];
 #ifdef DEBUG_ENABLED
 				if (!verify_arguments(newargs, r_error))
 					return;
@@ -130,9 +132,9 @@ struct _VariantCall {
 		StringName name;
 		Variant::Type type;
 		Arg() { type = Variant::NIL; }
-		Arg(Variant::Type p_type, const StringName &p_name)
-			: name(p_name),
-			  type(p_type) {
+		Arg(Variant::Type p_type, const StringName &p_name) :
+				name(p_name),
+				type(p_type) {
 		}
 	};
 
@@ -254,7 +256,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM2R(String, replacen);
 	VCALL_LOCALMEM2R(String, insert);
 	VCALL_LOCALMEM0R(String, capitalize);
-	VCALL_LOCALMEM2R(String, split);
+	VCALL_LOCALMEM3R(String, split);
 	VCALL_LOCALMEM2R(String, split_floats);
 	VCALL_LOCALMEM0R(String, to_upper);
 	VCALL_LOCALMEM0R(String, to_lower);
@@ -360,6 +362,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM2R(Rect2, grow_margin);
 	VCALL_LOCALMEM4R(Rect2, grow_individual);
 	VCALL_LOCALMEM1R(Rect2, expand);
+	VCALL_LOCALMEM0R(Rect2, abs);
 
 	VCALL_LOCALMEM0R(Vector3, min_axis);
 	VCALL_LOCALMEM0R(Vector3, max_axis);
@@ -437,6 +440,8 @@ struct _VariantCall {
 	VCALL_LOCALMEM0R(Color, contrasted);
 	VCALL_LOCALMEM2R(Color, linear_interpolate);
 	VCALL_LOCALMEM1R(Color, blend);
+	VCALL_LOCALMEM1R(Color, lightened);
+	VCALL_LOCALMEM1R(Color, darkened);
 	VCALL_LOCALMEM1R(Color, to_html);
 
 	VCALL_LOCALMEM0R(RID, get_id);
@@ -446,7 +451,8 @@ struct _VariantCall {
 	VCALL_LOCALMEM1R(NodePath, get_name);
 	VCALL_LOCALMEM0R(NodePath, get_subname_count);
 	VCALL_LOCALMEM1R(NodePath, get_subname);
-	VCALL_LOCALMEM0R(NodePath, get_property);
+	VCALL_LOCALMEM0R(NodePath, get_concatenated_subnames);
+	VCALL_LOCALMEM0R(NodePath, get_as_property_path);
 	VCALL_LOCALMEM0R(NodePath, is_empty);
 
 	VCALL_LOCALMEM0R(Dictionary, size);
@@ -458,6 +464,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM0R(Dictionary, hash);
 	VCALL_LOCALMEM0R(Dictionary, keys);
 	VCALL_LOCALMEM0R(Dictionary, values);
+	VCALL_LOCALMEM0R(Dictionary, duplicate);
 
 	VCALL_LOCALMEM2(Array, set);
 	VCALL_LOCALMEM1R(Array, get);
@@ -483,6 +490,8 @@ struct _VariantCall {
 	VCALL_LOCALMEM1(Array, erase);
 	VCALL_LOCALMEM0(Array, sort);
 	VCALL_LOCALMEM2(Array, sort_custom);
+	VCALL_LOCALMEM2R(Array, bsearch);
+	VCALL_LOCALMEM4R(Array, bsearch_custom);
 	VCALL_LOCALMEM0R(Array, duplicate);
 	VCALL_LOCALMEM0(Array, invert);
 
@@ -494,7 +503,7 @@ struct _VariantCall {
 			PoolByteArray::Read r = ba->read();
 			CharString cs;
 			cs.resize(ba->size() + 1);
-			copymem(cs.ptr(), r.ptr(), ba->size());
+			copymem(cs.ptrw(), r.ptr(), ba->size());
 			cs[ba->size()] = 0;
 
 			s = cs.get_data();
@@ -895,11 +904,6 @@ struct _VariantCall {
 	static void Basis_init2(Variant &r_ret, const Variant **p_args) {
 
 		r_ret = Basis(p_args[0]->operator Vector3(), p_args[1]->operator real_t());
-	}
-
-	static void Basis_init3(Variant &r_ret, const Variant **p_args) {
-
-		r_ret = Basis(p_args[0]->operator Vector3());
 	}
 
 	static void Transform_init1(Variant &r_ret, const Variant **p_args) {
@@ -1445,7 +1449,7 @@ void register_variant_methods() {
 	ADDFUNC2R(STRING, STRING, String, replacen, STRING, "what", STRING, "forwhat", varray());
 	ADDFUNC2R(STRING, STRING, String, insert, INT, "position", STRING, "what", varray());
 	ADDFUNC0R(STRING, STRING, String, capitalize, varray());
-	ADDFUNC2R(STRING, POOL_STRING_ARRAY, String, split, STRING, "divisor", BOOL, "allow_empty", varray(true));
+	ADDFUNC3R(STRING, POOL_STRING_ARRAY, String, split, STRING, "divisor", BOOL, "allow_empty", INT, "maxsplit", varray(true, 0));
 	ADDFUNC2R(STRING, POOL_REAL_ARRAY, String, split_floats, STRING, "divisor", BOOL, "allow_empty", varray(true));
 
 	ADDFUNC0R(STRING, STRING, String, to_upper, varray());
@@ -1526,6 +1530,7 @@ void register_variant_methods() {
 	ADDFUNC2R(RECT2, RECT2, Rect2, grow_margin, INT, "margin", REAL, "by", varray());
 	ADDFUNC4R(RECT2, RECT2, Rect2, grow_individual, REAL, "left", REAL, "top", REAL, "right", REAL, " bottom", varray());
 	ADDFUNC1R(RECT2, RECT2, Rect2, expand, VECTOR2, "to", varray());
+	ADDFUNC0R(RECT2, RECT2, Rect2, abs, varray());
 
 	ADDFUNC0R(VECTOR3, INT, Vector3, min_axis, varray());
 	ADDFUNC0R(VECTOR3, INT, Vector3, max_axis, varray());
@@ -1534,7 +1539,7 @@ void register_variant_methods() {
 	ADDFUNC0R(VECTOR3, BOOL, Vector3, is_normalized, varray());
 	ADDFUNC0R(VECTOR3, VECTOR3, Vector3, normalized, varray());
 	ADDFUNC0R(VECTOR3, VECTOR3, Vector3, inverse, varray());
-	ADDFUNC1R(VECTOR3, VECTOR3, Vector3, snapped, REAL, "by", varray());
+	ADDFUNC1R(VECTOR3, VECTOR3, Vector3, snapped, VECTOR3, "by", varray());
 	ADDFUNC2R(VECTOR3, VECTOR3, Vector3, rotated, VECTOR3, "axis", REAL, "phi", varray());
 	ADDFUNC2R(VECTOR3, VECTOR3, Vector3, linear_interpolate, VECTOR3, "b", REAL, "t", varray());
 	ADDFUNC4R(VECTOR3, VECTOR3, Vector3, cubic_interpolate, VECTOR3, "b", VECTOR3, "pre_a", VECTOR3, "post_b", REAL, "t", varray());
@@ -1581,6 +1586,8 @@ void register_variant_methods() {
 	ADDFUNC0R(COLOR, COLOR, Color, contrasted, varray());
 	ADDFUNC2R(COLOR, COLOR, Color, linear_interpolate, COLOR, "b", REAL, "t", varray());
 	ADDFUNC1R(COLOR, COLOR, Color, blend, COLOR, "over", varray());
+	ADDFUNC1R(COLOR, COLOR, Color, lightened, REAL, "amount", varray());
+	ADDFUNC1R(COLOR, COLOR, Color, darkened, REAL, "amount", varray());
 	ADDFUNC1R(COLOR, STRING, Color, to_html, BOOL, "with_alpha", varray(true));
 
 	ADDFUNC0R(_RID, INT, RID, get_id, varray());
@@ -1590,7 +1597,8 @@ void register_variant_methods() {
 	ADDFUNC1R(NODE_PATH, STRING, NodePath, get_name, INT, "idx", varray());
 	ADDFUNC0R(NODE_PATH, INT, NodePath, get_subname_count, varray());
 	ADDFUNC1R(NODE_PATH, STRING, NodePath, get_subname, INT, "idx", varray());
-	ADDFUNC0R(NODE_PATH, STRING, NodePath, get_property, varray());
+	ADDFUNC0R(NODE_PATH, STRING, NodePath, get_concatenated_subnames, varray());
+	ADDFUNC0R(NODE_PATH, NODE_PATH, NodePath, get_as_property_path, varray());
 	ADDFUNC0R(NODE_PATH, BOOL, NodePath, is_empty, varray());
 
 	ADDFUNC0R(DICTIONARY, INT, Dictionary, size, varray());
@@ -1602,6 +1610,7 @@ void register_variant_methods() {
 	ADDFUNC0R(DICTIONARY, INT, Dictionary, hash, varray());
 	ADDFUNC0R(DICTIONARY, ARRAY, Dictionary, keys, varray());
 	ADDFUNC0R(DICTIONARY, ARRAY, Dictionary, values, varray());
+	ADDFUNC0R(DICTIONARY, DICTIONARY, Dictionary, duplicate, varray());
 
 	ADDFUNC0R(ARRAY, INT, Array, size, varray());
 	ADDFUNC0R(ARRAY, BOOL, Array, empty, varray());
@@ -1625,6 +1634,8 @@ void register_variant_methods() {
 	ADDFUNC0RNC(ARRAY, NIL, Array, pop_front, varray());
 	ADDFUNC0NC(ARRAY, NIL, Array, sort, varray());
 	ADDFUNC2NC(ARRAY, NIL, Array, sort_custom, OBJECT, "obj", STRING, "func", varray());
+	ADDFUNC2R(ARRAY, INT, Array, bsearch, NIL, "value", BOOL, "before", varray(true));
+	ADDFUNC4R(ARRAY, INT, Array, bsearch_custom, NIL, "value", OBJECT, "obj", STRING, "func", BOOL, "before", varray(true));
 	ADDFUNC0NC(ARRAY, NIL, Array, invert, varray());
 	ADDFUNC0RNC(ARRAY, ARRAY, Array, duplicate, varray());
 
@@ -1737,10 +1748,10 @@ void register_variant_methods() {
 	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, rotated, REAL, "phi", varray());
 	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, scaled, VECTOR2, "scale", varray());
 	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, translated, VECTOR2, "offset", varray());
-	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, xform, NIL, "v", varray());
-	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, xform_inv, NIL, "v", varray());
-	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, basis_xform, NIL, "v", varray());
-	ADDFUNC1R(TRANSFORM2D, TRANSFORM2D, Transform2D, basis_xform_inv, NIL, "v", varray());
+	ADDFUNC1R(TRANSFORM2D, NIL, Transform2D, xform, NIL, "v", varray());
+	ADDFUNC1R(TRANSFORM2D, NIL, Transform2D, xform_inv, NIL, "v", varray());
+	ADDFUNC1R(TRANSFORM2D, VECTOR2, Transform2D, basis_xform, VECTOR2, "v", varray());
+	ADDFUNC1R(TRANSFORM2D, VECTOR2, Transform2D, basis_xform_inv, VECTOR2, "v", varray());
 	ADDFUNC2R(TRANSFORM2D, TRANSFORM2D, Transform2D, interpolate_with, TRANSFORM2D, "transform", REAL, "weight", varray());
 
 	ADDFUNC0R(BASIS, BASIS, Basis, inverse, varray());
@@ -1795,7 +1806,6 @@ void register_variant_methods() {
 
 	_VariantCall::add_constructor(_VariantCall::Basis_init1, Variant::BASIS, "x_axis", Variant::VECTOR3, "y_axis", Variant::VECTOR3, "z_axis", Variant::VECTOR3);
 	_VariantCall::add_constructor(_VariantCall::Basis_init2, Variant::BASIS, "axis", Variant::VECTOR3, "phi", Variant::REAL);
-	_VariantCall::add_constructor(_VariantCall::Basis_init3, Variant::BASIS, "euler", Variant::VECTOR3);
 
 	_VariantCall::add_constructor(_VariantCall::Transform_init1, Variant::TRANSFORM, "x_axis", Variant::VECTOR3, "y_axis", Variant::VECTOR3, "z_axis", Variant::VECTOR3, "origin", Variant::VECTOR3);
 	_VariantCall::add_constructor(_VariantCall::Transform_init2, Variant::TRANSFORM, "basis", Variant::BASIS, "origin", Variant::VECTOR3);

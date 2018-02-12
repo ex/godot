@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,13 +27,14 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "gdscript.h"
 
+#include "core/engine.h"
 #include "editor/editor_settings.h"
 #include "gdscript_compiler.h"
 #include "global_constants.h"
 #include "os/file_access.h"
-#include "project_settings.h"
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_file_system.h"
@@ -280,10 +281,62 @@ void GDScriptLanguage::debug_get_stack_level_members(int p_level, List<String> *
 		p_values->push_back(instance->debug_get_member_by_index(E->get().index));
 	}
 }
-void GDScriptLanguage::debug_get_globals(List<String> *p_locals, List<Variant> *p_values, int p_max_subitems, int p_max_depth) {
 
-	//no globals are really reachable in gdscript
+ScriptInstance *GDScriptLanguage::debug_get_stack_level_instance(int p_level) {
+
+	ERR_FAIL_COND_V(_debug_parse_err_line >= 0, NULL);
+	ERR_FAIL_INDEX_V(p_level, _debug_call_stack_pos, NULL);
+
+	int l = _debug_call_stack_pos - p_level - 1;
+	ScriptInstance *instance = _call_stack[l].instance;
+
+	return instance;
 }
+
+void GDScriptLanguage::debug_get_globals(List<String> *p_globals, List<Variant> *p_values, int p_max_subitems, int p_max_depth) {
+
+	const Map<StringName, int> &name_idx = GDScriptLanguage::get_singleton()->get_global_map();
+	const Variant *globals = GDScriptLanguage::get_singleton()->get_global_array();
+
+	List<Pair<String, Variant> > cinfo;
+	get_public_constants(&cinfo);
+
+	for (const Map<StringName, int>::Element *E = name_idx.front(); E; E = E->next()) {
+
+		if (ClassDB::class_exists(E->key()) || Engine::get_singleton()->has_singleton(E->key()))
+			continue;
+
+		bool is_script_constant = false;
+		for (List<Pair<String, Variant> >::Element *CE = cinfo.front(); CE; CE = CE->next()) {
+			if (CE->get().first == E->key()) {
+				is_script_constant = true;
+				break;
+			}
+		}
+		if (is_script_constant)
+			continue;
+
+		const Variant &var = globals[E->value()];
+		if (Object *obj = var) {
+			if (Object::cast_to<GDScriptNativeClass>(obj))
+				continue;
+		}
+
+		bool skip = false;
+		for (int i = 0; i < GlobalConstants::get_global_constant_count(); i++) {
+			if (E->key() == GlobalConstants::get_global_constant_name(i)) {
+				skip = true;
+				break;
+			}
+		}
+		if (skip)
+			continue;
+
+		p_globals->push_back(E->key());
+		p_values->push_back(var);
+	}
+}
+
 String GDScriptLanguage::debug_parse_stack_level_expression(int p_level, const String &p_expression, int p_max_subitems, int p_max_depth) {
 
 	if (_debug_parse_err_line >= 0)
@@ -438,8 +491,8 @@ static Ref<Reference> _get_parent_class(GDScriptCompletionContext &context) {
 				path = context.base_path.plus_file(path);
 			}
 
-			if (ScriptCodeCompletionCache::get_sigleton())
-				script = ScriptCodeCompletionCache::get_sigleton()->get_cached_resource(path);
+			if (ScriptCodeCompletionCache::get_singleton())
+				script = ScriptCodeCompletionCache::get_singleton()->get_cached_resource(path);
 			else
 				script = ResourceLoader::load(path);
 
@@ -712,8 +765,8 @@ static bool _guess_expression_type(GDScriptCompletionContext &context, const GDS
 													//print_line("is a script");
 
 													Ref<Script> scr;
-													if (ScriptCodeCompletionCache::get_sigleton())
-														scr = ScriptCodeCompletionCache::get_sigleton()->get_cached_resource(script);
+													if (ScriptCodeCompletionCache::get_singleton())
+														scr = ScriptCodeCompletionCache::get_singleton()->get_cached_resource(script);
 													else
 														scr = ResourceLoader::load(script);
 
@@ -739,7 +792,7 @@ static bool _guess_expression_type(GDScriptCompletionContext &context, const GDS
 									}
 
 									Variant::CallError ce;
-									Variant ret = mb->call(baseptr, argptr.ptr(), argptr.size(), ce);
+									Variant ret = mb->call(baseptr, (const Variant **)argptr.ptr(), argptr.size(), ce);
 
 									if (ce.error == Variant::CallError::CALL_OK && ret.get_type() != Variant::NIL) {
 
@@ -1248,8 +1301,8 @@ static bool _guess_identifier_type(GDScriptCompletionContext &context, int p_lin
 					//print_line("is a script");
 
 					Ref<Script> scr;
-					if (ScriptCodeCompletionCache::get_sigleton())
-						scr = ScriptCodeCompletionCache::get_sigleton()->get_cached_resource(script);
+					if (ScriptCodeCompletionCache::get_singleton())
+						scr = ScriptCodeCompletionCache::get_singleton()->get_cached_resource(script);
 					else
 						scr = ResourceLoader::load(script);
 
@@ -1743,8 +1796,8 @@ static void _find_type_arguments(GDScriptCompletionContext &context, const GDScr
 			}
 
 		} else {
-//regular method
 
+		//regular method
 #if defined(DEBUG_METHODS_ENABLED) && defined(TOOLS_ENABLED)
 			if (p_argidx < m->get_argument_count()) {
 				PropertyInfo pi = m->get_argument_info(p_argidx);
@@ -2397,8 +2450,10 @@ Error GDScriptLanguage::complete_code(const String &p_code, const String &p_base
 		} break;
 		case GDScriptParser::COMPLETION_RESOURCE_PATH: {
 
-			if (EditorSettings::get_singleton()->get("text_editor/completion/complete_file_paths"))
+			if (EditorSettings::get_singleton()->get("text_editor/completion/complete_file_paths")) {
 				get_directory_contents(EditorFileSystem::get_singleton()->get_filesystem(), options);
+				r_forced = true;
+			}
 		} break;
 		case GDScriptParser::COMPLETION_ASSIGN: {
 #if defined(DEBUG_METHODS_ENABLED) && defined(TOOLS_ENABLED)

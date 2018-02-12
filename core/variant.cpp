@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "variant.h"
 
 #include "core_string_names.h"
@@ -66,8 +67,7 @@ String Variant::get_type_name(Variant::Type p_type) {
 			return "String";
 		} break;
 
-			// math types
-
+		// math types
 		case VECTOR2: {
 
 			return "Vector2";
@@ -513,6 +513,7 @@ bool Variant::can_convert_strict(Variant::Type p_type_from, Variant::Type p_type
 
 			static const Type valid[] = {
 				QUAT,
+				VECTOR3,
 				NIL
 			};
 
@@ -723,8 +724,7 @@ bool Variant::is_zero() const {
 
 		} break;
 
-			// math types
-
+		// math types
 		case VECTOR2: {
 
 			return *reinterpret_cast<const Vector2 *>(_data._mem) == Vector2();
@@ -932,8 +932,7 @@ void Variant::reference(const Variant &p_variant) {
 			memnew_placement(_data._mem, String(*reinterpret_cast<const String *>(p_variant._data._mem)));
 		} break;
 
-			// math types
-
+		// math types
 		case VECTOR2: {
 
 			memnew_placement(_data._mem, Vector2(*reinterpret_cast<const Vector2 *>(p_variant._data._mem)));
@@ -1632,7 +1631,9 @@ Variant::operator Basis() const {
 		return *_data._basis;
 	else if (type == QUAT)
 		return *reinterpret_cast<const Quat *>(_data._mem);
-	else if (type == TRANSFORM)
+	else if (type == VECTOR3) {
+		return Basis(*reinterpret_cast<const Vector3 *>(_data._mem));
+	} else if (type == TRANSFORM) // unexposed in Variant::can_convert?
 		return _data._transform->basis;
 	else
 		return Basis();
@@ -2502,8 +2503,7 @@ void Variant::operator=(const Variant &p_variant) {
 			*reinterpret_cast<String *>(_data._mem) = *reinterpret_cast<const String *>(p_variant._data._mem);
 		} break;
 
-			// math types
-
+		// math types
 		case VECTOR2: {
 
 			*reinterpret_cast<Vector2 *>(_data._mem) = *reinterpret_cast<const Vector2 *>(p_variant._data._mem);
@@ -2642,8 +2642,8 @@ uint32_t Variant::hash() const {
 
 			return reinterpret_cast<const String *>(_data._mem)->hash();
 		} break;
-			// math types
 
+		// math types
 		case VECTOR2: {
 
 			uint32_t hash = hash_djb2_one_float(reinterpret_cast<const Vector2 *>(_data._mem)->x);

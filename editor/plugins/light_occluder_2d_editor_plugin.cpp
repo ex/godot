@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "light_occluder_2d_editor_plugin.h"
 
 #include "canvas_item_editor_plugin.h"
@@ -318,7 +319,7 @@ bool LightOccluder2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) {
 	return false;
 }
 
-void LightOccluder2DEditor::forward_draw_over_canvas(Control *p_canvas) {
+void LightOccluder2DEditor::forward_draw_over_viewport(Control *p_overlay) {
 
 	if (!node || !node->get_occluder_polygon().is_valid())
 		return;

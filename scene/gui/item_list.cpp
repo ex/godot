@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "item_list.h"
 #include "os/os.h"
 #include "project_settings.h"
@@ -257,6 +258,20 @@ void ItemList::unselect(int p_idx) {
 	}
 	update();
 }
+
+void ItemList::unselect_all() {
+
+	if (items.size() < 1)
+		return;
+
+	for (int i = 0; i < items.size(); i++) {
+
+		items[i].selected = false;
+	}
+
+	update();
+}
+
 bool ItemList::is_selected(int p_idx) const {
 
 	ERR_FAIL_INDEX_V(p_idx, items.size(), false);
@@ -525,6 +540,14 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 
 			return;
 		}
+		if (mb->get_button_index() == BUTTON_RIGHT) {
+			emit_signal("rmb_clicked", mb->get_position());
+
+			return;
+		}
+
+		// Since closest is null, more likely we clicked on empty space, so send signal to interested controls. Allows, for example, implement items deselecting.
+		emit_signal("nothing_selected");
 	}
 	if (mb.is_valid() && mb->get_button_index() == BUTTON_WHEEL_UP && mb->is_pressed()) {
 
@@ -707,6 +730,12 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 				}
 			}
 		}
+	}
+
+	Ref<InputEventPanGesture> pan_gesture = p_event;
+	if (pan_gesture.is_valid()) {
+
+		scroll_bar->set_value(scroll_bar->get_value() + scroll_bar->get_page() * pan_gesture->get_delta().y / 8);
 	}
 }
 
@@ -902,6 +931,9 @@ void ItemList::_notification(int p_what) {
 						scroll_bar->hide();
 					} else {
 						scroll_bar->show();
+
+						if (do_autoscroll_to_bottom)
+							scroll_bar->set_value(max);
 					}
 					break;
 				}
@@ -1238,6 +1270,15 @@ Vector<int> ItemList::get_selected_items() {
 	return selected;
 }
 
+bool ItemList::is_anything_selected() {
+	for (int i = 0; i < items.size(); i++) {
+		if (items[i].selected)
+			return true;
+	}
+
+	return false;
+}
+
 void ItemList::_set_items(const Array &p_items) {
 
 	ERR_FAIL_COND(p_items.size() % 3);
@@ -1274,6 +1315,11 @@ Size2 ItemList::get_minimum_size() const {
 		return Size2(0, auto_height_value);
 	}
 	return Size2();
+}
+
+void ItemList::set_autoscroll_to_bottom(const bool p_enable) {
+
+	do_autoscroll_to_bottom = p_enable;
 }
 
 void ItemList::set_auto_height(bool p_enable) {
@@ -1373,7 +1419,7 @@ void ItemList::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_set_items"), &ItemList::_set_items);
 	ClassDB::bind_method(D_METHOD("_get_items"), &ItemList::_get_items);
 
-	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "items", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "_set_items", "_get_items");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "items", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "_set_items", "_get_items");
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "select_mode", PROPERTY_HINT_ENUM, "Single,Multi"), "set_select_mode", "get_select_mode");
 	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "allow_rmb_select"), "set_allow_rmb_select", "get_allow_rmb_select");
@@ -1386,6 +1432,7 @@ void ItemList::_bind_methods() {
 	ADD_GROUP("Icon", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "icon_mode", PROPERTY_HINT_ENUM, "Top,Left"), "set_icon_mode", "get_icon_mode");
 	ADD_PROPERTYNO(PropertyInfo(Variant::REAL, "icon_scale"), "set_icon_scale", "get_icon_scale");
+	ADD_PROPERTYNO(PropertyInfo(Variant::VECTOR2, "fixed_icon_size"), "set_fixed_icon_size", "get_fixed_icon_size");
 
 	BIND_ENUM_CONSTANT(ICON_MODE_TOP);
 	BIND_ENUM_CONSTANT(ICON_MODE_LEFT);
@@ -1397,6 +1444,8 @@ void ItemList::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("item_rmb_selected", PropertyInfo(Variant::INT, "index"), PropertyInfo(Variant::VECTOR2, "at_position")));
 	ADD_SIGNAL(MethodInfo("multi_selected", PropertyInfo(Variant::INT, "index"), PropertyInfo(Variant::BOOL, "selected")));
 	ADD_SIGNAL(MethodInfo("item_activated", PropertyInfo(Variant::INT, "index")));
+	ADD_SIGNAL(MethodInfo("rmb_clicked", PropertyInfo(Variant::VECTOR2, "at_position")));
+	ADD_SIGNAL(MethodInfo("nothing_selected"));
 
 	GLOBAL_DEF("gui/timers/incremental_search_max_interval_msec", 2000);
 }
@@ -1427,6 +1476,7 @@ ItemList::ItemList() {
 	ensure_selected_visible = false;
 	defer_select_single = -1;
 	allow_rmb_select = false;
+	do_autoscroll_to_bottom = false;
 
 	icon_scale = 1.0f;
 	set_clip_contents(true);

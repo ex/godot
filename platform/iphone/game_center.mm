@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifdef GAME_CENTER_ENABLED
 
 #include "game_center.h"
@@ -109,7 +110,7 @@ void GameCenter::connect() {
 				GameCenter::get_singleton()->authenticated = true;
 			} else {
 				ret["result"] = "error";
-				ret["error_code"] = error.code;
+				ret["error_code"] = (int64_t)error.code;
 				ret["error_description"] = [error.localizedDescription UTF8String];
 				GameCenter::get_singleton()->authenticated = false;
 			};
@@ -145,7 +146,7 @@ Error GameCenter::post_score(Variant p_score) {
 					ret["result"] = "ok";
 				} else {
 					ret["result"] = "error";
-					ret["error_code"] = error.code;
+					ret["error_code"] = (int64_t)error.code;
 					ret["error_description"] = [error.localizedDescription UTF8String];
 				};
 
@@ -183,7 +184,7 @@ Error GameCenter::award_achievement(Variant p_params) {
 						ret["result"] = "ok";
 					} else {
 						ret["result"] = "error";
-						ret["error_code"] = error.code;
+						ret["error_code"] = (int64_t)error.code;
 					};
 
 					pending_events.push_back(ret);
@@ -241,7 +242,7 @@ void GameCenter::request_achievement_descriptions() {
 
 		} else {
 			ret["result"] = "error";
-			ret["error_code"] = error.code;
+			ret["error_code"] = (int64_t)error.code;
 		};
 
 		pending_events.push_back(ret);
@@ -273,7 +274,7 @@ void GameCenter::request_achievements() {
 
 		} else {
 			ret["result"] = "error";
-			ret["error_code"] = error.code;
+			ret["error_code"] = (int64_t)error.code;
 		};
 
 		pending_events.push_back(ret);
@@ -289,7 +290,7 @@ void GameCenter::reset_achievements() {
 			ret["result"] = "ok";
 		} else {
 			ret["result"] = "error";
-			ret["error_code"] = error.code;
+			ret["error_code"] = (int64_t)error.code;
 		};
 
 		pending_events.push_back(ret);
@@ -358,7 +359,7 @@ Error GameCenter::request_identity_verification_signature() {
 			ret["player_id"] = [player.playerID UTF8String];
 		} else {
 			ret["result"] = "error";
-			ret["error_code"] = error.code;
+			ret["error_code"] = (int64_t)error.code;
 			ret["error_description"] = [error.localizedDescription UTF8String];
 		};
 

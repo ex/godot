@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "gdscript.h"
 
 #include "engine.h"
@@ -100,7 +101,7 @@ GDScriptInstance *GDScript::_create_instance(const Variant **p_args, int p_argco
 #endif
 	instance->owner->set_script_instance(instance);
 
-/* STEP 2, INITIALIZE AND CONSRTUCT */
+	/* STEP 2, INITIALIZE AND CONSRTUCT */
 
 #ifndef NO_THREADS
 	GDScriptLanguage::singleton->lock->lock();
@@ -615,6 +616,23 @@ ScriptLanguage *GDScript::get_language() const {
 	return GDScriptLanguage::get_singleton();
 }
 
+void GDScript::get_constants(Map<StringName, Variant> *p_constants) {
+
+	if (p_constants) {
+		for (Map<StringName, Variant>::Element *E = constants.front(); E; E = E->next()) {
+			(*p_constants)[E->key()] = E->value();
+		}
+	}
+}
+
+void GDScript::get_members(Set<StringName> *p_members) {
+	if (p_members) {
+		for (Set<StringName>::Element *E = members.front(); E; E = E->next()) {
+			p_members->insert(E->get());
+		}
+	}
+}
+
 Variant GDScript::call(const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
 
 	GDScript *top = this;
@@ -687,7 +705,7 @@ bool GDScript::_set(const StringName &p_name, const Variant &p_value) {
 
 void GDScript::_get_property_list(List<PropertyInfo> *p_properties) const {
 
-	p_properties->push_back(PropertyInfo(Variant::STRING, "script/source", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR));
+	p_properties->push_back(PropertyInfo(Variant::STRING, "script/source", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
 }
 
 void GDScript::_bind_methods() {
@@ -721,7 +739,7 @@ Error GDScript::load_byte_code(const String &p_path) {
 		Error err = fae->open_and_parse(fa, key, FileAccessEncrypted::MODE_READ);
 		ERR_FAIL_COND_V(err, err);
 		bytecode.resize(fae->get_len());
-		fae->get_buffer(bytecode.ptr(), bytecode.size());
+		fae->get_buffer(bytecode.ptrw(), bytecode.size());
 		memdelete(fae);
 	} else {
 
@@ -859,8 +877,8 @@ void GDScript::get_script_signal_list(List<MethodInfo> *r_signals) const {
 #endif
 }
 
-GDScript::GDScript()
-	: script_list(this) {
+GDScript::GDScript() :
+		script_list(this) {
 
 	_static_ref = this;
 	valid = false;
@@ -1307,7 +1325,7 @@ void GDScriptLanguage::_add_global(const StringName &p_name, const Variant &p_va
 	}
 	globals[p_name] = global_array.size();
 	global_array.push_back(p_value);
-	_global_array = global_array.ptr();
+	_global_array = global_array.ptrw();
 }
 
 void GDScriptLanguage::add_global_constant(const StringName &p_variable, const Variant &p_value) {

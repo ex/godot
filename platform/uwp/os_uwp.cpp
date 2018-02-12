@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "os_uwp.h"
 
 #include "drivers/gles3/rasterizer_gles3.h"
@@ -34,13 +35,13 @@
 #include "drivers/windows/dir_access_windows.h"
 #include "drivers/windows/file_access_windows.h"
 #include "drivers/windows/mutex_windows.h"
+#include "drivers/windows/packet_peer_udp_winsock.h"
 #include "drivers/windows/rw_lock_windows.h"
 #include "drivers/windows/semaphore_windows.h"
+#include "drivers/windows/stream_peer_tcp_winsock.h"
+#include "drivers/windows/tcp_server_winsock.h"
 #include "io/marshalls.h"
 #include "main/main.h"
-#include "platform/windows/packet_peer_udp_winsock.h"
-#include "platform/windows/stream_peer_winsock.h"
-#include "platform/windows/tcp_server_winsock.h"
 #include "platform/windows/windows_terminal_logger.h"
 #include "project_settings.h"
 #include "servers/audio_server.h"
@@ -163,7 +164,7 @@ void OSUWP::initialize_core() {
 	DirAccess::make_default<DirAccessWindows>(DirAccess::ACCESS_FILESYSTEM);
 
 	TCPServerWinsock::make_default();
-	StreamPeerWinsock::make_default();
+	StreamPeerTCPWinsock::make_default();
 	PacketPeerUDPWinsock::make_default();
 
 	// We need to know how often the clock is updated
@@ -177,15 +178,6 @@ void OSUWP::initialize_core() {
 	IP_Unix::make_default();
 
 	cursor_shape = CURSOR_ARROW;
-}
-
-void OSUWP::initialize_logger() {
-	Vector<Logger *> loggers;
-	loggers.push_back(memnew(WindowsTerminalLogger));
-	// FIXME: Reenable once we figure out how to get this properly in user://
-	// instead of littering the user's working dirs (res:// + pwd) with log files (GH-12277)
-	//loggers.push_back(memnew(RotatedFileLogger("user://logs/log.txt")));
-	_set_logger(memnew(CompositeLogger(loggers)));
 }
 
 bool OSUWP::can_draw() const {
@@ -203,7 +195,7 @@ void OSUWP::screen_size_changed() {
 	gl_context->reset();
 };
 
-void OSUWP::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
+Error OSUWP::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
 
 	main_loop = NULL;
 	outside = true;
@@ -250,6 +242,7 @@ void OSUWP::initialize(const VideoMode &p_desired, int p_video_driver, int p_aud
 
 	RasterizerGLES3::register_config();
 	RasterizerGLES3::make_current();
+	gl_context->set_use_vsync(vm.use_vsync);
 
 	visual_server = memnew(VisualServerRaster);
 	// FIXME: Reimplement threaded rendering? Or remove?
@@ -305,6 +298,8 @@ void OSUWP::initialize(const VideoMode &p_desired, int p_video_driver, int p_aud
 		display_request->RequestActive();
 
 	set_keep_screen_on(GLOBAL_DEF("display/window/keep_screen_on", true));
+
+	return OK;
 }
 
 void OSUWP::set_clipboard(const String &p_text) {
@@ -659,6 +654,10 @@ void OSUWP::set_cursor_shape(CursorShape p_shape) {
 	cursor_shape = p_shape;
 }
 
+void OSUWP::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
+	// TODO
+}
+
 Error OSUWP::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr) {
 
 	return FAILED;
@@ -753,6 +752,51 @@ void OSUWP::hide_virtual_keyboard() {
 	pane->TryHide();
 }
 
+static String format_error_message(DWORD id) {
+
+	LPWSTR messageBuffer = NULL;
+	size_t size = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&messageBuffer, 0, NULL);
+
+	String msg = "Error " + itos(id) + ": " + String(messageBuffer, size);
+
+	LocalFree(messageBuffer);
+
+	return msg;
+}
+
+Error OSUWP::open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path) {
+
+	String full_path = "game/" + p_path;
+	p_library_handle = (void *)LoadPackagedLibrary(full_path.c_str(), 0);
+
+	if (!p_library_handle) {
+		ERR_EXPLAIN("Can't open dynamic library: " + full_path + ". Error: " + format_error_message(GetLastError()));
+		ERR_FAIL_V(ERR_CANT_OPEN);
+	}
+	return OK;
+}
+
+Error OSUWP::close_dynamic_library(void *p_library_handle) {
+	if (!FreeLibrary((HMODULE)p_library_handle)) {
+		return FAILED;
+	}
+	return OK;
+}
+
+Error OSUWP::get_dynamic_library_symbol_handle(void *p_library_handle, const String p_name, void *&p_symbol_handle, bool p_optional) {
+	p_symbol_handle = (void *)GetProcAddress((HMODULE)p_library_handle, p_name.utf8().get_data());
+	if (!p_symbol_handle) {
+		if (!p_optional) {
+			ERR_EXPLAIN("Can't resolve symbol " + p_name + ". Error: " + String::num(GetLastError()));
+			ERR_FAIL_V(ERR_CANT_RESOLVE);
+		} else {
+			return ERR_CANT_RESOLVE;
+		}
+	}
+	return OK;
+}
+
 void OSUWP::run() {
 
 	if (!main_loop)
@@ -834,7 +878,9 @@ OSUWP::OSUWP() {
 
 	AudioDriverManager::add_driver(&audio_driver);
 
-	_set_logger(memnew(WindowsTerminalLogger));
+	Vector<Logger *> loggers;
+	loggers.push_back(memnew(WindowsTerminalLogger));
+	_set_logger(memnew(CompositeLogger(loggers)));
 }
 
 OSUWP::~OSUWP() {

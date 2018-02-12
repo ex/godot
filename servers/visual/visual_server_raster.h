@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifndef VISUAL_SERVER_RASTER_H
 #define VISUAL_SERVER_RASTER_H
 
@@ -96,7 +97,6 @@ public:
 #define DISPLAY_CHANGED \
 	changes++;
 #endif
-		//	print_line(String("CHANGED: ") + __FUNCTION__);
 
 #define BIND0R(m_r, m_name) \
 	m_r m_name() { return BINDBASE->m_name(); }
@@ -167,6 +167,8 @@ public:
 	BIND1(texture_debug_usage, List<TextureInfo> *)
 
 	BIND1(textures_keep_original, bool)
+
+	BIND2(texture_set_proxy, RID, RID)
 
 	/* SKY API */
 
@@ -360,11 +362,30 @@ public:
 	BIND2(gi_probe_set_dynamic_data, RID, const PoolVector<int> &)
 	BIND1RC(PoolVector<int>, gi_probe_get_dynamic_data, RID)
 
+	/* LIGHTMAP CAPTURE */
+
+	BIND0R(RID, lightmap_capture_create)
+
+	BIND2(lightmap_capture_set_bounds, RID, const AABB &)
+	BIND1RC(AABB, lightmap_capture_get_bounds, RID)
+
+	BIND2(lightmap_capture_set_octree, RID, const PoolVector<uint8_t> &)
+	BIND1RC(PoolVector<uint8_t>, lightmap_capture_get_octree, RID)
+
+	BIND2(lightmap_capture_set_octree_cell_transform, RID, const Transform &)
+	BIND1RC(Transform, lightmap_capture_get_octree_cell_transform, RID)
+	BIND2(lightmap_capture_set_octree_cell_subdiv, RID, int)
+	BIND1RC(int, lightmap_capture_get_octree_cell_subdiv, RID)
+
+	BIND2(lightmap_capture_set_energy, RID, float)
+	BIND1RC(float, lightmap_capture_get_energy, RID)
+
 	/* PARTICLES */
 
 	BIND0R(RID, particles_create)
 
 	BIND2(particles_set_emitting, RID, bool)
+	BIND1R(bool, particles_get_emitting, RID)
 	BIND2(particles_set_amount, RID, int)
 	BIND2(particles_set_lifetime, RID, float)
 	BIND2(particles_set_one_shot, RID, bool)
@@ -503,6 +524,9 @@ public:
 	BIND3(instance_set_blend_shape_weight, RID, int, float)
 	BIND3(instance_set_surface_material, RID, int, RID)
 	BIND2(instance_set_visible, RID, bool)
+	BIND3(instance_set_use_lightmap, RID, RID, RID)
+
+	BIND2(instance_set_custom_aabb, RID, AABB)
 
 	BIND2(instance_attach_skeleton, RID, RID)
 	BIND2(instance_set_exterior, RID, bool)
@@ -548,6 +572,7 @@ public:
 
 	BIND6(canvas_item_add_line, RID, const Point2 &, const Point2 &, const Color &, float, bool)
 	BIND5(canvas_item_add_polyline, RID, const Vector<Point2> &, const Vector<Color> &, float, bool)
+	BIND5(canvas_item_add_multiline, RID, const Vector<Point2> &, const Vector<Color> &, float, bool)
 	BIND3(canvas_item_add_rect, RID, const Rect2 &, const Color &)
 	BIND4(canvas_item_add_circle, RID, const Point2 &, float, const Color &)
 	BIND7(canvas_item_add_texture_rect, RID, const Rect2 &, RID, bool, const Color &, bool, RID)
@@ -562,7 +587,7 @@ public:
 	BIND2(canvas_item_add_set_transform, RID, const Transform2D &)
 	BIND2(canvas_item_add_clip_ignore, RID, bool)
 	BIND2(canvas_item_set_sort_children_by_y, RID, bool)
-	BIND2(canvas_item_set_z, RID, int)
+	BIND2(canvas_item_set_z_index, RID, int)
 	BIND2(canvas_item_set_z_as_relative_to_parent, RID, bool)
 	BIND3(canvas_item_set_copy_to_backbuffer, RID, bool, const Rect2 &)
 
@@ -623,7 +648,7 @@ public:
 
 	virtual void request_frame_drawn_callback(Object *p_where, const StringName &p_method, const Variant &p_userdata);
 
-	virtual void draw();
+	virtual void draw(bool p_swap_buffers);
 	virtual void sync();
 	virtual bool has_changed() const;
 	virtual void init();
@@ -644,6 +669,8 @@ public:
 
 	virtual bool has_os_feature(const String &p_feature) const;
 	virtual void set_debug_generate_wireframes(bool p_generate);
+
+	virtual void call_set_use_vsync(bool p_enable);
 
 	VisualServerRaster();
 	~VisualServerRaster();

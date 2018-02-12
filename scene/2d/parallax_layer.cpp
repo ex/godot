@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "parallax_layer.h"
 
 #include "engine.h"
@@ -73,7 +74,8 @@ void ParallaxLayer::_update_mirroring() {
 
 		RID c = pb->get_world_2d()->get_canvas();
 		RID ci = get_canvas_item();
-		VisualServer::get_singleton()->canvas_set_item_mirroring(c, ci, mirroring);
+		Point2 mirrorScale = mirroring * get_scale();
+		VisualServer::get_singleton()->canvas_set_item_mirroring(c, ci, mirrorScale);
 	}
 }
 
@@ -116,18 +118,21 @@ void ParallaxLayer::set_base_offset_and_scale(const Point2 &p_offset, float p_sc
 
 	Point2 new_ofs = (screen_offset + (p_offset - screen_offset) * motion_scale) + motion_offset * p_scale + orig_offset * p_scale;
 
-	Vector2 mirror = Vector2(1, 1);
-
 	if (mirroring.x) {
-		mirror.x = -1;
+		double den = mirroring.x * p_scale;
+		double before = new_ofs.x;
+		new_ofs.x -= den * ceil(new_ofs.x / den);
 	}
 
 	if (mirroring.y) {
-		mirror.y = -1;
+		double den = mirroring.y * p_scale;
+		new_ofs.y -= den * ceil(new_ofs.y / den);
 	}
 
 	set_position(new_ofs);
-	set_scale(mirror * p_scale * orig_scale);
+	set_scale(Vector2(1, 1) * p_scale * orig_scale);
+
+	_update_mirroring();
 }
 
 String ParallaxLayer::get_configuration_warning() const {

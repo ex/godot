@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifndef OS_H
 #define OS_H
 
@@ -50,6 +51,7 @@ class OS {
 	List<String> _cmdline;
 	bool _keep_screen_on;
 	bool low_processor_usage_mode;
+	int low_processor_usage_mode_sleep_usec;
 	bool _verbose_stdout;
 	String _local_clipboard;
 	uint64_t _msec_splash;
@@ -57,15 +59,16 @@ class OS {
 	int _exit_code;
 	int _orientation;
 	bool _allow_hidpi;
+	bool _use_vsync;
 
 	char *last_error;
 
 	void *_stack_bottom;
 
-	Logger *_logger;
+	CompositeLogger *_logger;
 
 protected:
-	void _set_logger(Logger *p_logger);
+	void _set_logger(CompositeLogger *p_logger);
 
 public:
 	typedef void (*ImeCallback)(void *p_inp, String p_text, Point2 p_selection);
@@ -91,14 +94,16 @@ public:
 		bool resizable;
 		bool borderless_window;
 		bool maximized;
+		bool use_vsync;
 		float get_aspect() const { return (float)width / (float)height; }
-		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless_window = false, bool p_maximized = false) {
+		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless_window = false, bool p_maximized = false, bool p_use_vsync = false) {
 			width = p_width;
 			height = p_height;
 			fullscreen = p_fullscreen;
 			resizable = p_resizable;
 			borderless_window = p_borderless_window;
 			maximized = p_maximized;
+			use_vsync = p_use_vsync;
 		}
 	};
 
@@ -114,9 +119,10 @@ protected:
 	virtual int get_audio_driver_count() const = 0;
 	virtual const char *get_audio_driver_name(int p_driver) const = 0;
 
-	virtual void initialize_logger();
+	void add_logger(Logger *p_logger);
+
 	virtual void initialize_core() = 0;
-	virtual void initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) = 0;
+	virtual Error initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) = 0;
 
 	virtual void set_main_loop(MainLoop *p_main_loop) = 0;
 	virtual void delete_main_loop() = 0;
@@ -187,13 +193,13 @@ public:
 	virtual bool is_window_maximized() const { return true; }
 	virtual void request_attention() {}
 
-	virtual void set_borderless_window(int p_borderless) {}
+	virtual void set_borderless_window(bool p_borderless) {}
 	virtual bool get_borderless_window() { return 0; }
 
 	virtual void set_ime_position(const Point2 &p_pos) {}
 	virtual void set_ime_intermediate_text_callback(ImeCallback p_callback, void *p_inp) {}
 
-	virtual Error open_dynamic_library(const String p_path, void *&p_library_handle) { return ERR_UNAVAILABLE; }
+	virtual Error open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path = false) { return ERR_UNAVAILABLE; }
 	virtual Error close_dynamic_library(void *p_library_handle) { return ERR_UNAVAILABLE; }
 	virtual Error get_dynamic_library_symbol_handle(void *p_library_handle, const String p_name, void *&p_symbol_handle, bool p_optional = false) { return ERR_UNAVAILABLE; }
 
@@ -201,6 +207,8 @@ public:
 	virtual bool is_keep_screen_on() const;
 	virtual void set_low_processor_usage_mode(bool p_enabled);
 	virtual bool is_in_low_processor_usage_mode() const;
+	virtual void set_low_processor_usage_mode_sleep_usec(int p_usec);
+	virtual int get_low_processor_usage_mode_sleep_usec() const;
 
 	virtual String get_executable_path() const;
 	virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL, bool read_stderr = false) = 0;
@@ -318,6 +326,7 @@ public:
 	virtual int get_virtual_keyboard_height() const;
 
 	virtual void set_cursor_shape(CursorShape p_shape) = 0;
+	virtual void set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) = 0;
 
 	virtual bool get_swap_ok_cancel() { return false; }
 	virtual void dump_memory_to_file(const char *p_file);
@@ -334,7 +343,7 @@ public:
 
 	virtual String get_locale() const;
 
-	String get_safe_application_name() const;
+	String get_safe_dir_name(const String &p_dir_name, bool p_allow_dir_separator = false) const;
 	virtual String get_godot_dir_name() const;
 
 	virtual String get_data_path() const;
@@ -429,21 +438,23 @@ public:
 
 	virtual void set_context(int p_context);
 
-	virtual void set_use_vsync(bool p_enable);
-	virtual bool is_vsync_enabled() const;
+	//amazing hack because OpenGL needs this to be set on a separate thread..
+	//also core can't access servers, so a callback must be used
+	typedef void (*SwitchVSyncCallbackInThread)(bool);
+
+	static SwitchVSyncCallbackInThread switch_vsync_function;
+	void set_use_vsync(bool p_enable);
+	bool is_vsync_enabled() const;
+
+	//real, actual overridable function to switch vsync, which needs to be called from graphics thread if needed
+	virtual void _set_use_vsync(bool p_enable) {}
 
 	virtual OS::PowerState get_power_state();
 	virtual int get_power_seconds_left();
 	virtual int get_power_percent_left();
 
+	virtual void force_process_input(){};
 	bool has_feature(const String &p_feature);
-
-	/**
-	 * Returns the stack bottom of the main thread of the application.
-	 * This may be of use when integrating languages with garbage collectors that
-	 * need to check whether a pointer is on the stack.
-	 */
-	virtual void *get_stack_bottom() const;
 
 	bool is_hidpi_allowed() const { return _allow_hidpi; }
 	OS();

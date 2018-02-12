@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "gdscript_functions.h"
 
 #include "class_db.h"
@@ -84,6 +85,8 @@ const char *GDScriptFunctions::get_func_name(Function p_func) {
 		"rad2deg",
 		"linear2db",
 		"db2linear",
+		"polar2cartesian",
+		"cartesian2polar",
 		"wrapi",
 		"wrapf",
 		"max",
@@ -407,6 +410,22 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 			VALIDATE_ARG_COUNT(1);
 			VALIDATE_ARG_NUM(0);
 			r_ret = Math::db2linear((double)*p_args[0]);
+		} break;
+		case MATH_POLAR2CARTESIAN: {
+			VALIDATE_ARG_COUNT(2);
+			VALIDATE_ARG_NUM(0);
+			VALIDATE_ARG_NUM(1);
+			double r = *p_args[0];
+			double th = *p_args[1];
+			r_ret = Vector2(r * Math::cos(th), r * Math::sin(th));
+		} break;
+		case MATH_CARTESIAN2POLAR: {
+			VALIDATE_ARG_COUNT(2);
+			VALIDATE_ARG_NUM(0);
+			VALIDATE_ARG_NUM(1);
+			double x = *p_args[0];
+			double y = *p_args[1];
+			r_ret = Vector2(Math::sqrt(x * x + y * y), Math::atan2(y, x));
 		} break;
 		case MATH_WRAP: {
 			VALIDATE_ARG_COUNT(3);
@@ -1296,6 +1315,8 @@ bool GDScriptFunctions::is_deterministic(Function p_func) {
 		case MATH_RAD2DEG:
 		case MATH_LINEAR2DB:
 		case MATH_DB2LINEAR:
+		case MATH_POLAR2CARTESIAN:
+		case MATH_CARTESIAN2POLAR:
 		case MATH_WRAP:
 		case MATH_WRAPF:
 		case LOGIC_MAX:
@@ -1462,7 +1483,7 @@ MethodInfo GDScriptFunctions::get_info(Function p_func) {
 			return mi;
 		} break;
 		case MATH_INVERSE_LERP: {
-			MethodInfo mi("inverse_lerp", PropertyInfo(Variant::REAL, "from"), PropertyInfo(Variant::REAL, "to"), PropertyInfo(Variant::REAL, "value"));
+			MethodInfo mi("inverse_lerp", PropertyInfo(Variant::REAL, "from"), PropertyInfo(Variant::REAL, "to"), PropertyInfo(Variant::REAL, "weight"));
 			mi.return_val.type = Variant::REAL;
 			return mi;
 		} break;
@@ -1526,6 +1547,16 @@ MethodInfo GDScriptFunctions::get_info(Function p_func) {
 			mi.return_val.type = Variant::REAL;
 			return mi;
 		} break;
+		case MATH_POLAR2CARTESIAN: {
+			MethodInfo mi("polar2cartesian", PropertyInfo(Variant::REAL, "r"), PropertyInfo(Variant::REAL, "th"));
+			mi.return_val.type = Variant::VECTOR2;
+			return mi;
+		} break;
+		case MATH_CARTESIAN2POLAR: {
+			MethodInfo mi("cartesian2polar", PropertyInfo(Variant::REAL, "x"), PropertyInfo(Variant::REAL, "y"));
+			mi.return_val.type = Variant::VECTOR2;
+			return mi;
+		} break;
 		case MATH_WRAP: {
 			MethodInfo mi("wrapi", PropertyInfo(Variant::INT, "value"), PropertyInfo(Variant::INT, "min"), PropertyInfo(Variant::INT, "max"));
 			mi.return_val.type = Variant::INT;
@@ -1548,12 +1579,12 @@ MethodInfo GDScriptFunctions::get_info(Function p_func) {
 			return mi;
 		} break;
 		case LOGIC_CLAMP: {
-			MethodInfo mi("clamp", PropertyInfo(Variant::REAL, "val"), PropertyInfo(Variant::REAL, "min"), PropertyInfo(Variant::REAL, "max"));
+			MethodInfo mi("clamp", PropertyInfo(Variant::REAL, "value"), PropertyInfo(Variant::REAL, "min"), PropertyInfo(Variant::REAL, "max"));
 			mi.return_val.type = Variant::REAL;
 			return mi;
 		} break;
 		case LOGIC_NEAREST_PO2: {
-			MethodInfo mi("nearest_po2", PropertyInfo(Variant::INT, "val"));
+			MethodInfo mi("nearest_po2", PropertyInfo(Variant::INT, "value"));
 			mi.return_val.type = Variant::INT;
 			return mi;
 		} break;

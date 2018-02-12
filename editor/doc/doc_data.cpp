@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "doc_data.h"
 
 #include "engine.h"
@@ -214,7 +215,11 @@ void DocData::generate(bool p_basic_types) {
 	ClassDB::get_class_list(&classes);
 	classes.sort_custom<StringName::AlphCompare>();
 
+	bool skip_setter_getter_methods = true;
+
 	while (classes.size()) {
+
+		Set<StringName> setters_getters;
 
 		String name = classes.front()->get();
 		String cname = name;
@@ -231,7 +236,7 @@ void DocData::generate(bool p_basic_types) {
 		ClassDB::get_property_list(name, &properties, true);
 
 		for (List<PropertyInfo>::Element *E = properties.front(); E; E = E->next()) {
-			if (E->get().usage & PROPERTY_USAGE_GROUP || E->get().usage & PROPERTY_USAGE_CATEGORY)
+			if (E->get().usage & PROPERTY_USAGE_GROUP || E->get().usage & PROPERTY_USAGE_CATEGORY || E->get().usage & PROPERTY_USAGE_INTERNAL)
 				continue;
 
 			PropertyDoc prop;
@@ -266,6 +271,13 @@ void DocData::generate(bool p_basic_types) {
 						prop.type = Variant::get_type_name(retinfo.type);
 					}
 				}
+
+				setters_getters.insert(getter);
+			}
+
+			if (setter != StringName()) {
+
+				setters_getters.insert(setter);
 			}
 
 			if (!found_type) {
@@ -287,6 +299,9 @@ void DocData::generate(bool p_basic_types) {
 
 			if (E->get().name == "" || (E->get().name[0] == '_' && !(E->get().flags & METHOD_FLAG_VIRTUAL)))
 				continue; //hidden, don't count
+
+			if (skip_setter_getter_methods && setters_getters.has(E->get().name) && E->get().name.find("/") == -1)
+				continue;
 
 			MethodDoc method;
 
@@ -1067,9 +1082,9 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 			ConstantDoc &k = c.constants[i];
 			if (k.enumeration != String()) {
-				_write_string(f, 2, "<constant name=\"" + k.name + "\" value=\"" + k.value + "\">");
-			} else {
 				_write_string(f, 2, "<constant name=\"" + k.name + "\" value=\"" + k.value + "\" enum=\"" + k.enumeration + "\">");
+			} else {
+				_write_string(f, 2, "<constant name=\"" + k.name + "\" value=\"" + k.value + "\">");
 			}
 			_write_string(f, 3, k.description.strip_edges().xml_escape());
 			_write_string(f, 2, "</constant>");
@@ -1101,7 +1116,7 @@ Error DocData::load_compressed(const uint8_t *p_data, int p_compressed_size, int
 
 	Vector<uint8_t> data;
 	data.resize(p_uncompressed_size);
-	Compression::decompress(data.ptr(), p_uncompressed_size, p_data, p_compressed_size, Compression::MODE_DEFLATE);
+	Compression::decompress(data.ptrw(), p_uncompressed_size, p_data, p_compressed_size, Compression::MODE_DEFLATE);
 	class_list.clear();
 
 	Ref<XMLParser> parser = memnew(XMLParser);

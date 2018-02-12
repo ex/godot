@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "gdnative/array.h"
 
 #include "core/array.h"
@@ -300,6 +301,17 @@ void GDAPI godot_array_sort_custom(godot_array *p_self, godot_object *p_obj, con
 	Array *self = (Array *)p_self;
 	const String *func = (const String *)p_func;
 	self->sort_custom((Object *)p_obj, *func);
+}
+
+godot_int GDAPI godot_array_bsearch(godot_array *p_self, const godot_variant *p_value, const godot_bool p_before) {
+	Array *self = (Array *)p_self;
+	return self->bsearch((const Variant *)p_value, p_before);
+}
+
+godot_int GDAPI godot_array_bsearch_custom(godot_array *p_self, const godot_variant *p_value, godot_object *p_obj, const godot_string *p_func, const godot_bool p_before) {
+	Array *self = (Array *)p_self;
+	const String *func = (const String *)p_func;
+	return self->bsearch_custom((const Variant *)p_value, (Object *)p_obj, *func, p_before);
 }
 
 void GDAPI godot_array_destroy(godot_array *p_self) {

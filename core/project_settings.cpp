@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "project_settings.h"
 
 #include "bind/core_bind.h"
@@ -166,7 +167,7 @@ bool ProjectSettings::_set(const StringName &p_name, const Variant &p_value) {
 		}
 
 		if (props.has(p_name)) {
-			if (!props[p_name].overrided)
+			if (!props[p_name].overridden)
 				props[p_name].variant = p_value;
 
 		} else {
@@ -429,7 +430,7 @@ Error ProjectSettings::_load_settings_binary(const String p_path) {
 		uint32_t vlen = f->get_32();
 		Vector<uint8_t> d;
 		d.resize(vlen);
-		f->get_buffer(d.ptr(), vlen);
+		f->get_buffer(d.ptrw(), vlen);
 		Variant value;
 		Error err = decode_variant(value, d.ptr(), d.size());
 		ERR_EXPLAIN("Error decoding property: " + key);
@@ -891,7 +892,8 @@ ProjectSettings::ProjectSettings() {
 	custom_prop_info["application/run/main_scene"] = PropertyInfo(Variant::STRING, "application/run/main_scene", PROPERTY_HINT_FILE, "tscn,scn,res");
 	GLOBAL_DEF("application/run/disable_stdout", false);
 	GLOBAL_DEF("application/run/disable_stderr", false);
-	GLOBAL_DEF("application/config/use_shared_user_dir", true);
+	GLOBAL_DEF("application/config/use_custom_user_dir", false);
+	GLOBAL_DEF("application/config/custom_user_dir_name", "");
 
 	key.instance();
 	key->set_scancode(KEY_ENTER);

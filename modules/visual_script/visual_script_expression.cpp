@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "visual_script_expression.h"
 
 bool VisualScriptExpression::_set(const StringName &p_name, const Variant &p_value) {
@@ -1378,7 +1379,7 @@ public:
 					argp[i] = &arr[i];
 				}
 
-				r_ret = Variant::construct(constructor->data_type, argp.ptr(), argp.size(), ce);
+				r_ret = Variant::construct(constructor->data_type, (const Variant **)argp.ptr(), argp.size(), ce);
 
 				if (ce.error != Variant::CallError::CALL_OK) {
 					r_error_str = "Invalid arguments to construct '" + Variant::get_type_name(constructor->data_type) + "'.";
@@ -1405,7 +1406,7 @@ public:
 					argp[i] = &arr[i];
 				}
 
-				VisualScriptBuiltinFunc::exec_func(bifunc->func, argp.ptr(), &r_ret, ce, r_error_str);
+				VisualScriptBuiltinFunc::exec_func(bifunc->func, (const Variant **)argp.ptr(), &r_ret, ce, r_error_str);
 
 				if (ce.error != Variant::CallError::CALL_OK) {
 					r_error_str = "Builtin Call Failed. " + r_error_str;
@@ -1437,7 +1438,7 @@ public:
 					argp[i] = &arr[i];
 				}
 
-				r_ret = base.call(call->method, argp.ptr(), argp.size(), ce);
+				r_ret = base.call(call->method, (const Variant **)argp.ptr(), argp.size(), ce);
 
 				if (ce.error != Variant::CallError::CALL_OK) {
 					r_error_str = "On call to '" + String(call->method) + "':";

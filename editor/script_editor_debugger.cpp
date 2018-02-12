@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "script_editor_debugger.h"
 
 #include "editor_node.h"
@@ -45,6 +46,7 @@
 #include "scene/gui/tab_container.h"
 #include "scene/gui/texture_button.h"
 #include "scene/gui/tree.h"
+#include "ustring.h"
 
 class ScriptEditorDebuggerVariables : public Object {
 
@@ -116,7 +118,7 @@ class ScriptEditorDebuggerInspectedObject : public Object {
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value) {
 
-		if (!prop_values.has(p_name))
+		if (!prop_values.has(p_name) || String(p_name).begins_with("Constants/"))
 			return false;
 
 		emit_signal("value_edited", p_name, p_value);
@@ -132,6 +134,7 @@ protected:
 		r_ret = prop_values[p_name];
 		return true;
 	}
+
 	void _get_property_list(List<PropertyInfo> *p_list) const {
 
 		p_list->clear(); //sorry, no want category
@@ -142,23 +145,52 @@ protected:
 
 	static void _bind_methods() {
 
+		ClassDB::bind_method(D_METHOD("get_title"), &ScriptEditorDebuggerInspectedObject::get_title);
+		ClassDB::bind_method(D_METHOD("get_variant"), &ScriptEditorDebuggerInspectedObject::get_variant);
+		ClassDB::bind_method(D_METHOD("clear"), &ScriptEditorDebuggerInspectedObject::clear);
+		ClassDB::bind_method(D_METHOD("get_remote_object_id"), &ScriptEditorDebuggerInspectedObject::get_remote_object_id);
+
 		ADD_SIGNAL(MethodInfo("value_edited"));
 	}
 
 public:
-	ObjectID last_edited_id;
+	String type_name;
+	ObjectID remote_object_id;
 	List<PropertyInfo> prop_list;
 	Map<StringName, Variant> prop_values;
 
+	ObjectID get_remote_object_id() {
+		return remote_object_id;
+	}
+
+	String get_title() {
+		if (remote_object_id)
+			return TTR("Remote ") + String(type_name) + ": " + itos(remote_object_id);
+		else
+			return "<null>";
+	}
+	Variant get_variant(const StringName &p_name) {
+
+		Variant var;
+		_get(p_name, var);
+		return var;
+	}
+
+	void clear() {
+
+		prop_list.clear();
+		prop_values.clear();
+	}
 	void update() {
 		_change_notify();
 	}
-
 	void update_single(const char *p_prop) {
 		_change_notify(p_prop);
 	}
 
-	ScriptEditorDebuggerInspectedObject() { last_edited_id = 0; }
+	ScriptEditorDebuggerInspectedObject() {
+		remote_object_id = 0;
+	}
 };
 
 void ScriptEditorDebugger::debug_next() {
@@ -297,7 +329,6 @@ Size2 ScriptEditorDebugger::get_minimum_size() const {
 void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_data) {
 
 	if (p_msg == "debug_enter") {
-
 		Array msg;
 		msg.push_back("get_stack_dump");
 		ppeer->put_var(msg);
@@ -315,12 +346,10 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		if (error != "") {
 			tabs->set_current_tab(0);
 		}
-
 		profiler->set_enabled(false);
-
 		EditorNode::get_singleton()->get_pause_button()->set_pressed(true);
-
 		EditorNode::get_singleton()->make_bottom_panel_item_visible(this);
+		_clear_remote_objects();
 
 	} else if (p_msg == "debug_exit") {
 
@@ -337,9 +366,8 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		//tabs->set_current_tab(0);
 		profiler->set_enabled(true);
 		profiler->disable_seeking();
-
+		inspector->edit(NULL);
 		EditorNode::get_singleton()->get_pause_button()->set_pressed(false);
-
 	} else if (p_msg == "message:click_ctrl") {
 
 		clicked_ctrl->set_text(p_data[0]);
@@ -399,55 +427,57 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		le_set->set_disabled(false);
 	} else if (p_msg == "message:inspect_object") {
 
+		ScriptEditorDebuggerInspectedObject *debugObj = NULL;
+
 		ObjectID id = p_data[0];
 		String type = p_data[1];
-		Variant path = p_data[2]; //what to do yet, i don't  know
-		int prop_count = p_data[3];
+		Array properties = p_data[2];
 
-		int idx = 4;
-
-		if (inspected_object->last_edited_id != id) {
-			inspected_object->prop_list.clear();
-			inspected_object->prop_values.clear();
+		bool is_new_object = false;
+		if (remote_objects.has(id)) {
+			debugObj = remote_objects[id];
+		} else {
+			debugObj = memnew(ScriptEditorDebuggerInspectedObject);
+			debugObj->remote_object_id = id;
+			debugObj->type_name = type;
+			remote_objects[id] = debugObj;
+			is_new_object = true;
+			debugObj->connect("value_edited", this, "_scene_tree_property_value_edited");
 		}
 
-		for (int i = 0; i < prop_count; i++) {
+		for (int i = 0; i < properties.size(); i++) {
+
+			Array prop = properties[i];
+			if (prop.size() != 6)
+				continue;
 
 			PropertyInfo pinfo;
-			pinfo.name = p_data[idx++];
-			pinfo.type = Variant::Type(int(p_data[idx++]));
-			pinfo.hint = PropertyHint(int(p_data[idx++]));
-			pinfo.hint_string = p_data[idx++];
-			if (pinfo.name.begins_with("*")) {
-				pinfo.name = pinfo.name.substr(1, pinfo.name.length());
-				pinfo.usage = PROPERTY_USAGE_CATEGORY;
-			} else {
-				pinfo.usage = PROPERTY_USAGE_EDITOR;
+			pinfo.name = prop[0];
+			pinfo.type = Variant::Type(int(prop[1]));
+			pinfo.hint = PropertyHint(int(prop[2]));
+			pinfo.hint_string = prop[3];
+			pinfo.usage = PropertyUsageFlags(int(prop[4]));
+			Variant var = prop[5];
+
+			String hint_string = pinfo.hint_string;
+			if (hint_string.begins_with("RES:") && hint_string != "RES:") {
+				String path = hint_string.substr(4, hint_string.length());
+				var = ResourceLoader::load(path);
 			}
 
-			if (inspected_object->last_edited_id != id) {
+			if (is_new_object) {
 				//don't update.. it's the same, instead refresh
-				inspected_object->prop_list.push_back(pinfo);
+				debugObj->prop_list.push_back(pinfo);
 			}
 
-			inspected_object->prop_values[pinfo.name] = p_data[idx++];
-
-			if (inspected_object->last_edited_id == id) {
-				//same, just update value, don't rebuild
-				inspected_object->update_single(pinfo.name.ascii().get_data());
-			}
+			debugObj->prop_values[pinfo.name] = var;
 		}
 
-		if (inspected_object->last_edited_id != id) {
-			//only if different
-			inspected_object->update();
+		if (editor->get_editor_history()->get_current() != debugObj->get_instance_id()) {
+			editor->push_item(debugObj, "");
+		} else {
+			debugObj->update();
 		}
-
-		inspected_object->last_edited_id = id;
-
-		tabs->set_current_tab(inspect_info->get_index());
-		inspect_properties->edit(inspected_object);
-
 	} else if (p_msg == "message:video_mem") {
 
 		vmem_tree->clear();
@@ -502,7 +532,6 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 		int ofs = 0;
 		int mcount = p_data[ofs];
-
 		ofs++;
 		for (int i = 0; i < mcount; i++) {
 
@@ -521,12 +550,11 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 				v = s.get_slice(":", 1).to_int();
 			}
 
-			variables->add_property("members/" + n, v, h, hs);
+			variables->add_property("Locals/" + n, v, h, hs);
 		}
+
 		ofs += mcount * 2;
-
 		mcount = p_data[ofs];
-
 		ofs++;
 		for (int i = 0; i < mcount; i++) {
 
@@ -545,7 +573,30 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 				v = s.get_slice(":", 1).to_int();
 			}
 
-			variables->add_property("locals/" + n, v, h, hs);
+			variables->add_property("Members/" + n, v, h, hs);
+		}
+
+		ofs += mcount * 2;
+		mcount = p_data[ofs];
+		ofs++;
+		for (int i = 0; i < mcount; i++) {
+
+			String n = p_data[ofs + i * 2 + 0];
+			Variant v = p_data[ofs + i * 2 + 1];
+			PropertyHint h = PROPERTY_HINT_NONE;
+			String hs = String();
+
+			if (n.begins_with("*")) {
+
+				n = n.substr(1, n.length());
+				h = PROPERTY_HINT_OBJECT_ID;
+				String s = v;
+				s = s.replace("[", "");
+				hs = s.get_slice(":", 0);
+				v = s.get_slice(":", 1).to_int();
+			}
+
+			variables->add_property("Globals/" + n, v, h, hs);
 		}
 
 		variables->update();
@@ -561,7 +612,9 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 			if (!EditorNode::get_log()->is_visible()) {
 				if (EditorNode::get_singleton()->are_bottom_panels_hidden()) {
-					EditorNode::get_singleton()->make_bottom_panel_item_visible(EditorNode::get_log());
+					if (EDITOR_GET("run/output/always_open_output_on_play")) {
+						EditorNode::get_singleton()->make_bottom_panel_item_visible(EditorNode::get_log());
+					}
 				}
 			}
 			EditorNode::get_log()->add_message(t);
@@ -593,7 +646,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 							v /= 1024.0;
 						}
 						tt += " bytes";
-						vs = rtos(v) + " " + unit;
+						vs = String::num(v, 2) + " " + unit;
 					} break;
 					case Performance::MONITOR_TYPE_TIME: {
 						tt += " seconds";
@@ -906,31 +959,28 @@ void ScriptEditorDebugger::_notification(int p_what) {
 		case NOTIFICATION_PROCESS: {
 
 			if (connection.is_valid()) {
+
 				inspect_scene_tree_timeout -= get_process_delta_time();
 				if (inspect_scene_tree_timeout < 0) {
-					inspect_scene_tree_timeout = EditorSettings::get_singleton()->get("debugger/scene_tree_refresh_interval");
+					inspect_scene_tree_timeout = EditorSettings::get_singleton()->get("debugger/remote_scene_tree_refresh_interval");
 					if (inspect_scene_tree->is_visible_in_tree()) {
 						_scene_tree_request();
-
-						if (inspected_object_id != 0) {
-							//take the chance and re-inspect selected object
-							Array msg;
-							msg.push_back("inspect_object");
-							msg.push_back(inspected_object_id);
-							ppeer->put_var(msg);
-						}
 					}
 				}
 
 				inspect_edited_object_timeout -= get_process_delta_time();
 				if (inspect_edited_object_timeout < 0) {
 					inspect_edited_object_timeout = EditorSettings::get_singleton()->get("debugger/remote_inspect_refresh_interval");
-					if (inspect_scene_tree->is_visible_in_tree() && inspected_object_id) {
-						//take the chance and re-inspect selected object
-						Array msg;
-						msg.push_back("inspect_object");
-						msg.push_back(inspected_object_id);
-						ppeer->put_var(msg);
+					if (inspected_object_id) {
+						if (ScriptEditorDebuggerInspectedObject *obj = Object::cast_to<ScriptEditorDebuggerInspectedObject>(ObjectDB::get_instance(editor->get_editor_history()->get_current()))) {
+							if (obj->remote_object_id == inspected_object_id) {
+								//take the chance and re-inspect selected object
+								Array msg;
+								msg.push_back("inspect_object");
+								msg.push_back(inspected_object_id);
+								ppeer->put_var(msg);
+							}
+						}
 					}
 				}
 			}
@@ -1005,6 +1055,8 @@ void ScriptEditorDebugger::_notification(int p_what) {
 				break;
 			};
 
+			const uint64_t until = OS::get_singleton()->get_ticks_msec() + 20;
+
 			while (ppeer->get_available_packet_count() > 0) {
 
 				if (pending_in_queue) {
@@ -1069,6 +1121,9 @@ void ScriptEditorDebugger::_notification(int p_what) {
 						break;
 					}
 				}
+
+				if (OS::get_singleton()->get_ticks_msec() > until)
+					break;
 			}
 
 		} break;
@@ -1078,6 +1133,15 @@ void ScriptEditorDebugger::_notification(int p_what) {
 			tabs->add_style_override("tab_bg", editor->get_gui_base()->get_stylebox("DebuggerTabBG", "EditorStyles"));
 			tabs->set_margin(MARGIN_LEFT, -EditorNode::get_singleton()->get_gui_base()->get_stylebox("BottomPanelDebuggerOverride", "EditorStyles")->get_margin(MARGIN_LEFT));
 			tabs->set_margin(MARGIN_RIGHT, EditorNode::get_singleton()->get_gui_base()->get_stylebox("BottomPanelDebuggerOverride", "EditorStyles")->get_margin(MARGIN_RIGHT));
+
+			bool enable_rl = EditorSettings::get_singleton()->get("docks/scene_tree/draw_relationship_lines");
+			Color rl_color = EditorSettings::get_singleton()->get("docks/scene_tree/relationship_line_color");
+
+			if (enable_rl) {
+				inspect_scene_tree->add_constant_override("draw_relationship_lines", 1);
+				inspect_scene_tree->add_color_override("relationship_line_color", rl_color);
+			} else
+				inspect_scene_tree->add_constant_override("draw_relationship_lines", 0);
 		} break;
 	}
 }
@@ -1101,7 +1165,15 @@ void ScriptEditorDebugger::start() {
 		EditorNode::get_log()->add_message(String("Error listening on port ") + itos(remote_port), true);
 		return;
 	}
+
+	EditorNode::get_singleton()->get_scene_tree_dock()->show_tab_buttons();
+	auto_switch_remote_scene_tree = (bool)EditorSettings::get_singleton()->get("debugger/auto_switch_to_remote_scene_tree");
+	if (auto_switch_remote_scene_tree) {
+		EditorNode::get_singleton()->get_scene_tree_dock()->show_remote_tree();
+	}
+
 	set_process(true);
+	breaked = false;
 }
 
 void ScriptEditorDebugger::pause() {
@@ -1113,6 +1185,7 @@ void ScriptEditorDebugger::unpause() {
 void ScriptEditorDebugger::stop() {
 
 	set_process(false);
+	breaked = false;
 
 	server->stop();
 
@@ -1133,11 +1206,12 @@ void ScriptEditorDebugger::stop() {
 	le_set->set_disabled(true);
 	profiler->set_enabled(true);
 
-	inspect_properties->edit(NULL);
 	inspect_scene_tree->clear();
 
 	EditorNode::get_singleton()->get_pause_button()->set_pressed(false);
 	EditorNode::get_singleton()->get_pause_button()->set_disabled(true);
+	EditorNode::get_singleton()->get_scene_tree_dock()->hide_remote_tree();
+	EditorNode::get_singleton()->get_scene_tree_dock()->hide_tab_buttons();
 
 	if (hide_on_stop) {
 		if (is_visible_in_tree())
@@ -1544,30 +1618,33 @@ void ScriptEditorDebugger::_error_selected(int p_idx) {
 
 	error_stack->clear();
 	Array st = error_list->get_item_metadata(p_idx);
-	for (int i = 0; i < st.size(); i += 2) {
+	for (int i = 0; i < st.size(); i += 3) {
 
 		String script = st[i];
-		int line = st[i + 1];
+		String func = st[i + 1];
+		int line = st[i + 2];
 		Array md;
 		md.push_back(st[i]);
 		md.push_back(st[i + 1]);
+		md.push_back(st[i + 2]);
 
-		String str = script.get_file() + ":" + itos(line);
+		String str = func + " in " + script.get_file() + ":line " + itos(line);
 
 		error_stack->add_item(str);
 		error_stack->set_item_metadata(error_stack->get_item_count() - 1, md);
-		error_stack->set_item_tooltip(error_stack->get_item_count() - 1, TTR("File:") + " " + String(st[i]) + "\n" + TTR("Line:") + " " + itos(line));
+		error_stack->set_item_tooltip(error_stack->get_item_count() - 1,
+				TTR("File:") + " " + script + "\n" + TTR("Function:") + " " + func + "\n" + TTR("Line:") + " " + itos(line));
 	}
 }
 
 void ScriptEditorDebugger::_error_stack_selected(int p_idx) {
 
 	Array arr = error_stack->get_item_metadata(p_idx);
-	if (arr.size() != 2)
+	if (arr.size() != 3)
 		return;
 
 	Ref<Script> s = ResourceLoader::load(arr[0]);
-	emit_signal("goto_script_line", s, int(arr[1]) - 1);
+	emit_signal("goto_script_line", s, int(arr[2]) - 1);
 }
 
 void ScriptEditorDebugger::set_hide_on_stop(bool p_hide) {
@@ -1604,6 +1681,63 @@ void ScriptEditorDebugger::_paused() {
 	}
 }
 
+void ScriptEditorDebugger::_set_remote_object(ObjectID p_id, ScriptEditorDebuggerInspectedObject *p_obj) {
+
+	if (remote_objects.has(p_id))
+		memdelete(remote_objects[p_id]);
+	remote_objects[p_id] = p_obj;
+}
+
+void ScriptEditorDebugger::_clear_remote_objects() {
+
+	for (Map<ObjectID, ScriptEditorDebuggerInspectedObject *>::Element *E = remote_objects.front(); E; E = E->next()) {
+		if (editor->get_editor_history()->get_current() == E->value()->get_instance_id()) {
+			editor->push_item(NULL);
+		}
+		memdelete(E->value());
+	}
+	remote_objects.clear();
+}
+
+void ScriptEditorDebugger::_clear_errors_list() {
+
+	error_list->clear();
+	error_count = 0;
+	_notification(NOTIFICATION_PROCESS);
+}
+
+// Right click on specific file(s) or folder(s).
+void ScriptEditorDebugger::_error_list_item_rmb_selected(int p_item, const Vector2 &p_pos) {
+
+	item_menu->clear();
+	item_menu->set_size(Size2(1, 1));
+
+	// Allow specific actions only on one item.
+	bool single_item_selected = error_list->get_selected_items().size() == 1;
+
+	if (single_item_selected) {
+		item_menu->add_icon_item(get_icon("CopyNodePath", "EditorIcons"), TTR("Copy Error"), ITEM_MENU_COPY_ERROR);
+	}
+
+	if (item_menu->get_item_count() > 0) {
+		item_menu->set_position(error_list->get_global_position() + p_pos);
+		item_menu->popup();
+	}
+}
+
+void ScriptEditorDebugger::_item_menu_id_pressed(int p_option) {
+
+	switch (p_option) {
+
+		case ITEM_MENU_COPY_ERROR: {
+			String title = error_list->get_item_text(error_list->get_current());
+			String desc = error_list->get_item_tooltip(error_list->get_current());
+
+			OS::get_singleton()->set_clipboard(title + "\n----------\n" + desc);
+		} break;
+	}
+}
+
 void ScriptEditorDebugger::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_stack_dump_frame_selected"), &ScriptEditorDebugger::_stack_dump_frame_selected);
@@ -1623,6 +1757,10 @@ void ScriptEditorDebugger::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_error_stack_selected"), &ScriptEditorDebugger::_error_stack_selected);
 	ClassDB::bind_method(D_METHOD("_profiler_activate"), &ScriptEditorDebugger::_profiler_activate);
 	ClassDB::bind_method(D_METHOD("_profiler_seeked"), &ScriptEditorDebugger::_profiler_seeked);
+	ClassDB::bind_method(D_METHOD("_clear_errors_list"), &ScriptEditorDebugger::_clear_errors_list);
+
+	ClassDB::bind_method(D_METHOD("_error_list_item_rmb_selected"), &ScriptEditorDebugger::_error_list_item_rmb_selected);
+	ClassDB::bind_method(D_METHOD("_item_menu_id_pressed"), &ScriptEditorDebugger::_item_menu_id_pressed);
 
 	ClassDB::bind_method(D_METHOD("_paused"), &ScriptEditorDebugger::_paused);
 
@@ -1649,6 +1787,7 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 	ppeer = Ref<PacketPeerStream>(memnew(PacketPeerStream));
 	ppeer->set_input_buffer_max_size(1024 * 1024 * 8); //8mb should be enough
 	editor = p_editor;
+	editor->get_property_editor()->connect("object_id_selected", this, "_scene_tree_property_select_object");
 
 	tabs = memnew(TabContainer);
 	tabs->set_tab_align(TabContainer::ALIGN_LEFT);
@@ -1746,9 +1885,31 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 
 		error_split = memnew(HSplitContainer);
 		VBoxContainer *errvb = memnew(VBoxContainer);
+		HBoxContainer *errhb = memnew(HBoxContainer);
 		errvb->set_h_size_flags(SIZE_EXPAND_FILL);
+		Label *velb = memnew(Label(TTR("Errors:")));
+		velb->set_h_size_flags(SIZE_EXPAND_FILL);
+		errhb->add_child(velb);
+
+		clearbutton = memnew(Button);
+		clearbutton->set_text(TTR("Clear"));
+		clearbutton->connect("pressed", this, "_clear_errors_list");
+		errhb->add_child(clearbutton);
+		errvb->add_child(errhb);
+
 		error_list = memnew(ItemList);
-		errvb->add_margin_child(TTR("Errors:"), error_list, true);
+		error_list->set_v_size_flags(SIZE_EXPAND_FILL);
+		error_list->set_h_size_flags(SIZE_EXPAND_FILL);
+		error_list->connect("item_rmb_selected", this, "_error_list_item_rmb_selected");
+		error_list->set_allow_rmb_select(true);
+		error_list->set_autoscroll_to_bottom(true);
+
+		item_menu = memnew(PopupMenu);
+		item_menu->connect("id_pressed", this, "_item_menu_id_pressed");
+		error_list->add_child(item_menu);
+
+		errvb->add_child(error_list);
+
 		error_split->add_child(errvb);
 
 		errvb = memnew(VBoxContainer);
@@ -1761,41 +1922,20 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 		tabs->add_child(error_split);
 	}
 
-	{ // inquire
-
-		inspect_info = memnew(HSplitContainer);
-		inspect_info->set_name(TTR("Remote Inspector"));
-		tabs->add_child(inspect_info);
-
-		VBoxContainer *info_left = memnew(VBoxContainer);
-		info_left->set_h_size_flags(SIZE_EXPAND_FILL);
-		inspect_info->add_child(info_left);
+	{ // remote scene tree
 
 		inspect_scene_tree = memnew(Tree);
-		info_left->add_margin_child(TTR("Live Scene Tree:"), inspect_scene_tree, true);
+		EditorNode::get_singleton()->get_scene_tree_dock()->add_remote_tree_editor(inspect_scene_tree);
+		EditorNode::get_singleton()->get_scene_tree_dock()->connect("remote_tree_selected", this, "_scene_tree_selected");
+		inspect_scene_tree->set_v_size_flags(SIZE_EXPAND_FILL);
 		inspect_scene_tree->connect("cell_selected", this, "_scene_tree_selected");
 		inspect_scene_tree->connect("item_collapsed", this, "_scene_tree_folded");
 
-		//
-
-		VBoxContainer *info_right = memnew(VBoxContainer);
-		info_right->set_h_size_flags(SIZE_EXPAND_FILL);
-		inspect_info->add_child(info_right);
-
-		inspect_properties = memnew(PropertyEditor);
-		inspect_properties->hide_top_label();
-		inspect_properties->set_show_categories(true);
-		inspect_properties->connect("object_id_selected", this, "_scene_tree_property_select_object");
-
-		info_right->add_margin_child(TTR("Remote Object Properties: "), inspect_properties, true);
-
-		inspect_scene_tree_timeout = EDITOR_DEF("debugger/scene_tree_refresh_interval", 1.0);
+		auto_switch_remote_scene_tree = EDITOR_DEF("debugger/auto_switch_to_remote_scene_tree", false);
+		inspect_scene_tree_timeout = EDITOR_DEF("debugger/remote_scene_tree_refresh_interval", 1.0);
 		inspect_edited_object_timeout = EDITOR_DEF("debugger/remote_inspect_refresh_interval", 0.2);
 		inspected_object_id = 0;
 		updating_scene_tree = false;
-
-		inspected_object = memnew(ScriptEditorDebuggerInspectedObject);
-		inspected_object->connect("value_edited", this, "_scene_tree_property_value_edited");
 	}
 
 	{ //profiler
@@ -1952,5 +2092,5 @@ ScriptEditorDebugger::~ScriptEditorDebugger() {
 	ppeer->set_stream_peer(Ref<StreamPeer>());
 
 	server->stop();
-	memdelete(inspected_object);
+	_clear_remote_objects();
 }

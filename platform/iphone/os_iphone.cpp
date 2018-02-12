@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifdef IPHONE_ENABLED
 
 #include "os_iphone.h"
@@ -46,6 +47,7 @@
 #include "sem_iphone.h"
 
 #include "ios.h"
+#include <dlfcn.h>
 
 int OSIPhone::get_video_driver_count() const {
 
@@ -96,16 +98,7 @@ void OSIPhone::initialize_core() {
 	set_data_dir(data_dir);
 };
 
-void OSIPhone::initialize_logger() {
-	Vector<Logger *> loggers;
-	loggers.push_back(memnew(SyslogLogger));
-	// FIXME: Reenable once we figure out how to get this properly in user://
-	// instead of littering the user's working dirs (res:// + pwd) with log files (GH-12277)
-	//loggers.push_back(memnew(RotatedFileLogger("user://logs/log.txt")));
-	_set_logger(memnew(CompositeLogger(loggers)));
-}
-
-void OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
+Error OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
 
 	supported_orientations = 0;
 	supported_orientations |= ((GLOBAL_DEF("video_mode/allow_horizontal", true) ? 1 : 0) << LandscapeLeft);
@@ -125,7 +118,7 @@ void OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_
 	*/
 
 	visual_server->init();
-	//	visual_server->cursor_set_visible(false, 0);
+	//visual_server->cursor_set_visible(false, 0);
 
 	// reset this to what it should be, it will have been set to 0 after visual_server->init() is called
 	RasterizerStorageGLES3::system_fbo = gl_view_base_fb;
@@ -134,14 +127,6 @@ void OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_
 	AudioDriverManager::initialize(p_audio_driver);
 
 	input = memnew(InputDefault);
-
-/*
-#ifdef IOS_SCORELOOP_ENABLED
-	scoreloop = memnew(ScoreloopIOS);
-	Engine::get_singleton()->add_singleton(Engine::Singleton("Scoreloop", scoreloop));
-	scoreloop->connect();
-#endif
-	*/
 
 #ifdef GAME_CENTER_ENABLED
 	game_center = memnew(GameCenter);
@@ -157,9 +142,11 @@ void OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p_
 #ifdef ICLOUD_ENABLED
 	icloud = memnew(ICloud);
 	Engine::get_singleton()->add_singleton(Engine::Singleton("ICloud", icloud));
-//icloud->connect();
+	//icloud->connect();
 #endif
 	Engine::get_singleton()->add_singleton(Engine::Singleton("iOS", memnew(iOS)));
+
+	return OK;
 };
 
 MainLoop *OSIPhone::get_main_loop() const {
@@ -402,6 +389,37 @@ void OSIPhone::alert(const String &p_alert, const String &p_title) {
 	iOS::alert(utf8_alert.get_data(), utf8_title.get_data());
 }
 
+Error OSIPhone::open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path) {
+	if (p_path.length() == 0) {
+		p_library_handle = RTLD_SELF;
+		return OK;
+	}
+	return OS_Unix::open_dynamic_library(p_path, p_library_handle, p_also_set_library_path);
+}
+
+Error OSIPhone::close_dynamic_library(void *p_library_handle) {
+	if (p_library_handle == RTLD_SELF) {
+		return OK;
+	}
+	return OS_Unix::close_dynamic_library(p_library_handle);
+}
+
+HashMap<String, void *> OSIPhone::dynamic_symbol_lookup_table;
+void register_dynamic_symbol(char *name, void *address) {
+	OSIPhone::dynamic_symbol_lookup_table[String(name)] = address;
+}
+
+Error OSIPhone::get_dynamic_library_symbol_handle(void *p_library_handle, const String p_name, void *&p_symbol_handle, bool p_optional) {
+	if (p_library_handle == RTLD_SELF) {
+		void **ptr = OSIPhone::dynamic_symbol_lookup_table.getptr(p_name);
+		if (ptr) {
+			p_symbol_handle = *ptr;
+			return OK;
+		}
+	}
+	return OS_Unix::get_dynamic_library_symbol_handle(p_library_handle, p_name, p_symbol_handle, p_optional);
+}
+
 void OSIPhone::set_video_mode(const VideoMode &p_video_mode, int p_screen) {
 
 	video_mode = p_video_mode;
@@ -474,6 +492,8 @@ String OSIPhone::get_user_data_dir() const {
 
 	return data_dir;
 };
+
+void OSIPhone::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot){};
 
 String OSIPhone::get_name() {
 
@@ -558,7 +578,36 @@ bool OSIPhone::_check_internal_feature_support(const String &p_feature) {
 	return p_feature == "mobile" || p_feature == "etc" || p_feature == "pvrtc" || p_feature == "etc2";
 }
 
+// Initialization order between compilation units is not guaranteed,
+// so we use this as a hack to ensure certain code is called before
+// everything else, but after all units are initialized.
+typedef void (*init_callback)();
+static init_callback *ios_init_callbacks = NULL;
+static int ios_init_callbacks_count = 0;
+static int ios_init_callbacks_capacity = 0;
+
+void add_ios_init_callback(init_callback cb) {
+	if (ios_init_callbacks_count == ios_init_callbacks_capacity) {
+		void *new_ptr = realloc(ios_init_callbacks, sizeof(cb) * 32);
+		if (new_ptr) {
+			ios_init_callbacks = (init_callback *)(new_ptr);
+			ios_init_callbacks_capacity += 32;
+		}
+	}
+	if (ios_init_callbacks_capacity > ios_init_callbacks_count) {
+		ios_init_callbacks[ios_init_callbacks_count] = cb;
+		++ios_init_callbacks_count;
+	}
+}
+
 OSIPhone::OSIPhone(int width, int height, String p_data_dir) {
+	for (int i = 0; i < ios_init_callbacks_count; ++i) {
+		ios_init_callbacks[i]();
+	}
+	free(ios_init_callbacks);
+	ios_init_callbacks = NULL;
+	ios_init_callbacks_count = 0;
+	ios_init_callbacks_capacity = 0;
 
 	main_loop = NULL;
 	visual_server = NULL;
@@ -576,7 +625,13 @@ OSIPhone::OSIPhone(int width, int height, String p_data_dir) {
 	// which is initialized in initialize_core
 	data_dir = p_data_dir;
 
-	_set_logger(memnew(SyslogLogger));
+	Vector<Logger *> loggers;
+	loggers.push_back(memnew(SyslogLogger));
+#ifdef DEBUG_ENABLED
+	// it seems iOS app's stdout/stderr is only obtainable if you launch it from Xcode
+	loggers.push_back(memnew(StdLogger));
+#endif
+	_set_logger(memnew(CompositeLogger(loggers)));
 };
 
 OSIPhone::~OSIPhone() {

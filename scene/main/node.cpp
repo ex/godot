@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "node.h"
 
 #include "core/core_string_names.h"
@@ -177,13 +178,13 @@ void Node::_propagate_ready() {
 	}
 	data.blocked--;
 	if (data.ready_first) {
-		notification(NOTIFICATION_READY);
 		data.ready_first = false;
+		notification(NOTIFICATION_READY);
 	}
 }
 
 void Node::_propagate_enter_tree() {
-	// this needs to happen to all childs before any enter_tree
+	// this needs to happen to all children before any enter_tree
 
 	if (data.parent) {
 		data.tree = data.parent->data.tree;
@@ -274,7 +275,7 @@ void Node::_propagate_exit_tree() {
 
 		get_script_instance()->call_multilevel(SceneStringNames::get_singleton()->_exit_tree, NULL, 0);
 	}
-	emit_signal(SceneStringNames::get_singleton()->tree_exited);
+	emit_signal(SceneStringNames::get_singleton()->tree_exiting);
 
 	notification(NOTIFICATION_EXIT_TREE, true);
 	if (data.tree)
@@ -296,6 +297,8 @@ void Node::_propagate_exit_tree() {
 	data.ready_notified = false;
 	data.tree = NULL;
 	data.depth = -1;
+
+	emit_signal(SceneStringNames::get_singleton()->tree_exited);
 }
 
 void Node::move_child(Node *p_child, int p_pos) {
@@ -340,7 +343,8 @@ void Node::move_child(Node *p_child, int p_pos) {
 		data.children[i]->notification(NOTIFICATION_MOVED_IN_PARENT);
 	}
 	for (const Map<StringName, GroupData>::Element *E = p_child->data.grouped.front(); E; E = E->next()) {
-		E->get().group->changed = true;
+		if (E->get().group)
+			E->get().group->changed = true;
 	}
 
 	data.blocked--;
@@ -1198,13 +1202,13 @@ void Node::_validate_child_name(Node *p_child, bool p_force_human_readable) {
 			unique = false;
 		} else {
 			//check if exists
-			Node **childs = data.children.ptr();
+			Node **children = data.children.ptrw();
 			int cc = data.children.size();
 
 			for (int i = 0; i < cc; i++) {
-				if (childs[i] == p_child)
+				if (children[i] == p_child)
 					continue;
-				if (childs[i]->data.name == p_child->data.name) {
+				if (children[i]->data.name == p_child->data.name) {
 					unique = false;
 					break;
 				}
@@ -1307,7 +1311,7 @@ void Node::_add_child_nocheck(Node *p_child, const StringName &p_name) {
 	}
 
 	/* Notify */
-	//recognize childs created in this node constructor
+	//recognize children created in this node constructor
 	p_child->data.parent_owned = data.in_constructor;
 	add_child_notify(p_child);
 }
@@ -2104,37 +2108,80 @@ Node *Node::_duplicate(int p_flags, Map<const Node *, Node *> *r_duplimap) const
 		ERR_FAIL_COND_V(!node, NULL);
 	}
 
-	List<PropertyInfo> plist;
-
-	get_property_list(&plist);
+	if (get_filename() != "") { //an instance
+		node->set_filename(get_filename());
+	}
 
 	StringName script_property_name = CoreStringNames::get_singleton()->_script;
 
-	if (p_flags & DUPLICATE_SCRIPTS) {
-		bool is_valid = false;
-		Variant script = get(script_property_name, &is_valid);
-		if (is_valid) {
-			node->set(script_property_name, script);
+	List<const Node *> hidden_roots;
+	List<const Node *> node_tree;
+	node_tree.push_front(this);
+
+	if (instanced) {
+		// Since nodes in the instanced hierarchy won't be duplicated explicitly, we need to make an inventory
+		// of all the nodes in the tree of the instanced scene in order to transfer the values of the properties
+
+		for (List<const Node *>::Element *N = node_tree.front(); N; N = N->next()) {
+			for (int i = 0; i < N->get()->get_child_count(); ++i) {
+
+				Node *descendant = N->get()->get_child(i);
+				// Skip nodes not really belonging to the instanced hierarchy; they'll be processed normally later
+				// but remember non-instanced nodes that are hidden below instanced ones
+				if (descendant->data.owner != this) {
+					if (descendant->get_parent() && descendant->get_parent() != this && descendant->get_parent()->data.owner == this)
+						hidden_roots.push_back(descendant);
+					continue;
+				}
+
+				node_tree.push_back(descendant);
+			}
 		}
 	}
 
-	for (List<PropertyInfo>::Element *E = plist.front(); E; E = E->next()) {
+	for (List<const Node *>::Element *N = node_tree.front(); N; N = N->next()) {
 
-		if (!(E->get().usage & PROPERTY_USAGE_STORAGE))
-			continue;
-		String name = E->get().name;
-		if (name == script_property_name)
-			continue;
+		Node *current_node = node->get_node(get_path_to(N->get()));
+		ERR_CONTINUE(!current_node);
 
-		Variant value = get(name);
-		// Duplicate dictionaries and arrays, mainly needed for __meta__
-		if (value.get_type() == Variant::DICTIONARY) {
-			value = Dictionary(value).copy();
-		} else if (value.get_type() == Variant::ARRAY) {
-			value = Array(value).duplicate();
+		if (p_flags & DUPLICATE_SCRIPTS) {
+			bool is_valid = false;
+			Variant script = N->get()->get(script_property_name, &is_valid);
+			if (is_valid) {
+				current_node->set(script_property_name, script);
+			}
 		}
 
-		node->set(name, value);
+		List<PropertyInfo> plist;
+		N->get()->get_property_list(&plist);
+
+		for (List<PropertyInfo>::Element *E = plist.front(); E; E = E->next()) {
+
+			if (!(E->get().usage & PROPERTY_USAGE_STORAGE))
+				continue;
+			String name = E->get().name;
+			if (name == script_property_name)
+				continue;
+
+			Variant value = N->get()->get(name);
+			// Duplicate dictionaries and arrays, mainly needed for __meta__
+			if (value.get_type() == Variant::DICTIONARY) {
+				value = Dictionary(value).duplicate();
+			} else if (value.get_type() == Variant::ARRAY) {
+				value = Array(value).duplicate();
+			}
+
+			if (E->get().usage & PROPERTY_USAGE_DO_NOT_SHARE_ON_DUPLICATE) {
+
+				Resource *res = Object::cast_to<Resource>(value);
+				if (res) // Duplicate only if it's a resource
+					current_node->set(name, res->duplicate());
+
+			} else {
+
+				current_node->set(name, value);
+			}
+		}
 	}
 
 	node->set_name(get_name());
@@ -2173,6 +2220,34 @@ Node *Node::_duplicate(int p_flags, Map<const Node *, Node *> *r_duplimap) const
 		}
 
 		node->add_child(dup);
+		if (i < node->get_child_count() - 1) {
+			node->move_child(dup, i);
+		}
+	}
+
+	for (List<const Node *>::Element *E = hidden_roots.front(); E; E = E->next()) {
+
+		Node *parent = node->get_node(get_path_to(E->get()->data.parent));
+		if (!parent) {
+
+			memdelete(node);
+			return NULL;
+		}
+
+		Node *dup = E->get()->_duplicate(p_flags, r_duplimap);
+		if (!dup) {
+
+			memdelete(node);
+			return NULL;
+		}
+
+		parent->add_child(dup);
+		int pos = E->get()->get_position_in_parent();
+
+		if (pos < parent->get_child_count() - 1) {
+
+			parent->move_child(dup, pos);
+		}
 	}
 
 	return node;
@@ -2241,7 +2316,7 @@ void Node::_duplicate_and_reown(Node *p_new_parent, const Map<Node *, Node *> &p
 		Variant value = get(name);
 		// Duplicate dictionaries and arrays, mainly needed for __meta__
 		if (value.get_type() == Variant::DICTIONARY) {
-			value = Dictionary(value).copy();
+			value = Dictionary(value).duplicate();
 		} else if (value.get_type() == Variant::ARRAY) {
 			value = Array(value).duplicate();
 		}
@@ -2305,7 +2380,7 @@ void Node::_duplicate_signals(const Node *p_original, Node *p_copy) const {
 				copytarget = target;
 
 			if (copy && copytarget) {
-				copy->connect(E->get().signal, copytarget, E->get().method, E->get().binds, CONNECT_PERSIST);
+				copy->connect(E->get().signal, copytarget, E->get().method, E->get().binds, E->get().flags);
 			}
 		}
 	}
@@ -2502,24 +2577,19 @@ bool Node::has_node_and_resource(const NodePath &p_path) const {
 		return false;
 	Node *node = get_node(p_path);
 
-	if (p_path.get_subname_count()) {
+	bool result = false;
 
-		RES r;
-		for (int j = 0; j < p_path.get_subname_count(); j++) {
-			r = j == 0 ? node->get(p_path.get_subname(j)) : r->get(p_path.get_subname(j));
-			if (r.is_null())
-				return false;
-		}
-	}
+	node->get_indexed(p_path.get_subnames(), &result);
 
-	return true;
+	return result;
 }
 
 Array Node::_get_node_and_resource(const NodePath &p_path) {
 
 	Node *node;
 	RES res;
-	node = get_node_and_resource(p_path, res);
+	Vector<StringName> leftover_path;
+	node = get_node_and_resource(p_path, res, leftover_path);
 	Array result;
 
 	if (node)
@@ -2532,21 +2602,35 @@ Array Node::_get_node_and_resource(const NodePath &p_path) {
 	else
 		result.push_back(Variant());
 
+	result.push_back(NodePath(Vector<StringName>(), leftover_path, false));
+
 	return result;
 }
 
-Node *Node::get_node_and_resource(const NodePath &p_path, RES &r_res) const {
+Node *Node::get_node_and_resource(const NodePath &p_path, RES &r_res, Vector<StringName> &r_leftover_subpath, bool p_last_is_property) const {
 
 	Node *node = get_node(p_path);
 	r_res = RES();
+	r_leftover_subpath = Vector<StringName>();
 	if (!node)
 		return NULL;
 
 	if (p_path.get_subname_count()) {
 
-		for (int j = 0; j < p_path.get_subname_count(); j++) {
-			r_res = j == 0 ? node->get(p_path.get_subname(j)) : r_res->get(p_path.get_subname(j));
-			ERR_FAIL_COND_V(r_res.is_null(), node);
+		int j = 0;
+		// If not p_last_is_property, we shouldn't consider the last one as part of the resource
+		for (; j < p_path.get_subname_count() - p_last_is_property; j++) {
+			RES new_res = j == 0 ? node->get(p_path.get_subname(j)) : r_res->get(p_path.get_subname(j));
+
+			if (new_res.is_null()) {
+				break;
+			}
+
+			r_res = new_res;
+		}
+		for (; j < p_path.get_subname_count(); j++) {
+			// Put the rest of the subpath in the leftover path
+			r_leftover_subpath.push_back(p_path.get_subname(j));
 		}
 	}
 
@@ -2808,7 +2892,7 @@ void Node::_bind_methods() {
 #ifdef TOOLS_ENABLED
 	ClassDB::bind_method(D_METHOD("_set_import_path", "import_path"), &Node::set_import_path);
 	ClassDB::bind_method(D_METHOD("_get_import_path"), &Node::get_import_path);
-	ADD_PROPERTYNZ(PropertyInfo(Variant::NODE_PATH, "_import_path", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "_set_import_path", "_get_import_path");
+	ADD_PROPERTYNZ(PropertyInfo(Variant::NODE_PATH, "_import_path", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "_set_import_path", "_get_import_path");
 
 #endif
 
@@ -2870,6 +2954,7 @@ void Node::_bind_methods() {
 
 	ADD_SIGNAL(MethodInfo("renamed"));
 	ADD_SIGNAL(MethodInfo("tree_entered"));
+	ADD_SIGNAL(MethodInfo("tree_exiting"));
 	ADD_SIGNAL(MethodInfo("tree_exited"));
 
 	//ADD_PROPERTYNZ( PropertyInfo( Variant::BOOL, "process/process" ),"set_process","is_processing") ;
@@ -2878,7 +2963,10 @@ void Node::_bind_methods() {
 	//ADD_PROPERTYNZ( PropertyInfo( Variant::BOOL, "process/unhandled_input" ), "set_process_unhandled_input","is_processing_unhandled_input" ) ;
 	ADD_GROUP("Pause", "pause_");
 	ADD_PROPERTYNZ(PropertyInfo(Variant::INT, "pause_mode", PROPERTY_HINT_ENUM, "Inherit,Stop,Process"), "set_pause_mode", "get_pause_mode");
-	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "editor/display_folded", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_display_folded", "is_displayed_folded");
+	ADD_PROPERTYNZ(PropertyInfo(Variant::BOOL, "editor/display_folded", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "set_display_folded", "is_displayed_folded");
+	ADD_PROPERTYNZ(PropertyInfo(Variant::STRING, "name", PROPERTY_HINT_NONE, "", 0), "set_name", "get_name");
+	ADD_PROPERTYNZ(PropertyInfo(Variant::STRING, "filename", PROPERTY_HINT_NONE, "", 0), "set_filename", "get_filename");
+	ADD_PROPERTYNZ(PropertyInfo(Variant::OBJECT, "owner", PROPERTY_HINT_RESOURCE_TYPE, "Node", 0), "set_owner", "get_owner");
 
 	BIND_VMETHOD(MethodInfo("_process", PropertyInfo(Variant::REAL, "delta")));
 	BIND_VMETHOD(MethodInfo("_physics_process", PropertyInfo(Variant::REAL, "delta")));

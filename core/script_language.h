@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifndef SCRIPT_LANGUAGE_H
 #define SCRIPT_LANGUAGE_H
 
@@ -120,6 +121,9 @@ public:
 
 	virtual int get_member_line(const StringName &p_member) const { return -1; }
 
+	virtual void get_constants(Map<StringName, Variant> *p_constants) {}
+	virtual void get_members(Set<StringName> *p_constants) {}
+
 	Script() {}
 };
 
@@ -130,6 +134,7 @@ public:
 	virtual void get_property_list(List<PropertyInfo> *p_properties) const = 0;
 	virtual Variant::Type get_property_type(const StringName &p_name, bool *r_is_valid = NULL) const = 0;
 
+	virtual Object *get_owner() { return NULL; }
 	virtual void get_property_state(List<Pair<StringName, Variant> > &state);
 
 	virtual void get_method_list(List<MethodInfo> *p_list) const = 0;
@@ -174,7 +179,7 @@ class ScriptCodeCompletionCache {
 public:
 	virtual RES get_cached_resource(const String &p_path) = 0;
 
-	static ScriptCodeCompletionCache *get_sigleton() { return singleton; }
+	static ScriptCodeCompletionCache *get_singleton() { return singleton; }
 
 	ScriptCodeCompletionCache();
 };
@@ -244,11 +249,13 @@ public:
 	virtual String debug_get_stack_level_source(int p_level) const = 0;
 	virtual void debug_get_stack_level_locals(int p_level, List<String> *p_locals, List<Variant> *p_values, int p_max_subitems = -1, int p_max_depth = -1) = 0;
 	virtual void debug_get_stack_level_members(int p_level, List<String> *p_members, List<Variant> *p_values, int p_max_subitems = -1, int p_max_depth = -1) = 0;
-	virtual void debug_get_globals(List<String> *p_locals, List<Variant> *p_values, int p_max_subitems = -1, int p_max_depth = -1) = 0;
+	virtual ScriptInstance *debug_get_stack_level_instance(int p_level) { return NULL; }
+	virtual void debug_get_globals(List<String> *p_globals, List<Variant> *p_values, int p_max_subitems = -1, int p_max_depth = -1) = 0;
 	virtual String debug_parse_stack_level_expression(int p_level, const String &p_expression, int p_max_subitems = -1, int p_max_depth = -1) = 0;
 
 	struct StackInfo {
-		Ref<Script> script;
+		String file;
+		String func;
 		int line;
 	};
 
@@ -385,6 +392,7 @@ public:
 	ScriptLanguage *get_break_language() const;
 
 	virtual void send_message(const String &p_message, const Array &p_args) = 0;
+	virtual void send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const Vector<ScriptLanguage::StackInfo> &p_stack_info) = 0;
 
 	virtual bool is_remote() const { return false; }
 	virtual void request_quit() {}

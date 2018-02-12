@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="InputEventJoypadMotion" inherits="InputEvent" category="Core" version="3.0-alpha">
+<class name="InputEventJoypadMotion" inherits="InputEvent" category="Core" version="3.0-stable">
 	<brief_description>
 		Input event type for gamepad joysticks and other motions. For buttons see [code]InputEventJoypadMotion[/code].
 	</brief_description>
@@ -7,39 +7,11 @@
 		Stores information about joystick motions. One [code]InputEventJoypadMotion[/code] represents one axis at a time.
 	</description>
 	<tutorials>
-		http://docs.godotengine.org/en/stable/learning/features/inputs/inputevent.html
+		http://docs.godotengine.org/en/3.0/tutorials/inputs/inputevent.html
 	</tutorials>
 	<demos>
 	</demos>
 	<methods>
-		<method name="get_axis" qualifiers="const">
-			<return type="int">
-			</return>
-			<description>
-			</description>
-		</method>
-		<method name="get_axis_value" qualifiers="const">
-			<return type="float">
-			</return>
-			<description>
-			</description>
-		</method>
-		<method name="set_axis">
-			<return type="void">
-			</return>
-			<argument index="0" name="axis" type="int">
-			</argument>
-			<description>
-			</description>
-		</method>
-		<method name="set_axis_value">
-			<return type="void">
-			</return>
-			<argument index="0" name="axis_value" type="float">
-			</argument>
-			<description>
-			</description>
-		</method>
 	</methods>
 	<members>
 		<member name="axis" type="int" setter="set_axis" getter="get_axis">
