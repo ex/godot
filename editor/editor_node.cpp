@@ -99,7 +99,9 @@
 #include "editor/plugins/script_text_editor.h"
 #include "editor/plugins/shader_editor_plugin.h"
 #include "editor/plugins/shader_graph_editor_plugin.h"
+#include "editor/plugins/skeleton_2d_editor_plugin.h"
 #include "editor/plugins/spatial_editor_plugin.h"
+#include "editor/plugins/sprite_editor_plugin.h"
 #include "editor/plugins/sprite_frames_editor_plugin.h"
 #include "editor/plugins/style_box_editor_plugin.h"
 #include "editor/plugins/texture_editor_plugin.h"
@@ -216,6 +218,12 @@ void EditorNode::_unhandled_input(const Ref<InputEvent> &p_event) {
 			_editor_select_next();
 		} else if (ED_IS_SHORTCUT("editor/editor_prev", p_event)) {
 			_editor_select_prev();
+		}
+
+		if (k->get_scancode() == KEY_ESCAPE) {
+			for (int i = 0; i < bottom_panel_items.size(); i++) {
+				_bottom_panel_switch(false, i);
+			}
 		}
 	}
 }
@@ -341,14 +349,20 @@ void EditorNode::_notification(int p_what) {
 
 		// update_icons
 		for (int i = 0; i < singleton->main_editor_buttons.size(); i++) {
-			Ref<Texture> icon = singleton->main_editor_buttons[i]->get_icon();
+
+			ToolButton *tb = singleton->main_editor_buttons[i];
+			EditorPlugin *p_editor = singleton->editor_table[i];
+			Ref<Texture> icon = p_editor->get_icon();
 
 			if (icon.is_valid()) {
-				main_editor_buttons[i]->set_icon(icon);
-			} else if (singleton->gui_base->has_icon(singleton->main_editor_buttons[i]->get_name(), "EditorIcons")) {
-				main_editor_buttons[i]->set_icon(gui_base->get_icon(singleton->main_editor_buttons[i]->get_name(), "EditorIcons"));
+				tb->set_icon(icon);
+			} else if (singleton->gui_base->has_icon(p_editor->get_name(), "EditorIcons")) {
+				tb->set_icon(singleton->gui_base->get_icon(p_editor->get_name(), "EditorIcons"));
 			}
 		}
+
+		_build_icon_type_cache();
+
 		play_button->set_icon(gui_base->get_icon("MainPlay", "EditorIcons"));
 		play_scene_button->set_icon(gui_base->get_icon("PlayScene", "EditorIcons"));
 		play_custom_scene_button->set_icon(gui_base->get_icon("PlayCustom", "EditorIcons"));
@@ -374,6 +388,15 @@ void EditorNode::_notification(int p_what) {
 		dock_tab_move_left->set_icon(theme->get_icon("Back", "EditorIcons"));
 		dock_tab_move_right->set_icon(theme->get_icon("Forward", "EditorIcons"));
 		update_menu->set_icon(gui_base->get_icon("Progress1", "EditorIcons"));
+
+		PopupMenu *p = help_menu->get_popup();
+		p->set_item_icon(p->get_item_index(HELP_CLASSES), gui_base->get_icon("ClassList", "EditorIcons"));
+		p->set_item_icon(p->get_item_index(HELP_SEARCH), gui_base->get_icon("HelpSearch", "EditorIcons"));
+		p->set_item_icon(p->get_item_index(HELP_DOCS), gui_base->get_icon("Instance", "EditorIcons"));
+		p->set_item_icon(p->get_item_index(HELP_QA), gui_base->get_icon("Instance", "EditorIcons"));
+		p->set_item_icon(p->get_item_index(HELP_ISSUES), gui_base->get_icon("Instance", "EditorIcons"));
+		p->set_item_icon(p->get_item_index(HELP_COMMUNITY), gui_base->get_icon("Instance", "EditorIcons"));
+		p->set_item_icon(p->get_item_index(HELP_ABOUT), gui_base->get_icon("Godot", "EditorIcons"));
 	}
 
 	if (p_what == Control::NOTIFICATION_RESIZED) {
@@ -589,6 +612,7 @@ void EditorNode::save_resource_in_path(const Ref<Resource> &p_resource, const St
 	Error err = ResourceSaver::save(path, p_resource, flg | ResourceSaver::FLAG_REPLACE_SUBRESOURCE_PATHS);
 
 	if (err != OK) {
+		current_option = -1;
 		accept->set_text(TTR("Error saving resource!"));
 		accept->popup_centered_minsize();
 		return;
@@ -975,6 +999,7 @@ void EditorNode::_save_scene_with_preview(String p_file, int p_idx) {
 
 		String file = cache_base + ".png";
 
+		post_process_preview(img);
 		img->save_png(file);
 	}
 
@@ -1186,6 +1211,7 @@ void EditorNode::_dialog_action(String p_file) {
 			Error err = ResourceSaver::save(p_file, ml);
 			if (err) {
 
+				current_option = -1;
 				accept->get_ok()->set_text(TTR("I see.."));
 				accept->set_text(TTR("Error saving MeshLibrary!"));
 				accept->popup_centered_minsize();
@@ -1220,6 +1246,7 @@ void EditorNode::_dialog_action(String p_file) {
 			Error err = ResourceSaver::save(p_file, ml);
 			if (err) {
 
+				current_option = -1;
 				accept->get_ok()->set_text(TTR("I see.."));
 				accept->set_text(TTR("Error saving TileSet!"));
 				accept->popup_centered_minsize();
@@ -1778,7 +1805,7 @@ void EditorNode::_run(bool p_current, const String &p_custom) {
 		editor_data.save_editor_external_data();
 	}
 
-	if (!_call_build())
+	if (!call_build())
 		return;
 
 	if (bool(EDITOR_DEF("run/output/always_clear_output_on_play", true))) {
@@ -2315,7 +2342,7 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 			if (run_native->is_deploy_debug_remote_enabled()) {
 				_menu_option_confirm(RUN_STOP, true);
 
-				if (!_call_build())
+				if (!call_build())
 					break; // build failed
 
 				emit_signal("play_pressed");
@@ -2901,7 +2928,7 @@ void EditorNode::_set_main_scene_state(Dictionary p_state, Node *p_for_scene) {
 
 	if (p_state.has("editor_index")) {
 		int index = p_state["editor_index"];
-		if (current < 2) { //if currently in spatial/2d, only switch to spatial/2d. if curently in script, stay there
+		if (current < 2) { //if currently in spatial/2d, only switch to spatial/2d. if currently in script, stay there
 			if (index < 2 || !get_edited_scene()) {
 				_editor_select(index);
 			}
@@ -3431,6 +3458,19 @@ Ref<Texture> EditorNode::_file_dialog_get_icon(const String &p_path) {
 	}
 
 	return singleton->icon_type_cache["Object"];
+}
+
+void EditorNode::_build_icon_type_cache() {
+
+	List<StringName> tl;
+	StringName ei = "EditorIcons";
+	theme_base->get_theme()->get_icon_list(ei, &tl);
+	for (List<StringName>::Element *E = tl.front(); E; E = E->next()) {
+
+		if (!ClassDB::class_exists(E->get()))
+			continue;
+		icon_type_cache[E->get()] = theme_base->get_theme()->get_icon(E->get(), ei);
+	}
 }
 
 void EditorNode::_file_dialog_register(FileDialog *p_dialog) {
@@ -4519,7 +4559,7 @@ void EditorNode::add_build_callback(EditorBuildCallback p_callback) {
 
 EditorBuildCallback EditorNode::build_callbacks[EditorNode::MAX_BUILD_CALLBACKS];
 
-bool EditorNode::_call_build() {
+bool EditorNode::call_build() {
 
 	for (int i = 0; i < build_callback_count; i++) {
 		if (!build_callbacks[i]())
@@ -5124,7 +5164,6 @@ EditorNode::EditorNode() {
 	gui_base->add_child(export_template_manager);
 
 	about = memnew(EditorAbout);
-	about->get_logo()->set_texture(gui_base->get_icon("Logo", "EditorIcons"));
 	gui_base->add_child(about);
 
 	warning = memnew(AcceptDialog);
@@ -5549,7 +5588,8 @@ EditorNode::EditorNode() {
 	bottom_panel_vb->add_child(bottom_panel_hb);
 
 	log = memnew(EditorLog);
-	add_bottom_panel_item(TTR("Output"), log);
+	ToolButton *output_button = add_bottom_panel_item(TTR("Output"), log);
+	log->set_tool_button(output_button);
 
 	old_split_ofs = 0;
 
@@ -5665,6 +5705,8 @@ EditorNode::EditorNode() {
 	add_editor_plugin(memnew(AnimationTreeEditorPlugin(this)));
 	add_editor_plugin(memnew(MeshLibraryEditorPlugin(this)));
 	add_editor_plugin(memnew(StyleBoxEditorPlugin(this)));
+	add_editor_plugin(memnew(SpriteEditorPlugin(this)));
+	add_editor_plugin(memnew(Skeleton2DEditorPlugin(this)));
 	add_editor_plugin(memnew(ParticlesEditorPlugin(this)));
 	add_editor_plugin(memnew(ResourcePreloaderEditorPlugin(this)));
 	add_editor_plugin(memnew(ItemListEditorPlugin(this)));
@@ -5687,7 +5729,7 @@ EditorNode::EditorNode() {
 	add_editor_plugin(memnew(CollisionShape2DEditorPlugin(this)));
 	add_editor_plugin(memnew(CurveEditorPlugin(this)));
 	add_editor_plugin(memnew(TextureEditorPlugin(this)));
-	add_editor_plugin(memnew(MeshEditorPlugin(this)));
+	add_editor_plugin(memnew(AudioBusesEditorPlugin(audio_bus_editor)));
 	add_editor_plugin(memnew(AudioBusesEditorPlugin(audio_bus_editor)));
 	add_editor_plugin(memnew(NavigationMeshEditorPlugin(this)));
 
@@ -5787,17 +5829,7 @@ EditorNode::EditorNode() {
 	EditorFileSystem::get_singleton()->connect("filesystem_changed", this, "_fs_changed");
 	EditorFileSystem::get_singleton()->connect("resources_reimported", this, "_resources_reimported");
 
-	{
-		List<StringName> tl;
-		StringName ei = "EditorIcons";
-		theme_base->get_theme()->get_icon_list(ei, &tl);
-		for (List<StringName>::Element *E = tl.front(); E; E = E->next()) {
-
-			if (!ClassDB::class_exists(E->get()))
-				continue;
-			icon_type_cache[E->get()] = theme_base->get_theme()->get_icon(E->get(), ei);
-		}
-	}
+	_build_icon_type_cache();
 
 	Node::set_human_readable_collision_renaming(true);
 
