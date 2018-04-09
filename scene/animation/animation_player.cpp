@@ -590,8 +590,8 @@ void AnimationPlayer::_animation_update_transforms() {
 
 			Transform t;
 			t.origin = nc->loc_accum;
-			t.basis = nc->rot_accum;
 			t.basis.scale(nc->scale_accum);
+			t.basis.rotate(nc->rot_accum.get_euler());
 
 			if (nc->skeleton && nc->bone_idx >= 0) {
 
@@ -1025,6 +1025,13 @@ float AnimationPlayer::get_speed_scale() const {
 
 	return speed_scale;
 }
+float AnimationPlayer::get_playing_speed() const {
+
+	if (!playing) {
+		return 0;
+	}
+	return speed_scale * playback.current.speed_scale;
+}
 
 void AnimationPlayer::seek(float p_time, bool p_update) {
 
@@ -1316,6 +1323,7 @@ void AnimationPlayer::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_speed_scale", "speed"), &AnimationPlayer::set_speed_scale);
 	ClassDB::bind_method(D_METHOD("get_speed_scale"), &AnimationPlayer::get_speed_scale);
+	ClassDB::bind_method(D_METHOD("get_playing_speed"), &AnimationPlayer::get_playing_speed);
 
 	ClassDB::bind_method(D_METHOD("set_autoplay", "name"), &AnimationPlayer::set_autoplay);
 	ClassDB::bind_method(D_METHOD("get_autoplay"), &AnimationPlayer::get_autoplay);

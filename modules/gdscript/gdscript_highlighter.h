@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  power_javascript.h                                                   */
+/*  gdscript_highlighter.h                                               */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,26 +28,29 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef PLATFORM_JAVASCRIPT_POWER_JAVASCRIPT_H_
-#define PLATFORM_JAVASCRIPT_POWER_JAVASCRIPT_H_
+#ifndef GDSCRIPT_HIGHLIGHTER_H
+#define GDSCRIPT_HIGHLIGHTER_H
 
-#include "os/os.h"
+#include "scene/gui/text_edit.h"
 
-class PowerJavascript {
+class GDScriptSyntaxHighlighter : public SyntaxHighlighter {
 private:
-	int nsecs_left;
-	int percent_left;
-	OS::PowerState power_state;
-
-	bool UpdatePowerInfo();
+	// colours
+	Color font_color;
+	Color symbol_color;
+	Color function_color;
+	Color built_in_type_color;
+	Color number_color;
+	Color member_color;
 
 public:
-	PowerJavascript();
-	virtual ~PowerJavascript();
+	static SyntaxHighlighter *create();
 
-	OS::PowerState get_power_state();
-	int get_power_seconds_left();
-	int get_power_percent_left();
+	virtual void _update_cache();
+	virtual Map<int, TextEdit::HighlighterInfo> _get_line_syntax_highlighting(int p_line);
+
+	virtual String get_name();
+	virtual List<String> get_supported_languages();
 };
 
-#endif /* PLATFORM_JAVASCRIPT_POWER_JAVASCRIPT_H_ */
+#endif // GDSCRIPT_HIGHLIGHTER_H
