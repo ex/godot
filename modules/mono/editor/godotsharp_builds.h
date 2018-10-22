@@ -61,20 +61,18 @@ private:
 
 	static GodotSharpBuilds *singleton;
 
-	friend class GDMono;
-	static void _register_internal_calls();
-
 public:
 	enum BuildTool {
 		MSBUILD_MONO,
 #ifdef WINDOWS_ENABLED
-		MSBUILD
-#else
-		XBUILD // Deprecated
+		MSBUILD_VS,
 #endif
+		XBUILD // Deprecated
 	};
 
 	_FORCE_INLINE_ static GodotSharpBuilds *get_singleton() { return singleton; }
+
+	static void register_internal_calls();
 
 	static void show_build_error_dialog(const String &p_message);
 

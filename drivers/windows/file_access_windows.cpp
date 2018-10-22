@@ -31,11 +31,13 @@
 #ifdef WINDOWS_ENABLED
 
 #include "file_access_windows.h"
-#include "os/os.h"
-#include "shlwapi.h"
+
+#include "core/os/os.h"
+#include "core/print_string.h"
+
+#include <shlwapi.h>
 #include <windows.h>
 
-#include "print_string.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <tchar.h>
@@ -85,13 +87,34 @@ Error FileAccessWindows::_open(const String &p_path, int p_mode_flags) {
 			return ERR_FILE_CANT_OPEN;
 	};
 
+#ifdef TOOLS_ENABLED
+	// Windows is case insensitive, but all other platforms are sensitive to it
+	// To ease cross-platform development, we issue a warning if users try to access
+	// a file using the wrong case (which *works* on Windows, but won't on other
+	// platforms).
+	if (p_mode_flags == READ) {
+		WIN32_FIND_DATAW d = { 0 };
+		HANDLE f = FindFirstFileW(path.c_str(), &d);
+		if (f) {
+			String fname = d.cFileName;
+			if (fname != String()) {
+
+				String base_file = path.get_file();
+				if (base_file != fname && base_file.findn(fname) == 0) {
+					WARN_PRINTS("Case mismatch opening requested file '" + base_file + "', stored as '" + fname + "' in the filesystem. This file will not open when exported to other case-sensitive platforms.");
+				}
+			}
+			FindClose(f);
+		}
+	}
+#endif
+
 	if (is_backup_save_enabled() && p_mode_flags & WRITE && !(p_mode_flags & READ)) {
 		save_path = path;
 		path = path + ".tmp";
-		//print_line("saving instead to "+path);
 	}
 
-	f = _wfopen(path.c_str(), mode_string);
+	_wfopen_s(&f, path.c_str(), mode_string);
 
 	if (f == NULL) {
 		last_error = ERR_FILE_CANT_OPEN;
@@ -112,17 +135,12 @@ void FileAccessWindows::close() {
 
 	if (save_path != "") {
 
-		//unlink(save_path.utf8().get_data());
-		//print_line("renaming..");
-		//_wunlink(save_path.c_str()); //unlink if exists
-		//int rename_error = _wrename((save_path+".tmp").c_str(),save_path.c_str());
-
 		bool rename_error = true;
 		int attempts = 4;
 		while (rename_error && attempts) {
-		// This workaround of trying multiple times is added to deal with paranoid Windows
-		// antiviruses that love reading just written files even if they are not executable, thus
-		// locking the file and preventing renaming from happening.
+			// This workaround of trying multiple times is added to deal with paranoid Windows
+			// antiviruses that love reading just written files even if they are not executable, thus
+			// locking the file and preventing renaming from happening.
 
 #ifdef UWP_ENABLED
 			// UWP has no PathFileExists, so we check attributes instead
@@ -141,7 +159,7 @@ void FileAccessWindows::close() {
 			}
 			if (rename_error) {
 				attempts--;
-				OS::get_singleton()->delay_usec(1000000); //wait 100msec and try again
+				OS::get_singleton()->delay_usec(100000); // wait 100msec and try again
 			}
 		}
 
@@ -260,7 +278,7 @@ bool FileAccessWindows::file_exists(const String &p_name) {
 	FILE *g;
 	//printf("opening file %s\n", p_fname.c_str());
 	String filename = fix_path(p_name);
-	g = _wfopen(filename.c_str(), L"rb");
+	_wfopen_s(&g, filename.c_str(), L"rb");
 	if (g == NULL) {
 
 		return false;
@@ -284,11 +302,10 @@ uint64_t FileAccessWindows::_get_modified_time(const String &p_file) {
 
 		return st.st_mtime;
 	} else {
-		print_line("no access to " + file);
+		ERR_EXPLAIN("Failed to get modified time for: " + file);
+		ERR_FAIL_V(0);
 	}
-
-	ERR_FAIL_V(0);
-};
+}
 
 FileAccessWindows::FileAccessWindows() {
 

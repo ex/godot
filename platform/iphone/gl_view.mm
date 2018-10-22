@@ -53,7 +53,6 @@ static GLView *_instance = NULL;
 
 static bool video_found_error = false;
 static bool video_playing = false;
-static float video_previous_volume = 0.0f;
 static CMTime video_current_time;
 
 void _show_keyboard(String);
@@ -77,6 +76,16 @@ void _hide_keyboard() {
 	[_instance hide_keyboard];
 	keyboard_text = "";
 };
+
+Rect2 _get_ios_window_safe_area(float p_window_width, float p_window_height) {
+	UIEdgeInsets insets = UIEdgeInsetsMake(0, 0, 0, 0);
+	if (_instance != nil && [_instance respondsToSelector:@selector(safeAreaInsets)]) {
+		insets = [_instance safeAreaInsets];
+	}
+	ERR_FAIL_COND_V(insets.left < 0 || insets.top < 0 || insets.right < 0 || insets.bottom < 0,
+			Rect2(0, 0, p_window_width, p_window_height));
+	return Rect2(insets.left, insets.top, p_window_width - insets.right - insets.left, p_window_height - insets.bottom - insets.top);
+}
 
 bool _play_video(String p_path, float p_volume, String p_audio_track, String p_subtitle_track) {
 	p_path = ProjectSettings::get_singleton()->globalize_path(p_path);
@@ -238,16 +247,6 @@ static int remove_touch(UITouch *p_touch) {
 	return remaining;
 };
 
-static int get_first_id(UITouch *p_touch) {
-
-	for (int i = 0; i < max_touches; i++) {
-
-		if (touches[i] != NULL)
-			return i;
-	};
-	return -1;
-};
-
 static void clear_touches() {
 
 	for (int i = 0; i < max_touches; i++) {
@@ -326,9 +325,7 @@ static void clear_touches() {
 	// Generate IDs for a framebuffer object and a color renderbuffer
 	UIScreen *mainscr = [UIScreen mainScreen];
 	printf("******** screen size %i, %i\n", (int)mainscr.currentMode.size.width, (int)mainscr.currentMode.size.height);
-	float minPointSize = MIN(mainscr.bounds.size.width, mainscr.bounds.size.height);
-	float minScreenSize = MIN(mainscr.currentMode.size.width, mainscr.currentMode.size.height);
-	self.contentScaleFactor = minScreenSize / minPointSize;
+	self.contentScaleFactor = mainscr.nativeScale;
 
 	glGenFramebuffersOES(1, &viewFramebuffer);
 	glGenRenderbuffersOES(1, &viewRenderbuffer);
@@ -489,7 +486,7 @@ static void clear_touches() {
 			int tid = get_touch_id(touch);
 			ERR_FAIL_COND(tid == -1);
 			CGPoint touchPoint = [touch locationInView:self];
-			OSIPhone::get_singleton()->mouse_button(tid, touchPoint.x * self.contentScaleFactor, touchPoint.y * self.contentScaleFactor, true, touch.tapCount > 1, tid == 0);
+			OSIPhone::get_singleton()->touch_press(tid, touchPoint.x * self.contentScaleFactor, touchPoint.y * self.contentScaleFactor, true, touch.tapCount > 1);
 		};
 	};
 }
@@ -506,10 +503,9 @@ static void clear_touches() {
 				continue;
 			int tid = get_touch_id(touch);
 			ERR_FAIL_COND(tid == -1);
-			int first = get_first_id(touch);
 			CGPoint touchPoint = [touch locationInView:self];
 			CGPoint prev_point = [touch previousLocationInView:self];
-			OSIPhone::get_singleton()->mouse_move(tid, prev_point.x * self.contentScaleFactor, prev_point.y * self.contentScaleFactor, touchPoint.x * self.contentScaleFactor, touchPoint.y * self.contentScaleFactor, first == tid);
+			OSIPhone::get_singleton()->touch_drag(tid, prev_point.x * self.contentScaleFactor, prev_point.y * self.contentScaleFactor, touchPoint.x * self.contentScaleFactor, touchPoint.y * self.contentScaleFactor);
 		};
 	};
 }
@@ -525,9 +521,9 @@ static void clear_touches() {
 				continue;
 			int tid = get_touch_id(touch);
 			ERR_FAIL_COND(tid == -1);
-			int rem = remove_touch(touch);
+			remove_touch(touch);
 			CGPoint touchPoint = [touch locationInView:self];
-			OSIPhone::get_singleton()->mouse_button(tid, touchPoint.x * self.contentScaleFactor, touchPoint.y * self.contentScaleFactor, false, false, rem == 0);
+			OSIPhone::get_singleton()->touch_press(tid, touchPoint.x * self.contentScaleFactor, touchPoint.y * self.contentScaleFactor, false, false);
 		};
 	};
 }
@@ -627,6 +623,7 @@ static void clear_touches() {
 	}
 	init_touches();
 	self.multipleTouchEnabled = YES;
+	self.autocorrectionType = UITextAutocorrectionTypeNo;
 
 	printf("******** adding observer for sound routing changes\n");
 	[[NSNotificationCenter defaultCenter]
@@ -743,7 +740,6 @@ static void clear_touches() {
 		[_instance.moviePlayerController stop];
 		[_instance.moviePlayerController.view removeFromSuperview];
 
-	//[[MPMusicPlayerController applicationMusicPlayer] setVolume: video_previous_volume];
 	video_playing = false;
 }
 */

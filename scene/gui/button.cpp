@@ -29,9 +29,8 @@
 /*************************************************************************/
 
 #include "button.h"
-#include "print_string.h"
+#include "core/translation.h"
 #include "servers/visual_server.h"
-#include "translation.h"
 
 Size2 Button::get_minimum_size() const {
 
@@ -76,8 +75,6 @@ void Button::_notification(int p_what) {
 		Color color;
 		Color color_icon(1, 1, 1, 1);
 
-		//print_line(get_text()+": "+itos(is_flat())+" hover "+itos(get_draw_mode()));
-
 		Ref<StyleBox> style = get_stylebox("normal");
 
 		switch (get_draw_mode()) {
@@ -91,6 +88,21 @@ void Button::_notification(int p_what) {
 				if (has_color("icon_color_normal"))
 					color_icon = get_color("icon_color_normal");
 			} break;
+			case DRAW_HOVER_PRESSED: {
+				if (has_stylebox("hover_pressed") && has_stylebox_override("hover_pressed")) {
+					style = get_stylebox("hover_pressed");
+					if (!flat)
+						style->draw(ci, Rect2(Point2(0, 0), size));
+					if (has_color("font_color_hover_pressed"))
+						color = get_color("font_color_hover_pressed");
+					else
+						color = get_color("font_color");
+					if (has_color("icon_color_hover_pressed"))
+						color_icon = get_color("icon_color_hover_pressed");
+
+					break;
+				}
+			}
 			case DRAW_PRESSED: {
 
 				style = get_stylebox("pressed");

@@ -30,6 +30,7 @@
 
 #include "area_bullet.h"
 
+#include "bullet_physics_server.h"
 #include "bullet_types_converter.h"
 #include "bullet_utilities.h"
 #include "collision_object_bullet.h"
@@ -45,7 +46,6 @@
 AreaBullet::AreaBullet() :
 		RigidCollisionObjectBullet(CollisionObjectBullet::TYPE_AREA),
 		monitorable(true),
-		isScratched(false),
 		spOv_mode(PhysicsServer::AREA_SPACE_OVERRIDE_DISABLED),
 		spOv_gravityPoint(false),
 		spOv_gravityPointDistanceScale(0),
@@ -54,10 +54,11 @@ AreaBullet::AreaBullet() :
 		spOv_gravityMag(10),
 		spOv_linearDump(0.1),
 		spOv_angularDump(1),
-		spOv_priority(0) {
+		spOv_priority(0),
+		isScratched(false) {
 
 	btGhost = bulletnew(btGhostObject);
-	btGhost->setCollisionShape(compoundShape);
+	reload_shapes();
 	setupBulletCollisionObject(btGhost);
 	/// Collision objects with a callback still have collision response with dynamic rigid bodies.
 	/// In order to use collision objects as trigger, you have to disable the collision response.
@@ -68,8 +69,9 @@ AreaBullet::AreaBullet() :
 }
 
 AreaBullet::~AreaBullet() {
-	// Call "remove_all_overlapping_instantly();" is not necessary because the exit
-	// signal are handled by godot, so just clear the array
+	// signal are handled by godot, so just clear without notify
+	for (int i = overlappingObjects.size() - 1; 0 <= i; --i)
+		overlappingObjects[i].object->on_exit_area(this);
 }
 
 void AreaBullet::dispatch_callbacks() {
@@ -79,7 +81,7 @@ void AreaBullet::dispatch_callbacks() {
 
 	// Reverse order because I've to remove EXIT objects
 	for (int i = overlappingObjects.size() - 1; 0 <= i; --i) {
-		OverlappingObjectData &otherObj = overlappingObjects[i];
+		OverlappingObjectData &otherObj = overlappingObjects.write[i];
 
 		switch (otherObj.state) {
 			case OVERLAP_STATE_ENTER:
@@ -91,6 +93,9 @@ void AreaBullet::dispatch_callbacks() {
 				call_event(otherObj.object, PhysicsServer::AREA_BODY_REMOVED);
 				otherObj.object->on_exit_area(this);
 				overlappingObjects.remove(i); // Remove after callback
+				break;
+			case OVERLAP_STATE_DIRTY:
+			case OVERLAP_STATE_INSIDE:
 				break;
 		}
 	}
@@ -122,24 +127,21 @@ void AreaBullet::scratch() {
 	isScratched = true;
 }
 
-void AreaBullet::remove_all_overlapping_instantly() {
-	CollisionObjectBullet *supportObject;
+void AreaBullet::clear_overlaps(bool p_notify) {
 	for (int i = overlappingObjects.size() - 1; 0 <= i; --i) {
-		supportObject = overlappingObjects[i].object;
-		call_event(supportObject, PhysicsServer::AREA_BODY_REMOVED);
-		supportObject->on_exit_area(this);
+		if (p_notify)
+			call_event(overlappingObjects[i].object, PhysicsServer::AREA_BODY_REMOVED);
+		overlappingObjects[i].object->on_exit_area(this);
 	}
 	overlappingObjects.clear();
 }
 
-void AreaBullet::remove_overlapping_instantly(CollisionObjectBullet *p_object, bool p_notify) {
-	CollisionObjectBullet *supportObject;
+void AreaBullet::remove_overlap(CollisionObjectBullet *p_object, bool p_notify) {
 	for (int i = overlappingObjects.size() - 1; 0 <= i; --i) {
-		supportObject = overlappingObjects[i].object;
-		if (supportObject == p_object) {
+		if (overlappingObjects[i].object == p_object) {
 			if (p_notify)
-				call_event(supportObject, PhysicsServer::AREA_BODY_REMOVED);
-			supportObject->on_exit_area(this);
+				call_event(overlappingObjects[i].object, PhysicsServer::AREA_BODY_REMOVED);
+			overlappingObjects[i].object->on_exit_area(this);
 			overlappingObjects.remove(i);
 			break;
 		}
@@ -162,6 +164,11 @@ void AreaBullet::set_monitorable(bool p_monitorable) {
 
 bool AreaBullet::is_monitoring() const {
 	return get_godot_object_flags() & GOF_IS_MONITORING_AREA;
+}
+
+void AreaBullet::main_shape_changed() {
+	CRASH_COND(!get_main_shape())
+	btGhost->setCollisionShape(get_main_shape());
 }
 
 void AreaBullet::reload_body() {
@@ -201,13 +208,13 @@ void AreaBullet::add_overlap(CollisionObjectBullet *p_otherObject) {
 
 void AreaBullet::put_overlap_as_exit(int p_index) {
 	scratch();
-	overlappingObjects[p_index].state = OVERLAP_STATE_EXIT;
+	overlappingObjects.write[p_index].state = OVERLAP_STATE_EXIT;
 }
 
 void AreaBullet::put_overlap_as_inside(int p_index) {
 	// This check is required to be sure this body was inside
 	if (OVERLAP_STATE_DIRTY == overlappingObjects[p_index].state) {
-		overlappingObjects[p_index].state = OVERLAP_STATE_INSIDE;
+		overlappingObjects.write[p_index].state = OVERLAP_STATE_INSIDE;
 	}
 }
 
@@ -238,7 +245,7 @@ void AreaBullet::set_param(PhysicsServer::AreaParameter p_param, const Variant &
 			set_spOv_gravityPointAttenuation(p_value);
 			break;
 		default:
-			print_line("The Bullet areas doesn't suppot this param: " + itos(p_param));
+			WARN_PRINTS("Area doesn't support this parameter in the Bullet backend: " + itos(p_param));
 	}
 }
 
@@ -261,7 +268,7 @@ Variant AreaBullet::get_param(PhysicsServer::AreaParameter p_param) const {
 		case PhysicsServer::AREA_PARAM_GRAVITY_POINT_ATTENUATION:
 			return spOv_gravityPointAttenuation;
 		default:
-			print_line("The Bullet areas doesn't suppot this param: " + itos(p_param));
+			WARN_PRINTS("Area doesn't support this parameter in the Bullet backend: " + itos(p_param));
 			return Variant();
 	}
 }

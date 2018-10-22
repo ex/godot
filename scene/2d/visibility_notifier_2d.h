@@ -43,7 +43,7 @@ class VisibilityNotifier2D : public Node2D {
 	Rect2 rect;
 
 protected:
-	friend class SpatialIndexer2D;
+	friend struct SpatialIndexer2D;
 
 	void _enter_viewport(Viewport *p_viewport);
 	void _exit_viewport(Viewport *p_viewport);
@@ -56,6 +56,7 @@ protected:
 
 public:
 	virtual Rect2 _edit_get_rect() const;
+	virtual bool _edit_use_rect() const;
 
 	void set_rect(const Rect2 &p_rect);
 	Rect2 get_rect() const;

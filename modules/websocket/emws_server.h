@@ -46,6 +46,9 @@ public:
 	bool is_listening() const;
 	bool has_peer(int p_id) const;
 	Ref<WebSocketPeer> get_peer(int p_id) const;
+	IP_Address get_peer_address(int p_peer_id) const;
+	int get_peer_port(int p_peer_id) const;
+	void disconnect_peer(int p_peer_id, int p_code = 1000, String p_reason = "");
 	virtual void poll();
 	virtual PoolVector<String> get_protocols() const;
 

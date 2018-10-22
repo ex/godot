@@ -4,7 +4,7 @@
 		Raw byte array.
 	</brief_description>
 	<description>
-		Raw byte array. Contains bytes. Optimized for memory usage, can't fragment the memory.
+		Raw byte array. Contains bytes. Optimized for memory usage, can't fragment the memory. Note that this type is passed by value and not by reference.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -81,7 +81,7 @@
 		</method>
 		<method name="invert">
 			<description>
-				Reverse the order of the elements in the array (so first element will now be the last).
+				Reverse the order of the elements in the array.
 			</description>
 		</method>
 		<method name="push_back">
@@ -129,7 +129,7 @@
 			<argument index="1" name="to" type="int">
 			</argument>
 			<description>
-				Returns the slice of the [code]PoolByteArray[/code] between indices (inclusive) as a new [code]PoolByteArray[/code].  Any negative index is considered to be from the end of the array.
+				Returns the slice of the [code]PoolByteArray[/code] between indices (inclusive) as a new [code]PoolByteArray[/code]. Any negative index is considered to be from the end of the array.
 			</description>
 		</method>
 	</methods>

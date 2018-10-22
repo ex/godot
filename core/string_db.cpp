@@ -30,8 +30,8 @@
 
 #include "string_db.h"
 
-#include "os/os.h"
-#include "print_string.h"
+#include "core/os/os.h"
+#include "core/print_string.h"
 
 StaticCString StaticCString::create(const char *p_ptr) {
 	StaticCString scs;
@@ -73,7 +73,6 @@ void StringName::cleanup() {
 			_Data *d = _table[i];
 			lost_strings++;
 			if (OS::get_singleton()->is_stdout_verbose()) {
-
 				if (d->cname) {
 					print_line("Orphan StringName: " + String(d->cname));
 				} else {
@@ -85,8 +84,8 @@ void StringName::cleanup() {
 			memdelete(d);
 		}
 	}
-	if (OS::get_singleton()->is_stdout_verbose() && lost_strings) {
-		print_line("StringName: " + itos(lost_strings) + " unclaimed string names at exit.");
+	if (lost_strings) {
+		print_verbose("StringName: " + itos(lost_strings) + " unclaimed string names at exit.");
 	}
 	lock->unlock();
 
@@ -164,21 +163,14 @@ void StringName::operator=(const StringName &p_name) {
 		_data = p_name._data;
 	}
 }
-/* was inlined
-StringName::operator String() const {
 
-	if (_data)
-		return _data->get_name();
-
-	return "";
-}
-*/
 StringName::StringName(const StringName &p_name) {
 
-	ERR_FAIL_COND(!configured);
 	_data = NULL;
-	if (p_name._data && p_name._data->refcount.ref()) {
 
+	ERR_FAIL_COND(!configured);
+
+	if (p_name._data && p_name._data->refcount.ref()) {
 		_data = p_name._data;
 	}
 }
