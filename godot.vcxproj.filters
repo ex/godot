@@ -11,9 +11,6 @@
 		<Filter Include="Header Files\core\bind">
 			<UniqueIdentifier>{CE826060-3E73-AF25-EE16-F13968AA756E}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Header Files\core\helper">
-			<UniqueIdentifier>{48A4F175-7017-C6AF-A7CF-11E285A24E78}</UniqueIdentifier>
-		</Filter>
 		<Filter Include="Header Files\core\io">
 			<UniqueIdentifier>{02E91A47-D10C-8039-1018-3D096618EBB8}</UniqueIdentifier>
 		</Filter>
@@ -29,11 +26,17 @@
 		<Filter Include="Header Files\drivers\alsa">
 			<UniqueIdentifier>{9372A896-AD51-C343-3321-01600BDCF7DE}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Header Files\drivers\alsamidi">
+			<UniqueIdentifier>{CDD3350D-D7FE-34CE-62DF-0D6B7ADA6172}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Header Files\drivers\convex_decomp">
 			<UniqueIdentifier>{0B44F75A-52E1-DC77-203E-F1BF1D8F3DF7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\coreaudio">
 			<UniqueIdentifier>{3EC51398-9435-B91B-6A2D-18BCBAC35708}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\drivers\coremidi">
+			<UniqueIdentifier>{8E6C64A0-4D31-40F1-304C-72C5E68C26C1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\gl_context">
 			<UniqueIdentifier>{174103D4-66B3-B81F-CBEF-97CEF15A1E09}</UniqueIdentifier>
@@ -62,6 +65,9 @@
 		<Filter Include="Header Files\drivers\windows">
 			<UniqueIdentifier>{4B081CB9-8444-4DBF-DAF7-6D70BF244E03}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Header Files\drivers\winmidi">
+			<UniqueIdentifier>{A02C375E-AA58-E656-B457-C411D31079E2}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Header Files\editor">
 			<UniqueIdentifier>{04AB032D-D5CB-507F-06F5-4564F192258A}</UniqueIdentifier>
 		</Filter>
@@ -86,8 +92,17 @@
 		<Filter Include="Header Files\modules">
 			<UniqueIdentifier>{04B9A41C-41C0-9EAC-B0B1-F4C2540F8173}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Header Files\modules\bmp">
+			<UniqueIdentifier>{628F74DA-2D6F-6CF0-739F-A3AB67EFBAC2}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Header Files\modules\bullet">
 			<UniqueIdentifier>{E9AFE3F5-222E-3182-6806-8D2109B59AE7}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\modules\csg">
+			<UniqueIdentifier>{F2C46301-0B09-172D-60B2-509960176DAA}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\modules\cvtt">
+			<UniqueIdentifier>{28130856-7B39-1B3F-EEB3-D7F062651510}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\dds">
 			<UniqueIdentifier>{A6422536-7386-8854-F12C-E9D1D889375C}</UniqueIdentifier>
@@ -110,11 +125,17 @@
 		<Filter Include="Header Files\modules\gdnative\nativescript">
 			<UniqueIdentifier>{7687B812-A10F-9D54-7349-FC43C8541417}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Header Files\modules\gdnative\net">
+			<UniqueIdentifier>{9DAA2351-08FE-4C74-E729-EFBCB9A52052}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Header Files\modules\gdnative\pluginscript">
 			<UniqueIdentifier>{0D581E94-5A74-D5C3-AC7A-92749F33278D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gdscript">
 			<UniqueIdentifier>{7E8D8E74-5C91-DCEA-CB42-13BFE3D04CB8}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\modules\gdscript\editor">
+			<UniqueIdentifier>{F2D9BBE2-02DD-348B-A177-E5873EB46011}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gridmap">
 			<UniqueIdentifier>{01A45991-7575-9E07-864F-49E78999B8F8}</UniqueIdentifier>
@@ -128,8 +149,14 @@
 		<Filter Include="Header Files\modules\mbedtls">
 			<UniqueIdentifier>{11ECB634-4A51-21AC-4585-B3F5625A5238}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Header Files\modules\mobile_vr">
+			<UniqueIdentifier>{E0DD35F9-ED7F-3E56-82EE-5ECD31EC64F8}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Header Files\modules\ogg">
 			<UniqueIdentifier>{DE45F3B4-6C83-D875-B0DE-0EC4C555E806}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\modules\opensimplex">
+			<UniqueIdentifier>{D6CACFD9-D6C1-76D4-8A64-94246B0382B5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\opus">
 			<UniqueIdentifier>{AD8EAE8E-717F-049E-9C6E-008E0DAA359E}</UniqueIdentifier>
@@ -158,14 +185,14 @@
 		<Filter Include="Header Files\modules\tga">
 			<UniqueIdentifier>{7DDA3836-CBDF-EA69-0083-70E0C0FB6312}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Header Files\modules\thekla_unwrap">
-			<UniqueIdentifier>{693FF23F-1839-CD4E-6D2B-B226B713BEE6}</UniqueIdentifier>
-		</Filter>
 		<Filter Include="Header Files\modules\theora">
 			<UniqueIdentifier>{F067818B-E045-EF60-416E-E47D2BA5EF37}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\tinyexr">
 			<UniqueIdentifier>{20A5FBCB-BE61-BF88-1FB8-7FEA6CEA8C09}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\modules\upnp">
+			<UniqueIdentifier>{7F34B053-66A5-9B53-E401-C9B6B68F2B63}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\visual_script">
 			<UniqueIdentifier>{9780EBFC-B77B-E2C7-2D20-862F9348E130}</UniqueIdentifier>
@@ -184,6 +211,9 @@
 		</Filter>
 		<Filter Include="Header Files\modules\websocket">
 			<UniqueIdentifier>{3DF398B3-5C1F-A5B8-456C-AB6DCD066CA2}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\modules\xatlas_unwrap">
+			<UniqueIdentifier>{3B646596-AD88-9AF2-6AF0-8ADEBFB2F00F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform">
 			<UniqueIdentifier>{17E8F8B5-13CD-DEF5-0C5E-157C73DB7261}</UniqueIdentifier>
@@ -350,6 +380,9 @@
 		<Filter Include="Header Files\thirdparty\bullet\LinearMath">
 			<UniqueIdentifier>{20D56594-C148-11D9-C0B6-18F5FE3D01E9}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Header Files\thirdparty\cvtt">
+			<UniqueIdentifier>{59752170-D4FA-7082-4C82-2641E78A50FD}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Header Files\thirdparty\etc2comp">
 			<UniqueIdentifier>{7131F530-B9E6-2326-755A-91D7DCB20DA9}</UniqueIdentifier>
 		</Filter>
@@ -370,9 +403,6 @@
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libtheora">
 			<UniqueIdentifier>{89F879AB-76CB-B7C6-84BB-3BE8C9A88FC6}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\libtheora\x86_vc">
-			<UniqueIdentifier>{09CD0A02-2239-C2A0-C53C-29786106C731}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvorbis">
 			<UniqueIdentifier>{99A1A511-D9D7-56CA-EF2B-04A8CB8581C1}</UniqueIdentifier>
@@ -425,23 +455,23 @@
 		<Filter Include="Header Files\thirdparty\libwebp\src\utils">
 			<UniqueIdentifier>{8CFD2818-CD2C-44A2-5896-E3EC86B8F7E3}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Header Files\thirdparty\lws">
-			<UniqueIdentifier>{E7B7F2A9-9FFA-42CC-EA98-68F5F0133E20}</UniqueIdentifier>
+		<Filter Include="Header Files\thirdparty\libwebsockets">
+			<UniqueIdentifier>{32161EBC-20EB-B29E-8AE7-8ED9721FE940}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Header Files\thirdparty\lws\ext">
-			<UniqueIdentifier>{25813524-5250-ADC7-9992-B9984C14EA52}</UniqueIdentifier>
+		<Filter Include="Header Files\thirdparty\libwebsockets\win32helpers">
+			<UniqueIdentifier>{82E9200B-A913-B70E-51F7-3ED209A07352}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Header Files\thirdparty\lws\misc">
-			<UniqueIdentifier>{8F489F06-D500-98DC-9654-37041FF644B0}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\lws\win32helpers">
-			<UniqueIdentifier>{3572293E-5780-F5ED-450B-F93802E7DF10}</UniqueIdentifier>
+		<Filter Include="Header Files\thirdparty\miniupnpc">
+			<UniqueIdentifier>{F43DAEFA-CCC5-BA2C-3EA1-9E5B0E58E682}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\minizip">
 			<UniqueIdentifier>{B4148CA4-AA37-911A-A037-FFFC92C3195F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\misc">
 			<UniqueIdentifier>{E1310C5F-5499-D407-460E-D2247B496EF6}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\thirdparty\nanosvg">
+			<UniqueIdentifier>{5A5F7541-B2EC-9699-AEB3-374E113F1655}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\opus">
 			<UniqueIdentifier>{EB49C8E6-ED16-1E86-1043-B85D0869FA44}</UniqueIdentifier>
@@ -461,44 +491,11 @@
 		<Filter Include="Header Files\thirdparty\squish">
 			<UniqueIdentifier>{926FB0FE-6C4C-A708-7D5A-ABC28424228A}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas">
-			<UniqueIdentifier>{508E439A-DBD3-E566-C285-B8623B76CE16}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvcore">
-			<UniqueIdentifier>{9267BEC2-940F-A86F-C0D7-F45B8AAEBAF8}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvimage">
-			<UniqueIdentifier>{3BC4ACFE-FBBB-394F-55F2-027339906B7E}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvmath">
-			<UniqueIdentifier>{28ECF260-8769-9C4D-4E55-64825656DBA9}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvmesh">
-			<UniqueIdentifier>{15161FEB-93C5-57B7-CF30-7B544431E7C8}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvmesh\geometry">
-			<UniqueIdentifier>{A3376D37-DE75-812B-0EE6-891079FF137E}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvmesh\halfedge">
-			<UniqueIdentifier>{776F63A6-9C50-8652-4560-F80C43F8A68F}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvmesh\param">
-			<UniqueIdentifier>{240E79C1-84C3-414A-5B92-E4029E41A993}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvmesh\raster">
-			<UniqueIdentifier>{E90BC8B8-7566-AFF0-D460-2AE5A794345E}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\nvmesh\weld">
-			<UniqueIdentifier>{81F2442A-A6DA-8F5F-07FB-C892DB817A0C}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\poshlib">
-			<UniqueIdentifier>{35FCDF0B-993C-0E02-059C-EC9AC6F1B374}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\thekla_atlas\thekla">
-			<UniqueIdentifier>{C05FC490-8E69-06B1-A96B-806DA1483BE6}</UniqueIdentifier>
-		</Filter>
 		<Filter Include="Header Files\thirdparty\tinyexr">
 			<UniqueIdentifier>{98BBD3E4-9D2E-E96E-68F2-43E10E7630FA}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\thirdparty\xatlas">
+			<UniqueIdentifier>{A5225989-ADCB-22B8-D488-8318367337FA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\zlib">
 			<UniqueIdentifier>{8CE7096F-A8CC-00B3-5BC4-F0B3F9F3E977}</UniqueIdentifier>
@@ -522,9 +519,6 @@
 		<Filter Include="Source Files\core\bind">
 			<UniqueIdentifier>{E342ECF4-63F2-FF55-23B9-DBA84639C88F}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\core\helper">
-			<UniqueIdentifier>{AAA91B67-FCE3-F9EB-67D9-2A821B60EC39}</UniqueIdentifier>
-		</Filter>
 		<Filter Include="Source Files\core\io">
 			<UniqueIdentifier>{4B5090D7-71FB-1016-8AA3-6A1925FB1540}</UniqueIdentifier>
 		</Filter>
@@ -540,11 +534,17 @@
 		<Filter Include="Source Files\drivers\alsa">
 			<UniqueIdentifier>{6631B44C-ADFC-C3B2-4545-BB9196F3C5DF}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Source Files\drivers\alsamidi">
+			<UniqueIdentifier>{DE50EA02-4FBC-0B0F-C7AD-07F7A5442D03}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Source Files\drivers\convex_decomp">
 			<UniqueIdentifier>{A0F3428C-0836-28B1-95C4-6F5B6921C3E1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\coreaudio">
 			<UniqueIdentifier>{583A0FD1-3F0C-C716-398D-B954EB331E50}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\drivers\coremidi">
+			<UniqueIdentifier>{2EAB9315-0880-063E-7100-EF0EF112C12B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\gl_context">
 			<UniqueIdentifier>{AA9E8A74-60EF-C116-63CA-D0118338C6A3}</UniqueIdentifier>
@@ -573,6 +573,9 @@
 		<Filter Include="Source Files\drivers\windows">
 			<UniqueIdentifier>{A491978B-2E40-ECAF-946C-102B7F87643F}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Source Files\drivers\winmidi">
+			<UniqueIdentifier>{8B8C5BBC-BE3B-CFF2-99CA-B4A2604F6CD4}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Source Files\editor">
 			<UniqueIdentifier>{FFF3014C-96C1-3B12-7817-02A398911F60}</UniqueIdentifier>
 		</Filter>
@@ -597,8 +600,17 @@
 		<Filter Include="Source Files\modules">
 			<UniqueIdentifier>{64C4AABC-CC0F-221B-9E7B-4B96E3DA90E7}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Source Files\modules\bmp">
+			<UniqueIdentifier>{C7A9B709-EB27-D3AF-60A6-F881EF33478A}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Source Files\modules\bullet">
 			<UniqueIdentifier>{FF0F338F-1109-EDC1-5660-0DD124514EB2}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\modules\csg">
+			<UniqueIdentifier>{53570998-827B-4B6D-FFAA-C31F396770D1}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\modules\cvtt">
+			<UniqueIdentifier>{91DAF6B7-6A22-0929-9E3A-120709D44DDE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\dds">
 			<UniqueIdentifier>{5C4711C4-9983-3D17-3D51-8020F23762C6}</UniqueIdentifier>
@@ -615,6 +627,9 @@
 		<Filter Include="Source Files\modules\gdnative">
 			<UniqueIdentifier>{FC0EB446-3DE0-896A-CFEA-B590FBB9C5FA}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Source Files\modules\gdnative\android">
+			<UniqueIdentifier>{9207F759-2EA2-0DE9-161D-DD72A5D355E7}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Source Files\modules\gdnative\arvr">
 			<UniqueIdentifier>{81DAB992-A16B-98B9-A5C6-8E530A6D2319}</UniqueIdentifier>
 		</Filter>
@@ -624,11 +639,17 @@
 		<Filter Include="Source Files\modules\gdnative\nativescript">
 			<UniqueIdentifier>{4B3CAD3B-7D41-95C0-463F-56B9984BB67E}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Source Files\modules\gdnative\net">
+			<UniqueIdentifier>{B0333026-F03E-956C-84B0-9892C873A96B}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Source Files\modules\gdnative\pluginscript">
 			<UniqueIdentifier>{114930A6-61B4-FB06-0CCE-7BC327F1533B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdscript">
 			<UniqueIdentifier>{F7A742AA-7E0A-D822-0800-7A4BFACE65AC}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\modules\gdscript\editor">
+			<UniqueIdentifier>{E5F690EE-0CF9-0587-CD77-B0A5CC5592AB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gridmap">
 			<UniqueIdentifier>{1BA0A407-A245-6FAC-3636-032AD7782AC0}</UniqueIdentifier>
@@ -642,8 +663,14 @@
 		<Filter Include="Source Files\modules\mbedtls">
 			<UniqueIdentifier>{7197C9E5-E889-9FDF-B57F-0A9F899A9B27}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Source Files\modules\mobile_vr">
+			<UniqueIdentifier>{144940A2-9C40-5E28-F851-631767EEE3BB}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Source Files\modules\ogg">
 			<UniqueIdentifier>{635FCD8A-327D-1A12-87BD-21318A76ED20}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\modules\opensimplex">
+			<UniqueIdentifier>{8C1B7DD2-8E92-9C50-D88B-FA7A0996EEA4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\opus">
 			<UniqueIdentifier>{4BF6379A-1EB4-042A-D125-B33848A29B57}</UniqueIdentifier>
@@ -672,14 +699,14 @@
 		<Filter Include="Source Files\modules\tga">
 			<UniqueIdentifier>{51B6AD45-1D70-8CAA-8BDB-5BACD99E0DEC}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\modules\thekla_unwrap">
-			<UniqueIdentifier>{EF60B220-7DFF-A391-7E3E-ACD70CDF9394}</UniqueIdentifier>
-		</Filter>
 		<Filter Include="Source Files\modules\theora">
 			<UniqueIdentifier>{26E0338F-01CA-ACC6-E9B8-B19DB4EB42B7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\tinyexr">
 			<UniqueIdentifier>{DC5E0E0B-856A-A2C8-99DF-EABFF0F3CA6D}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\modules\upnp">
+			<UniqueIdentifier>{A852511D-D166-D92F-DDA7-D7633F683937}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\visual_script">
 			<UniqueIdentifier>{6BE20697-7F0F-13DC-A3FE-AFB4D98B9768}</UniqueIdentifier>
@@ -698,6 +725,9 @@
 		</Filter>
 		<Filter Include="Source Files\modules\websocket">
 			<UniqueIdentifier>{B8EDAA89-9C53-79BC-9ED2-ED8EB7C06889}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\modules\xatlas_unwrap">
+			<UniqueIdentifier>{E0F56742-5071-B4F8-E813-50078717B521}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform">
 			<UniqueIdentifier>{81C1C9A7-733D-EB00-4610-DE483B5D3FDD}</UniqueIdentifier>
@@ -864,6 +894,9 @@
 		<Filter Include="Source Files\thirdparty\bullet\LinearMath">
 			<UniqueIdentifier>{60028321-D838-2390-9250-572C409462B4}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Source Files\thirdparty\cvtt">
+			<UniqueIdentifier>{881594F6-AA52-D2C8-6166-204D3152D6FC}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Source Files\thirdparty\enet">
 			<UniqueIdentifier>{707E2818-9713-0363-6943-88A9CF8DAE56}</UniqueIdentifier>
 		</Filter>
@@ -887,9 +920,6 @@
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libtheora">
 			<UniqueIdentifier>{2C9ED768-4C73-A8A9-7A61-C09F1AFA8C12}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\libtheora\x86_vc">
-			<UniqueIdentifier>{FFD7DC0F-409F-DF2A-3138-70FA2AD162C8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvorbis">
 			<UniqueIdentifier>{7DD41AE8-E125-C3A4-2126-3911BA94648C}</UniqueIdentifier>
@@ -963,41 +993,77 @@
 		<Filter Include="Source Files\thirdparty\libwebp\src\utils">
 			<UniqueIdentifier>{C916E0DB-F336-F580-F161-7781E6911FAC}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws">
-			<UniqueIdentifier>{ED2D00BA-C448-F051-0D4A-36C361C91B34}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets">
+			<UniqueIdentifier>{F8CBEE4E-2A25-76D0-C173-368EECFD9212}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\client">
-			<UniqueIdentifier>{9E9BF731-1AD7-5E0A-2558-B5BEB5B2BA88}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\core">
+			<UniqueIdentifier>{AA51433E-35BD-9B68-6EF2-482D7D5879E0}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\ext">
-			<UniqueIdentifier>{697F795E-01D0-8BBD-FBDC-125E6250D46F}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\event-libs">
+			<UniqueIdentifier>{14B670D1-8018-BA15-A4FC-21866CDF7304}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\mbedtls_wrapper">
-			<UniqueIdentifier>{8BBF326E-DA5E-DE29-AC95-9F412E9639FD}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\event-libs\poll">
+			<UniqueIdentifier>{2F660A77-138A-1F5A-8532-8D3CA3CF7855}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\mbedtls_wrapper\library">
-			<UniqueIdentifier>{1FE441A6-5799-B7C9-99BA-A20F4633C09C}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\misc">
+			<UniqueIdentifier>{63DD7F4E-5434-4C9E-25A1-FB8B6ADBF797}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\mbedtls_wrapper\platform">
-			<UniqueIdentifier>{C3494559-3CB2-A38B-E56D-C2E1174FC53E}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\plat">
+			<UniqueIdentifier>{9C0CF88A-9604-836F-2B16-3D25F16C4D62}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\misc">
-			<UniqueIdentifier>{4356CDC3-8C9D-B959-8434-C831FED29852}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles">
+			<UniqueIdentifier>{DA38E19D-A8EB-7295-DC59-9EC9E886E6F9}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\plat">
-			<UniqueIdentifier>{414E6AFB-5ADB-C2CF-CFD4-7809257EE0F6}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles\h1">
+			<UniqueIdentifier>{C0B1F7A3-2D44-D966-20C6-3AC273A31C33}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\server">
-			<UniqueIdentifier>{1EF69F73-6E64-96AB-0F99-59948BF9807D}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles\http">
+			<UniqueIdentifier>{E25E786C-F8F9-2D52-EE26-5F8A190498A2}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\lws\win32helpers">
-			<UniqueIdentifier>{FBABF875-D376-8353-76BD-8C214ECB1ACB}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles\http\client">
+			<UniqueIdentifier>{478C8965-276A-D9C2-CAD1-E5CFBE8B2F18}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles\http\server">
+			<UniqueIdentifier>{7F945A2A-5866-A4D5-96CF-F3728940A54B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles\listen">
+			<UniqueIdentifier>{8F30A6A2-012A-B16A-9C70-54367C1CA27B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles\pipe">
+			<UniqueIdentifier>{4A91661E-677B-1630-65F4-8173F82F3BDA}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles\raw">
+			<UniqueIdentifier>{185DCB52-A696-8D71-125E-4DC82777AA76}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\roles\ws">
+			<UniqueIdentifier>{7488E970-0ECE-8A93-961D-8B182D0D72CE}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\tls">
+			<UniqueIdentifier>{3337EF17-E05A-2BE7-3F52-082ED8B632B8}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\tls\mbedtls">
+			<UniqueIdentifier>{2BB01741-85DE-CE5C-A162-88ABDB756E48}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper">
+			<UniqueIdentifier>{C282462C-A4AF-09CD-26A0-DFE56940CECB}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library">
+			<UniqueIdentifier>{517049A6-191A-FE6A-BA57-469840AA72DD}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\platform">
+			<UniqueIdentifier>{F03F01C4-4644-6B4C-0488-AFFDEE583279}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\win32helpers">
+			<UniqueIdentifier>{BEF9A588-0B9B-6574-F80B-86218FF28EFA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\mbedtls">
 			<UniqueIdentifier>{F76B1D1D-E16F-BC5F-DF7C-8D87AFD23979}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\mbedtls\library">
 			<UniqueIdentifier>{35AA52EA-E398-8765-DB26-7B7E9FF88257}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\miniupnpc">
+			<UniqueIdentifier>{932B8699-8EEE-47B3-1C9A-0F0419A9C265}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\minizip">
 			<UniqueIdentifier>{AB3FA3F0-0160-4F89-973A-DF3208230202}</UniqueIdentifier>
@@ -1020,47 +1086,23 @@
 		<Filter Include="Source Files\thirdparty\pvrtccompressor">
 			<UniqueIdentifier>{89EEF2A7-9568-4629-2CA1-545BCA557525}</UniqueIdentifier>
 		</Filter>
+		<Filter Include="Source Files\thirdparty\recastnavigation">
+			<UniqueIdentifier>{A5261CBD-98C7-84B9-E4A3-BCCF376C7BA7}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\recastnavigation\Recast">
+			<UniqueIdentifier>{5C1CF86E-F309-9F81-261B-D67C4DCBBFD3}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\recastnavigation\Recast\Source">
+			<UniqueIdentifier>{9C82BD75-AC49-E97E-A957-DB56B8CFB4E7}</UniqueIdentifier>
+		</Filter>
 		<Filter Include="Source Files\thirdparty\rtaudio">
 			<UniqueIdentifier>{B923E80B-B97E-C9EB-A402-B761EECC9AB3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\squish">
 			<UniqueIdentifier>{814D98D3-606C-95F6-985A-94546EF3A43F}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas">
-			<UniqueIdentifier>{E720F721-FD7A-2971-1062-FC0F7A3C6B98}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvcore">
-			<UniqueIdentifier>{1E129447-3AA3-E581-DED5-9B208342663A}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvimage">
-			<UniqueIdentifier>{90942F46-0F81-3A21-3E70-FF4A75DBEFE8}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvmath">
-			<UniqueIdentifier>{CE093853-90BC-D8CD-D2C7-7B5AB0440748}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvmesh">
-			<UniqueIdentifier>{8229505A-23A8-A054-8659-BF295A32804E}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvmesh\geometry">
-			<UniqueIdentifier>{A5702A11-323D-62BF-88DE-846C320B3B86}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvmesh\halfedge">
-			<UniqueIdentifier>{ED03B070-83D1-E86C-7A26-363E1753A712}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvmesh\param">
-			<UniqueIdentifier>{688B3C9F-34AA-4D74-8DF7-2EFCBE0CDA46}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvmesh\raster">
-			<UniqueIdentifier>{9017C457-0D4E-3895-E737-FDDF662DE43A}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\nvmesh\weld">
-			<UniqueIdentifier>{72DCFDAE-5E27-D326-5A04-0FEF29F11049}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\poshlib">
-			<UniqueIdentifier>{C4AD6353-CED9-F934-F264-8288DCF0DCE2}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\thekla_atlas\thekla">
-			<UniqueIdentifier>{348CDFA5-A193-B0AE-3877-036098B3987E}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\xatlas">
+			<UniqueIdentifier>{3E44CF9B-61C0-C206-E4AC-65B0BE55E3D5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\zlib">
 			<UniqueIdentifier>{76E609EF-DCF8-8A9C-394D-A5A35960A60E}</UniqueIdentifier>
@@ -1081,9 +1123,6 @@
 	<ItemGroup>
 		<ClInclude Include="core\bind\core_bind.h">
 			<Filter>Header Files\core\bind</Filter>
-		</ClInclude>
-		<ClInclude Include="core\helper\math_fieldwise.h">
-			<Filter>Header Files\core\helper</Filter>
 		</ClInclude>
 		<ClInclude Include="core\io\compression.h">
 			<Filter>Header Files\core\io</Filter>
@@ -1136,6 +1175,9 @@
 		<ClInclude Include="core\io\multiplayer_api.h">
 			<Filter>Header Files\core\io</Filter>
 		</ClInclude>
+		<ClInclude Include="core\io\net_socket.h">
+			<Filter>Header Files\core\io</Filter>
+		</ClInclude>
 		<ClInclude Include="core\io\networked_multiplayer_peer.h">
 			<Filter>Header Files\core\io</Filter>
 		</ClInclude>
@@ -1178,6 +1220,9 @@
 		<ClInclude Include="core\io\xml_parser.h">
 			<Filter>Header Files\core\io</Filter>
 		</ClInclude>
+		<ClInclude Include="core\io\zip_io.h">
+			<Filter>Header Files\core\io</Filter>
+		</ClInclude>
 		<ClInclude Include="core\math\a_star.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
@@ -1193,13 +1238,16 @@
 		<ClInclude Include="core\math\camera_matrix.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
+		<ClInclude Include="core\math\expression.h">
+			<Filter>Header Files\core\math</Filter>
+		</ClInclude>
 		<ClInclude Include="core\math\face3.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
 		<ClInclude Include="core\math\geometry.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
-		<ClInclude Include="core\math\math_2d.h">
+		<ClInclude Include="core\math\math_fieldwise.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
 		<ClInclude Include="core\math\math_funcs.h">
@@ -1217,13 +1265,22 @@
 		<ClInclude Include="core\math\quick_hull.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
+		<ClInclude Include="core\math\rect2.h">
+			<Filter>Header Files\core\math</Filter>
+		</ClInclude>
 		<ClInclude Include="core\math\transform.h">
+			<Filter>Header Files\core\math</Filter>
+		</ClInclude>
+		<ClInclude Include="core\math\transform_2d.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
 		<ClInclude Include="core\math\triangle_mesh.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
 		<ClInclude Include="core\math\triangulate.h">
+			<Filter>Header Files\core\math</Filter>
+		</ClInclude>
+		<ClInclude Include="core\math\vector2.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
 		<ClInclude Include="core\math\vector3.h">
@@ -1248,6 +1305,9 @@
 			<Filter>Header Files\core\os</Filter>
 		</ClInclude>
 		<ClInclude Include="core\os\memory.h">
+			<Filter>Header Files\core\os</Filter>
+		</ClInclude>
+		<ClInclude Include="core\os\midi_driver.h">
 			<Filter>Header Files\core\os</Filter>
 		</ClInclude>
 		<ClInclude Include="core\os\mutex.h">
@@ -1394,11 +1454,17 @@
 		<ClInclude Include="drivers\alsa\audio_driver_alsa.h">
 			<Filter>Header Files\drivers\alsa</Filter>
 		</ClInclude>
+		<ClInclude Include="drivers\alsamidi\alsa_midi.h">
+			<Filter>Header Files\drivers\alsamidi</Filter>
+		</ClInclude>
 		<ClInclude Include="drivers\convex_decomp\b2d_decompose.h">
 			<Filter>Header Files\drivers\convex_decomp</Filter>
 		</ClInclude>
 		<ClInclude Include="drivers\coreaudio\audio_driver_coreaudio.h">
 			<Filter>Header Files\drivers\coreaudio</Filter>
+		</ClInclude>
+		<ClInclude Include="drivers\coremidi\core_midi.h">
+			<Filter>Header Files\drivers\coremidi</Filter>
 		</ClInclude>
 		<ClInclude Include="drivers\gl_context\context_gl.h">
 			<Filter>Header Files\drivers\gl_context</Filter>
@@ -1463,10 +1529,10 @@
 		<ClInclude Include="drivers\unix\mutex_posix.h">
 			<Filter>Header Files\drivers\unix</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\unix\os_unix.h">
+		<ClInclude Include="drivers\unix\net_socket_posix.h">
 			<Filter>Header Files\drivers\unix</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\unix\packet_peer_udp_posix.h">
+		<ClInclude Include="drivers\unix\os_unix.h">
 			<Filter>Header Files\drivers\unix</Filter>
 		</ClInclude>
 		<ClInclude Include="drivers\unix\rw_lock_posix.h">
@@ -1475,13 +1541,7 @@
 		<ClInclude Include="drivers\unix\semaphore_posix.h">
 			<Filter>Header Files\drivers\unix</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\unix\stream_peer_tcp_posix.h">
-			<Filter>Header Files\drivers\unix</Filter>
-		</ClInclude>
 		<ClInclude Include="drivers\unix\syslog_logger.h">
-			<Filter>Header Files\drivers\unix</Filter>
-		</ClInclude>
-		<ClInclude Include="drivers\unix\tcp_server_posix.h">
 			<Filter>Header Files\drivers\unix</Filter>
 		</ClInclude>
 		<ClInclude Include="drivers\unix\thread_posix.h">
@@ -1499,9 +1559,6 @@
 		<ClInclude Include="drivers\windows\mutex_windows.h">
 			<Filter>Header Files\drivers\windows</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\windows\packet_peer_udp_winsock.h">
-			<Filter>Header Files\drivers\windows</Filter>
-		</ClInclude>
 		<ClInclude Include="drivers\windows\rw_lock_windows.h">
 			<Filter>Header Files\drivers\windows</Filter>
 		</ClInclude>
@@ -1511,14 +1568,11 @@
 		<ClInclude Include="drivers\windows\shell_windows.h">
 			<Filter>Header Files\drivers\windows</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\windows\stream_peer_tcp_winsock.h">
-			<Filter>Header Files\drivers\windows</Filter>
-		</ClInclude>
-		<ClInclude Include="drivers\windows\tcp_server_winsock.h">
-			<Filter>Header Files\drivers\windows</Filter>
-		</ClInclude>
 		<ClInclude Include="drivers\windows\thread_windows.h">
 			<Filter>Header Files\drivers\windows</Filter>
+		</ClInclude>
+		<ClInclude Include="drivers\winmidi\win_midi.h">
+			<Filter>Header Files\drivers\winmidi</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\collada\collada.h">
 			<Filter>Header Files\editor\collada</Filter>
@@ -1547,6 +1601,12 @@
 		<ClInclude Include="editor\import\resource_importer_csv_translation.h">
 			<Filter>Header Files\editor\import</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\import\resource_importer_image.h">
+			<Filter>Header Files\editor\import</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\import\resource_importer_layered_texture.h">
+			<Filter>Header Files\editor\import</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\import\resource_importer_obj.h">
 			<Filter>Header Files\editor\import</Filter>
 		</ClInclude>
@@ -1562,13 +1622,31 @@
 		<ClInclude Include="editor\plugins\abstract_polygon_2d_editor.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\plugins\animation_blend_space_1d_editor.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugins\animation_blend_space_2d_editor.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugins\animation_blend_tree_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\plugins\animation_player_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugins\animation_state_machine_editor.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\animation_tree_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\plugins\animation_tree_player_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\plugins\asset_library_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugins\audio_stream_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\baked_lightmap_editor_plugin.h">
@@ -1589,7 +1667,7 @@
 		<ClInclude Include="editor\plugins\collision_shape_2d_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
-		<ClInclude Include="editor\plugins\cube_grid_theme_editor_plugin.h">
+		<ClInclude Include="editor\plugins\cpu_particles_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\curve_editor_plugin.h">
@@ -1622,13 +1700,10 @@
 		<ClInclude Include="editor\plugins\mesh_instance_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\plugins\mesh_library_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\plugins\multimesh_editor_plugin.h">
-			<Filter>Header Files\editor\plugins</Filter>
-		</ClInclude>
-		<ClInclude Include="editor\plugins\navigation_mesh_editor_plugin.h">
-			<Filter>Header Files\editor\plugins</Filter>
-		</ClInclude>
-		<ClInclude Include="editor\plugins\navigation_mesh_generator.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\navigation_polygon_editor_plugin.h">
@@ -1646,10 +1721,16 @@
 		<ClInclude Include="editor\plugins\path_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\plugins\physical_bone_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\plugins\polygon_2d_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\resource_preloader_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugins\root_motion_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\script_editor_plugin.h">
@@ -1661,10 +1742,13 @@
 		<ClInclude Include="editor\plugins\shader_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
-		<ClInclude Include="editor\plugins\shader_graph_editor_plugin.h">
+		<ClInclude Include="editor\plugins\skeleton_2d_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
-		<ClInclude Include="editor\plugins\skeleton_2d_editor_plugin.h">
+		<ClInclude Include="editor\plugins\skeleton_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugins\skeleton_ik_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\spatial_editor_plugin.h">
@@ -1677,6 +1761,9 @@
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\style_box_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugins\text_editor.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\texture_editor_plugin.h">
@@ -1694,10 +1781,22 @@
 		<ClInclude Include="editor\plugins\tile_set_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
-		<ClInclude Include="editor\animation_editor.h">
+		<ClInclude Include="editor\plugins\visual_shader_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\animation_bezier_editor.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\animation_track_editor.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\animation_track_editor_plugins.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\array_property_edit.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\audio_stream_preview.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\code_editor.h">
@@ -1748,7 +1847,7 @@
 		<ClInclude Include="editor\editor_help.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
-		<ClInclude Include="editor\editor_initialize_ssl.h">
+		<ClInclude Include="editor\editor_inspector.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\editor_log.h">
@@ -1772,6 +1871,12 @@
 		<ClInclude Include="editor\editor_profiler.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\editor_properties.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\editor_properties_array_dict.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\editor_resource_preview.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
@@ -1787,7 +1892,13 @@
 		<ClInclude Include="editor\editor_scale.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\editor_sectioned_inspector.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\editor_settings.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\editor_spin_slider.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\editor_sub_scene.h">
@@ -1814,6 +1925,9 @@
 		<ClInclude Include="editor\import_dock.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\inspector_dock.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\multi_node_edit.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
@@ -1824,6 +1938,9 @@
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\pane_drag.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugin_config_dialog.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\progress_dialog.h">
@@ -1851,6 +1968,9 @@
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\register_exporters.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\rename_dialog.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\reparent_dialog.h">
@@ -1888,6 +2008,15 @@
 		</ClInclude>
 		<ClInclude Include="main\performance.h">
 			<Filter>Header Files\main</Filter>
+		</ClInclude>
+		<ClInclude Include="main\timer_sync.h">
+			<Filter>Header Files\main</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\bmp\image_loader_bmp.h">
+			<Filter>Header Files\modules\bmp</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\bmp\register_types.h">
+			<Filter>Header Files\modules\bmp</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\bullet\area_bullet.h">
 			<Filter>Header Files\modules\bullet</Filter>
@@ -1955,6 +2084,24 @@
 		<ClInclude Include="modules\bullet\space_bullet.h">
 			<Filter>Header Files\modules\bullet</Filter>
 		</ClInclude>
+		<ClInclude Include="modules\csg\csg.h">
+			<Filter>Header Files\modules\csg</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\csg\csg_gizmos.h">
+			<Filter>Header Files\modules\csg</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\csg\csg_shape.h">
+			<Filter>Header Files\modules\csg</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\csg\register_types.h">
+			<Filter>Header Files\modules\csg</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\cvtt\image_compress_cvtt.h">
+			<Filter>Header Files\modules\cvtt</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\cvtt\register_types.h">
+			<Filter>Header Files\modules\cvtt</Filter>
+		</ClInclude>
 		<ClInclude Include="modules\dds\register_types.h">
 			<Filter>Header Files\modules\dds</Filter>
 		</ClInclude>
@@ -1994,6 +2141,18 @@
 		<ClInclude Include="modules\gdnative\nativescript\register_types.h">
 			<Filter>Header Files\modules\gdnative\nativescript</Filter>
 		</ClInclude>
+		<ClInclude Include="modules\gdnative\net\multiplayer_peer_gdnative.h">
+			<Filter>Header Files\modules\gdnative\net</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\gdnative\net\packet_peer_gdnative.h">
+			<Filter>Header Files\modules\gdnative\net</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\gdnative\net\register_types.h">
+			<Filter>Header Files\modules\gdnative\net</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\gdnative\net\stream_peer_gdnative.h">
+			<Filter>Header Files\modules\gdnative\net</Filter>
+		</ClInclude>
 		<ClInclude Include="modules\gdnative\pluginscript\pluginscript_instance.h">
 			<Filter>Header Files\modules\gdnative\pluginscript</Filter>
 		</ClInclude>
@@ -2021,6 +2180,9 @@
 		<ClInclude Include="modules\gdnative\register_types.h">
 			<Filter>Header Files\modules\gdnative</Filter>
 		</ClInclude>
+		<ClInclude Include="modules\gdscript\editor\gdscript_highlighter.h">
+			<Filter>Header Files\modules\gdscript\editor</Filter>
+		</ClInclude>
 		<ClInclude Include="modules\gdscript\gdscript.h">
 			<Filter>Header Files\modules\gdscript</Filter>
 		</ClInclude>
@@ -2031,9 +2193,6 @@
 			<Filter>Header Files\modules\gdscript</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\gdscript\gdscript_functions.h">
-			<Filter>Header Files\modules\gdscript</Filter>
-		</ClInclude>
-		<ClInclude Include="modules\gdscript\gdscript_highlighter.h">
 			<Filter>Header Files\modules\gdscript</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\gdscript\gdscript_parser.h">
@@ -2072,8 +2231,23 @@
 		<ClInclude Include="modules\mbedtls\stream_peer_mbed_tls.h">
 			<Filter>Header Files\modules\mbedtls</Filter>
 		</ClInclude>
+		<ClInclude Include="modules\mobile_vr\mobile_vr_interface.h">
+			<Filter>Header Files\modules\mobile_vr</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\mobile_vr\register_types.h">
+			<Filter>Header Files\modules\mobile_vr</Filter>
+		</ClInclude>
 		<ClInclude Include="modules\ogg\register_types.h">
 			<Filter>Header Files\modules\ogg</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\opensimplex\noise_texture.h">
+			<Filter>Header Files\modules\opensimplex</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\opensimplex\open_simplex_noise.h">
+			<Filter>Header Files\modules\opensimplex</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\opensimplex\register_types.h">
+			<Filter>Header Files\modules\opensimplex</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\opus\stub\register_types.h">
 			<Filter>Header Files\modules\opus\stub</Filter>
@@ -2083,6 +2257,12 @@
 		</ClInclude>
 		<ClInclude Include="modules\pvr\texture_loader_pvr.h">
 			<Filter>Header Files\modules\pvr</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\recast\navigation_mesh_editor_plugin.h">
+			<Filter>Header Files\modules\recast</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\recast\navigation_mesh_generator.h">
+			<Filter>Header Files\modules\recast</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\recast\register_types.h">
 			<Filter>Header Files\modules\recast</Filter>
@@ -2120,13 +2300,7 @@
 		<ClInclude Include="modules\tga\register_types.h">
 			<Filter>Header Files\modules\tga</Filter>
 		</ClInclude>
-		<ClInclude Include="modules\thekla_unwrap\register_types.h">
-			<Filter>Header Files\modules\thekla_unwrap</Filter>
-		</ClInclude>
 		<ClInclude Include="modules\theora\register_types.h">
-			<Filter>Header Files\modules\theora</Filter>
-		</ClInclude>
-		<ClInclude Include="modules\theora\resource_importer_theora.h">
 			<Filter>Header Files\modules\theora</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\theora\video_stream_theora.h">
@@ -2137,6 +2311,15 @@
 		</ClInclude>
 		<ClInclude Include="modules\tinyexr\register_types.h">
 			<Filter>Header Files\modules\tinyexr</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\upnp\register_types.h">
+			<Filter>Header Files\modules\upnp</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\upnp\upnp.h">
+			<Filter>Header Files\modules\upnp</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\upnp\upnpdevice.h">
+			<Filter>Header Files\modules\upnp</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\visual_script\register_types.h">
 			<Filter>Header Files\modules\visual_script</Filter>
@@ -2162,6 +2345,9 @@
 		<ClInclude Include="modules\visual_script\visual_script_nodes.h">
 			<Filter>Header Files\modules\visual_script</Filter>
 		</ClInclude>
+		<ClInclude Include="modules\visual_script\visual_script_property_selector.h">
+			<Filter>Header Files\modules\visual_script</Filter>
+		</ClInclude>
 		<ClInclude Include="modules\visual_script\visual_script_yield_nodes.h">
 			<Filter>Header Files\modules\visual_script</Filter>
 		</ClInclude>
@@ -2169,9 +2355,6 @@
 			<Filter>Header Files\modules\vorbis\stub</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\webm\register_types.h">
-			<Filter>Header Files\modules\webm</Filter>
-		</ClInclude>
-		<ClInclude Include="modules\webm\resource_importer_webm.h">
 			<Filter>Header Files\modules\webm</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\webm\video_stream_webm.h">
@@ -2195,6 +2378,9 @@
 		<ClInclude Include="modules\websocket\lws_client.h">
 			<Filter>Header Files\modules\websocket</Filter>
 		</ClInclude>
+		<ClInclude Include="modules\websocket\lws_helper.h">
+			<Filter>Header Files\modules\websocket</Filter>
+		</ClInclude>
 		<ClInclude Include="modules\websocket\lws_peer.h">
 			<Filter>Header Files\modules\websocket</Filter>
 		</ClInclude>
@@ -2215,6 +2401,9 @@
 		</ClInclude>
 		<ClInclude Include="modules\websocket\websocket_server.h">
 			<Filter>Header Files\modules\websocket</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\xatlas_unwrap\register_types.h">
+			<Filter>Header Files\modules\xatlas_unwrap</Filter>
 		</ClInclude>
 		<ClInclude Include="platform\android\export\export.h">
 			<Filter>Header Files\platform\android\export</Filter>
@@ -2271,6 +2460,9 @@
 			<Filter>Header Files\scene\2d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\2d\collision_shape_2d.h">
+			<Filter>Header Files\scene\2d</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\2d\cpu_particles_2d.h">
 			<Filter>Header Files\scene\2d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\2d\joints_2d.h">
@@ -2375,6 +2567,9 @@
 		<ClInclude Include="scene\3d\collision_shape.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
+		<ClInclude Include="scene\3d\cpu_particles.h">
+			<Filter>Header Files\scene\3d</Filter>
+		</ClInclude>
 		<ClInclude Include="scene\3d\gi_probe.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
@@ -2441,10 +2636,16 @@
 		<ClInclude Include="scene\3d\skeleton.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
+		<ClInclude Include="scene\3d\soft_body.h">
+			<Filter>Header Files\scene\3d</Filter>
+		</ClInclude>
 		<ClInclude Include="scene\3d\spatial.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\3d\spatial_velocity_tracker.h">
+			<Filter>Header Files\scene\3d</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\3d\spring_arm.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\3d\sprite_3d.h">
@@ -2462,13 +2663,34 @@
 		<ClInclude Include="scene\3d\voxel_light_baker.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
+		<ClInclude Include="scene\animation\animation_blend_space_1d.h">
+			<Filter>Header Files\scene\animation</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\animation\animation_blend_space_2d.h">
+			<Filter>Header Files\scene\animation</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\animation\animation_blend_tree.h">
+			<Filter>Header Files\scene\animation</Filter>
+		</ClInclude>
 		<ClInclude Include="scene\animation\animation_cache.h">
+			<Filter>Header Files\scene\animation</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\animation\animation_node_state_machine.h">
 			<Filter>Header Files\scene\animation</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\animation\animation_player.h">
 			<Filter>Header Files\scene\animation</Filter>
 		</ClInclude>
+		<ClInclude Include="scene\animation\animation_tree.h">
+			<Filter>Header Files\scene\animation</Filter>
+		</ClInclude>
 		<ClInclude Include="scene\animation\animation_tree_player.h">
+			<Filter>Header Files\scene\animation</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\animation\root_motion_view.h">
+			<Filter>Header Files\scene\animation</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\animation\skeleton_ik.h">
 			<Filter>Header Files\scene\animation</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\animation\tween.h">
@@ -2696,6 +2918,9 @@
 		<ClInclude Include="scene\resources\curve.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
+		<ClInclude Include="scene\resources\cylinder_shape.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
 		<ClInclude Include="scene\resources\dynamic_font.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
@@ -2726,6 +2951,12 @@
 		<ClInclude Include="scene\resources\packed_scene.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
+		<ClInclude Include="scene\resources\particles_material.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\resources\physics_material.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
 		<ClInclude Include="scene\resources\plane_shape.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
@@ -2753,9 +2984,6 @@
 		<ClInclude Include="scene\resources\shader.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\resources\shader_graph.h">
-			<Filter>Header Files\scene\resources</Filter>
-		</ClInclude>
 		<ClInclude Include="scene\resources\shape.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
@@ -2780,6 +3008,9 @@
 		<ClInclude Include="scene\resources\surface_tool.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
+		<ClInclude Include="scene\resources\text_file.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
 		<ClInclude Include="scene\resources\texture.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
@@ -2790,6 +3021,12 @@
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\video_stream.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\resources\visual_shader.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\resources\visual_shader_nodes.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\world.h">
@@ -2841,6 +3078,9 @@
 			<Filter>Header Files\servers\audio\effects</Filter>
 		</ClInclude>
 		<ClInclude Include="servers\audio\effects\audio_effect_pitch_shift.h">
+			<Filter>Header Files\servers\audio\effects</Filter>
+		</ClInclude>
+		<ClInclude Include="servers\audio\effects\audio_effect_record.h">
 			<Filter>Header Files\servers\audio\effects</Filter>
 		</ClInclude>
 		<ClInclude Include="servers\audio\effects\audio_effect_reverb.h">
@@ -3197,6 +3437,9 @@
 		<ClInclude Include="thirdparty\bullet\BulletCollision\CollisionShapes\btHeightfieldTerrainShape.h">
 			<Filter>Header Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
 		</ClInclude>
+		<ClInclude Include="thirdparty\bullet\BulletCollision\CollisionShapes\btMiniSDF.h">
+			<Filter>Header Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
+		</ClInclude>
 		<ClInclude Include="thirdparty\bullet\BulletCollision\CollisionShapes\btMinkowskiSumShape.h">
 			<Filter>Header Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
 		</ClInclude>
@@ -3213,6 +3456,9 @@
 			<Filter>Header Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
 		</ClInclude>
 		<ClInclude Include="thirdparty\bullet\BulletCollision\CollisionShapes\btScaledBvhTriangleMeshShape.h">
+			<Filter>Header Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\bullet\BulletCollision\CollisionShapes\btSdfCollisionShape.h">
 			<Filter>Header Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
 		</ClInclude>
 		<ClInclude Include="thirdparty\bullet\BulletCollision\CollisionShapes\btShapeHull.h">
@@ -3500,6 +3746,9 @@
 		<ClInclude Include="thirdparty\bullet\LinearMath\btVector3.h">
 			<Filter>Header Files\thirdparty\bullet\LinearMath</Filter>
 		</ClInclude>
+		<ClInclude Include="thirdparty\cvtt\ConvectionKernels.h">
+			<Filter>Header Files\thirdparty\cvtt</Filter>
+		</ClInclude>
 		<ClInclude Include="thirdparty\etc2comp\Etc.h">
 			<Filter>Header Files\thirdparty\etc2comp</Filter>
 		</ClInclude>
@@ -3562,9 +3811,6 @@
 		</ClInclude>
 		<ClInclude Include="thirdparty\libsimplewebm\WebMDemuxer.hpp">
 			<Filter>Header Files\thirdparty\libsimplewebm</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\libtheora\x86_vc\mmxfrag.h">
-			<Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
 		</ClInclude>
 		<ClInclude Include="thirdparty\libtheora\bitpack.h">
 			<Filter>Header Files\thirdparty\libtheora</Filter>
@@ -3833,20 +4079,47 @@
 		<ClInclude Include="thirdparty\libwebp\src\utils\utils.h">
 			<Filter>Header Files\thirdparty\libwebp\src\utils</Filter>
 		</ClInclude>
-		<ClInclude Include="thirdparty\lws\ext\extension-permessage-deflate.h">
-			<Filter>Header Files\thirdparty\lws\ext</Filter>
+		<ClInclude Include="thirdparty\libwebsockets\win32helpers\getopt.h">
+			<Filter>Header Files\thirdparty\libwebsockets\win32helpers</Filter>
 		</ClInclude>
-		<ClInclude Include="thirdparty\lws\misc\lejp.h">
-			<Filter>Header Files\thirdparty\lws\misc</Filter>
+		<ClInclude Include="thirdparty\libwebsockets\win32helpers\gettimeofday.h">
+			<Filter>Header Files\thirdparty\libwebsockets\win32helpers</Filter>
 		</ClInclude>
-		<ClInclude Include="thirdparty\lws\win32helpers\getopt.h">
-			<Filter>Header Files\thirdparty\lws\win32helpers</Filter>
+		<ClInclude Include="thirdparty\miniupnpc\connecthostport.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
 		</ClInclude>
-		<ClInclude Include="thirdparty\lws\win32helpers\gettimeofday.h">
-			<Filter>Header Files\thirdparty\lws\win32helpers</Filter>
+		<ClInclude Include="thirdparty\miniupnpc\igd_desc_parse.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
 		</ClInclude>
-		<ClInclude Include="thirdparty\lws\libwebsockets.h">
-			<Filter>Header Files\thirdparty\lws</Filter>
+		<ClInclude Include="thirdparty\miniupnpc\minisoap.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\minissdpc.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\miniupnpc.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\miniwget.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\minixml.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\portlistingparse.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\receivedata.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\upnpcommands.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\upnpdev.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\miniupnpc\upnpreplyparse.h">
+			<Filter>Header Files\thirdparty\miniupnpc</Filter>
 		</ClInclude>
 		<ClInclude Include="thirdparty\minizip\ioapi.h">
 			<Filter>Header Files\thirdparty\minizip</Filter>
@@ -3878,6 +4151,9 @@
 		<ClInclude Include="thirdparty\misc\mikktspace.h">
 			<Filter>Header Files\thirdparty\misc</Filter>
 		</ClInclude>
+		<ClInclude Include="thirdparty\misc\open-simplex-noise.h">
+			<Filter>Header Files\thirdparty\misc</Filter>
+		</ClInclude>
 		<ClInclude Include="thirdparty\misc\pcg.h">
 			<Filter>Header Files\thirdparty\misc</Filter>
 		</ClInclude>
@@ -3887,8 +4163,14 @@
 		<ClInclude Include="thirdparty\misc\smaz.h">
 			<Filter>Header Files\thirdparty\misc</Filter>
 		</ClInclude>
+		<ClInclude Include="thirdparty\misc\stb_vorbis.h">
+			<Filter>Header Files\thirdparty\misc</Filter>
+		</ClInclude>
 		<ClInclude Include="thirdparty\misc\triangulator.h">
 			<Filter>Header Files\thirdparty\misc</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\nanosvg\nanosvg.h">
+			<Filter>Header Files\thirdparty\nanosvg</Filter>
 		</ClInclude>
 		<ClInclude Include="thirdparty\opus\celt\bands.h">
 			<Filter>Header Files\thirdparty\opus\celt</Filter>
@@ -4004,128 +4286,11 @@
 		<ClInclude Include="thirdparty\squish\squish.h">
 			<Filter>Header Files\thirdparty\squish</Filter>
 		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvcore\Debug.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvcore\FileSystem.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvcore\Memory.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvcore\RadixSort.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvcore\StrLib.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvimage\BitMap.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvimage</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvimage\Image.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvimage</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\Basis.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\ConvexHull.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\Fitting.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\Plane.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\ProximityGrid.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\Random.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\Solver.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\Sparse.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmath\TypeSerialization.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\geometry\Bounds.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\geometry</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\geometry\Measurements.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\geometry</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\halfedge\Edge.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\halfedge</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\halfedge\Face.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\halfedge</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\halfedge\Mesh.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\halfedge</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\halfedge\Vertex.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\halfedge</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\param\Atlas.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\param\AtlasBuilder.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\param\AtlasPacker.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\param\LeastSquaresConformalMap.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\param\OrthogonalProjectionMap.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\param\ParameterizationQuality.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\param\SingleFaceMap.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\param\Util.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\raster\Raster.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\raster</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\weld\Snap.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\weld</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\weld\VertexWeld.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh\weld</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\BaseMesh.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\MeshBuilder.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\MeshTopology.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\QuadTriMesh.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\nvmesh\TriMesh.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\poshlib\posh.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\poshlib</Filter>
-		</ClInclude>
-		<ClInclude Include="thirdparty\thekla_atlas\thekla\thekla_atlas.h">
-			<Filter>Header Files\thirdparty\thekla_atlas\thekla</Filter>
-		</ClInclude>
 		<ClInclude Include="thirdparty\tinyexr\tinyexr.h">
 			<Filter>Header Files\thirdparty\tinyexr</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\xatlas\xatlas.h">
+			<Filter>Header Files\thirdparty\xatlas</Filter>
 		</ClInclude>
 		<ClInclude Include="thirdparty\zlib\crc32.h">
 			<Filter>Header Files\thirdparty\zlib</Filter>
@@ -4183,9 +4348,6 @@
 		<ClCompile Include="core\bind\core_bind.cpp">
 			<Filter>Source Files\core\bind</Filter>
 		</ClCompile>
-		<ClCompile Include="core\helper\math_fieldwise.cpp">
-			<Filter>Source Files\core\helper</Filter>
-		</ClCompile>
 		<ClCompile Include="core\io\compression.cpp">
 			<Filter>Source Files\core\io</Filter>
 		</ClCompile>
@@ -4237,6 +4399,9 @@
 		<ClCompile Include="core\io\multiplayer_api.cpp">
 			<Filter>Source Files\core\io</Filter>
 		</ClCompile>
+		<ClCompile Include="core\io\net_socket.cpp">
+			<Filter>Source Files\core\io</Filter>
+		</ClCompile>
 		<ClCompile Include="core\io\networked_multiplayer_peer.cpp">
 			<Filter>Source Files\core\io</Filter>
 		</ClCompile>
@@ -4279,6 +4444,9 @@
 		<ClCompile Include="core\io\xml_parser.cpp">
 			<Filter>Source Files\core\io</Filter>
 		</ClCompile>
+		<ClCompile Include="core\io\zip_io.cpp">
+			<Filter>Source Files\core\io</Filter>
+		</ClCompile>
 		<ClCompile Include="core\math\a_star.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
@@ -4294,13 +4462,16 @@
 		<ClCompile Include="core\math\camera_matrix.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
+		<ClCompile Include="core\math\expression.cpp">
+			<Filter>Source Files\core\math</Filter>
+		</ClCompile>
 		<ClCompile Include="core\math\face3.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
 		<ClCompile Include="core\math\geometry.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
-		<ClCompile Include="core\math\math_2d.cpp">
+		<ClCompile Include="core\math\math_fieldwise.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
 		<ClCompile Include="core\math\math_funcs.cpp">
@@ -4318,13 +4489,22 @@
 		<ClCompile Include="core\math\quick_hull.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
+		<ClCompile Include="core\math\rect2.cpp">
+			<Filter>Source Files\core\math</Filter>
+		</ClCompile>
 		<ClCompile Include="core\math\transform.cpp">
+			<Filter>Source Files\core\math</Filter>
+		</ClCompile>
+		<ClCompile Include="core\math\transform_2d.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
 		<ClCompile Include="core\math\triangle_mesh.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
 		<ClCompile Include="core\math\triangulate.cpp">
+			<Filter>Source Files\core\math</Filter>
+		</ClCompile>
+		<ClCompile Include="core\math\vector2.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
 		<ClCompile Include="core\math\vector3.cpp">
@@ -4349,6 +4529,9 @@
 			<Filter>Source Files\core\os</Filter>
 		</ClCompile>
 		<ClCompile Include="core\os\memory.cpp">
+			<Filter>Source Files\core\os</Filter>
+		</ClCompile>
+		<ClCompile Include="core\os\midi_driver.cpp">
 			<Filter>Source Files\core\os</Filter>
 		</ClCompile>
 		<ClCompile Include="core\os\mutex.cpp">
@@ -4504,11 +4687,17 @@
 		<ClCompile Include="drivers\alsa\audio_driver_alsa.cpp">
 			<Filter>Source Files\drivers\alsa</Filter>
 		</ClCompile>
+		<ClCompile Include="drivers\alsamidi\alsa_midi.cpp">
+			<Filter>Source Files\drivers\alsamidi</Filter>
+		</ClCompile>
 		<ClCompile Include="drivers\convex_decomp\b2d_decompose.cpp">
 			<Filter>Source Files\drivers\convex_decomp</Filter>
 		</ClCompile>
 		<ClCompile Include="drivers\coreaudio\audio_driver_coreaudio.cpp">
 			<Filter>Source Files\drivers\coreaudio</Filter>
+		</ClCompile>
+		<ClCompile Include="drivers\coremidi\core_midi.cpp">
+			<Filter>Source Files\drivers\coremidi</Filter>
 		</ClCompile>
 		<ClCompile Include="drivers\gl_context\context_gl.cpp">
 			<Filter>Source Files\drivers\gl_context</Filter>
@@ -4573,10 +4762,10 @@
 		<ClCompile Include="drivers\unix\mutex_posix.cpp">
 			<Filter>Source Files\drivers\unix</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\unix\os_unix.cpp">
+		<ClCompile Include="drivers\unix\net_socket_posix.cpp">
 			<Filter>Source Files\drivers\unix</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\unix\packet_peer_udp_posix.cpp">
+		<ClCompile Include="drivers\unix\os_unix.cpp">
 			<Filter>Source Files\drivers\unix</Filter>
 		</ClCompile>
 		<ClCompile Include="drivers\unix\rw_lock_posix.cpp">
@@ -4585,13 +4774,7 @@
 		<ClCompile Include="drivers\unix\semaphore_posix.cpp">
 			<Filter>Source Files\drivers\unix</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\unix\stream_peer_tcp_posix.cpp">
-			<Filter>Source Files\drivers\unix</Filter>
-		</ClCompile>
 		<ClCompile Include="drivers\unix\syslog_logger.cpp">
-			<Filter>Source Files\drivers\unix</Filter>
-		</ClCompile>
-		<ClCompile Include="drivers\unix\tcp_server_posix.cpp">
 			<Filter>Source Files\drivers\unix</Filter>
 		</ClCompile>
 		<ClCompile Include="drivers\unix\thread_posix.cpp">
@@ -4609,9 +4792,6 @@
 		<ClCompile Include="drivers\windows\mutex_windows.cpp">
 			<Filter>Source Files\drivers\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\windows\packet_peer_udp_winsock.cpp">
-			<Filter>Source Files\drivers\windows</Filter>
-		</ClCompile>
 		<ClCompile Include="drivers\windows\rw_lock_windows.cpp">
 			<Filter>Source Files\drivers\windows</Filter>
 		</ClCompile>
@@ -4621,14 +4801,11 @@
 		<ClCompile Include="drivers\windows\shell_windows.cpp">
 			<Filter>Source Files\drivers\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\windows\stream_peer_tcp_winsock.cpp">
-			<Filter>Source Files\drivers\windows</Filter>
-		</ClCompile>
-		<ClCompile Include="drivers\windows\tcp_server_winsock.cpp">
-			<Filter>Source Files\drivers\windows</Filter>
-		</ClCompile>
 		<ClCompile Include="drivers\windows\thread_windows.cpp">
 			<Filter>Source Files\drivers\windows</Filter>
+		</ClCompile>
+		<ClCompile Include="drivers\winmidi\win_midi.cpp">
+			<Filter>Source Files\drivers\winmidi</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\collada\collada.cpp">
 			<Filter>Source Files\editor\collada</Filter>
@@ -4657,6 +4834,12 @@
 		<ClCompile Include="editor\import\resource_importer_csv_translation.cpp">
 			<Filter>Source Files\editor\import</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\import\resource_importer_image.cpp">
+			<Filter>Source Files\editor\import</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\import\resource_importer_layered_texture.cpp">
+			<Filter>Source Files\editor\import</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\import\resource_importer_obj.cpp">
 			<Filter>Source Files\editor\import</Filter>
 		</ClCompile>
@@ -4672,13 +4855,31 @@
 		<ClCompile Include="editor\plugins\abstract_polygon_2d_editor.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\plugins\animation_blend_space_1d_editor.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugins\animation_blend_space_2d_editor.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugins\animation_blend_tree_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\plugins\animation_player_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugins\animation_state_machine_editor.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\animation_tree_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\plugins\animation_tree_player_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\plugins\asset_library_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugins\audio_stream_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\baked_lightmap_editor_plugin.cpp">
@@ -4699,7 +4900,7 @@
 		<ClCompile Include="editor\plugins\collision_shape_2d_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
-		<ClCompile Include="editor\plugins\cube_grid_theme_editor_plugin.cpp">
+		<ClCompile Include="editor\plugins\cpu_particles_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\curve_editor_plugin.cpp">
@@ -4732,13 +4933,10 @@
 		<ClCompile Include="editor\plugins\mesh_instance_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\plugins\mesh_library_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\plugins\multimesh_editor_plugin.cpp">
-			<Filter>Source Files\editor\plugins</Filter>
-		</ClCompile>
-		<ClCompile Include="editor\plugins\navigation_mesh_editor_plugin.cpp">
-			<Filter>Source Files\editor\plugins</Filter>
-		</ClCompile>
-		<ClCompile Include="editor\plugins\navigation_mesh_generator.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\navigation_polygon_editor_plugin.cpp">
@@ -4756,10 +4954,16 @@
 		<ClCompile Include="editor\plugins\path_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\plugins\physical_bone_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\plugins\polygon_2d_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\resource_preloader_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugins\root_motion_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\script_editor_plugin.cpp">
@@ -4771,10 +4975,13 @@
 		<ClCompile Include="editor\plugins\shader_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
-		<ClCompile Include="editor\plugins\shader_graph_editor_plugin.cpp">
+		<ClCompile Include="editor\plugins\skeleton_2d_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
-		<ClCompile Include="editor\plugins\skeleton_2d_editor_plugin.cpp">
+		<ClCompile Include="editor\plugins\skeleton_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugins\skeleton_ik_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\spatial_editor_plugin.cpp">
@@ -4787,6 +4994,9 @@
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\style_box_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugins\text_editor.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\texture_editor_plugin.cpp">
@@ -4804,10 +5014,22 @@
 		<ClCompile Include="editor\plugins\tile_set_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
-		<ClCompile Include="editor\animation_editor.cpp">
+		<ClCompile Include="editor\plugins\visual_shader_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\animation_bezier_editor.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\animation_track_editor.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\animation_track_editor_plugins.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\array_property_edit.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\audio_stream_preview.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\code_editor.cpp">
@@ -4858,7 +5080,7 @@
 		<ClCompile Include="editor\editor_help.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
-		<ClCompile Include="editor\editor_initialize_ssl.cpp">
+		<ClCompile Include="editor\editor_inspector.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\editor_log.cpp">
@@ -4882,6 +5104,12 @@
 		<ClCompile Include="editor\editor_profiler.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\editor_properties.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\editor_properties_array_dict.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\editor_resource_preview.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
@@ -4897,7 +5125,13 @@
 		<ClCompile Include="editor\editor_scale.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\editor_sectioned_inspector.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\editor_settings.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\editor_spin_slider.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\editor_sub_scene.cpp">
@@ -4924,6 +5158,9 @@
 		<ClCompile Include="editor\import_dock.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\inspector_dock.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\multi_node_edit.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
@@ -4934,6 +5171,9 @@
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\pane_drag.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugin_config_dialog.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\progress_dialog.cpp">
@@ -4958,6 +5198,9 @@
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\quick_open.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\rename_dialog.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\reparent_dialog.cpp">
@@ -4992,6 +5235,15 @@
 		</ClCompile>
 		<ClCompile Include="main\performance.cpp">
 			<Filter>Source Files\main</Filter>
+		</ClCompile>
+		<ClCompile Include="main\timer_sync.cpp">
+			<Filter>Source Files\main</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\bmp\image_loader_bmp.cpp">
+			<Filter>Source Files\modules\bmp</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\bmp\register_types.cpp">
+			<Filter>Source Files\modules\bmp</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\bullet\area_bullet.cpp">
 			<Filter>Source Files\modules\bullet</Filter>
@@ -5059,6 +5311,24 @@
 		<ClCompile Include="modules\bullet\space_bullet.cpp">
 			<Filter>Source Files\modules\bullet</Filter>
 		</ClCompile>
+		<ClCompile Include="modules\csg\csg.cpp">
+			<Filter>Source Files\modules\csg</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\csg\csg_gizmos.cpp">
+			<Filter>Source Files\modules\csg</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\csg\csg_shape.cpp">
+			<Filter>Source Files\modules\csg</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\csg\register_types.cpp">
+			<Filter>Source Files\modules\csg</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\cvtt\image_compress_cvtt.cpp">
+			<Filter>Source Files\modules\cvtt</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\cvtt\register_types.cpp">
+			<Filter>Source Files\modules\cvtt</Filter>
+		</ClCompile>
 		<ClCompile Include="modules\dds\register_types.cpp">
 			<Filter>Source Files\modules\dds</Filter>
 		</ClCompile>
@@ -5082,6 +5352,9 @@
 		</ClCompile>
 		<ClCompile Include="modules\freetype\register_types.cpp">
 			<Filter>Source Files\modules\freetype</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\gdnative\android\android_gdn.cpp">
+			<Filter>Source Files\modules\gdnative\android</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\gdnative\arvr\arvr_interface_gdnative.cpp">
 			<Filter>Source Files\modules\gdnative\arvr</Filter>
@@ -5158,6 +5431,18 @@
 		<ClCompile Include="modules\gdnative\nativescript\register_types.cpp">
 			<Filter>Source Files\modules\gdnative\nativescript</Filter>
 		</ClCompile>
+		<ClCompile Include="modules\gdnative\net\multiplayer_peer_gdnative.cpp">
+			<Filter>Source Files\modules\gdnative\net</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\gdnative\net\packet_peer_gdnative.cpp">
+			<Filter>Source Files\modules\gdnative\net</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\gdnative\net\register_types.cpp">
+			<Filter>Source Files\modules\gdnative\net</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\gdnative\net\stream_peer_gdnative.cpp">
+			<Filter>Source Files\modules\gdnative\net</Filter>
+		</ClCompile>
 		<ClCompile Include="modules\gdnative\pluginscript\pluginscript_instance.cpp">
 			<Filter>Source Files\modules\gdnative\pluginscript</Filter>
 		</ClCompile>
@@ -5185,6 +5470,9 @@
 		<ClCompile Include="modules\gdnative\register_types.cpp">
 			<Filter>Source Files\modules\gdnative</Filter>
 		</ClCompile>
+		<ClCompile Include="modules\gdscript\editor\gdscript_highlighter.cpp">
+			<Filter>Source Files\modules\gdscript\editor</Filter>
+		</ClCompile>
 		<ClCompile Include="modules\gdscript\gdscript.cpp">
 			<Filter>Source Files\modules\gdscript</Filter>
 		</ClCompile>
@@ -5198,9 +5486,6 @@
 			<Filter>Source Files\modules\gdscript</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\gdscript\gdscript_functions.cpp">
-			<Filter>Source Files\modules\gdscript</Filter>
-		</ClCompile>
-		<ClCompile Include="modules\gdscript\gdscript_highlighter.cpp">
 			<Filter>Source Files\modules\gdscript</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\gdscript\gdscript_parser.cpp">
@@ -5239,8 +5524,23 @@
 		<ClCompile Include="modules\mbedtls\stream_peer_mbed_tls.cpp">
 			<Filter>Source Files\modules\mbedtls</Filter>
 		</ClCompile>
+		<ClCompile Include="modules\mobile_vr\mobile_vr_interface.cpp">
+			<Filter>Source Files\modules\mobile_vr</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\mobile_vr\register_types.cpp">
+			<Filter>Source Files\modules\mobile_vr</Filter>
+		</ClCompile>
 		<ClCompile Include="modules\ogg\register_types.cpp">
 			<Filter>Source Files\modules\ogg</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\opensimplex\noise_texture.cpp">
+			<Filter>Source Files\modules\opensimplex</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\opensimplex\open_simplex_noise.cpp">
+			<Filter>Source Files\modules\opensimplex</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\opensimplex\register_types.cpp">
+			<Filter>Source Files\modules\opensimplex</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\opus\stub\register_types.cpp">
 			<Filter>Source Files\modules\opus\stub</Filter>
@@ -5250,6 +5550,12 @@
 		</ClCompile>
 		<ClCompile Include="modules\pvr\texture_loader_pvr.cpp">
 			<Filter>Source Files\modules\pvr</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\recast\navigation_mesh_editor_plugin.cpp">
+			<Filter>Source Files\modules\recast</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\recast\navigation_mesh_generator.cpp">
+			<Filter>Source Files\modules\recast</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\recast\register_types.cpp">
 			<Filter>Source Files\modules\recast</Filter>
@@ -5287,13 +5593,7 @@
 		<ClCompile Include="modules\tga\register_types.cpp">
 			<Filter>Source Files\modules\tga</Filter>
 		</ClCompile>
-		<ClCompile Include="modules\thekla_unwrap\register_types.cpp">
-			<Filter>Source Files\modules\thekla_unwrap</Filter>
-		</ClCompile>
 		<ClCompile Include="modules\theora\register_types.cpp">
-			<Filter>Source Files\modules\theora</Filter>
-		</ClCompile>
-		<ClCompile Include="modules\theora\resource_importer_theora.cpp">
 			<Filter>Source Files\modules\theora</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\theora\video_stream_theora.cpp">
@@ -5304,6 +5604,15 @@
 		</ClCompile>
 		<ClCompile Include="modules\tinyexr\register_types.cpp">
 			<Filter>Source Files\modules\tinyexr</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\upnp\register_types.cpp">
+			<Filter>Source Files\modules\upnp</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\upnp\upnp.cpp">
+			<Filter>Source Files\modules\upnp</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\upnp\upnpdevice.cpp">
+			<Filter>Source Files\modules\upnp</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\visual_script\register_types.cpp">
 			<Filter>Source Files\modules\visual_script</Filter>
@@ -5329,6 +5638,9 @@
 		<ClCompile Include="modules\visual_script\visual_script_nodes.cpp">
 			<Filter>Source Files\modules\visual_script</Filter>
 		</ClCompile>
+		<ClCompile Include="modules\visual_script\visual_script_property_selector.cpp">
+			<Filter>Source Files\modules\visual_script</Filter>
+		</ClCompile>
 		<ClCompile Include="modules\visual_script\visual_script_yield_nodes.cpp">
 			<Filter>Source Files\modules\visual_script</Filter>
 		</ClCompile>
@@ -5336,9 +5648,6 @@
 			<Filter>Source Files\modules\vorbis\stub</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\webm\register_types.cpp">
-			<Filter>Source Files\modules\webm</Filter>
-		</ClCompile>
-		<ClCompile Include="modules\webm\resource_importer_webm.cpp">
 			<Filter>Source Files\modules\webm</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\webm\video_stream_webm.cpp">
@@ -5362,6 +5671,9 @@
 		<ClCompile Include="modules\websocket\lws_client.cpp">
 			<Filter>Source Files\modules\websocket</Filter>
 		</ClCompile>
+		<ClCompile Include="modules\websocket\lws_helper.cpp">
+			<Filter>Source Files\modules\websocket</Filter>
+		</ClCompile>
 		<ClCompile Include="modules\websocket\lws_peer.cpp">
 			<Filter>Source Files\modules\websocket</Filter>
 		</ClCompile>
@@ -5382,6 +5694,9 @@
 		</ClCompile>
 		<ClCompile Include="modules\websocket\websocket_server.cpp">
 			<Filter>Source Files\modules\websocket</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\xatlas_unwrap\register_types.cpp">
+			<Filter>Source Files\modules\xatlas_unwrap</Filter>
 		</ClCompile>
 		<ClCompile Include="platform\android\export\export.cpp">
 			<Filter>Source Files\platform\android\export</Filter>
@@ -5407,9 +5722,6 @@
 		<ClCompile Include="platform\windows\export\export.cpp">
 			<Filter>Source Files\platform\windows\export</Filter>
 		</ClCompile>
-		<ClCompile Include="platform\windows\['godot_res.windows.tools.32.obj']">
-			<Filter>Source Files\platform\windows</Filter>
-		</ClCompile>
 		<ClCompile Include="platform\windows\context_gl_win.cpp">
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
@@ -5417,6 +5729,12 @@
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
 		<ClCompile Include="platform\windows\ctxgl_procaddr.cpp">
+			<Filter>Source Files\platform\windows</Filter>
+		</ClCompile>
+		<ClCompile Include="platform\windows\godot.natvis">
+			<Filter>Source Files\platform\windows</Filter>
+		</ClCompile>
+		<ClCompile Include="platform\windows\godot_res.rc">
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
 		<ClCompile Include="platform\windows\godot_win.cpp">
@@ -5468,6 +5786,9 @@
 			<Filter>Source Files\scene\2d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\2d\collision_shape_2d.cpp">
+			<Filter>Source Files\scene\2d</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\2d\cpu_particles_2d.cpp">
 			<Filter>Source Files\scene\2d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\2d\joints_2d.cpp">
@@ -5572,6 +5893,9 @@
 		<ClCompile Include="scene\3d\collision_shape.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
+		<ClCompile Include="scene\3d\cpu_particles.cpp">
+			<Filter>Source Files\scene\3d</Filter>
+		</ClCompile>
 		<ClCompile Include="scene\3d\gi_probe.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
@@ -5638,10 +5962,16 @@
 		<ClCompile Include="scene\3d\skeleton.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
+		<ClCompile Include="scene\3d\soft_body.cpp">
+			<Filter>Source Files\scene\3d</Filter>
+		</ClCompile>
 		<ClCompile Include="scene\3d\spatial.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\3d\spatial_velocity_tracker.cpp">
+			<Filter>Source Files\scene\3d</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\3d\spring_arm.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\3d\sprite_3d.cpp">
@@ -5659,19 +5989,37 @@
 		<ClCompile Include="scene\3d\voxel_light_baker.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
+		<ClCompile Include="scene\animation\animation_blend_space_1d.cpp">
+			<Filter>Source Files\scene\animation</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\animation\animation_blend_space_2d.cpp">
+			<Filter>Source Files\scene\animation</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\animation\animation_blend_tree.cpp">
+			<Filter>Source Files\scene\animation</Filter>
+		</ClCompile>
 		<ClCompile Include="scene\animation\animation_cache.cpp">
+			<Filter>Source Files\scene\animation</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\animation\animation_node_state_machine.cpp">
 			<Filter>Source Files\scene\animation</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\animation\animation_player.cpp">
 			<Filter>Source Files\scene\animation</Filter>
 		</ClCompile>
+		<ClCompile Include="scene\animation\animation_tree.cpp">
+			<Filter>Source Files\scene\animation</Filter>
+		</ClCompile>
 		<ClCompile Include="scene\animation\animation_tree_player.cpp">
 			<Filter>Source Files\scene\animation</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\animation\tween.cpp">
+		<ClCompile Include="scene\animation\root_motion_view.cpp">
 			<Filter>Source Files\scene\animation</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\animation\tween_interpolaters.cpp">
+		<ClCompile Include="scene\animation\skeleton_ik.cpp">
+			<Filter>Source Files\scene\animation</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\animation\tween.cpp">
 			<Filter>Source Files\scene\animation</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\audio\audio_player.cpp">
@@ -5896,6 +6244,9 @@
 		<ClCompile Include="scene\resources\curve.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
+		<ClCompile Include="scene\resources\cylinder_shape.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
 		<ClCompile Include="scene\resources\dynamic_font.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
@@ -5926,6 +6277,12 @@
 		<ClCompile Include="scene\resources\packed_scene.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
+		<ClCompile Include="scene\resources\particles_material.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\resources\physics_material.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
 		<ClCompile Include="scene\resources\plane_shape.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
@@ -5953,9 +6310,6 @@
 		<ClCompile Include="scene\resources\shader.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\resources\shader_graph.cpp">
-			<Filter>Source Files\scene\resources</Filter>
-		</ClCompile>
 		<ClCompile Include="scene\resources\shape.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
@@ -5980,6 +6334,9 @@
 		<ClCompile Include="scene\resources\surface_tool.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
+		<ClCompile Include="scene\resources\text_file.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
 		<ClCompile Include="scene\resources\texture.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
@@ -5990,6 +6347,12 @@
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\video_stream.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\resources\visual_shader.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\resources\visual_shader_nodes.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\world.cpp">
@@ -6041,6 +6404,9 @@
 			<Filter>Source Files\servers\audio\effects</Filter>
 		</ClCompile>
 		<ClCompile Include="servers\audio\effects\audio_effect_pitch_shift.cpp">
+			<Filter>Source Files\servers\audio\effects</Filter>
+		</ClCompile>
+		<ClCompile Include="servers\audio\effects\audio_effect_record.cpp">
 			<Filter>Source Files\servers\audio\effects</Filter>
 		</ClCompile>
 		<ClCompile Include="servers\audio\effects\audio_effect_reverb.cpp">
@@ -6397,6 +6763,9 @@
 		<ClCompile Include="thirdparty\bullet\BulletCollision\CollisionShapes\btHeightfieldTerrainShape.cpp">
 			<Filter>Source Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\bullet\BulletCollision\CollisionShapes\btMiniSDF.cpp">
+			<Filter>Source Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\bullet\BulletCollision\CollisionShapes\btMinkowskiSumShape.cpp">
 			<Filter>Source Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
 		</ClCompile>
@@ -6413,6 +6782,9 @@
 			<Filter>Source Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\bullet\BulletCollision\CollisionShapes\btScaledBvhTriangleMeshShape.cpp">
+			<Filter>Source Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\bullet\BulletCollision\CollisionShapes\btSdfCollisionShape.cpp">
 			<Filter>Source Files\thirdparty\bullet\BulletCollision\CollisionShapes</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\bullet\BulletCollision\CollisionShapes\btShapeHull.cpp">
@@ -6703,6 +7075,9 @@
 		<ClCompile Include="thirdparty\bullet\LinearMath\btVector3.cpp">
 			<Filter>Source Files\thirdparty\bullet\LinearMath</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\cvtt\ConvectionKernels.cpp">
+			<Filter>Source Files\thirdparty\cvtt</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\enet\callbacks.c">
 			<Filter>Source Files\thirdparty\enet</Filter>
 		</ClCompile>
@@ -6837,18 +7212,6 @@
 		</ClCompile>
 		<ClCompile Include="thirdparty\libsimplewebm\WebMDemuxer.cpp">
 			<Filter>Source Files\thirdparty\libsimplewebm</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\libtheora\x86_vc\mmxfrag.c">
-			<Filter>Source Files\thirdparty\libtheora\x86_vc</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\libtheora\x86_vc\mmxidct.c">
-			<Filter>Source Files\thirdparty\libtheora\x86_vc</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\libtheora\x86_vc\mmxstate.c">
-			<Filter>Source Files\thirdparty\libtheora\x86_vc</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\libtheora\x86_vc\x86state.c">
-			<Filter>Source Files\thirdparty\libtheora\x86_vc</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\libtheora\bitpack.c">
 			<Filter>Source Files\thirdparty\libtheora</Filter>
@@ -7387,6 +7750,9 @@
 		<ClCompile Include="thirdparty\libwebp\src\dsp\upsampling_sse2.c">
 			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\libwebp\src\dsp\upsampling_sse41.c">
+			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\libwebp\src\dsp\yuv.c">
 			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
 		</ClCompile>
@@ -7400,6 +7766,9 @@
 			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\libwebp\src\dsp\yuv_sse2.c">
+			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebp\src\dsp\yuv_sse41.c">
 			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\libwebp\src\enc\alpha_enc.c">
@@ -7522,116 +7891,140 @@
 		<ClCompile Include="thirdparty\libwebp\src\utils\utils.c">
 			<Filter>Source Files\thirdparty\libwebp\src\utils</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\client\client-handshake.c">
-			<Filter>Source Files\thirdparty\lws\client</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\core\alloc.c">
+			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\client\client-parser.c">
-			<Filter>Source Files\thirdparty\lws\client</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\core\context.c">
+			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\client\client.c">
-			<Filter>Source Files\thirdparty\lws\client</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\core\libwebsockets.c">
+			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\client\ssl-client.c">
-			<Filter>Source Files\thirdparty\lws\client</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\core\output.c">
+			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\ext\extension-permessage-deflate.c">
-			<Filter>Source Files\thirdparty\lws\ext</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\core\pollfd.c">
+			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\ext\extension.c">
-			<Filter>Source Files\thirdparty\lws\ext</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\core\service.c">
+			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\mbedtls_wrapper\library\ssl_cert.c">
-			<Filter>Source Files\thirdparty\lws\mbedtls_wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\event-libs\poll\poll.c">
+			<Filter>Source Files\thirdparty\libwebsockets\event-libs\poll</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\mbedtls_wrapper\library\ssl_lib.c">
-			<Filter>Source Files\thirdparty\lws\mbedtls_wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\misc\base64-decode.c">
+			<Filter>Source Files\thirdparty\libwebsockets\misc</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\mbedtls_wrapper\library\ssl_methods.c">
-			<Filter>Source Files\thirdparty\lws\mbedtls_wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\misc\lejp.c">
+			<Filter>Source Files\thirdparty\libwebsockets\misc</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\mbedtls_wrapper\library\ssl_pkey.c">
-			<Filter>Source Files\thirdparty\lws\mbedtls_wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\misc\sha-1.c">
+			<Filter>Source Files\thirdparty\libwebsockets\misc</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\mbedtls_wrapper\library\ssl_stack.c">
-			<Filter>Source Files\thirdparty\lws\mbedtls_wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\plat\lws-plat-win.c">
+			<Filter>Source Files\thirdparty\libwebsockets\plat</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\mbedtls_wrapper\library\ssl_x509.c">
-			<Filter>Source Files\thirdparty\lws\mbedtls_wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\h1\ops-h1.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\h1</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\mbedtls_wrapper\platform\ssl_pm.c">
-			<Filter>Source Files\thirdparty\lws\mbedtls_wrapper\platform</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\http\client\client-handshake.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\http\client</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\mbedtls_wrapper\platform\ssl_port.c">
-			<Filter>Source Files\thirdparty\lws\mbedtls_wrapper\platform</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\http\client\client.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\http\client</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\misc\base64-decode.c">
-			<Filter>Source Files\thirdparty\lws\misc</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\http\server\fops-zip.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\http\server</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\misc\lejp.c">
-			<Filter>Source Files\thirdparty\lws\misc</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\http\server\lejp-conf.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\http\server</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\misc\sha-1.c">
-			<Filter>Source Files\thirdparty\lws\misc</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\http\server\parsers.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\http\server</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\plat\lws-plat-win.c">
-			<Filter>Source Files\thirdparty\lws\plat</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\http\server\server.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\http\server</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\server\fops-zip.c">
-			<Filter>Source Files\thirdparty\lws\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\http\header.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\http</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\server\lejp-conf.c">
-			<Filter>Source Files\thirdparty\lws\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\listen\ops-listen.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\listen</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\server\parsers.c">
-			<Filter>Source Files\thirdparty\lws\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\pipe\ops-pipe.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\pipe</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\server\ranges.c">
-			<Filter>Source Files\thirdparty\lws\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\raw\ops-raw.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\raw</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\server\server-handshake.c">
-			<Filter>Source Files\thirdparty\lws\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\ws\client-parser-ws.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\ws</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\server\server.c">
-			<Filter>Source Files\thirdparty\lws\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\ws\client-ws.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\ws</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\server\ssl-server.c">
-			<Filter>Source Files\thirdparty\lws\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\ws\ops-ws.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\ws</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\win32helpers\getopt.c">
-			<Filter>Source Files\thirdparty\lws\win32helpers</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\roles\ws\server-ws.c">
+			<Filter>Source Files\thirdparty\libwebsockets\roles\ws</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\win32helpers\getopt_long.c">
-			<Filter>Source Files\thirdparty\lws\win32helpers</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_cert.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\win32helpers\gettimeofday.c">
-			<Filter>Source Files\thirdparty\lws\win32helpers</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_lib.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\alloc.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_methods.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\context.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_pkey.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\handshake.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_stack.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\header.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_x509.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\libwebsockets.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\platform\ssl_pm.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\platform</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\output.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\platform\ssl_port.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\platform</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\pollfd.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\lws-genhash.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\service.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\lws-genrsa.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\lws\ssl.c">
-			<Filter>Source Files\thirdparty\lws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\mbedtls-client.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\mbedtls-server.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\ssl.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\tls\tls-client.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\tls\tls-server.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\tls\tls.c">
+			<Filter>Source Files\thirdparty\libwebsockets\tls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\win32helpers\getopt.c">
+			<Filter>Source Files\thirdparty\libwebsockets\win32helpers</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\win32helpers\getopt_long.c">
+			<Filter>Source Files\thirdparty\libwebsockets\win32helpers</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\win32helpers\gettimeofday.c">
+			<Filter>Source Files\thirdparty\libwebsockets\win32helpers</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\aes.c">
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
@@ -7640,6 +8033,9 @@
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\arc4.c">
+			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\mbedtls\library\aria.c">
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\asn1parse.c">
@@ -7664,6 +8060,12 @@
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\certs.c">
+			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\mbedtls\library\chacha20.c">
+			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\mbedtls\library\chachapoly.c">
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\cipher.c">
@@ -7717,6 +8119,9 @@
 		<ClCompile Include="thirdparty\mbedtls\library\havege.c">
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\mbedtls\library\hkdf.c">
+			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\hmac_drbg.c">
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
@@ -7739,6 +8144,9 @@
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\net_sockets.c">
+			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\mbedtls\library\nist_kw.c">
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\oid.c">
@@ -7772,6 +8180,12 @@
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\platform.c">
+			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\mbedtls\library\platform_util.c">
+			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\mbedtls\library\poly1305.c">
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\mbedtls\library\ripemd160.c">
@@ -7849,6 +8263,42 @@
 		<ClCompile Include="thirdparty\mbedtls\library\xtea.c">
 			<Filter>Source Files\thirdparty\mbedtls\library</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\connecthostport.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\igd_desc_parse.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\minisoap.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\minissdpc.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\miniupnpc.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\miniwget.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\minixml.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\portlistingparse.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\receivedata.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\upnpcommands.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\upnpdev.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\miniupnpc\upnpreplyparse.c">
+			<Filter>Source Files\thirdparty\miniupnpc</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\minizip\ioapi.c">
 			<Filter>Source Files\thirdparty\minizip</Filter>
 		</ClCompile>
@@ -7867,6 +8317,9 @@
 		<ClCompile Include="thirdparty\misc\clipper.cpp">
 			<Filter>Source Files\thirdparty\misc</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\misc\easing_equations.cpp">
+			<Filter>Source Files\thirdparty\misc</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\misc\fastlz.c">
 			<Filter>Source Files\thirdparty\misc</Filter>
 		</ClCompile>
@@ -7879,6 +8332,9 @@
 		<ClCompile Include="thirdparty\misc\mikktspace.c">
 			<Filter>Source Files\thirdparty\misc</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\misc\open-simplex-noise.c">
+			<Filter>Source Files\thirdparty\misc</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\misc\pcg.cpp">
 			<Filter>Source Files\thirdparty\misc</Filter>
 		</ClCompile>
@@ -7886,6 +8342,9 @@
 			<Filter>Source Files\thirdparty\misc</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\misc\smaz.c">
+			<Filter>Source Files\thirdparty\misc</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\misc\stb_vorbis.c">
 			<Filter>Source Files\thirdparty\misc</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\misc\triangulator.cpp">
@@ -8329,6 +8788,39 @@
 		<ClCompile Include="thirdparty\pvrtccompressor\PvrTcPacket.cpp">
 			<Filter>Source Files\thirdparty\pvrtccompressor</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\Recast.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastAlloc.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastArea.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastAssert.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastContour.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastFilter.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastLayers.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastMesh.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastMeshDetail.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastRasterization.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastRegion.cpp">
+			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\rtaudio\RtAudio.cpp">
 			<Filter>Source Files\thirdparty\rtaudio</Filter>
 		</ClCompile>
@@ -8359,125 +8851,8 @@
 		<ClCompile Include="thirdparty\squish\squish.cpp">
 			<Filter>Source Files\thirdparty\squish</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvcore\Debug.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvcore\FileSystem.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvcore\Memory.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvcore\RadixSort.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvcore\StrLib.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvcore</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvimage\BitMap.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvimage</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvimage\Image.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvimage</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\Basis.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\ConvexHull.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\Fitting.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\Plane.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\ProximityGrid.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\Random.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\Solver.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\Sparse.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmath\TypeSerialization.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmath</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\geometry\Bounds.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\geometry</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\geometry\Measurements.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\geometry</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\halfedge\Edge.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\halfedge</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\halfedge\Face.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\halfedge</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\halfedge\Mesh.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\halfedge</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\halfedge\Vertex.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\halfedge</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\param\Atlas.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\param\AtlasBuilder.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\param\AtlasPacker.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\param\LeastSquaresConformalMap.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\param\OrthogonalProjectionMap.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\param\ParameterizationQuality.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\param\SingleFaceMap.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\param\Util.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\param</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\raster\Raster.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\raster</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\weld\Snap.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\weld</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\weld\VertexWeld.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh\weld</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\BaseMesh.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\MeshBuilder.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\MeshTopology.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\QuadTriMesh.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\nvmesh\TriMesh.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\nvmesh</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\poshlib\posh.c">
-			<Filter>Source Files\thirdparty\thekla_atlas\poshlib</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\thekla_atlas\thekla\thekla_atlas.cpp">
-			<Filter>Source Files\thirdparty\thekla_atlas\thekla</Filter>
+		<ClCompile Include="thirdparty\xatlas\xatlas.cpp">
+			<Filter>Source Files\thirdparty\xatlas</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\zlib\adler32.c">
 			<Filter>Source Files\thirdparty\zlib</Filter>
