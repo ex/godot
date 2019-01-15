@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -49,6 +49,7 @@ private:
 	Type type;
 	RID self;
 	ObjectID instance_id;
+	ObjectID canvas_instance_id;
 	bool pickable;
 
 	struct Shape {
@@ -102,6 +103,9 @@ public:
 	_FORCE_INLINE_ void set_instance_id(const ObjectID &p_instance_id) { instance_id = p_instance_id; }
 	_FORCE_INLINE_ ObjectID get_instance_id() const { return instance_id; }
 
+	_FORCE_INLINE_ void set_canvas_instance_id(const ObjectID &p_canvas_instance_id) { canvas_instance_id = p_canvas_instance_id; }
+	_FORCE_INLINE_ ObjectID get_canvas_instance_id() const { return canvas_instance_id; }
+
 	void _shape_changed();
 
 	_FORCE_INLINE_ Type get_type() const { return type; }
@@ -111,6 +115,10 @@ public:
 	void set_shape_metadata(int p_index, const Variant &p_metadata);
 
 	_FORCE_INLINE_ int get_shape_count() const { return shapes.size(); }
+	_FORCE_INLINE_ bool is_shape_disabled(int p_index) const {
+		CRASH_BAD_INDEX(p_index, shapes.size());
+		return shapes[p_index].disabled;
+	}
 	_FORCE_INLINE_ Shape2DSW *get_shape(int p_index) const {
 		CRASH_BAD_INDEX(p_index, shapes.size());
 		return shapes[p_index].shape;

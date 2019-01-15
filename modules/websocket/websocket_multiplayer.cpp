@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "websocket_multiplayer.h"
 #include "core/os/os.h"
 
@@ -98,13 +99,6 @@ int WebSocketMultiplayerPeer::get_available_packet_count() const {
 	ERR_FAIL_COND_V(!_is_multiplayer, ERR_UNCONFIGURED);
 
 	return _incoming_packets.size();
-}
-
-int WebSocketMultiplayerPeer::get_max_packet_size() const {
-
-	ERR_FAIL_COND_V(!_is_multiplayer, ERR_UNCONFIGURED);
-
-	return MAX_PACKET_SIZE;
 }
 
 Error WebSocketMultiplayerPeer::get_packet(const uint8_t **r_buffer, int &r_buffer_size) {

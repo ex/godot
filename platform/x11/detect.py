@@ -1,6 +1,7 @@
 import os
 import platform
 import sys
+from compat import decode_utf8
 
 
 def is_active():
@@ -47,6 +48,11 @@ def can_build():
         print("xrender not found.. x11 disabled.")
         return False
 
+    x11_error = os.system("pkg-config xi --modversion > /dev/null ")
+    if (x11_error):
+        print("xi not found.. Aborting.")
+        return False
+
     return True
 
 def get_opts():
@@ -80,10 +86,8 @@ def configure(env):
     ## Build type
 
     if (env["target"] == "release"):
-        # -O3 -ffast-math is identical to -Ofast. We need to split it out so we can selectively disable
-        # -ffast-math in code for which it generates wrong results.
         if (env["optimize"] == "speed"): #optimize for speed (default)
-            env.Prepend(CCFLAGS=['-O3', '-ffast-math'])
+            env.Prepend(CCFLAGS=['-O3'])
         else: #optimize for size
             env.Prepend(CCFLAGS=['-Os'])
 
@@ -94,7 +98,7 @@ def configure(env):
 
     elif (env["target"] == "release_debug"):
         if (env["optimize"] == "speed"): #optimize for speed (default)
-            env.Prepend(CCFLAGS=['-O2', '-ffast-math', '-DDEBUG_ENABLED'])
+            env.Prepend(CCFLAGS=['-O2', '-DDEBUG_ENABLED'])
         else: #optimize for size
             env.Prepend(CCFLAGS=['-Os', '-DDEBUG_ENABLED'])
 
@@ -149,6 +153,19 @@ def configure(env):
     env.Append(CCFLAGS=['-pipe'])
     env.Append(LINKFLAGS=['-pipe'])
 
+    # Check for gcc version > 5 before adding -no-pie
+    import re
+    import subprocess
+    proc = subprocess.Popen([env['CXX'], '--version'], stdout=subprocess.PIPE)
+    (stdout, _) = proc.communicate()
+    stdout = decode_utf8(stdout)
+    match = re.search('[0-9][0-9.]*', stdout)
+    if match is not None:
+        version = match.group().split('.')
+        if (version[0] > '5'):
+            env.Append(CCFLAGS=['-fpie'])
+            env.Append(LINKFLAGS=['-no-pie'])
+
     ## Dependencies
 
     env.ParseConfig('pkg-config x11 --cflags --libs')
@@ -156,13 +173,9 @@ def configure(env):
     env.ParseConfig('pkg-config xinerama --cflags --libs')
     env.ParseConfig('pkg-config xrandr --cflags --libs')
     env.ParseConfig('pkg-config xrender --cflags --libs')
+    env.ParseConfig('pkg-config xi --cflags --libs')
 
     if (env['touch']):
-        x11_error = os.system("pkg-config xi --modversion > /dev/null ")
-        if (x11_error):
-            print("xi not found.. cannot build with touch. Aborting.")
-            sys.exit(255)
-        env.ParseConfig('pkg-config xi --cflags --libs')
         env.Append(CPPFLAGS=['-DTOUCH_ENABLED'])
 
     # FIXME: Check for existence of the libs before parsing their flags with pkg-config

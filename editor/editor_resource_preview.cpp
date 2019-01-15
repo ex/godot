@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -326,7 +326,7 @@ void EditorResourcePreview::queue_edited_resource_preview(const Ref<Resource> &p
 	if (cache.has(path_id) && cache[path_id].last_hash == p_res->hash_edited_version()) {
 
 		cache[path_id].order = order++;
-		p_receiver->call_deferred(p_receiver_func, path_id, cache[path_id].preview, cache[path_id].small_preview, p_userdata);
+		p_receiver->call(p_receiver_func, path_id, cache[path_id].preview, cache[path_id].small_preview, p_userdata);
 		preview_mutex->unlock();
 		return;
 	}
@@ -351,7 +351,7 @@ void EditorResourcePreview::queue_resource_preview(const String &p_path, Object 
 	preview_mutex->lock();
 	if (cache.has(p_path)) {
 		cache[p_path].order = order++;
-		p_receiver->call_deferred(p_receiver_func, p_path, cache[p_path].preview, cache[p_path].small_preview, p_userdata);
+		p_receiver->call(p_receiver_func, p_path, cache[p_path].preview, cache[p_path].small_preview, p_userdata);
 		preview_mutex->unlock();
 		return;
 	}

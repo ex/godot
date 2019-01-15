@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,7 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifndef WEBSOCKET_MULTIPLAYER_PEER_H
 #define WEBSOCKET_MULTIPLAYER_PEER_H
 
@@ -51,9 +52,7 @@ protected:
 		SYS_DEL = 2,
 		SYS_ID = 3,
 
-		PROTO_SIZE = 9,
-		SYS_PACKET_SIZE = 13,
-		MAX_PACKET_SIZE = 65536 - 14 // 5 websocket, 9 multiplayer
+		PROTO_SIZE = 9
 	};
 
 	struct Packet {
@@ -93,7 +92,7 @@ public:
 
 	/* PacketPeer */
 	virtual int get_available_packet_count() const;
-	virtual int get_max_packet_size() const;
+	virtual int get_max_packet_size() const = 0;
 	virtual Error get_packet(const uint8_t **r_buffer, int &r_buffer_size);
 	virtual Error put_packet(const uint8_t *p_buffer, int p_buffer_size);
 

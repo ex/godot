@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -42,6 +42,16 @@ void Path::_curve_changed() {
 		update_gizmo();
 	if (is_inside_tree()) {
 		emit_signal("curve_changed");
+	}
+
+	// update the configuration warnings of all children of type OrientedPathFollows
+	if (is_inside_tree()) {
+		for (int i = 0; i < get_child_count(); i++) {
+			OrientedPathFollow *child = Object::cast_to<OrientedPathFollow>(get_child(i));
+			if (child) {
+				child->update_configuration_warning();
+			}
+		}
 	}
 }
 
@@ -203,8 +213,20 @@ void PathFollow::_validate_property(PropertyInfo &property) const {
 		if (path && path->get_curve().is_valid())
 			max = path->get_curve()->get_baked_length();
 
-		property.hint_string = "0," + rtos(max) + ",0.01";
+		property.hint_string = "0," + rtos(max) + ",0.01,or_greater";
 	}
+}
+
+String PathFollow::get_configuration_warning() const {
+
+	if (!is_visible_in_tree() || !is_inside_tree())
+		return String();
+
+	if (!Object::cast_to<Path>(get_parent())) {
+		return TTR("PathFollow only works when set as a child of a Path node.");
+	}
+
+	return String();
 }
 
 void PathFollow::_bind_methods() {
@@ -230,8 +252,8 @@ void PathFollow::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_loop", "loop"), &PathFollow::set_loop);
 	ClassDB::bind_method(D_METHOD("has_loop"), &PathFollow::has_loop);
 
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "offset", PROPERTY_HINT_EXP_RANGE, "0,10000,0.01,or_greater"), "set_offset", "get_offset");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "unit_offset", PROPERTY_HINT_RANGE, "0,1,0.0001", PROPERTY_USAGE_EDITOR), "set_unit_offset", "get_unit_offset");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "offset", PROPERTY_HINT_RANGE, "0,10000,0.01,or_greater"), "set_offset", "get_offset");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "unit_offset", PROPERTY_HINT_RANGE, "0,1,0.0001,or_greater", PROPERTY_USAGE_EDITOR), "set_unit_offset", "get_unit_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "h_offset"), "set_h_offset", "get_h_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "v_offset"), "set_v_offset", "get_v_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "rotation_mode", PROPERTY_HINT_ENUM, "None,Y,XY,XYZ"), "set_rotation_mode", "get_rotation_mode");
@@ -442,6 +464,23 @@ void OrientedPathFollow::_validate_property(PropertyInfo &property) const {
 
 		property.hint_string = "0," + rtos(max) + ",0.01";
 	}
+}
+
+String OrientedPathFollow::get_configuration_warning() const {
+
+	if (!is_visible_in_tree() || !is_inside_tree())
+		return String();
+
+	if (!Object::cast_to<Path>(get_parent())) {
+		return TTR("OrientedPathFollow only works when set as a child of a Path node.");
+	} else {
+		Path *path = Object::cast_to<Path>(get_parent());
+		if (path->get_curve().is_valid() && !path->get_curve()->is_up_vector_enabled()) {
+			return TTR("OrientedPathFollow requires \"Up Vector\" enabled in its parent Path's Curve resource.");
+		}
+	}
+
+	return String();
 }
 
 void OrientedPathFollow::_bind_methods() {

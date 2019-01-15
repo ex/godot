@@ -141,7 +141,7 @@ def configure(env):
     if (env["target"].startswith("release")):
         if (env["optimize"] == "speed"): #optimize for speed (default)
             env.Append(LINKFLAGS=['-O2'])
-            env.Append(CPPFLAGS=['-O2', '-DNDEBUG', '-ffast-math', '-funsafe-math-optimizations', '-fomit-frame-pointer'])
+            env.Append(CPPFLAGS=['-O2', '-DNDEBUG', '-fomit-frame-pointer'])
         else: #optimize for size
             env.Append(CPPFLAGS=['-Os', '-DNDEBUG'])
             env.Append(LINKFLAGS=['-Os'])
@@ -186,7 +186,7 @@ def configure(env):
     env.PrependENVPath('PATH', tools_path)
 
     ccache_path = os.environ.get("CCACHE")
-    if ccache_path == None:
+    if ccache_path is None:
         env['CC'] = compiler_path + '/clang'
         env['CXX'] = compiler_path + '/clang++'
     else:
@@ -223,7 +223,7 @@ def configure(env):
     else:
         print("Using NDK deprecated headers")
         env.Append(CPPFLAGS=["-isystem", lib_sysroot + "/usr/include"])
-     
+
     env.Append(CPPFLAGS='-fpic -ffunction-sections -funwind-tables -fstack-protector-strong -fvisibility=hidden -fno-strict-aliasing'.split())
     env.Append(CPPFLAGS='-DNO_STATVFS -DGLES_ENABLED'.split())
 
@@ -267,12 +267,12 @@ def configure(env):
         env.Append(LINKFLAGS=['-shared', '--sysroot=' + lib_sysroot, '-Wl,--warn-shared-textrel'])
         if mt_link:
             env.Append(LINKFLAGS=['-Wl,--threads'])
-            
+
     if env["android_arch"] == "armv7":
         env.Append(LINKFLAGS='-Wl,--fix-cortex-a8'.split())
     env.Append(LINKFLAGS='-Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now'.split())
     env.Append(LINKFLAGS='-Wl,-soname,libgodot_android.so -Wl,--gc-sections'.split())
-    
+
     env.Append(LINKFLAGS=target_opts)
     env.Append(LINKFLAGS=common_opts)
 
@@ -293,7 +293,7 @@ def configure(env):
 
 # Return NDK version string in source.properties (adapted from the Chromium project).
 def get_ndk_version(path):
-    if path == None:
+    if path is None:
         return None
     prop_file_path = os.path.join(path, "source.properties")
     try:
