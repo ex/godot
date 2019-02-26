@@ -546,22 +546,13 @@ msgstr "Σμύκρινση"
 msgid "Reset Zoom"
 msgstr "Επαναφορά μεγέθυνσης"
 
-#: editor/code_editor.cpp
-msgid "Warnings:"
-msgstr "Προειδοποιήσεις:"
+#: editor/code_editor.cpp modules/mono/editor/mono_bottom_panel.cpp
+msgid "Warnings"
+msgstr "Προειδοποιήσεις"
 
 #: editor/code_editor.cpp
-#, fuzzy
-msgid "Font Size:"
-msgstr "Μέγεθος πηγαίας γραμματοσειράς:"
-
-#: editor/code_editor.cpp
-msgid "Line:"
-msgstr "Γραμμή:"
-
-#: editor/code_editor.cpp
-msgid "Col:"
-msgstr "Στήλη:"
+msgid "Line and column numbers."
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Method in target Node must be specified!"
@@ -866,8 +857,8 @@ msgstr "Διαγραφή επιλεγμένων αρχείων;"
 #: editor/dependency_editor.cpp editor/editor_audio_buses.cpp
 #: editor/editor_file_dialog.cpp editor/editor_node.cpp
 #: editor/filesystem_dock.cpp editor/plugins/item_list_editor_plugin.cpp
-#: editor/project_export.cpp editor/project_settings_editor.cpp
-#: editor/scene_tree_dock.cpp
+#: editor/plugins/sprite_frames_editor_plugin.cpp editor/project_export.cpp
+#: editor/project_settings_editor.cpp editor/scene_tree_dock.cpp
 msgid "Delete"
 msgstr "Διαγραφή"
 
@@ -1125,8 +1116,9 @@ msgid "Add Bus"
 msgstr "Προσθήκη διαύλου"
 
 #: editor/editor_audio_buses.cpp
-msgid "Create a new Bus Layout."
-msgstr "Δημιουργία νέας διάταξης διαύλων ήχου."
+#, fuzzy
+msgid "Add a new Audio Bus to this layout."
+msgstr "Αποθήκευση διάταξης διαύλων ήχου ώς..."
 
 #: editor/editor_audio_buses.cpp editor/editor_properties.cpp
 #: editor/plugins/animation_player_editor_plugin.cpp editor/property_editor.cpp
@@ -1153,6 +1145,10 @@ msgstr "Φόρτωση προεπιλογής"
 #: editor/editor_audio_buses.cpp
 msgid "Load the default Bus Layout."
 msgstr "Φόρτωση προεπιλεγμένης διάταξης διαύλων ήχου."
+
+#: editor/editor_audio_buses.cpp
+msgid "Create a new Bus Layout."
+msgstr "Δημιουργία νέας διάταξης διαύλων ήχου."
 
 #: editor/editor_autoload_settings.cpp
 msgid "Invalid name."
@@ -1292,8 +1288,29 @@ msgid "Storing File:"
 msgstr "Αρχείο αποθήκευσης:"
 
 #: editor/editor_export.cpp
+#, fuzzy
+msgid "No export template found at the expected path:"
+msgstr ""
+"Δεν βρέθηκαν πρότυπα εξαγωγής.\n"
+"Κατεβάστε και εγκαταστήστε τα πρότυπα εξαγωγής."
+
+#: editor/editor_export.cpp
 msgid "Packing"
 msgstr "Πακετάρισμα"
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Custom debug template not found."
+msgstr "Το προσαρμοσμένο πακέτο αποσφαλμάτωσης δεν βρέθηκε."
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Custom release template not found."
+msgstr "Το προσαρμοσμένο πακέτο παραγωγής δεν βρέθηκε."
 
 #: editor/editor_export.cpp platform/javascript/export/export.cpp
 msgid "Template file not found:"
@@ -2415,7 +2432,8 @@ msgid "Save & Restart"
 msgstr "Αποθήκευση & Επανεκκίνηση"
 
 #: editor/editor_node.cpp
-msgid "Spins when the editor window repaints!"
+#, fuzzy
+msgid "Spins when the editor window redraws."
 msgstr "Περιστρέφεται όταν το παράθυρο του επεξεργαστή επαναχρωματίζεται!"
 
 #: editor/editor_node.cpp
@@ -3349,6 +3367,20 @@ msgstr "Διαμόρφωση..."
 msgid "Reimport"
 msgstr "Επανεισαγωγή"
 
+#: editor/import_dock.cpp
+msgid "Save scenes, re-import and restart"
+msgstr ""
+
+#: editor/import_dock.cpp
+#, fuzzy
+msgid "Changing the type of an imported file requires editor restart."
+msgstr "Η αλλαγή του οδηγού βίντεο απαιτεί επανεκκίνηση του επεξεργαστή."
+
+#: editor/import_dock.cpp
+msgid ""
+"WARNING: Assets exist that use this resource, they may stop loading properly."
+msgstr ""
+
 #: editor/inspector_dock.cpp
 msgid "Failed to load resource."
 msgstr "Απέτυχε η φόρτωση πόρου."
@@ -3475,25 +3507,6 @@ msgid "Create Polygon"
 msgstr "Δημιουγία πολυγώνου"
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
-#, fuzzy
-msgid "Edit Polygon"
-msgstr "Επεγεργασία πολυγώνου"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-msgid "Insert Point"
-msgstr "Εισαγωγή σημείου"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-#, fuzzy
-msgid "Edit Polygon (Remove Point)"
-msgstr "Επεγεργασία πολυγώνου (Αφαίρεση σημείου)"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-#, fuzzy
-msgid "Remove Polygon And Point"
-msgstr "Αφαίρεση πολυγώνου και σημείου"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 msgid "Create points."
@@ -3515,6 +3528,25 @@ msgstr ""
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 msgid "Erase points."
 msgstr "Διαγραφή σημείων."
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+#, fuzzy
+msgid "Edit Polygon"
+msgstr "Επεγεργασία πολυγώνου"
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+msgid "Insert Point"
+msgstr "Εισαγωγή σημείου"
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+#, fuzzy
+msgid "Edit Polygon (Remove Point)"
+msgstr "Επεγεργασία πολυγώνου (Αφαίρεση σημείου)"
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+#, fuzzy
+msgid "Remove Polygon And Point"
+msgstr "Αφαίρεση πολυγώνου και σημείου"
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
@@ -4323,6 +4355,16 @@ msgstr "Περιστροφή CanvasItem"
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Move CanvasItem"
 msgstr "Μετακίνηση CanvasItem"
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
+msgid "Presets for the anchors and margins values of a Control node."
+msgstr ""
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
+msgid ""
+"Children of containers have their anchors and margins values overridden by "
+"their parent."
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Anchors only"
@@ -5237,6 +5279,12 @@ msgstr ""
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Create UV Map"
 msgstr "Δημιουργία χάρτη UV"
+
+#: editor/plugins/polygon_2d_editor_plugin.cpp
+msgid ""
+"Polygon 2D has internal vertices, so it can no longer be edited in the "
+"viewport."
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 #, fuzzy
@@ -6381,7 +6429,7 @@ msgid "Post"
 msgstr "Μετά"
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "Name-less gizmo"
+msgid "Nameless gizmo"
 msgstr ""
 
 #: editor/plugins/sprite_editor_plugin.cpp
@@ -6464,8 +6512,14 @@ msgid "(empty)"
 msgstr "(άδειο)"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
-msgid "Animations"
+#, fuzzy
+msgid "Animations:"
 msgstr "Κινήσεις"
+
+#: editor/plugins/sprite_frames_editor_plugin.cpp
+#, fuzzy
+msgid "New Animation"
+msgstr "Κίνηση"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Speed (FPS):"
@@ -6476,7 +6530,8 @@ msgid "Loop"
 msgstr "Επανάληψη"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
-msgid "Animation Frames"
+#, fuzzy
+msgid "Animation Frames:"
 msgstr "Καρέ κίνησης"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
@@ -7276,6 +7331,38 @@ msgid "Browse"
 msgstr "Περιήγηση"
 
 #: editor/project_manager.cpp
+msgid "Renderer:"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 3.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Higher visual quality\n"
+"All features available\n"
+"Incompatible with older hardware\n"
+"Not recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 2.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Lower visual quality\n"
+"Some features not available\n"
+"Works on most hardware\n"
+"Recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "Renderer can be changed later, but scenes may need to be adjusted."
+msgstr ""
+
+#: editor/project_manager.cpp
 msgid "Unnamed Project"
 msgstr "Ανώνυμο έργο"
 
@@ -7287,6 +7374,19 @@ msgstr "Δεν ήταν δυνατό το άνοιγμα του έργου"
 #: editor/project_manager.cpp
 msgid "Are you sure to open more than one project?"
 msgstr "Είστε σίγουροι πως θέλετε να ανοίξετε περισσότερα από ένα έργα;"
+
+#: editor/project_manager.cpp
+msgid ""
+"The following project settings file does not specify the version of Godot "
+"through which it was created.\n"
+"\n"
+"%s\n"
+"\n"
+"If you proceed with opening it, it will be converted to Godot's current "
+"configuration file format.\n"
+"Warning: You will not be able to open the project with previous versions of "
+"the engine anymore."
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid ""
@@ -8007,6 +8107,18 @@ msgstr "Μετακίνηση κόμβων στον γονέα"
 #: editor/scene_tree_dock.cpp
 msgid "Duplicate Node(s)"
 msgstr "Διπλασιασμός κόμβων"
+
+#: editor/scene_tree_dock.cpp
+msgid "Can't reparent nodes in inherited scenes, order of nodes can't change."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Node must belong to the edited scene to become root."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Instantiated scenes can't become root"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Delete Node(s)?"
@@ -8844,10 +8956,6 @@ msgid "Build Project"
 msgstr "Δόμηση έργου"
 
 #: modules/mono/editor/mono_bottom_panel.cpp
-msgid "Warnings"
-msgstr "Προειδοποιήσεις"
-
-#: modules/mono/editor/mono_bottom_panel.cpp
 msgid "View log"
 msgstr "Προβολή αρχείου καταγραφής"
 
@@ -9256,6 +9364,90 @@ msgstr ""
 msgid "Set %s"
 msgstr ""
 
+#: platform/android/export/export.cpp
+msgid "Package name is missing."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Package segments must be of non-zero length."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' is not allowed in Android application package names."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "A digit cannot be the first character in a package segment."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' cannot be the first character in a package segment."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The package must have at least one '.' separator."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "ADB executable not configured in the Editor Settings."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "OpenJDK jarsigner not configured in the Editor Settings."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Debug keystore not configured in the Editor Settings nor in the preset."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Invalid public key for APK expansion."
+msgstr ""
+
+#: platform/android/export/export.cpp
+#, fuzzy
+msgid "Invalid package name:"
+msgstr "Μη έγκυρο όνομα κλάσης"
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier is missing."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier segments must be of non-zero length."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+#, fuzzy
+msgid "The character '%s' is not allowed in Identifier."
+msgstr "Το όνομα δεν είναι έγκυρο αναγνωριστικό:"
+
+#: platform/iphone/export/export.cpp
+msgid "A digit cannot be the first character in a Identifier segment."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid ""
+"The character '%s' cannot be the first character in a Identifier segment."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "The Identifier must have at least one '.' separator."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "App Store Team ID not specified - cannot configure the project."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+#, fuzzy
+msgid "Invalid Identifier:"
+msgstr "Το όνομα δεν είναι έγκυρο αναγνωριστικό:"
+
+#: platform/iphone/export/export.cpp
+msgid "Required icon is not specified in the preset."
+msgstr ""
+
 #: platform/javascript/export/export.cpp
 msgid "Run in Browser"
 msgstr "Εκτέλεση στον περιηγητή"
@@ -9287,6 +9479,51 @@ msgstr "Σφάλμα κατά την ανάγνωση εικόνας εκκίν�
 #: platform/javascript/export/export.cpp
 msgid "Using default boot splash image."
 msgstr "Χρήση προεπιλεγμένης εικόνας εκκίνησης."
+
+#: platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Invalid package unique name."
+msgstr "Άκυρο μοναδικό όνομα."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid product GUID."
+msgstr "Άκυρο GUID προϊόντος."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid publisher GUID."
+msgstr "Άκυρο GUID εκδότη."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid background color."
+msgstr "Άκυρο χρώμα παρασκηνίου."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr "Άκυρη εικόνα λογότυπου καταστήματος (πρέπει να είναι 50x50)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr "Άκυρη εικόνα τετράγωνου λογότυπου 44x44 (πρέπει να είναι 44x44)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr "Άκυρη εικόνα τετράγωνου λογότυπου 71x71 (πρέπει να είναι 71x71)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr "Άκυρη εικόνα τετράγωνου λογότυπου 150x150 (πρέπει να είναι 150x150)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr "Άκυρη εικόνα τετράγωνου λογότυπου 310x310 (πρέπει να είναι 310x310)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr "Άκυρη εικόνα ευρύ λογότυπου 310x150 (πρέπει να είναι 310x150)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
+msgstr "Άκυρες διαστάσεις εικόνας οθόνης εκκίνησης (πρέπει να είναι 620x300)."
 
 #: scene/2d/animated_sprite.cpp
 msgid ""
@@ -9398,6 +9635,13 @@ msgid ""
 msgstr ""
 "Ένας κόμβος ParallaxLayer δουλεύει μόνο όταν κληρονομεί έναν κόμβο τύπου "
 "ParallaxBackground."
+
+#: scene/2d/particles_2d.cpp
+msgid ""
+"GPU-based particles are not supported by the GLES2 video driver.\n"
+"Use the CPUParticles2D node instead. You can use the \"Convert to "
+"CPUParticles\" option for this purpose."
+msgstr ""
 
 #: scene/2d/particles_2d.cpp scene/3d/particles.cpp
 msgid ""
@@ -9588,6 +9832,13 @@ msgstr ""
 
 #: scene/3d/particles.cpp
 msgid ""
+"GPU-based particles are not supported by the GLES2 video driver.\n"
+"Use the CPUParticles node instead. You can use the \"Convert to CPUParticles"
+"\" option for this purpose."
+msgstr ""
+
+#: scene/3d/particles.cpp
+msgid ""
 "Nothing is visible because meshes have not been assigned to draw passes."
 msgstr ""
 "Τίποτα δεν είναι ορατό, επειδή δεν έχουν οριστεί περάσματα για τα πλέγματα."
@@ -9604,14 +9855,9 @@ msgid "PathFollow only works when set as a child of a Path node."
 msgstr "Το PathFollow2D δουλεύει μόνο όταν κληρονομεί έναν κόμβο Path2D."
 
 #: scene/3d/path.cpp
-#, fuzzy
-msgid "OrientedPathFollow only works when set as a child of a Path node."
-msgstr "Το PathFollow2D δουλεύει μόνο όταν κληρονομεί έναν κόμβο Path2D."
-
-#: scene/3d/path.cpp
 msgid ""
-"OrientedPathFollow requires \"Up Vector\" enabled in its parent Path's Curve "
-"resource."
+"PathFollow ROTATION_ORIENTED requires \"Up Vector\" enabled in its parent "
+"Path's Curve resource."
 msgstr ""
 
 #: scene/3d/physics_body.cpp
@@ -9629,25 +9875,6 @@ msgid "Path property must point to a valid Spatial node to work."
 msgstr ""
 "Η ιδιότητα Path πρέπει να δείχνει σε έναν έγκυρο κόμβο Spatial για να "
 "δουλέψει αυτός ο κόμβος."
-
-#: scene/3d/scenario_fx.cpp
-msgid "WorldEnvironment needs an Environment resource."
-msgstr "Το WorldEnvironment χρειάζεται έναν πόρο Environment."
-
-#: scene/3d/scenario_fx.cpp
-msgid ""
-"Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
-msgstr ""
-"Μόνο ένα WorldEnvironment επιτρέπεται σε κάθε σκηνή (ή σύνολο στιγμιοτύπων "
-"σκηνών)."
-
-#: scene/3d/scenario_fx.cpp
-msgid ""
-"This WorldEnvironment is ignored. Either add a Camera (for 3D scenes) or set "
-"this environment's Background Mode to Canvas (for 2D scenes)."
-msgstr ""
-"Αυτό το WorldEnvironment θα αγνοηθεί. Προσθέστε μια κάμερα (για 3d) ή ορίστε "
-"το Background Mode αυτού του περιβάλλοντος σε Canvas (για 2d)."
 
 #: scene/3d/soft_body.cpp
 msgid "This body will be ignored until you set a mesh"
@@ -9679,6 +9906,25 @@ msgid ""
 msgstr ""
 "Το VehicleWheel δίνει ένα σύστημα τροχών για το VehicleBody. Παρακαλούμε "
 "χρησιμοποιήστε το ως παιδί του VehicleBody."
+
+#: scene/3d/world_environment.cpp
+msgid "WorldEnvironment needs an Environment resource."
+msgstr "Το WorldEnvironment χρειάζεται έναν πόρο Environment."
+
+#: scene/3d/world_environment.cpp
+msgid ""
+"Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
+msgstr ""
+"Μόνο ένα WorldEnvironment επιτρέπεται σε κάθε σκηνή (ή σύνολο στιγμιοτύπων "
+"σκηνών)."
+
+#: scene/3d/world_environment.cpp
+msgid ""
+"This WorldEnvironment is ignored. Either add a Camera (for 3D scenes) or set "
+"this environment's Background Mode to Canvas (for 2D scenes)."
+msgstr ""
+"Αυτό το WorldEnvironment θα αγνοηθεί. Προσθέστε μια κάμερα (για 3d) ή ορίστε "
+"το Background Mode αυτού του περιβάλλοντος σε Canvas (για 2d)."
 
 #: scene/animation/animation_blend_tree.cpp
 msgid "On BlendTree node '%s', animation not found: '%s'"
@@ -9728,11 +9974,20 @@ msgid "This node has been deprecated. Use AnimationTree instead."
 msgstr ""
 
 #: scene/gui/color_picker.cpp
+msgid "Pick a color from the screen."
+msgstr ""
+
+#: scene/gui/color_picker.cpp
 msgid "Raw Mode"
 msgstr "Ωμή λειτουργία"
 
 #: scene/gui/color_picker.cpp
-msgid "Add current color as a preset"
+msgid "Switch between hexadecimal and code values."
+msgstr ""
+
+#: scene/gui/color_picker.cpp
+#, fuzzy
+msgid "Add current color as a preset."
 msgstr "Προσθήκη του τρέχοντος χρώματος ως προκαθορισμένο"
 
 #: scene/gui/dialogs.cpp
@@ -9829,6 +10084,23 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Varyings can only be assigned in vertex function."
 msgstr ""
+
+#~ msgid "Warnings:"
+#~ msgstr "Προειδοποιήσεις:"
+
+#, fuzzy
+#~ msgid "Font Size:"
+#~ msgstr "Μέγεθος πηγαίας γραμματοσειράς:"
+
+#~ msgid "Line:"
+#~ msgstr "Γραμμή:"
+
+#~ msgid "Col:"
+#~ msgstr "Στήλη:"
+
+#, fuzzy
+#~ msgid "OrientedPathFollow only works when set as a child of a Path node."
+#~ msgstr "Το PathFollow2D δουλεύει μόνο όταν κληρονομεί έναν κόμβο Path2D."
 
 #, fuzzy
 #~ msgid "Split already exists."
@@ -11068,55 +11340,6 @@ msgstr ""
 
 #~ msgid "Error creating the package signature."
 #~ msgstr "Σφάλμα κατά τη δημιουργία της υπογραφής του πακέτου."
-
-#~ msgid ""
-#~ "No export templates found.\n"
-#~ "Download and install export templates."
-#~ msgstr ""
-#~ "Δεν βρέθηκαν πρότυπα εξαγωγής.\n"
-#~ "Κατεβάστε και εγκαταστήστε τα πρότυπα εξαγωγής."
-
-#~ msgid "Custom debug package not found."
-#~ msgstr "Το προσαρμοσμένο πακέτο αποσφαλμάτωσης δεν βρέθηκε."
-
-#~ msgid "Custom release package not found."
-#~ msgstr "Το προσαρμοσμένο πακέτο παραγωγής δεν βρέθηκε."
-
-#~ msgid "Invalid unique name."
-#~ msgstr "Άκυρο μοναδικό όνομα."
-
-#~ msgid "Invalid product GUID."
-#~ msgstr "Άκυρο GUID προϊόντος."
-
-#~ msgid "Invalid publisher GUID."
-#~ msgstr "Άκυρο GUID εκδότη."
-
-#~ msgid "Invalid background color."
-#~ msgstr "Άκυρο χρώμα παρασκηνίου."
-
-#~ msgid "Invalid Store Logo image dimensions (should be 50x50)."
-#~ msgstr "Άκυρη εικόνα λογότυπου καταστήματος (πρέπει να είναι 50x50)."
-
-#~ msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
-#~ msgstr "Άκυρη εικόνα τετράγωνου λογότυπου 44x44 (πρέπει να είναι 44x44)."
-
-#~ msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
-#~ msgstr "Άκυρη εικόνα τετράγωνου λογότυπου 71x71 (πρέπει να είναι 71x71)."
-
-#~ msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
-#~ msgstr ""
-#~ "Άκυρη εικόνα τετράγωνου λογότυπου 150x150 (πρέπει να είναι 150x150)."
-
-#~ msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
-#~ msgstr ""
-#~ "Άκυρη εικόνα τετράγωνου λογότυπου 310x310 (πρέπει να είναι 310x310)."
-
-#~ msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
-#~ msgstr "Άκυρη εικόνα ευρύ λογότυπου 310x150 (πρέπει να είναι 310x150)."
-
-#~ msgid "Invalid splash screen image dimensions (should be 620x300)."
-#~ msgstr ""
-#~ "Άκυρες διαστάσεις εικόνας οθόνης εκκίνησης (πρέπει να είναι 620x300)."
 
 #~ msgid "RAW Mode"
 #~ msgstr "Ακατέργαστη λειτουργία"

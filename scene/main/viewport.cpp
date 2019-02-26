@@ -37,8 +37,8 @@
 #include "scene/3d/camera.h"
 #include "scene/3d/collision_object.h"
 #include "scene/3d/listener.h"
-#include "scene/3d/scenario_fx.h"
 #include "scene/3d/spatial.h"
+#include "scene/3d/world_environment.h"
 #include "scene/gui/control.h"
 #include "scene/gui/label.h"
 #include "scene/gui/menu_button.h"
@@ -239,7 +239,7 @@ void Viewport::_collision_object_input_event(CollisionObject *p_object, Camera *
 	ObjectID id = p_object->get_instance_id();
 
 	if (p_discard_empty_motion) {
-		//avoid sending the event unnecesarily if nothing really changed in the context
+		//avoid sending the event unnecessarily if nothing really changed in the context
 		Ref<InputEventMouseMotion> mm = p_input_event;
 		if (mm.is_valid() && object_transform == physics_last_object_transform && camera_transform == physics_last_camera_transform && physics_last_id == id) {
 			return; //discarded
@@ -425,7 +425,7 @@ void Viewport::_notification(int p_what) {
 				bool discard_empty_motion = false;
 
 				{ // if no motion event exists, create a new one. This is necessary because objects or camera may have moved.
-					// while this extra event is sent, it is checked if both camera and last object and last ID did not move. If nothing changed, the event is discarded to avoid flooding with unnecesary motion events every frame
+					// while this extra event is sent, it is checked if both camera and last object and last ID did not move. If nothing changed, the event is discarded to avoid flooding with unnecessary motion events every frame
 					bool has_mouse_motion = false;
 					for (List<Ref<InputEvent> >::Element *E = physics_picking_events.front(); E; E = E->next()) {
 						Ref<InputEventMouseMotion> mm = E->get();
@@ -540,12 +540,12 @@ void Viewport::_notification(int p_what) {
 									CollisionObject2D *co = Object::cast_to<CollisionObject2D>(res[i].collider);
 									if (co) {
 
-										Map<ObjectID, uint64_t>::Element *E = physics_2d_mouseover.find(res[i].collider_id);
-										if (!E) {
-											E = physics_2d_mouseover.insert(res[i].collider_id, frame);
+										Map<ObjectID, uint64_t>::Element *F = physics_2d_mouseover.find(res[i].collider_id);
+										if (!F) {
+											F = physics_2d_mouseover.insert(res[i].collider_id, frame);
 											co->_mouse_enter();
 										} else {
-											E->get() = frame;
+											F->get() = frame;
 										}
 
 										co->_input_event(this, ev, res[i].shape);
@@ -691,6 +691,13 @@ void Viewport::set_use_arvr(bool p_use_arvr) {
 
 bool Viewport::use_arvr() {
 	return arvr;
+}
+
+void Viewport::update_canvas_items() {
+	if (!is_inside_tree())
+		return;
+
+	_update_canvas_items(this);
 }
 
 void Viewport::set_size(const Size2 &p_size) {
@@ -1128,6 +1135,26 @@ Transform2D Viewport::get_final_transform() const {
 	return stretch_transform * global_canvas_transform;
 }
 
+void Viewport::_update_canvas_items(Node *p_node) {
+	if (p_node != this) {
+
+		Viewport *vp = Object::cast_to<Viewport>(p_node);
+		if (vp)
+			return;
+
+		CanvasItem *ci = Object::cast_to<CanvasItem>(p_node);
+		if (ci) {
+			ci->update();
+		}
+	}
+
+	int cc = p_node->get_child_count();
+
+	for (int i = 0; i < cc; i++) {
+		_update_canvas_items(p_node->get_child(i));
+	}
+}
+
 void Viewport::set_size_override(bool p_enable, const Size2 &p_size, const Vector2 &p_margin) {
 
 	if (size_override == p_enable && p_size == size_override_size)
@@ -1533,6 +1560,35 @@ void Viewport::_gui_call_input(Control *p_control, const Ref<InputEvent> &p_inpu
 	//_unblock();
 }
 
+void Viewport::_gui_call_notification(Control *p_control, int p_what) {
+
+	CanvasItem *ci = p_control;
+	while (ci) {
+
+		Control *control = Object::cast_to<Control>(ci);
+		if (control) {
+
+			if (control->data.mouse_filter != Control::MOUSE_FILTER_IGNORE) {
+				control->notification(p_what);
+			}
+
+			if (!control->is_inside_tree())
+				break;
+
+			if (!control->is_inside_tree() || control->is_set_as_toplevel())
+				break;
+			if (control->data.mouse_filter == Control::MOUSE_FILTER_STOP)
+				break;
+		}
+
+		if (ci->is_set_as_toplevel())
+			break;
+
+		ci = ci->get_parent_item();
+	}
+
+	//_unblock();
+}
 Control *Viewport::_gui_find_control(const Point2 &p_global) {
 
 	_gui_prepare_subwindows();
@@ -1691,8 +1747,8 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 				while (!gui.modal_stack.empty()) {
 
 					Control *top = gui.modal_stack.back()->get();
-					Vector2 pos = top->get_global_transform_with_canvas().affine_inverse().xform(mpos);
-					if (!top->has_point(pos)) {
+					Vector2 pos2 = top->get_global_transform_with_canvas().affine_inverse().xform(mpos);
+					if (!top->has_point(pos2)) {
 
 						if (top->data.modal_exclusive || top->data.modal_frame == Engine::get_singleton()->get_frames_drawn()) {
 							//cancel event, sorry, modal exclusive EATS UP ALL
@@ -1975,13 +2031,15 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 
 		if (over != gui.mouse_over) {
 
-			if (gui.mouse_over)
-				gui.mouse_over->notification(Control::NOTIFICATION_MOUSE_EXIT);
+			if (gui.mouse_over) {
+				_gui_call_notification(gui.mouse_over, Control::NOTIFICATION_MOUSE_EXIT);
+			}
 
 			_gui_cancel_tooltip();
 
-			if (over)
-				over->notification(Control::NOTIFICATION_MOUSE_ENTER);
+			if (over) {
+				_gui_call_notification(over, Control::NOTIFICATION_MOUSE_ENTER);
+			}
 		}
 
 		gui.mouse_over = over;
@@ -2437,6 +2495,9 @@ void Viewport::_gui_remove_control(Control *p_control) {
 	if (gui.mouse_focus == p_control) {
 		gui.mouse_focus = NULL;
 		gui.mouse_focus_mask = 0;
+	}
+	if (gui.last_mouse_focus == p_control) {
+		gui.last_mouse_focus = NULL;
 	}
 	if (gui.key_focus == p_control)
 		gui.key_focus = NULL;
@@ -3141,6 +3202,8 @@ Viewport::Viewport() {
 	gui.drag_attempted = false;
 	gui.canvas_sort_index = 0;
 	gui.roots_order_dirty = false;
+	gui.mouse_focus = NULL;
+	gui.last_mouse_focus = NULL;
 
 	msaa = MSAA_DISABLED;
 	hdr = true;

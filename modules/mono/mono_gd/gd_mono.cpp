@@ -54,17 +54,6 @@
 #include "main/main.h"
 #endif
 
-#ifdef MONO_PRINT_HANDLER_ENABLED
-void gdmono_MonoPrintCallback(const char *string, mono_bool is_stdout) {
-
-	if (is_stdout) {
-		OS::get_singleton()->print(string);
-	} else {
-		OS::get_singleton()->printerr(string);
-	}
-}
-#endif
-
 GDMono *GDMono::singleton = NULL;
 
 namespace {
@@ -130,9 +119,14 @@ void gdmono_debug_init() {
 	}
 #endif
 
-	CharString da_args = String("--debugger-agent=transport=dt_socket,address=127.0.0.1:" + itos(da_port) +
-								",embedding=1,server=y,suspend=" + (da_suspend ? "y,timeout=" + itos(da_timeout) : "n"))
-								 .utf8();
+	CharString da_args = OS::get_singleton()->get_environment("GODOT_MONO_DEBUGGER_AGENT").utf8();
+
+	if (da_args.length() == 0) {
+		da_args = String("--debugger-agent=transport=dt_socket,address=127.0.0.1:" + itos(da_port) +
+						 ",embedding=1,server=y,suspend=" + (da_suspend ? "y,timeout=" + itos(da_timeout) : "n"))
+						  .utf8();
+	}
+
 	// --debugger-agent=help
 	const char *options[] = {
 		"--soft-breakpoints",
@@ -145,6 +139,50 @@ void gdmono_debug_init() {
 
 } // namespace
 
+void GDMono::add_mono_shared_libs_dir_to_path() {
+	// By default Mono seems to search shared libraries in the following directories:
+	// Current working directory, @executable_path@ and PATH
+	// The parent directory of the image file (assembly where the dllimport method is declared)
+	// @executable_path@/../lib
+	// @executable_path@/../Libraries (__MACH__ only)
+
+	// This does not work when embedding Mono unless we use the same directory structure.
+	// To fix this we append the directory containing our shared libraries to PATH.
+
+#if defined(WINDOWS_ENABLED) || defined(UNIX_ENABLED)
+	String path_var("PATH");
+	String path_value = OS::get_singleton()->get_environment(path_var);
+
+#ifdef WINDOWS_ENABLED
+	path_value += ';';
+
+	String bundled_bin_dir = GodotSharpDirs::get_data_mono_bin_dir();
+#ifdef TOOLS_ENABLED
+	if (DirAccess::exists(bundled_bin_dir)) {
+		path_value += bundled_bin_dir;
+	} else {
+		path_value += mono_reg_info.bin_dir;
+	}
+#else
+	if (DirAccess::exists(bundled_bin_dir))
+		path_value += bundled_bin_dir;
+#endif // TOOLS_ENABLED
+
+#else
+	path_value += ':';
+
+	String bundled_lib_dir = GodotSharpDirs::get_data_mono_lib_dir();
+	if (DirAccess::exists(bundled_lib_dir)) {
+		path_value += bundled_lib_dir;
+	} else {
+		// TODO: Do we need to add the lib dir when using the system installed Mono on Unix platforms?
+	}
+#endif // WINDOWS_ENABLED
+
+	OS::get_singleton()->set_environment(path_var, path_value);
+#endif // WINDOWS_ENABLED || UNIX_ENABLED
+}
+
 void GDMono::initialize() {
 
 	ERR_FAIL_NULL(Engine::get_singleton());
@@ -156,11 +194,6 @@ void GDMono::initialize() {
 #endif
 
 	GDMonoLog::get_singleton()->initialize();
-
-#ifdef MONO_PRINT_HANDLER_ENABLED
-	mono_trace_set_print_handler(gdmono_MonoPrintCallback);
-	mono_trace_set_printerr_handler(gdmono_MonoPrintCallback);
-#endif
 
 	String assembly_rootdir;
 	String config_dir;
@@ -208,15 +241,27 @@ void GDMono::initialize() {
 		assembly_rootdir = bundled_assembly_rootdir;
 		config_dir = bundled_config_dir;
 	}
+
+#ifdef WINDOWS_ENABLED
+	if (assembly_rootdir.empty() || config_dir.empty()) {
+		// Assertion: if they are not set, then they weren't found in the registry
+		CRASH_COND(mono_reg_info.assembly_dir.length() > 0 || mono_reg_info.config_dir.length() > 0);
+
+		ERR_PRINT("Cannot find Mono in the registry");
+	}
+#endif // WINDOWS_ENABLED
+
 #else
 	// These are always the directories in export templates
 	assembly_rootdir = bundled_assembly_rootdir;
 	config_dir = bundled_config_dir;
-#endif
+#endif // TOOLS_ENABLED
 
 	// Leak if we call mono_set_dirs more than once
 	mono_set_dirs(assembly_rootdir.length() ? assembly_rootdir.utf8().get_data() : NULL,
 			config_dir.length() ? config_dir.utf8().get_data() : NULL);
+
+	add_mono_shared_libs_dir_to_path();
 
 	GDMonoAssembly::initialize();
 
@@ -227,6 +272,29 @@ void GDMono::initialize() {
 	mono_config_parse(NULL);
 
 	mono_install_unhandled_exception_hook(&unhandled_exception_hook, NULL);
+
+#ifdef TOOLS_ENABLED
+	if (!DirAccess::exists("res://.mono")) {
+		// 'res://.mono/' is missing so there is nothing to load. We don't need to initialize mono, but
+		// we still do so unless mscorlib is missing (which is the case for projects that don't use C#).
+
+		String mscorlib_fname("mscorlib.dll");
+
+		Vector<String> search_dirs;
+		GDMonoAssembly::fill_search_dirs(search_dirs);
+
+		bool found = false;
+		for (int i = 0; i < search_dirs.size(); i++) {
+			if (FileAccess::exists(search_dirs[i].plus_file(mscorlib_fname))) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+			return; // mscorlib is missing, do not initialize mono
+	}
+#endif
 
 	root_domain = mono_jit_init_version("GodotEngine.RootDomain", "v4.0.30319");
 
@@ -322,7 +390,7 @@ namespace GodotSharpBindings {
 uint64_t get_core_api_hash();
 #ifdef TOOLS_ENABLED
 uint64_t get_editor_api_hash();
-#endif // TOOLS_ENABLED
+#endif
 uint32_t get_bindings_version();
 
 void register_generated_icalls();
@@ -339,29 +407,20 @@ void GDMono::_register_internal_calls() {
 #endif
 }
 
-#ifdef DEBUG_METHODS_ENABLED
 void GDMono::_initialize_and_check_api_hashes() {
 
-	api_core_hash = ClassDB::get_api_hash(ClassDB::API_CORE);
-
 #ifdef MONO_GLUE_ENABLED
-	if (api_core_hash != GodotSharpBindings::get_core_api_hash()) {
+	if (get_api_core_hash() != GodotSharpBindings::get_core_api_hash()) {
 		ERR_PRINT("Mono: Core API hash mismatch!");
 	}
-#endif
 
 #ifdef TOOLS_ENABLED
-	api_editor_hash = ClassDB::get_api_hash(ClassDB::API_EDITOR);
-
-#ifdef MONO_GLUE_ENABLED
-	if (api_editor_hash != GodotSharpBindings::get_editor_api_hash()) {
+	if (get_api_editor_hash() != GodotSharpBindings::get_editor_api_hash()) {
 		ERR_PRINT("Mono: Editor API hash mismatch!");
 	}
-#endif
-
 #endif // TOOLS_ENABLED
+#endif // MONO_GLUE_ENABLED
 }
-#endif // DEBUG_METHODS_ENABLED
 
 void GDMono::add_assembly(uint32_t p_domain_id, GDMonoAssembly *p_assembly) {
 
@@ -726,7 +785,9 @@ Error GDMono::_unload_scripts_domain() {
 #endif
 
 	core_api_assembly_out_of_sync = false;
+#ifdef TOOLS_ENABLED
 	editor_api_assembly_out_of_sync = false;
+#endif
 
 	MonoDomain *domain = scripts_domain;
 	scripts_domain = NULL;
@@ -759,7 +820,7 @@ Error GDMono::_load_tools_domain() {
 }
 #endif
 
-#ifdef TOOLS_ENABLED
+#ifdef GD_MONO_HOT_RELOAD
 Error GDMono::reload_scripts_domain() {
 
 	ERR_FAIL_COND_V(!runtime_initialized, ERR_BUG);
@@ -780,8 +841,12 @@ Error GDMono::reload_scripts_domain() {
 
 #ifdef MONO_GLUE_ENABLED
 	if (!_load_api_assemblies()) {
-		if ((core_api_assembly && (core_api_assembly_out_of_sync || !GDMonoUtils::mono_cache.godot_api_cache_updated)) ||
-				(editor_api_assembly && editor_api_assembly_out_of_sync)) {
+		if ((core_api_assembly && (core_api_assembly_out_of_sync || !GDMonoUtils::mono_cache.godot_api_cache_updated))
+#ifdef TOOLS_ENABLED
+				|| (editor_api_assembly && editor_api_assembly_out_of_sync)
+#endif
+		) {
+#ifdef TOOLS_ENABLED
 			// The assembly was successfully loaded, but the full api could not be cached.
 			// This is most likely an outdated assembly loaded because of an invalid version in the
 			// metadata, so we invalidate the version in the metadata and unload the script domain.
@@ -805,6 +870,10 @@ Error GDMono::reload_scripts_domain() {
 			}
 
 			return ERR_CANT_RESOLVE;
+#else
+			ERR_PRINT("The loaded API assembly is invalid");
+			CRASH_NOW();
+#endif
 		} else {
 			return ERR_CANT_OPEN;
 		}
@@ -900,7 +969,7 @@ void GDMono::unhandled_exception_hook(MonoObject *p_exc, void *) {
 		ScriptDebugger::get_singleton()->idle_poll();
 #endif
 	abort();
-	_UNREACHABLE_();
+	GD_UNREACHABLE();
 }
 
 GDMono::GDMono() {
@@ -919,7 +988,9 @@ GDMono::GDMono() {
 #endif
 
 	core_api_assembly_out_of_sync = false;
+#ifdef TOOLS_ENABLED
 	editor_api_assembly_out_of_sync = false;
+#endif
 
 	corlib_assembly = NULL;
 	core_api_assembly = NULL;
@@ -929,11 +1000,9 @@ GDMono::GDMono() {
 	editor_tools_assembly = NULL;
 #endif
 
-#ifdef DEBUG_METHODS_ENABLED
 	api_core_hash = 0;
 #ifdef TOOLS_ENABLED
 	api_editor_hash = 0;
-#endif
 #endif
 }
 
@@ -1057,17 +1126,9 @@ void _GodotSharp::_bind_methods() {
 _GodotSharp::_GodotSharp() {
 
 	singleton = this;
-	queue_empty = true;
-#ifndef NO_THREADS
-	queue_mutex = Mutex::create();
-#endif
 }
 
 _GodotSharp::~_GodotSharp() {
 
 	singleton = NULL;
-
-	if (queue_mutex) {
-		memdelete(queue_mutex);
-	}
 }

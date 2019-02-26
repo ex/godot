@@ -46,7 +46,6 @@
 // WebGL 2.0 has no MapBufferRange/UnmapBuffer, but offers a non-ES style BufferSubData API instead.
 #ifdef __EMSCRIPTEN__
 void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data);
-void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data);
 #endif
 
 class RasterizerCanvasGLES3;
@@ -83,11 +82,11 @@ public:
 		bool etc2_supported;
 		bool pvrtc_supported;
 
-		bool hdr_supported;
-
 		bool srgb_decode_supported;
 
 		bool texture_float_linear_supported;
+		bool framebuffer_float_supported;
+		bool framebuffer_half_float_supported;
 
 		bool use_rgba_2d_shadows;
 
@@ -375,6 +374,8 @@ public:
 	virtual void texture_set_detect_normal_callback(RID p_texture, VisualServer::TextureDetectCallback p_callback, void *p_userdata);
 
 	virtual void texture_set_proxy(RID p_texture, RID p_proxy);
+	virtual Size2 texture_size_with_proxy(RID p_texture) const;
+
 	virtual void texture_set_force_redraw_if_visible(RID p_texture, bool p_enable);
 
 	/* SKY API */

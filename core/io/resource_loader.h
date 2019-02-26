@@ -31,8 +31,8 @@
 #ifndef RESOURCE_LOADER_H
 #define RESOURCE_LOADER_H
 
+#include "core/os/thread.h"
 #include "core/resource.h"
-
 /**
 	@author Juan Linietsky <reduzio@gmail.com>
 */
@@ -40,6 +40,9 @@
 class ResourceInteractiveLoader : public Reference {
 
 	GDCLASS(ResourceInteractiveLoader, Reference);
+	friend class ResourceLoader;
+	String path_loading;
+	Thread::ID path_loading_thread;
 
 protected:
 	static void _bind_methods();
@@ -54,6 +57,7 @@ public:
 	virtual Error wait();
 
 	ResourceInteractiveLoader() {}
+	~ResourceInteractiveLoader();
 };
 
 class ResourceFormatLoader : public Reference {
@@ -110,12 +114,33 @@ class ResourceLoader {
 	static SelfList<Resource>::List remapped_list;
 
 	friend class ResourceFormatImporter;
+	friend class ResourceInteractiveLoader;
 	//internal load function
 	static RES _load(const String &p_path, const String &p_original_path, const String &p_type_hint, bool p_no_cache, Error *r_error);
 
 	static ResourceLoadedCallback _loaded_callback;
 
 	static Ref<ResourceFormatLoader> _find_custom_resource_format_loader(String path);
+	static Mutex *loading_map_mutex;
+
+	//used to track paths being loaded in a thread, avoids cyclic recursion
+	struct LoadingMapKey {
+		String path;
+		Thread::ID thread;
+		bool operator==(const LoadingMapKey &p_key) const {
+			return (thread == p_key.thread && path == p_key.path);
+		}
+	};
+	struct LoadingMapKeyHasher {
+
+		static _FORCE_INLINE_ uint32_t hash(const LoadingMapKey &p_key) { return p_key.path.hash() + HashMapHasherDefault::hash(p_key.thread); }
+	};
+
+	static HashMap<LoadingMapKey, int, LoadingMapKeyHasher> loading_map;
+
+	static bool _add_to_loading_map(const String &p_path);
+	static void _remove_from_loading_map(const String &p_path);
+	static void _remove_from_loading_map_and_thread(const String &p_path, Thread::ID p_thread);
 
 public:
 	static Ref<ResourceInteractiveLoader> load_interactive(const String &p_path, const String &p_type_hint = "", bool p_no_cache = false, Error *r_error = NULL);
@@ -170,6 +195,9 @@ public:
 	static void remove_custom_resource_format_loader(String script_path);
 	static void add_custom_loaders();
 	static void remove_custom_loaders();
+
+	static void initialize();
+	static void finalize();
 };
 
 #endif

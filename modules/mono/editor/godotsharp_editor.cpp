@@ -30,6 +30,7 @@
 
 #include "godotsharp_editor.h"
 
+#include "core/message_queue.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
 #include "scene/gui/control.h"
@@ -114,10 +115,33 @@ bool GodotSharpEditor::_create_project_solution() {
 
 void GodotSharpEditor::_make_api_solutions_if_needed() {
 	// I'm sick entirely of ProgressDialog
+
+	static int attempts_left = 100;
+
+	if (MessageQueue::get_singleton()->is_flushing() || !SceneTree::get_singleton()) {
+		ERR_FAIL_COND(attempts_left == 0); // You've got to be kidding
+
+		if (SceneTree::get_singleton()) {
+			SceneTree::get_singleton()->connect("idle_frame", this, "_make_api_solutions_if_needed", Vector<Variant>());
+		} else {
+			call_deferred("_make_api_solutions_if_needed");
+		}
+
+		attempts_left--;
+		return;
+	}
+
+	// Recursion guard needed because signals don't play well with ProgressDialog either, but unlike
+	// the message queue, with signals the collateral damage should be minimal in the worst case.
 	static bool recursion_guard = false;
 	if (!recursion_guard) {
 		recursion_guard = true;
+
+		// Oneshot signals don't play well with ProgressDialog either, so we do it this way instead
+		SceneTree::get_singleton()->disconnect("idle_frame", this, "_make_api_solutions_if_needed");
+
 		_make_api_solutions_if_needed_impl();
+
 		recursion_guard = false;
 	}
 }
@@ -248,19 +272,50 @@ Error GodotSharpEditor::open_in_external_editor(const Ref<Script> &p_script, int
 			static String vscode_path;
 
 			if (vscode_path.empty() || !FileAccess::exists(vscode_path)) {
-				static List<String> vscode_name;
-				vscode_name.push_back("code");
-				vscode_name.push_back("code-oss");
-				vscode_name.push_back("vscode");
-				vscode_name.push_back("vscode-oss");
-				vscode_name.push_back("visual-studio-code");
-				vscode_name.push_back("visual-studio-code-oss");
 				// Try to search it again if it wasn't found last time or if it was removed from its location
-				for (int i = 0; i < vscode_name.size(); i++) {
-					vscode_path = path_which(vscode_name[i]);
-					if (!vscode_path.empty() || FileAccess::exists(vscode_path))
-						break;
+				bool found = false;
+
+				// TODO: Use initializer lists once C++11 is allowed
+
+				// Try with hint paths
+				static Vector<String> hint_paths;
+#ifdef WINDOWS_ENABLED
+				if (hint_paths.empty()) {
+					hint_paths.push_back(OS::get_singleton()->get_environment("ProgramFiles") + "\\Microsoft VS Code\\Code.exe");
+					if (sizeof(size_t) == 8) {
+						hint_paths.push_back(OS::get_singleton()->get_environment("ProgramFiles(x86)") + "\\Microsoft VS Code\\Code.exe");
+					}
 				}
+#endif
+				for (int i = 0; i < hint_paths.size(); i++) {
+					vscode_path = hint_paths[i];
+					if (FileAccess::exists(vscode_path)) {
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
+					static Vector<String> vscode_names;
+					if (vscode_names.empty()) {
+						vscode_names.push_back("code");
+						vscode_names.push_back("code-oss");
+						vscode_names.push_back("vscode");
+						vscode_names.push_back("vscode-oss");
+						vscode_names.push_back("visual-studio-code");
+						vscode_names.push_back("visual-studio-code-oss");
+					}
+					for (int i = 0; i < vscode_names.size(); i++) {
+						vscode_path = path_which(vscode_names[i]);
+						if (!vscode_path.empty()) {
+							found = true;
+							break;
+						}
+					}
+				}
+
+				if (!found)
+					vscode_path.clear(); // Not found, clear so next time the empty() check is enough
 			}
 
 			List<String> args;
@@ -434,7 +489,7 @@ GodotSharpEditor::GodotSharpEditor(EditorNode *p_editor) {
 	String csproj_path = GodotSharpDirs::get_project_csproj_path();
 
 	if (FileAccess::exists(sln_path) && FileAccess::exists(csproj_path)) {
-		// We can't use EditorProgress here. It calls Main::iterarion() and the main loop is not initialized yet.
+		// Defer this task because EditorProgress calls Main::iterarion() and the main loop is not yet initialized.
 		call_deferred("_make_api_solutions_if_needed");
 	} else {
 		bottom_panel_btn->hide();
@@ -452,7 +507,7 @@ GodotSharpEditor::GodotSharpEditor(EditorNode *p_editor) {
 	EditorSettings *ed_settings = EditorSettings::get_singleton();
 	EDITOR_DEF("mono/editor/external_editor", EDITOR_NONE);
 
-	String settings_hint_str = "None";
+	String settings_hint_str = "Disabled";
 
 #ifdef WINDOWS_ENABLED
 	settings_hint_str += ",MonoDevelop,Visual Studio Code";

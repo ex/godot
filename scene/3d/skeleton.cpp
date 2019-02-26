@@ -70,9 +70,9 @@ bool Skeleton::_set(const StringName &p_path, const Variant &p_value) {
 
 			for (int i = 0; i < children.size(); i++) {
 
-				NodePath path = children[i];
-				ERR_CONTINUE(path.operator String() == "");
-				Node *node = get_node(path);
+				NodePath npath = children[i];
+				ERR_CONTINUE(npath.operator String() == "");
+				Node *node = get_node(npath);
 				ERR_CONTINUE(!node);
 				bind_child_node_to_bone(which, node);
 			}
@@ -115,8 +115,8 @@ bool Skeleton::_get(const StringName &p_path, Variant &r_ret) const {
 			ERR_CONTINUE(!obj);
 			Node *node = Object::cast_to<Node>(obj);
 			ERR_CONTINUE(!node);
-			NodePath path = get_path_to(node);
-			children.push_back(path);
+			NodePath npath = get_path_to(node);
+			children.push_back(npath);
 		}
 
 		r_ret = children;
@@ -232,7 +232,7 @@ void Skeleton::_notification(int p_what) {
 			Bone *bonesptr = bones.ptrw();
 			int len = bones.size();
 
-			vs->skeleton_allocate(skeleton, len); // if same size, nothin really happens
+			vs->skeleton_allocate(skeleton, len); // if same size, nothing really happens
 
 			_update_process_order();
 
@@ -320,7 +320,7 @@ void Skeleton::_notification(int p_what) {
 				}
 
 				b.transform_final = b.pose_global * b.rest_global_inverse;
-				vs->skeleton_bone_set_transform(skeleton, i, global_transform * (b.transform_final * global_transform_inverse));
+				vs->skeleton_bone_set_transform(skeleton, order[i], global_transform * (b.transform_final * global_transform_inverse));
 
 				for (List<uint32_t>::Element *E = b.nodes_bound.front(); E; E = E->next()) {
 

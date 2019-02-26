@@ -47,7 +47,7 @@
 #include "core/io/packet_peer_udp.h"
 #include "core/io/pck_packer.h"
 #include "core/io/resource_format_binary.h"
-#include "core/io/resource_import.h"
+#include "core/io/resource_importer.h"
 #include "core/io/stream_peer_ssl.h"
 #include "core/io/tcp_server.h"
 #include "core/io/translation_loader_po.h"
@@ -99,6 +99,7 @@ void register_core_types() {
 	_global_mutex = Mutex::create();
 
 	StringName::setup();
+	ResourceLoader::initialize();
 
 	register_global_constants();
 	register_variant_methods();
@@ -142,6 +143,7 @@ void register_core_types() {
 	ClassDB::register_virtual_class<InputEventGesture>();
 	ClassDB::register_class<InputEventMagnifyGesture>();
 	ClassDB::register_class<InputEventPanGesture>();
+	ClassDB::register_class<InputEventMIDI>();
 
 	ClassDB::register_class<FuncRef>();
 	ClassDB::register_virtual_class<StreamPeer>();
@@ -267,6 +269,8 @@ void unregister_core_types() {
 
 	if (ip)
 		memdelete(ip);
+
+	ResourceLoader::finalize();
 
 	ObjectDB::cleanup();
 

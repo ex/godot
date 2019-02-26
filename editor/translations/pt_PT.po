@@ -13,12 +13,12 @@
 # Rueben Stevens <supercell03@gmail.com>, 2017.
 # SARDON <fabio3_Santos@hotmail.com>, 2017.
 # Vinicius Gonçalves <viniciusgoncalves21@gmail.com>, 2017.
-# ssantos <ssantos@web.de>, 2018.
+# ssantos <ssantos@web.de>, 2018, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-01-13 15:07+0000\n"
+"PO-Revision-Date: 2019-02-01 12:09+0000\n"
 "Last-Translator: João Lopes <linux-man@hotmail.com>\n"
 "Language-Team: Portuguese (Portugal) <https://hosted.weblate.org/projects/"
 "godot-engine/godot/pt_PT/>\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.4-dev\n"
+"X-Generator: Weblate 3.5-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -554,21 +554,13 @@ msgstr "Zoom Out"
 msgid "Reset Zoom"
 msgstr "Repor Zoom"
 
-#: editor/code_editor.cpp
-msgid "Warnings:"
-msgstr "Avisos:"
+#: editor/code_editor.cpp modules/mono/editor/mono_bottom_panel.cpp
+msgid "Warnings"
+msgstr "Avisos"
 
 #: editor/code_editor.cpp
-msgid "Font Size:"
-msgstr "Tamanho do tipo de letra:"
-
-#: editor/code_editor.cpp
-msgid "Line:"
-msgstr "Linha:"
-
-#: editor/code_editor.cpp
-msgid "Col:"
-msgstr "Coluna:"
+msgid "Line and column numbers."
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Method in target Node must be specified!"
@@ -870,8 +862,8 @@ msgstr "Apagar arquivos selecionados?"
 #: editor/dependency_editor.cpp editor/editor_audio_buses.cpp
 #: editor/editor_file_dialog.cpp editor/editor_node.cpp
 #: editor/filesystem_dock.cpp editor/plugins/item_list_editor_plugin.cpp
-#: editor/project_export.cpp editor/project_settings_editor.cpp
-#: editor/scene_tree_dock.cpp
+#: editor/plugins/sprite_frames_editor_plugin.cpp editor/project_export.cpp
+#: editor/project_settings_editor.cpp editor/scene_tree_dock.cpp
 msgid "Delete"
 msgstr "Apagar"
 
@@ -1127,8 +1119,9 @@ msgid "Add Bus"
 msgstr "Adicionar Barramento"
 
 #: editor/editor_audio_buses.cpp
-msgid "Create a new Bus Layout."
-msgstr "Criar um novo Modelo de Barramento."
+#, fuzzy
+msgid "Add a new Audio Bus to this layout."
+msgstr "Guardar Modelo do barramento de áudio como..."
 
 #: editor/editor_audio_buses.cpp editor/editor_properties.cpp
 #: editor/plugins/animation_player_editor_plugin.cpp editor/property_editor.cpp
@@ -1155,6 +1148,10 @@ msgstr "Carregar Padrão"
 #: editor/editor_audio_buses.cpp
 msgid "Load the default Bus Layout."
 msgstr "Carregar o Modelo padrão de barramento."
+
+#: editor/editor_audio_buses.cpp
+msgid "Create a new Bus Layout."
+msgstr "Criar um novo Modelo de Barramento."
 
 #: editor/editor_autoload_settings.cpp
 msgid "Invalid name."
@@ -1298,8 +1295,24 @@ msgid "Storing File:"
 msgstr "Arquivo de Armazenamento:"
 
 #: editor/editor_export.cpp
+msgid "No export template found at the expected path:"
+msgstr "Nenhum modelo de exportação encontrado no caminho previsto:"
+
+#: editor/editor_export.cpp
 msgid "Packing"
 msgstr "Empacotamento"
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+msgid "Custom debug template not found."
+msgstr "Modelo de depuração personalizado não encontrado."
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+msgid "Custom release template not found."
+msgstr "Modelo de lançamento personalizado não encontrado."
 
 #: editor/editor_export.cpp platform/javascript/export/export.cpp
 msgid "Template file not found:"
@@ -2387,7 +2400,8 @@ msgid "Save & Restart"
 msgstr "Guardar & Reiniciar"
 
 #: editor/editor_node.cpp
-msgid "Spins when the editor window repaints!"
+#, fuzzy
+msgid "Spins when the editor window redraws."
 msgstr "Roda quando a janela do Editor atualiza!"
 
 #: editor/editor_node.cpp
@@ -2598,9 +2612,8 @@ msgid "Assign..."
 msgstr "Atribuir..."
 
 #: editor/editor_properties.cpp
-#, fuzzy
 msgid "Invalid RID"
-msgstr "Caminho inválido"
+msgstr "RID inválido"
 
 #: editor/editor_properties.cpp
 msgid ""
@@ -3310,6 +3323,21 @@ msgstr "Predefinido..."
 msgid "Reimport"
 msgstr "Reimportar"
 
+#: editor/import_dock.cpp
+msgid "Save scenes, re-import and restart"
+msgstr "Guardar cenas, reimportar e reiniciar"
+
+#: editor/import_dock.cpp
+msgid "Changing the type of an imported file requires editor restart."
+msgstr "Alterar o tipo de um ficheiro importado requer reiniciar o editor."
+
+#: editor/import_dock.cpp
+msgid ""
+"WARNING: Assets exist that use this resource, they may stop loading properly."
+msgstr ""
+"AVISO: Existem Ativos que usam este recurso, podendo não ser carregados "
+"corretamente."
+
 #: editor/inspector_dock.cpp
 msgid "Failed to load resource."
 msgstr "Falha ao carregar recurso."
@@ -3433,22 +3461,6 @@ msgid "Create Polygon"
 msgstr "Criar Polígono"
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
-msgid "Edit Polygon"
-msgstr "Editar Polígono"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-msgid "Insert Point"
-msgstr "Inserir Ponto"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-msgid "Edit Polygon (Remove Point)"
-msgstr "Editar Polígono (Remover Ponto)"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
-msgid "Remove Polygon And Point"
-msgstr "Remover Polígono e Ponto"
-
-#: editor/plugins/abstract_polygon_2d_editor.cpp
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 msgid "Create points."
@@ -3468,6 +3480,22 @@ msgstr ""
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 msgid "Erase points."
 msgstr "Apagar pontos."
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+msgid "Edit Polygon"
+msgstr "Editar Polígono"
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+msgid "Insert Point"
+msgstr "Inserir Ponto"
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+msgid "Edit Polygon (Remove Point)"
+msgstr "Editar Polígono (Remover Ponto)"
+
+#: editor/plugins/abstract_polygon_2d_editor.cpp
+msgid "Remove Polygon And Point"
+msgstr "Remover Polígono e Ponto"
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
@@ -4266,6 +4294,19 @@ msgstr "Escalar CanvasItem"
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Move CanvasItem"
 msgstr "Mover CanvasItem"
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
+msgid "Presets for the anchors and margins values of a Control node."
+msgstr ""
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid ""
+"Children of containers have their anchors and margins values overridden by "
+"their parent."
+msgstr ""
+"Atenção: as crianças de um contentor obtêm a sua posição e tamanho "
+"determinados apenas pelos seus pais."
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Anchors only"
@@ -5172,32 +5213,34 @@ msgid "Create UV Map"
 msgstr "Criar mapa UV"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
+msgid ""
+"Polygon 2D has internal vertices, so it can no longer be edited in the "
+"viewport."
+msgstr ""
+
+#: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Create Polygon & UV"
 msgstr "Criar Polígono & UV"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Create Internal Vertex"
-msgstr "Criar nova guia horizontal"
+msgstr "Criar vértice interno"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Internal Vertex"
-msgstr "Remover Ponto In-Control"
+msgstr "Remover Vértice Interno"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Invalid Polygon (need 3 different vertices)"
-msgstr ""
+msgstr "Polígono inválido (precisa de 3 vértices diferentes)"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Add Custom Polygon"
-msgstr "Editar Polígono"
+msgstr "Adicionar Polígono Personalizado"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Custom Polygon"
-msgstr "Remover Polígono de Colisão"
+msgstr "Remover Polígono Personalizado"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Transform UV Map"
@@ -5224,14 +5267,12 @@ msgid "UV"
 msgstr "UV"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Points"
-msgstr "Ponto"
+msgstr "Pontos"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Polygons"
-msgstr "Polígono->UV"
+msgstr "Polígonos"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Bones"
@@ -5268,12 +5309,16 @@ msgstr "Escalar Polígono"
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Create a custom polygon. Enables custom polygon rendering."
 msgstr ""
+"Crie um polígono personalizado. Habilita a renderização de polígonos "
+"personalizados."
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid ""
 "Remove a custom polygon. If none remain, custom polygon rendering is "
 "disabled."
 msgstr ""
+"Remover um polígono personalizado. Se não restar nenhum, a renderização de "
+"polígonos personalizados é desativada."
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Paint weights with specified intensity."
@@ -6264,7 +6309,8 @@ msgid "Post"
 msgstr "Pós"
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "Name-less gizmo"
+#, fuzzy
+msgid "Nameless gizmo"
 msgstr "Bugiganga sem nome"
 
 #: editor/plugins/sprite_editor_plugin.cpp
@@ -6340,8 +6386,14 @@ msgid "(empty)"
 msgstr "(vazio)"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
-msgid "Animations"
+#, fuzzy
+msgid "Animations:"
 msgstr "Animações"
+
+#: editor/plugins/sprite_frames_editor_plugin.cpp
+#, fuzzy
+msgid "New Animation"
+msgstr "Animação"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Speed (FPS):"
@@ -6352,7 +6404,8 @@ msgid "Loop"
 msgstr "Ciclo"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
-msgid "Animation Frames"
+#, fuzzy
+msgid "Animation Frames:"
 msgstr "Frames da Animação"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
@@ -7106,6 +7159,48 @@ msgid "Browse"
 msgstr "Navegar"
 
 #: editor/project_manager.cpp
+msgid "Renderer:"
+msgstr "Renderizador:"
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 3.0"
+msgstr "OpenGL ES 3.0"
+
+#: editor/project_manager.cpp
+msgid ""
+"Higher visual quality\n"
+"All features available\n"
+"Incompatible with older hardware\n"
+"Not recommended for web games"
+msgstr ""
+"Qualidade visual superior\n"
+"Todas as características disponíveis\n"
+"Incompatível com hardware antigo\n"
+"Não recomendado para jogos Web"
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 2.0"
+msgstr "OpenGL ES 2.0"
+
+#: editor/project_manager.cpp
+msgid ""
+"Lower visual quality\n"
+"Some features not available\n"
+"Works on most hardware\n"
+"Recommended for web games"
+msgstr ""
+"Qualidade visual inferior\n"
+"Algumas características indisponíveis\n"
+"Funciona na maioria do hardware\n"
+"Recomendado para jogos Web"
+
+#: editor/project_manager.cpp
+msgid "Renderer can be changed later, but scenes may need to be adjusted."
+msgstr ""
+"O Renderizador pode ser alterado mais tarde, mas as cenas poderão ter de ser "
+"ajustadas."
+
+#: editor/project_manager.cpp
 msgid "Unnamed Project"
 msgstr "Projeto sem nome"
 
@@ -7116,6 +7211,28 @@ msgstr "Impossível abrir Projeto em '%s'."
 #: editor/project_manager.cpp
 msgid "Are you sure to open more than one project?"
 msgstr "Está seguro que quer abrir mais do que um Projeto?"
+
+#: editor/project_manager.cpp
+#, fuzzy
+msgid ""
+"The following project settings file does not specify the version of Godot "
+"through which it was created.\n"
+"\n"
+"%s\n"
+"\n"
+"If you proceed with opening it, it will be converted to Godot's current "
+"configuration file format.\n"
+"Warning: You will not be able to open the project with previous versions of "
+"the engine anymore."
+msgstr ""
+"A seguinte configuração do projeto foi gerada por um motor mais antigo, e "
+"precisa de ser convertida para esta versão.\n"
+"\n"
+"%s\n"
+"\n"
+"Deseja convertê-la?\n"
+"Aviso: Não conseguirá mais abrir o projeto em versões anteriores à deste "
+"motor."
 
 #: editor/project_manager.cpp
 msgid ""
@@ -7826,6 +7943,18 @@ msgstr "Mover Nós no Parente"
 #: editor/scene_tree_dock.cpp
 msgid "Duplicate Node(s)"
 msgstr "Duplicar Nó(s)"
+
+#: editor/scene_tree_dock.cpp
+msgid "Can't reparent nodes in inherited scenes, order of nodes can't change."
+msgstr "Impossível mudar nó em cenas herdadas, a ordem dos nós não pode mudar."
+
+#: editor/scene_tree_dock.cpp
+msgid "Node must belong to the edited scene to become root."
+msgstr "O nó deve pertencer à cena editada para se tornar root."
+
+#: editor/scene_tree_dock.cpp
+msgid "Instantiated scenes can't become root"
+msgstr "Cenas instantâneas não se podem tornar root"
 
 #: editor/scene_tree_dock.cpp
 msgid "Delete Node(s)?"
@@ -8634,10 +8763,6 @@ msgid "Build Project"
 msgstr "Construir Projeto"
 
 #: modules/mono/editor/mono_bottom_panel.cpp
-msgid "Warnings"
-msgstr "Avisos"
-
-#: modules/mono/editor/mono_bottom_panel.cpp
 msgid "View log"
 msgstr "Ver log"
 
@@ -9037,6 +9162,95 @@ msgstr "Obter %s"
 msgid "Set %s"
 msgstr "Definir %s"
 
+#: platform/android/export/export.cpp
+msgid "Package name is missing."
+msgstr "Falta o nome do pacote."
+
+#: platform/android/export/export.cpp
+msgid "Package segments must be of non-zero length."
+msgstr "Os segmentos de pacote devem ser de comprimento diferente de zero."
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' is not allowed in Android application package names."
+msgstr ""
+"O caráter '%s' não é permitido em nomes de pacotes de aplicações Android."
+
+#: platform/android/export/export.cpp
+msgid "A digit cannot be the first character in a package segment."
+msgstr "Um dígito não pode ser o primeiro caráter num segmento de pacote."
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' cannot be the first character in a package segment."
+msgstr "O caráter '%s' não pode ser o primeiro caráter num segmento de pacote."
+
+#: platform/android/export/export.cpp
+msgid "The package must have at least one '.' separator."
+msgstr "O pacote deve ter pelo menos um separador '.'."
+
+#: platform/android/export/export.cpp
+msgid "ADB executable not configured in the Editor Settings."
+msgstr "O executável ADB não está configurado nas Configurações do Editor."
+
+#: platform/android/export/export.cpp
+msgid "OpenJDK jarsigner not configured in the Editor Settings."
+msgstr "O jarsigner do OpenJDK não está configurado nas Definições do Editor."
+
+#: platform/android/export/export.cpp
+msgid "Debug keystore not configured in the Editor Settings nor in the preset."
+msgstr ""
+"Depuração de keystore não configurado nas Configurações do Editor e nem na "
+"predefinição."
+
+#: platform/android/export/export.cpp
+msgid "Invalid public key for APK expansion."
+msgstr "Chave pública inválida para expansão APK."
+
+#: platform/android/export/export.cpp
+msgid "Invalid package name:"
+msgstr "Nome de pacote inválido:"
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier is missing."
+msgstr "Falta o identificador."
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier segments must be of non-zero length."
+msgstr "Identificador de segmentos devem ser de comprimento diferente de zero."
+
+#: platform/iphone/export/export.cpp
+msgid "The character '%s' is not allowed in Identifier."
+msgstr "O caráter \"%s\" não é permitido no Identificador."
+
+#: platform/iphone/export/export.cpp
+msgid "A digit cannot be the first character in a Identifier segment."
+msgstr ""
+"Um dígito não pode ser o primeiro caráter num segmento de Identificador."
+
+#: platform/iphone/export/export.cpp
+msgid ""
+"The character '%s' cannot be the first character in a Identifier segment."
+msgstr ""
+"O caráter \"%s\" não pode ser o primeiro caráter num segmento de "
+"Identificador."
+
+#: platform/iphone/export/export.cpp
+msgid "The Identifier must have at least one '.' separator."
+msgstr "O identificador deve ter pelo menos um separador \".\"."
+
+#: platform/iphone/export/export.cpp
+msgid "App Store Team ID not specified - cannot configure the project."
+msgstr ""
+"ID da equipa da App Store não especificado - não é possível configurar o "
+"projecto."
+
+#: platform/iphone/export/export.cpp
+msgid "Invalid Identifier:"
+msgstr "Identificador Inválido:"
+
+#: platform/iphone/export/export.cpp
+msgid "Required icon is not specified in the preset."
+msgstr "O ícone obrigatório não está especificado na predefinição."
+
 #: platform/javascript/export/export.cpp
 msgid "Run in Browser"
 msgstr "Executar no Navegador"
@@ -9068,6 +9282,56 @@ msgstr "Impossível ler Ficheiro de imagem do ecrã de inicialização:"
 #: platform/javascript/export/export.cpp
 msgid "Using default boot splash image."
 msgstr "A usar imagem padrão de inicialização."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid package unique name."
+msgstr "Nome único de pacote inválido."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid product GUID."
+msgstr "GUID do produto inválido."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid publisher GUID."
+msgstr "GUID do editor inválido."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid background color."
+msgstr "Cor de fundo inválida."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr "Inválidas dimensões da imagem do logotipo do Store (deve ser 50x50)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr ""
+"Dimensões inválidas do quadrado 44x44 da imagem do logotipo (deve ser 44x44)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr ""
+"Quadrado inválido 71x71 das dimensões da imagem do logotipo (deve ser 71x71)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr ""
+"Quadrado inválido 150x150 das dimensões da imagem do logotipo (deve ser "
+"150x150)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr ""
+"Quadrado inválido 310x310 das dimensões da imagem do logotipo (deve ser "
+"310x310)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr "Largura inválida da imagem do logotipo 310x150 (deve ser 310x150)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
+msgstr "Dimensões inválidas da imagem do ecrã inicial (deve ser 620x300)."
 
 #: scene/2d/animated_sprite.cpp
 msgid ""
@@ -9178,6 +9442,13 @@ msgid ""
 msgstr ""
 "O Nó ParallaxLayer só funciona quando definido como filho de um Nó "
 "ParallaxBackground."
+
+#: scene/2d/particles_2d.cpp
+msgid ""
+"GPU-based particles are not supported by the GLES2 video driver.\n"
+"Use the CPUParticles2D node instead. You can use the \"Convert to "
+"CPUParticles\" option for this purpose."
+msgstr ""
 
 #: scene/2d/particles_2d.cpp scene/3d/particles.cpp
 msgid ""
@@ -9368,6 +9639,13 @@ msgstr ""
 
 #: scene/3d/particles.cpp
 msgid ""
+"GPU-based particles are not supported by the GLES2 video driver.\n"
+"Use the CPUParticles node instead. You can use the \"Convert to CPUParticles"
+"\" option for this purpose."
+msgstr ""
+
+#: scene/3d/particles.cpp
+msgid ""
 "Nothing is visible because meshes have not been assigned to draw passes."
 msgstr ""
 "Nada é visível porque não foram atribuídas Meshes aos passos de desenho."
@@ -9385,16 +9663,12 @@ msgid "PathFollow only works when set as a child of a Path node."
 msgstr "PathFollow apenas funciona quando definido como filho de um Nó Path."
 
 #: scene/3d/path.cpp
-msgid "OrientedPathFollow only works when set as a child of a Path node."
-msgstr ""
-"OrientedPathFollow apenas funciona quando definido como filho de um Nó Path."
-
-#: scene/3d/path.cpp
 msgid ""
-"OrientedPathFollow requires \"Up Vector\" enabled in its parent Path's Curve "
-"resource."
+"PathFollow ROTATION_ORIENTED requires \"Up Vector\" enabled in its parent "
+"Path's Curve resource."
 msgstr ""
-"OrientedPathFollow requer \"Up Vector\" ativado no recurso Curve do pai dele."
+"PathFollow ROTATION_ORIENTED requer \"Up Vector\" habilitado no recurso de "
+"Curva do Caminho do seu pai."
 
 #: scene/3d/physics_body.cpp
 msgid ""
@@ -9411,25 +9685,6 @@ msgid "Path property must point to a valid Spatial node to work."
 msgstr ""
 "Para funcionar, a Propriedade Caminho tem de apontar para um Nó Spatial "
 "válido."
-
-#: scene/3d/scenario_fx.cpp
-msgid "WorldEnvironment needs an Environment resource."
-msgstr "WorldEnvironment precisa de um recurso Environment."
-
-#: scene/3d/scenario_fx.cpp
-msgid ""
-"Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
-msgstr ""
-"Apenas um WorldEnvironment é permitido por Cena (ou grupo de cenas "
-"instanciadas)."
-
-#: scene/3d/scenario_fx.cpp
-msgid ""
-"This WorldEnvironment is ignored. Either add a Camera (for 3D scenes) or set "
-"this environment's Background Mode to Canvas (for 2D scenes)."
-msgstr ""
-"Este WorldEnvironment ė ignorado. Pode adicionar uma Camera (para cenas 3D) "
-"ou definir o Modo Background  deste ambiente como Canvas (para cenas 2D)."
 
 #: scene/3d/soft_body.cpp
 msgid "This body will be ignored until you set a mesh"
@@ -9460,6 +9715,25 @@ msgid ""
 msgstr ""
 "VehicleWheel fornece um sistema de rodas a um VehicleBody. Use-o como um "
 "filho de VehicleBody."
+
+#: scene/3d/world_environment.cpp
+msgid "WorldEnvironment needs an Environment resource."
+msgstr "WorldEnvironment precisa de um recurso Environment."
+
+#: scene/3d/world_environment.cpp
+msgid ""
+"Only one WorldEnvironment is allowed per scene (or set of instanced scenes)."
+msgstr ""
+"Apenas um WorldEnvironment é permitido por Cena (ou grupo de cenas "
+"instanciadas)."
+
+#: scene/3d/world_environment.cpp
+msgid ""
+"This WorldEnvironment is ignored. Either add a Camera (for 3D scenes) or set "
+"this environment's Background Mode to Canvas (for 2D scenes)."
+msgstr ""
+"Este WorldEnvironment ė ignorado. Pode adicionar uma Camera (para cenas 3D) "
+"ou definir o Modo Background  deste ambiente como Canvas (para cenas 2D)."
 
 #: scene/animation/animation_blend_tree.cpp
 msgid "On BlendTree node '%s', animation not found: '%s'"
@@ -9504,11 +9778,20 @@ msgid "This node has been deprecated. Use AnimationTree instead."
 msgstr "Este nó foi depreciado. Use AnimationTree em vez disso."
 
 #: scene/gui/color_picker.cpp
+msgid "Pick a color from the screen."
+msgstr ""
+
+#: scene/gui/color_picker.cpp
 msgid "Raw Mode"
 msgstr "Modo Raw"
 
 #: scene/gui/color_picker.cpp
-msgid "Add current color as a preset"
+msgid "Switch between hexadecimal and code values."
+msgstr ""
+
+#: scene/gui/color_picker.cpp
+#, fuzzy
+msgid "Add current color as a preset."
 msgstr "Adicionar cor atual como predefinição"
 
 #: scene/gui/dialogs.cpp
@@ -9603,6 +9886,23 @@ msgstr "Atribuição a uniforme."
 msgid "Varyings can only be assigned in vertex function."
 msgstr "Variações só podem ser atribuídas na função vértice."
 
+#~ msgid "Warnings:"
+#~ msgstr "Avisos:"
+
+#~ msgid "Font Size:"
+#~ msgstr "Tamanho do tipo de letra:"
+
+#~ msgid "Line:"
+#~ msgstr "Linha:"
+
+#~ msgid "Col:"
+#~ msgstr "Coluna:"
+
+#~ msgid "OrientedPathFollow only works when set as a child of a Path node."
+#~ msgstr ""
+#~ "OrientedPathFollow apenas funciona quando definido como filho de um Nó "
+#~ "Path."
+
 #~ msgid "Split point with itself."
 #~ msgstr "Separar ponto consigo próprio."
 
@@ -9614,9 +9914,6 @@ msgstr "Variações só podem ser atribuídas na função vértice."
 
 #~ msgid "Add Split"
 #~ msgstr "Adicionar Separação"
-
-#~ msgid "Invalid Split: "
-#~ msgstr "Separação inválida: "
 
 #~ msgid "Remove Split"
 #~ msgstr "Remover Separação"
@@ -10205,7 +10502,3 @@ msgstr "Variações só podem ser atribuídas na função vértice."
 
 #~ msgid "Sections:"
 #~ msgstr "Secções:"
-
-#, fuzzy
-#~ msgid "Invalid unique name."
-#~ msgstr "Nome de índice propriedade inválido."

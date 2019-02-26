@@ -373,7 +373,7 @@ float AnimationNodeStateMachinePlayback::process(AnimationNodeStateMachine *sm, 
 
 	if (fading_from != StringName()) {
 
-		sm->blend_node(current, sm->states[fading_from].node, p_time, p_seek, 1.0 - fade_blend, AnimationNode::FILTER_IGNORE, false);
+		sm->blend_node(fading_from, sm->states[fading_from].node, p_time, p_seek, 1.0 - fade_blend, AnimationNode::FILTER_IGNORE, false);
 	}
 
 	//guess playback position
@@ -421,7 +421,8 @@ float AnimationNodeStateMachinePlayback::process(AnimationNodeStateMachine *sm, 
 
 			if (sm->transitions[i].from == current && auto_advance) {
 
-				if (sm->transitions[i].transition->get_priority() < priority_best) {
+				if (sm->transitions[i].transition->get_priority() <= priority_best) {
+					priority_best = sm->transitions[i].transition->get_priority();
 					auto_advance_to = i;
 				}
 			}

@@ -320,7 +320,6 @@ void AnimationNodeBlendSpace2D::_update_triangles() {
 	if (!auto_triangles || !trianges_dirty)
 		return;
 
-	print_line("updating triangles");
 	trianges_dirty = false;
 	triangles.clear();
 	if (blend_points_used < 3) {
@@ -335,8 +334,6 @@ void AnimationNodeBlendSpace2D::_update_triangles() {
 	}
 
 	Vector<Delaunay2D::Triangle> triangles = Delaunay2D::triangulate(points);
-
-	print_line("triangles generated: " + itos(triangles.size()));
 
 	for (int i = 0; i < triangles.size(); i++) {
 		add_triangle(triangles[i].points[0], triangles[i].points[1], triangles[i].points[2]);
@@ -464,9 +461,9 @@ float AnimationNodeBlendSpace2D::process(float p_time, bool p_seek) {
 					points[j],
 					points[(j + 1) % 3]
 				};
-				Vector2 closest = Geometry::get_closest_point_to_segment_2d(blend_pos, s);
-				if (first || closest.distance_to(blend_pos) < best_point.distance_to(blend_pos)) {
-					best_point = closest;
+				Vector2 closest2 = Geometry::get_closest_point_to_segment_2d(blend_pos, s);
+				if (first || closest2.distance_to(blend_pos) < best_point.distance_to(blend_pos)) {
+					best_point = closest2;
 					blend_triangle = i;
 					first = false;
 					float d = s[0].distance_to(s[1]);
@@ -475,7 +472,7 @@ float AnimationNodeBlendSpace2D::process(float p_time, bool p_seek) {
 						blend_weights[(j + 1) % 3] = 0.0;
 						blend_weights[(j + 2) % 3] = 0.0;
 					} else {
-						float c = s[0].distance_to(closest) / d;
+						float c = s[0].distance_to(closest2) / d;
 
 						blend_weights[j] = 1.0 - c;
 						blend_weights[(j + 1) % 3] = c;

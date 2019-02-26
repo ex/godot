@@ -42,7 +42,7 @@
 #include "editor/plugins/script_editor_plugin.h"
 #include "editor_node.h"
 #include "editor_settings.h"
-#include "scene/resources/scene_format_text.h"
+#include "scene/resources/resource_format_text.h"
 #include "thirdparty/misc/md5.h"
 
 static int _get_pad(int p_alignment, int p_n) {
@@ -378,7 +378,7 @@ String EditorExportPlatform::find_export_template(String template_file_name, Str
 
 	// Not found
 	if (err) {
-		*err += "No export template found at \"" + template_path + "\".";
+		*err += TTR("No export template found at the expected path:") + "\n" + template_path + "\n";
 	}
 	return String();
 }
@@ -858,7 +858,7 @@ Error EditorExportPlatform::export_project_files(const Ref<EditorExportPreset> &
 		Vector<uint8_t> array = FileAccess::get_file_as_array(icon);
 		p_func(p_udata, icon, array, idx, total);
 	}
-	if (splash != String() && FileAccess::exists(splash)) {
+	if (splash != String() && FileAccess::exists(splash) && icon != splash) {
 		Vector<uint8_t> array = FileAccess::get_file_as_array(splash);
 		p_func(p_udata, splash, array, idx, total);
 	}
@@ -1404,12 +1404,12 @@ bool EditorExportPlatformPC::can_export(const Ref<EditorExportPreset> &p_preset,
 
 	if (!FileAccess::exists(custom_debug_binary)) {
 		dvalid = false;
-		err = "Custom debug binary not found.\n";
+		err += TTR("Custom debug template not found.") + "\n";
 	}
 
 	if (!FileAccess::exists(custom_release_binary)) {
 		rvalid = false;
-		err += "Custom release binary not found.\n";
+		err += TTR("Custom release template not found.") + "\n";
 	}
 
 	if (dvalid || rvalid)

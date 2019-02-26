@@ -43,7 +43,7 @@
 #include "drivers/windows/rw_lock_windows.h"
 #include "drivers/windows/semaphore_windows.h"
 #include "drivers/windows/thread_windows.h"
-#include "joypad.h"
+#include "joypad_windows.h"
 #include "lang_table.h"
 #include "main/main.h"
 #include "servers/audio_server.h"
@@ -51,6 +51,8 @@
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "windows_terminal_logger.h"
 
+#include <avrt.h>
+#include <direct.h>
 #include <process.h>
 #include <regstr.h>
 #include <shlobj.h>
@@ -783,7 +785,9 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		case WM_TIMER: {
 			if (wParam == move_timer_id) {
 				process_key_events();
-				Main::iteration();
+				if (!Main::is_iterating()) {
+					Main::iteration();
+				}
 			}
 		} break;
 
@@ -802,6 +806,13 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					gr_mem = alt_mem;
 			}
 
+			if (mouse_mode == MOUSE_MODE_CAPTURED) {
+				// When SetCapture is used, ALT+F4 hotkey is ignored by Windows, so handle it ourselves
+				if (wParam == VK_F4 && alt_mem && (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN)) {
+					if (main_loop)
+						main_loop->notification(MainLoop::NOTIFICATION_WM_QUIT_REQUEST);
+				}
+			}
 			/*
 			if (wParam==VK_WIN) TODO wtf is this?
 				meta_mem=uMsg==WM_KEYDOWN;
@@ -1263,7 +1274,7 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 
 	gl_context = NULL;
 	while (!gl_context) {
-		gl_context = memnew(ContextGL_Win(hWnd, gles3_context));
+		gl_context = memnew(ContextGL_Windows(hWnd, gles3_context));
 
 		if (gl_context->initialize() != OK) {
 			memdelete(gl_context);
@@ -1370,6 +1381,21 @@ Error OS_Windows::initialize(const VideoMode &p_desired, int p_video_driver, int
 	im_position = Vector2();
 
 	set_ime_active(false);
+
+	if (!OS::get_singleton()->is_in_low_processor_usage_mode()) {
+		//SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
+		SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
+		DWORD index = 0;
+		HANDLE handle = AvSetMmThreadCharacteristics("Games", &index);
+		if (handle)
+			AvSetMmThreadPriority(handle, AVRT_PRIORITY_CRITICAL);
+
+		// This is needed to make sure that background work does not starve the main thread.
+		// This is only setting priority of this thread, not the whole process.
+		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+	}
+
+	update_real_mouse_position();
 
 	return OK;
 }
@@ -1572,6 +1598,19 @@ Point2 OS_Windows::get_mouse_position() const {
 	return Point2(old_x, old_y);
 }
 
+void OS_Windows::update_real_mouse_position() {
+
+	POINT mouse_pos;
+	if (GetCursorPos(&mouse_pos) && ScreenToClient(hWnd, &mouse_pos)) {
+		if (mouse_pos.x > 0 && mouse_pos.y > 0 && mouse_pos.x <= video_mode.width && mouse_pos.y <= video_mode.height) {
+			old_x = mouse_pos.x;
+			old_y = mouse_pos.y;
+			old_invalid = false;
+			input->set_mouse_position(Point2i(mouse_pos.x, mouse_pos.y));
+		}
+	}
+}
+
 int OS_Windows::get_mouse_button_state() const {
 
 	return last_button_state;
@@ -1714,6 +1753,7 @@ void OS_Windows::set_window_position(const Point2 &p_position) {
 	}
 
 	last_pos = p_position;
+	update_real_mouse_position();
 }
 Size2 OS_Windows::get_window_size() const {
 
@@ -2114,7 +2154,9 @@ OS::TimeZoneInfo OS_Windows::get_time_zone_info() const {
 		ret.name = info.StandardName;
 	}
 
-	ret.bias = info.Bias;
+	// Bias value returned by GetTimeZoneInformation is inverted of what we expect
+	// For example on GMT-3 GetTimeZoneInformation return a Bias of 180, so invert the value to get -180
+	ret.bias = -info.Bias;
 	return ret;
 }
 
@@ -2318,6 +2360,9 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 		iconinfo.yHotspot = p_hotspot.y;
 		iconinfo.hbmMask = hAndMask;
 		iconinfo.hbmColor = hXorMask;
+
+		if (cursors[p_shape])
+			DestroyIcon(cursors[p_shape]);
 
 		cursors[p_shape] = CreateIconIndirect(&iconinfo);
 
@@ -2576,6 +2621,11 @@ String OS_Windows::get_environment(const String &p_var) const {
 		return wval;
 	}
 	return "";
+}
+
+bool OS_Windows::set_environment(const String &p_var, const String &p_value) const {
+
+	return (bool)SetEnvironmentVariableW(p_var.c_str(), p_value.c_str());
 }
 
 String OS_Windows::get_stdin_string(bool p_block) {
@@ -2926,7 +2976,7 @@ int OS_Windows::get_power_percent_left() {
 
 bool OS_Windows::_check_internal_feature_support(const String &p_feature) {
 
-	return p_feature == "pc" || p_feature == "s3tc" || p_feature == "bptc";
+	return p_feature == "pc";
 }
 
 void OS_Windows::disable_crash_handler() {
@@ -2987,9 +3037,6 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 
 #ifdef WASAPI_ENABLED
 	AudioDriverManager::add_driver(&driver_wasapi);
-#endif
-#ifdef RTAUDIO_ENABLED
-	AudioDriverManager::add_driver(&driver_rtaudio);
 #endif
 #ifdef XAUDIO2_ENABLED
 	AudioDriverManager::add_driver(&driver_xaudio2);

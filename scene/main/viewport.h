@@ -305,6 +305,8 @@ private:
 	bool disable_input;
 
 	void _gui_call_input(Control *p_control, const Ref<InputEvent> &p_input);
+	void _gui_call_notification(Control *p_control, int p_what);
+
 	void _gui_prepare_subwindows();
 	void _gui_sort_subwindows();
 	void _gui_sort_roots();
@@ -383,6 +385,8 @@ private:
 
 	void _drop_mouse_focus();
 
+	void _update_canvas_items(Node *p_node);
+
 protected:
 	void _notification(int p_what);
 	static void _bind_methods();
@@ -401,6 +405,7 @@ public:
 	bool is_audio_listener_2d() const;
 
 	void set_size(const Size2 &p_size);
+	void update_canvas_items();
 
 	Size2 get_size() const;
 	Rect2 get_visible_rect() const;

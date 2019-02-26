@@ -31,7 +31,7 @@
 #ifndef RASTERIZERSTORAGEGLES2_H
 #define RASTERIZERSTORAGEGLES2_H
 
-#include "core/dvector.h"
+#include "core/pool_vector.h"
 #include "core/self_list.h"
 #include "servers/visual/rasterizer.h"
 #include "servers/visual/shader_language.h"
@@ -72,12 +72,19 @@ public:
 		bool float_texture_supported;
 		bool s3tc_supported;
 		bool etc1_supported;
+		bool pvrtc_supported;
 
 		bool keep_original_textures;
 
 		bool force_vertex_shading;
 
 		bool use_rgba_2d_shadows;
+		bool use_rgba_3d_shadows;
+
+		bool support_32_bits_indices;
+		bool support_write_depth;
+		bool support_half_float_vertices;
+		bool support_npot_repeat_mipmap;
 	} config;
 
 	struct Resources {
@@ -86,6 +93,9 @@ public:
 		GLuint black_tex;
 		GLuint normal_tex;
 		GLuint aniso_tex;
+
+		GLuint mipmap_blur_fbo;
+		GLuint mipmap_blur_color;
 
 		GLuint radical_inverse_vdc_cache_tex;
 		bool use_rgba_2d_shadows;
@@ -236,6 +246,8 @@ public:
 
 		int mipmaps;
 
+		bool resize_to_po2;
+
 		bool active;
 		GLenum tex_id;
 
@@ -271,6 +283,7 @@ public:
 				ignore_mipmaps(false),
 				compressed(false),
 				mipmaps(0),
+				resize_to_po2(false),
 				active(false),
 				tex_id(0),
 				stored_cube_sides(0),
@@ -309,7 +322,7 @@ public:
 
 	mutable RID_Owner<Texture> texture_owner;
 
-	Ref<Image> _get_gl_image_and_format(const Ref<Image> &p_image, Image::Format p_format, uint32_t p_flags, Image::Format &r_real_format, GLenum &r_gl_format, GLenum &r_gl_internal_format, GLenum &r_gl_type, bool &r_compressed) const;
+	Ref<Image> _get_gl_image_and_format(const Ref<Image> &p_image, Image::Format p_format, uint32_t p_flags, Image::Format &r_real_format, GLenum &r_gl_format, GLenum &r_gl_internal_format, GLenum &r_gl_type, bool &r_compressed, bool p_will_need_resize) const;
 
 	virtual RID texture_create();
 	virtual void texture_allocate(RID p_texture, int p_width, int p_height, int p_depth_3d, Image::Format p_format, VS::TextureType p_type, uint32_t p_flags = VS::TEXTURE_FLAGS_DEFAULT);
@@ -338,6 +351,7 @@ public:
 	virtual void textures_keep_original(bool p_enable);
 
 	virtual void texture_set_proxy(RID p_texture, RID p_proxy);
+	virtual Size2 texture_size_with_proxy(RID p_texture) const;
 
 	virtual void texture_set_detect_3d_callback(RID p_texture, VisualServer::TextureDetectCallback p_callback, void *p_userdata);
 	virtual void texture_set_detect_srgb_callback(RID p_texture, VisualServer::TextureDetectCallback p_callback, void *p_userdata);
