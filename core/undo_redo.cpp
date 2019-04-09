@@ -90,7 +90,7 @@ void UndoRedo::create_action(const String &p_name, MergeMode p_mode) {
 			actions.write[actions.size() - 1].last_tick = ticks;
 
 			merge_mode = p_mode;
-
+			merging = true;
 		} else {
 
 			Action new_action;
@@ -239,6 +239,10 @@ void UndoRedo::_pop_history_tail() {
 	}
 }
 
+bool UndoRedo::is_commiting_action() const {
+	return commiting > 0;
+}
+
 void UndoRedo::commit_action() {
 
 	ERR_FAIL_COND(action_level <= 0);
@@ -246,8 +250,14 @@ void UndoRedo::commit_action() {
 	if (action_level > 0)
 		return; //still nested
 
-	redo(); // perform action
+	if (merging) {
+		version--;
+		merging = false;
+	}
 
+	commiting++;
+	redo(); // perform action
+	commiting--;
 	if (callback && actions.size() > 0) {
 		callback(callback_ud, actions[actions.size() - 1].name);
 	}
@@ -321,6 +331,7 @@ bool UndoRedo::redo() {
 
 	if ((current_action + 1) >= actions.size())
 		return false; //nothing to redo
+
 	current_action++;
 
 	_process_operation_list(actions.write[current_action].do_ops.front());
@@ -337,7 +348,6 @@ bool UndoRedo::undo() {
 	_process_operation_list(actions.write[current_action].undo_ops.front());
 	current_action--;
 	version--;
-
 	return true;
 }
 
@@ -386,10 +396,12 @@ void UndoRedo::set_property_notify_callback(PropertyNotifyCallback p_property_ca
 
 UndoRedo::UndoRedo() {
 
+	commiting = 0;
 	version = 1;
 	action_level = 0;
 	current_action = -1;
 	merge_mode = MERGE_DISABLE;
+	merging = false;
 	callback = NULL;
 	callback_ud = NULL;
 
@@ -484,6 +496,7 @@ void UndoRedo::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("create_action", "name", "merge_mode"), &UndoRedo::create_action, DEFVAL(MERGE_DISABLE));
 	ClassDB::bind_method(D_METHOD("commit_action"), &UndoRedo::commit_action);
+	ClassDB::bind_method(D_METHOD("is_commiting_action"), &UndoRedo::is_commiting_action);
 
 	//ClassDB::bind_method(D_METHOD("add_do_method","p_object", "p_method", "VARIANT_ARG_LIST"),&UndoRedo::add_do_method);
 	//ClassDB::bind_method(D_METHOD("add_undo_method","p_object", "p_method", "VARIANT_ARG_LIST"),&UndoRedo::add_undo_method);

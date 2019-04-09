@@ -2074,7 +2074,9 @@ bool ShaderLanguage::_validate_function_call(BlockNode *p_block, OperatorNode *p
 				bool fail = false;
 				for (int i = 0; i < argcount; i++) {
 
-					if (args[i] != builtin_func_defs[idx].args[i]) {
+					if (get_scalar_type(args[i]) == args[i] && p_func->arguments[i + 1]->type == Node::TYPE_CONSTANT && convert_constant(static_cast<ConstantNode *>(p_func->arguments[i + 1]), builtin_func_defs[idx].args[i])) {
+						//all good, but needs implicit conversion later
+					} else if (args[i] != builtin_func_defs[idx].args[i]) {
 						fail = true;
 						break;
 					}
@@ -2118,6 +2120,24 @@ bool ShaderLanguage::_validate_function_call(BlockNode *p_block, OperatorNode *p
 						}
 
 						outarg_idx++;
+					}
+					//implicitly convert values if possible
+					for (int i = 0; i < argcount; i++) {
+
+						if (get_scalar_type(args[i]) != args[i] || args[i] == builtin_func_defs[idx].args[i] || p_func->arguments[i + 1]->type != Node::TYPE_CONSTANT) {
+							//can't do implicit conversion here
+							continue;
+						}
+
+						//this is an implicit conversion
+						ConstantNode *constant = static_cast<ConstantNode *>(p_func->arguments[i + 1]);
+						ConstantNode *conversion = alloc_node<ConstantNode>();
+
+						conversion->datatype = builtin_func_defs[idx].args[i];
+						conversion->values.resize(1);
+
+						convert_constant(constant, builtin_func_defs[idx].args[i], conversion->values.ptrw());
+						p_func->arguments.write[i + 1] = conversion;
 					}
 
 					if (r_ret_type)
@@ -2184,13 +2204,35 @@ bool ShaderLanguage::_validate_function_call(BlockNode *p_block, OperatorNode *p
 
 		for (int j = 0; j < args.size(); j++) {
 
-			if (args[j] != pfunc->arguments[j].type) {
+			if (get_scalar_type(args[j]) == args[j] && p_func->arguments[j + 1]->type == Node::TYPE_CONSTANT && convert_constant(static_cast<ConstantNode *>(p_func->arguments[j + 1]), pfunc->arguments[j].type)) {
+				//all good, but it needs implicit conversion later
+			} else if (args[j] != pfunc->arguments[j].type) {
 				fail = true;
 				break;
 			}
 		}
 
 		if (!fail) {
+
+			//implicitly convert values if possible
+			for (int k = 0; k < args.size(); k++) {
+
+				if (get_scalar_type(args[k]) != args[k] || args[k] == pfunc->arguments[k].type || p_func->arguments[k + 1]->type != Node::TYPE_CONSTANT) {
+					//can't do implicit conversion here
+					continue;
+				}
+
+				//this is an implicit conversion
+				ConstantNode *constant = static_cast<ConstantNode *>(p_func->arguments[k + 1]);
+				ConstantNode *conversion = alloc_node<ConstantNode>();
+
+				conversion->datatype = pfunc->arguments[k].type;
+				conversion->values.resize(1);
+
+				convert_constant(constant, pfunc->arguments[k].type, conversion->values.ptrw());
+				p_func->arguments.write[k + 1] = conversion;
+			}
+
 			if (r_ret_type)
 				*r_ret_type = pfunc->return_type;
 			return true;
@@ -3578,7 +3620,8 @@ ShaderLanguage::Node *ShaderLanguage::_reduce_expression(BlockNode *p_block, Sha
 					case TYPE_FLOAT: {
 						nv.real = -cn->values[i].real;
 					} break;
-					default: {}
+					default: {
+					}
 				}
 
 				values.push_back(nv);
@@ -4780,7 +4823,8 @@ Error ShaderLanguage::complete(const String &p_code, const Map<StringName, Funct
 				case TYPE_MAT2: limit = 2; break;
 				case TYPE_MAT3: limit = 3; break;
 				case TYPE_MAT4: limit = 4; break;
-				default: {}
+				default: {
+				}
 			}
 
 			for (int i = 0; i < limit; i++) {

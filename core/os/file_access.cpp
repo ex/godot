@@ -409,6 +409,23 @@ int FileAccess::get_buffer(uint8_t *p_dst, int p_length) const {
 	return i;
 }
 
+String FileAccess::get_as_utf8_string() const {
+	PoolVector<uint8_t> sourcef;
+	int len = get_len();
+	sourcef.resize(len + 1);
+
+	PoolVector<uint8_t>::Write w = sourcef.write();
+	int r = get_buffer(w.ptr(), len);
+	ERR_FAIL_COND_V(r != len, String());
+	w[len] = 0;
+
+	String s;
+	if (s.parse_utf8((const char *)w.ptr())) {
+		return String();
+	}
+	return s;
+}
+
 void FileAccess::store_16(uint16_t p_dest) {
 
 	uint8_t a, b;
@@ -554,15 +571,41 @@ void FileAccess::store_buffer(const uint8_t *p_src, int p_length) {
 		store_8(p_src[i]);
 }
 
-Vector<uint8_t> FileAccess::get_file_as_array(const String &p_path) {
+Vector<uint8_t> FileAccess::get_file_as_array(const String &p_path, Error *r_error) {
 
-	FileAccess *f = FileAccess::open(p_path, READ);
-	ERR_FAIL_COND_V(!f, Vector<uint8_t>());
+	FileAccess *f = FileAccess::open(p_path, READ, r_error);
+	if (!f) {
+		if (r_error) { // if error requested, do not throw error
+			return Vector<uint8_t>();
+		} else {
+			ERR_FAIL_COND_V(!f, Vector<uint8_t>());
+		}
+	}
 	Vector<uint8_t> data;
 	data.resize(f->get_len());
 	f->get_buffer(data.ptrw(), data.size());
 	memdelete(f);
 	return data;
+}
+
+String FileAccess::get_file_as_string(const String &p_path, Error *r_error) {
+
+	Error err;
+	Vector<uint8_t> array = get_file_as_array(p_path, &err);
+	if (r_error) {
+		*r_error = err;
+	}
+	if (err != OK) {
+		if (r_error) {
+			return String();
+		} else {
+			ERR_FAIL_COND_V(err != OK, String());
+		}
+	}
+
+	String ret;
+	ret.parse_utf8((const char *)array.ptr(), array.size());
+	return ret;
 }
 
 String FileAccess::get_md5(const String &p_file) {

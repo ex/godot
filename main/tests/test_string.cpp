@@ -457,7 +457,7 @@ bool test_27() {
 			state = s.begins_with(sb) == tc[i].expected;
 		}
 		if (!state) {
-			OS::get_singleton()->print("\n\t Failure on:\n\t\tstring: ", tc[i].data, "\n\t\tbegin: ", tc[i].begin, "\n\t\texpected: ", tc[i].expected ? "true" : "false", "\n");
+			OS::get_singleton()->print("\n\t Failure on:\n\t\tstring: %s\n\t\tbegin: %s\n\t\texpected: %s\n", tc[i].data, tc[i].begin, tc[i].expected ? "true" : "false");
 			break;
 		}
 	};
@@ -1053,6 +1053,19 @@ bool test_33() {
 	return empty.parse_utf8(NULL, -1) == true;
 }
 
+bool test_34() {
+	OS::get_singleton()->print("\n\nTest 34: Cyrillic to_lower()\n");
+
+	String upper = L"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+	String lower = L"абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+
+	String test = upper.to_lower();
+
+	bool state = test == lower;
+
+	return state;
+}
+
 typedef bool (*TestFunc)(void);
 
 TestFunc test_funcs[] = {
@@ -1090,6 +1103,7 @@ TestFunc test_funcs[] = {
 	test_31,
 	test_32,
 	test_33,
+	test_34,
 	0
 
 };

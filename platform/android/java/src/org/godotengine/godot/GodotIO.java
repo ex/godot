@@ -29,28 +29,27 @@
 /*************************************************************************/
 
 package org.godotengine.godot;
-import java.util.HashMap;
-import java.util.Locale;
-import android.net.Uri;
-import android.content.Intent;
-import android.content.res.AssetManager;
-import java.io.InputStream;
-import java.io.IOException;
 import android.app.*;
 import android.content.*;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.AssetManager;
+import android.graphics.*;
+import android.hardware.*;
+import android.media.*;
+import android.net.Uri;
+import android.os.*;
+import android.text.*;
+import android.text.method.*;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
-import android.os.*;
-import android.util.Log;
-import android.util.DisplayMetrics;
-import android.graphics.*;
-import android.text.method.*;
-import android.text.*;
-import android.media.*;
-import android.hardware.*;
-import android.content.*;
-import android.content.pm.ActivityInfo;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Locale;
 import org.godotengine.godot.input.*;
 //android.os.Build
 
@@ -500,11 +499,6 @@ public class GodotIO {
 		return (int)(metrics.density * 160f);
 	}
 
-	public boolean needsReloadHooks() {
-
-		return false;
-	}
-
 	public void showKeyboard(String p_existing_text) {
 		if (edit != null)
 			edit.showKeyboard(p_existing_text);
@@ -516,14 +510,6 @@ public class GodotIO {
 	public void hideKeyboard() {
 		if (edit != null)
 			edit.hideKeyboard();
-
-		InputMethodManager inputMgr = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-		View v = activity.getCurrentFocus();
-		if (v != null) {
-			inputMgr.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-		} else {
-			inputMgr.hideSoftInputFromWindow(new View(activity).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-		}
 	};
 
 	public void setScreenOrientation(int p_orientation) {

@@ -59,6 +59,10 @@ uniform ivec2 skeleton_texture_size;
 
 #endif
 
+uniform highp mat4 skeleton_transform;
+uniform highp mat4 skeleton_transform_inverse;
+uniform bool skeleton_in_world_coords;
+
 #endif
 
 #ifdef USE_INSTANCING
@@ -404,7 +408,13 @@ void main() {
 
 #endif
 
-	world_matrix = bone_transform * world_matrix;
+	if (skeleton_in_world_coords) {
+		bone_transform = skeleton_transform * (bone_transform * skeleton_transform_inverse);
+		world_matrix = bone_transform * world_matrix;
+	} else {
+		world_matrix = world_matrix * bone_transform;
+	}
+
 #endif
 
 #ifdef USE_INSTANCING
@@ -660,21 +670,20 @@ VERTEX_SHADER_CODE
 #if defined(RENDER_DEPTH) && defined(USE_RGBA_SHADOWS)
 	position_interp = gl_Position;
 #endif
-
 }
 
 /* clang-format off */
 [fragment]
 
+// texture2DLodEXT and textureCubeLodEXT are fragment shader specific.
+// Do not copy these defines in the vertex section.
 #ifndef USE_GLES_OVER_GL
-
 #ifdef GL_EXT_shader_texture_lod
 #extension GL_EXT_shader_texture_lod : enable
 #define texture2DLod(img, coord, lod) texture2DLodEXT(img, coord, lod)
 #define textureCubeLod(img, coord, lod) textureCubeLodEXT(img, coord, lod)
 #endif
-
-#endif
+#endif // !USE_GLES_OVER_GL
 
 #ifdef GL_ARB_shader_texture_lod
 #extension GL_ARB_shader_texture_lod : enable
@@ -684,9 +693,6 @@ VERTEX_SHADER_CODE
 #define texture2DLod(img, coord, lod) texture2D(img, coord, lod)
 #define textureCubeLod(img, coord, lod) textureCube(img, coord, lod)
 #endif
-
-
-
 
 #ifdef USE_GLES_OVER_GL
 #define lowp
@@ -1358,11 +1364,8 @@ LIGHT_SHADER_CODE
 
 #endif
 
-
 #define SAMPLE_SHADOW_TEXEL(p_shadow, p_pos, p_depth) step(p_depth, SHADOW_DEPTH(texture2D(p_shadow, p_pos)))
 #define SAMPLE_SHADOW_TEXEL_PROJ(p_shadow, p_pos) step(p_pos.z, SHADOW_DEPTH(texture2DProj(p_shadow, p_pos)))
-
-
 
 float sample_shadow(highp sampler2D shadow, highp vec4 spos) {
 
@@ -1463,6 +1466,9 @@ void main() {
 	float anisotropy = 0.0;
 	vec2 anisotropy_flow = vec2(1.0, 0.0);
 	float sss_strength = 0.0; //unused
+	// gl_FragDepth is not available in GLES2, so writing to DEPTH is not converted to gl_FragDepth by Godot compiler resulting in a
+	// compile error because DEPTH is not a variable.
+	float m_DEPTH = 0.0;
 
 	float alpha = 1.0;
 	float side = 1.0;

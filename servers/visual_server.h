@@ -393,6 +393,7 @@ public:
 	virtual void skeleton_bone_set_transform_2d(RID p_skeleton, int p_bone, const Transform2D &p_transform) = 0;
 	virtual Transform2D skeleton_bone_get_transform_2d(RID p_skeleton, int p_bone) const = 0;
 	virtual void skeleton_set_base_transform_2d(RID p_skeleton, const Transform2D &p_base_transform) = 0;
+	virtual void skeleton_set_world_transform(RID p_skeleton, bool p_enable, const Transform &p_base_transform) = 0;
 
 	/* Light API */
 
@@ -859,6 +860,9 @@ public:
 	virtual RID canvas_create() = 0;
 	virtual void canvas_set_item_mirroring(RID p_canvas, RID p_item, const Point2 &p_mirroring) = 0;
 	virtual void canvas_set_modulate(RID p_canvas, const Color &p_color) = 0;
+	virtual void canvas_set_parent(RID p_canvas, RID p_parent, float p_scale) = 0;
+
+	virtual void canvas_set_disable_scale(bool p_disable) = 0;
 
 	virtual RID canvas_item_create() = 0;
 	virtual void canvas_item_set_parent(RID p_item, RID p_parent) = 0;

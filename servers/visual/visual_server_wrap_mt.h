@@ -232,6 +232,7 @@ public:
 	FUNC3(skeleton_bone_set_transform_2d, RID, int, const Transform2D &)
 	FUNC2RC(Transform2D, skeleton_bone_get_transform_2d, RID, int)
 	FUNC2(skeleton_set_base_transform_2d, RID, const Transform2D &)
+	FUNC3(skeleton_set_world_transform, RID, bool, const Transform &)
 
 	/* Light API */
 
@@ -486,6 +487,8 @@ public:
 	FUNCRID(canvas)
 	FUNC3(canvas_set_item_mirroring, RID, RID, const Point2 &)
 	FUNC2(canvas_set_modulate, RID, const Color &)
+	FUNC3(canvas_set_parent, RID, RID, float)
+	FUNC1(canvas_set_disable_scale, bool)
 
 	FUNCRID(canvas_item)
 	FUNC2(canvas_item_set_parent, RID, RID)

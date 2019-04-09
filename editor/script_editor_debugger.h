@@ -77,6 +77,7 @@ class ScriptEditorDebugger : public Control {
 	LineEdit *live_edit_root;
 	Button *le_set;
 	Button *le_clear;
+	Button *export_csv;
 
 	bool updating_scene_tree;
 	float inspect_scene_tree_timeout;
@@ -87,12 +88,18 @@ class ScriptEditorDebugger : public Control {
 	Map<ObjectID, ScriptEditorDebuggerInspectedObject *> remote_objects;
 	Set<ObjectID> unfold_cache;
 
-	HSplitContainer *error_split;
+	VBoxContainer *errors_tab;
 	Tree *error_tree;
 	Tree *inspect_scene_tree;
 	Button *clearbutton;
 	PopupMenu *item_menu;
+
 	EditorFileDialog *file_dialog;
+	enum FileDialogMode {
+		SAVE_CSV,
+		SAVE_NODE,
+	};
+	FileDialogMode file_dialog_mode;
 
 	int error_count;
 	int warning_count;
@@ -195,6 +202,8 @@ class ScriptEditorDebugger : public Control {
 
 	void _error_tree_item_rmb_selected(const Vector2 &p_pos);
 	void _item_menu_id_pressed(int p_option);
+
+	void _export_csv();
 
 protected:
 	void _notification(int p_what);

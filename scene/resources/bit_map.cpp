@@ -96,7 +96,7 @@ int BitMap::get_true_bit_count() const {
 	const uint8_t *d = bitmask.ptr();
 	int c = 0;
 
-	//fast, almot branchless version
+	//fast, almost branchless version
 
 	for (int i = 0; i < ds; i++) {
 
@@ -106,6 +106,7 @@ int BitMap::get_true_bit_count() const {
 		c += (d[i] & (1 << 4)) >> 4;
 		c += (d[i] & (1 << 3)) >> 3;
 		c += (d[i] & (1 << 2)) >> 2;
+		c += (d[i] & (1 << 1)) >> 1;
 		c += d[i] & 1;
 	}
 
@@ -332,7 +333,7 @@ Vector<Vector2> BitMap::_march_square(const Rect2i &rect, const Point2i &start) 
 		prevx = stepx;
 		prevy = stepy;
 
-		ERR_FAIL_COND_V(count > width * height, _points);
+		ERR_FAIL_COND_V((int)count > width * height, _points);
 	} while (curx != startx || cury != starty);
 	return _points;
 }

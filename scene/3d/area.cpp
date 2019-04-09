@@ -441,8 +441,8 @@ void Area::set_monitorable(bool p_enable) {
 
 	if (locked || (is_inside_tree() && PhysicsServer::get_singleton()->is_flushing_queries())) {
 		ERR_EXPLAIN("Function blocked during in/out signal. Use set_deferred(\"monitorable\",true/false)");
+		ERR_FAIL();
 	}
-	ERR_FAIL_COND(locked || PhysicsServer::get_singleton()->is_flushing_queries());
 
 	if (p_enable == monitorable)
 		return;
@@ -756,7 +756,6 @@ Area::Area() :
 	monitorable = false;
 	collision_mask = 1;
 	collision_layer = 1;
-	set_ray_pickable(false);
 	set_monitoring(true);
 	set_monitorable(true);
 

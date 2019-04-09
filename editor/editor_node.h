@@ -38,6 +38,7 @@
 #include "editor/editor_about.h"
 #include "editor/editor_data.h"
 #include "editor/editor_export.h"
+#include "editor/editor_feature_profile.h"
 #include "editor/editor_folding.h"
 #include "editor/editor_inspector.h"
 #include "editor/editor_log.h"
@@ -84,7 +85,6 @@
 #include "scene/gui/tool_button.h"
 #include "scene/gui/tree.h"
 #include "scene/gui/viewport_container.h"
-
 /**
 	@author Juan Linietsky <reduzio@gmail.com>
 */
@@ -175,6 +175,7 @@ private:
 		SETTINGS_EDITOR_DATA_FOLDER,
 		SETTINGS_EDITOR_CONFIG_FOLDER,
 		SETTINGS_MANAGE_EXPORT_TEMPLATES,
+		SETTINGS_MANAGE_FEATURE_PROFILES,
 		SETTINGS_PICK_MAIN_SCENE,
 		SETTINGS_TOGGLE_FULLSCREEN,
 		SETTINGS_HELP,
@@ -294,6 +295,7 @@ private:
 	ProjectSettingsEditor *project_settings;
 	EditorFileDialog *file;
 	ExportTemplateManager *export_template_manager;
+	EditorFeatureProfileManager *feature_profile_manager;
 	EditorFileDialog *file_templates;
 	EditorFileDialog *file_export;
 	EditorFileDialog *file_export_lib;
@@ -442,6 +444,8 @@ private:
 	void _show_messages();
 	void _vp_resized();
 
+	int _save_external_resources();
+
 	bool _validate_scene_recursive(const String &p_filename, Node *p_node);
 	void _save_scene(String p_file, int idx = -1);
 	void _save_all_scenes();
@@ -450,7 +454,6 @@ private:
 
 	void _instance_request(const Vector<String> &p_files);
 
-	void _hide_top_editors();
 	void _display_top_editors(bool p_display);
 	void _set_top_editors(Vector<EditorPlugin *> p_editor_plugins_over);
 	void _set_editing_top_editors(Object *p_current_object);
@@ -609,6 +612,9 @@ private:
 
 	void _resources_changed(const PoolVector<String> &p_resources);
 
+	void _feature_profile_changed();
+	bool _is_class_editor_disabled_by_feature_profile(const StringName &p_class);
+
 protected:
 	void _notification(int p_what);
 	static void _bind_methods();
@@ -675,6 +681,7 @@ public:
 	void edit_item(Object *p_object);
 	void edit_item_resource(RES p_resource);
 	bool item_has_editor(Object *p_object);
+	void hide_top_editors();
 
 	void open_request(const String &p_path);
 

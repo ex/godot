@@ -103,7 +103,7 @@ public:
 
 		bool keep_original_textures;
 
-		bool no_depth_prepass;
+		bool use_depth_prepass;
 		bool force_vertex_shading;
 	} config;
 
@@ -890,12 +890,15 @@ public:
 		SelfList<Skeleton> update_list;
 		Set<RasterizerScene::InstanceBase *> instances; //instances using skeleton
 		Transform2D base_transform_2d;
+		bool use_world_transform;
+		Transform world_transform;
 
 		Skeleton() :
 				use_2d(false),
 				size(0),
 				texture(0),
-				update_list(this) {
+				update_list(this),
+				use_world_transform(false) {
 		}
 	};
 
@@ -913,6 +916,7 @@ public:
 	virtual void skeleton_bone_set_transform_2d(RID p_skeleton, int p_bone, const Transform2D &p_transform);
 	virtual Transform2D skeleton_bone_get_transform_2d(RID p_skeleton, int p_bone) const;
 	virtual void skeleton_set_base_transform_2d(RID p_skeleton, const Transform2D &p_base_transform);
+	virtual void skeleton_set_world_transform(RID p_skeleton, bool p_enable, const Transform &p_world_transform);
 
 	/* Light API */
 
@@ -1341,6 +1345,15 @@ public:
 					fbo(0) {}
 		} exposure;
 
+		// External FBO to render our final result to (mostly used for ARVR)
+		struct External {
+			GLuint fbo;
+			RID texture;
+
+			External() :
+					fbo(0) {}
+		} external;
+
 		uint64_t last_exposure_tick;
 
 		int width, height;
@@ -1362,6 +1375,7 @@ public:
 				msaa(VS::VIEWPORT_MSAA_DISABLED) {
 			exposure.fbo = 0;
 			buffers.fbo = 0;
+			external.fbo = 0;
 			for (int i = 0; i < RENDER_TARGET_FLAG_MAX; i++) {
 				flags[i] = false;
 			}
@@ -1379,6 +1393,7 @@ public:
 	virtual RID render_target_create();
 	virtual void render_target_set_size(RID p_render_target, int p_width, int p_height);
 	virtual RID render_target_get_texture(RID p_render_target) const;
+	virtual void render_target_set_external_texture(RID p_render_target, unsigned int p_texture_id);
 
 	virtual void render_target_set_flag(RID p_render_target, RenderTargetFlags p_flag, bool p_value);
 	virtual bool render_target_was_used(RID p_render_target);

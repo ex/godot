@@ -642,7 +642,8 @@ void RasterizerStorageGLES3::texture_allocate(RID p_texture, int p_width, int p_
 				p_flags &= ~VS::TEXTURE_FLAG_FILTER;
 			}
 		} break;
-		default: {}
+		default: {
+		}
 	}
 #endif
 
@@ -702,14 +703,18 @@ void RasterizerStorageGLES3::texture_allocate(RID p_texture, int p_width, int p_
 
 		int mipmaps = 0;
 
-		while (width != 1 && height != 1) {
-			glTexImage3D(texture->target, 0, internal_format, width, height, depth, 0, format, type, NULL);
+		while (width > 0 || height > 0 || (p_type == VS::TEXTURE_TYPE_3D && depth > 0)) {
+			width = MAX(1, width);
+			height = MAX(1, height);
+			depth = MAX(1, depth);
 
-			width = MAX(1, width / 2);
-			height = MAX(1, height / 2);
+			glTexImage3D(texture->target, mipmaps, internal_format, width, height, depth, 0, format, type, NULL);
+
+			width /= 2;
+			height /= 2;
 
 			if (p_type == VS::TEXTURE_TYPE_3D) {
-				depth = MAX(1, depth / 2);
+				depth /= 2;
 			}
 
 			mipmaps++;
@@ -748,7 +753,11 @@ void RasterizerStorageGLES3::texture_set_data(RID p_texture, const Ref<Image> &p
 	if (config.keep_original_textures && !(texture->flags & VS::TEXTURE_FLAG_USED_FOR_STREAMING)) {
 		texture->images.write[p_layer] = p_image;
 	}
-
+#ifndef GLES_OVER_GL
+	if (p_image->is_compressed() && p_image->has_mipmaps() && !p_image->is_size_po2()) {
+		ERR_PRINTS("Texuture '" + texture->path + "' is compressed, has mipmaps but is not of powerf-of-2 size. This does not work on OpenGL ES 3.0.");
+	}
+#endif
 	Image::Format real_format;
 	Ref<Image> img = _get_gl_image_and_format(p_image, p_image->get_format(), texture->flags, real_format, format, internal_format, type, compressed, srgb);
 
@@ -925,6 +934,9 @@ void RasterizerStorageGLES3::texture_set_data(RID p_texture, const Ref<Image> &p
 		w = MAX(1, w >> 1);
 		h = MAX(1, h >> 1);
 	}
+
+	// Handle array and 3D textures, as those set their data per layer.
+	tsize *= MAX(texture->alloc_depth, 1);
 
 	info.texture_mem -= texture->total_data_size;
 	texture->total_data_size = tsize;
@@ -1496,7 +1508,7 @@ void RasterizerStorageGLES3::texture_debug_usage(List<VS::TextureInfo> *r_info) 
 		tinfo.format = t->format;
 		tinfo.width = t->alloc_width;
 		tinfo.height = t->alloc_height;
-		tinfo.depth = 0;
+		tinfo.depth = t->alloc_depth;
 		tinfo.bytes = t->total_data_size;
 		r_info->push_back(tinfo);
 	}
@@ -2740,7 +2752,8 @@ _FORCE_INLINE_ static void _fill_std140_variant_ubo_value(ShaderLanguage::DataTy
 			gui[14] = v.origin.z;
 			gui[15] = 1;
 		} break;
-		default: {}
+		default: {
+		}
 	}
 }
 
@@ -2908,7 +2921,8 @@ _FORCE_INLINE_ static void _fill_std140_ubo_value(ShaderLanguage::DataType type,
 				gui[i] = value[i].real;
 			}
 		} break;
-		default: {}
+		default: {
+		}
 	}
 }
 
@@ -2951,7 +2965,8 @@ _FORCE_INLINE_ static void _fill_std140_ubo_empty(ShaderLanguage::DataType type,
 			zeromem(data, 64);
 		} break;
 
-		default: {}
+		default: {
+		}
 	}
 }
 
@@ -3455,9 +3470,9 @@ void RasterizerStorageGLES3::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 					continue;
 
 				if (attribs[i].integer) {
-					glVertexAttribIPointer(attribs[i].index, attribs[i].size, attribs[i].type, attribs[i].stride, ((uint8_t *)0) + attribs[i].offset);
+					glVertexAttribIPointer(attribs[i].index, attribs[i].size, attribs[i].type, attribs[i].stride, CAST_INT_TO_UCHAR_PTR(attribs[i].offset));
 				} else {
-					glVertexAttribPointer(attribs[i].index, attribs[i].size, attribs[i].type, attribs[i].normalized, attribs[i].stride, ((uint8_t *)0) + attribs[i].offset);
+					glVertexAttribPointer(attribs[i].index, attribs[i].size, attribs[i].type, attribs[i].normalized, attribs[i].stride, CAST_INT_TO_UCHAR_PTR(attribs[i].offset));
 				}
 				glEnableVertexAttribArray(attribs[i].index);
 			}
@@ -3560,9 +3575,9 @@ void RasterizerStorageGLES3::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 						continue;
 
 					if (attribs[i].integer) {
-						glVertexAttribIPointer(attribs[i].index, attribs[i].size, attribs[i].type, attribs[i].stride, ((uint8_t *)0) + attribs[i].offset);
+						glVertexAttribIPointer(attribs[i].index, attribs[i].size, attribs[i].type, attribs[i].stride, CAST_INT_TO_UCHAR_PTR(attribs[i].offset));
 					} else {
-						glVertexAttribPointer(attribs[i].index, attribs[i].size, attribs[i].type, attribs[i].normalized, attribs[i].stride, ((uint8_t *)0) + attribs[i].offset);
+						glVertexAttribPointer(attribs[i].index, attribs[i].size, attribs[i].type, attribs[i].normalized, attribs[i].stride, CAST_INT_TO_UCHAR_PTR(attribs[i].offset));
 					}
 					glEnableVertexAttribArray(attribs[i].index);
 				}
@@ -3605,9 +3620,9 @@ void RasterizerStorageGLES3::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 					continue;
 
 				if (attribs[j].integer) {
-					glVertexAttribIPointer(attribs[j].index, attribs[j].size, attribs[j].type, attribs[j].stride, ((uint8_t *)0) + attribs[j].offset);
+					glVertexAttribIPointer(attribs[j].index, attribs[j].size, attribs[j].type, attribs[j].stride, CAST_INT_TO_UCHAR_PTR(attribs[j].offset));
 				} else {
-					glVertexAttribPointer(attribs[j].index, attribs[j].size, attribs[j].type, attribs[j].normalized, attribs[j].stride, ((uint8_t *)0) + attribs[j].offset);
+					glVertexAttribPointer(attribs[j].index, attribs[j].size, attribs[j].type, attribs[j].normalized, attribs[j].stride, CAST_INT_TO_UCHAR_PTR(attribs[j].offset));
 				}
 				glEnableVertexAttribArray(attribs[j].index);
 			}
@@ -3634,6 +3649,7 @@ void RasterizerStorageGLES3::mesh_set_blend_shape_count(RID p_mesh, int p_amount
 	ERR_FAIL_COND(p_amount < 0);
 
 	mesh->blend_shape_count = p_amount;
+	mesh->instance_change_notify(true, false);
 }
 int RasterizerStorageGLES3::mesh_get_blend_shape_count(RID p_mesh) const {
 
@@ -4119,7 +4135,7 @@ void RasterizerStorageGLES3::mesh_render_blend_shapes(Surface *s, const float *p
 	for (int ti = 0; ti < mtc; ti++) {
 		float weight = p_weights[ti];
 
-		if (weight < 0.001) //not bother with this one
+		if (weight < 0.00001) //not bother with this one
 			continue;
 
 		glBindVertexArray(s->blend_shapes[ti].array_id);
@@ -4137,44 +4153,44 @@ void RasterizerStorageGLES3::mesh_render_blend_shapes(Surface *s, const float *p
 
 					case VS::ARRAY_VERTEX: {
 						if (s->format & VS::ARRAY_FLAG_USE_2D_VERTICES) {
-							glVertexAttribPointer(i + 8, 2, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+							glVertexAttribPointer(i + 8, 2, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 							ofs += 2 * 4;
 						} else {
-							glVertexAttribPointer(i + 8, 3, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+							glVertexAttribPointer(i + 8, 3, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 							ofs += 3 * 4;
 						}
 					} break;
 					case VS::ARRAY_NORMAL: {
-						glVertexAttribPointer(i + 8, 3, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribPointer(i + 8, 3, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 3 * 4;
 					} break;
 					case VS::ARRAY_TANGENT: {
-						glVertexAttribPointer(i + 8, 4, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribPointer(i + 8, 4, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 4 * 4;
 
 					} break;
 					case VS::ARRAY_COLOR: {
-						glVertexAttribPointer(i + 8, 4, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribPointer(i + 8, 4, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 4 * 4;
 
 					} break;
 					case VS::ARRAY_TEX_UV: {
-						glVertexAttribPointer(i + 8, 2, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribPointer(i + 8, 2, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 2 * 4;
 
 					} break;
 					case VS::ARRAY_TEX_UV2: {
-						glVertexAttribPointer(i + 8, 2, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribPointer(i + 8, 2, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 2 * 4;
 
 					} break;
 					case VS::ARRAY_BONES: {
-						glVertexAttribIPointer(i + 8, 4, GL_UNSIGNED_INT, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribIPointer(i + 8, 4, GL_UNSIGNED_INT, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 4 * 4;
 
 					} break;
 					case VS::ARRAY_WEIGHTS: {
-						glVertexAttribPointer(i + 8, 4, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribPointer(i + 8, 4, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 4 * 4;
 
 					} break;
@@ -4207,44 +4223,44 @@ void RasterizerStorageGLES3::mesh_render_blend_shapes(Surface *s, const float *p
 
 				case VS::ARRAY_VERTEX: {
 					if (s->format & VS::ARRAY_FLAG_USE_2D_VERTICES) {
-						glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 2 * 4;
 					} else {
-						glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+						glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 						ofs += 3 * 4;
 					}
 				} break;
 				case VS::ARRAY_NORMAL: {
-					glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+					glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 					ofs += 3 * 4;
 				} break;
 				case VS::ARRAY_TANGENT: {
-					glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+					glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 					ofs += 4 * 4;
 
 				} break;
 				case VS::ARRAY_COLOR: {
-					glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+					glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 					ofs += 4 * 4;
 
 				} break;
 				case VS::ARRAY_TEX_UV: {
-					glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+					glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 					ofs += 2 * 4;
 
 				} break;
 				case VS::ARRAY_TEX_UV2: {
-					glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+					glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 					ofs += 2 * 4;
 
 				} break;
 				case VS::ARRAY_BONES: {
-					glVertexAttribIPointer(i, 4, GL_UNSIGNED_INT, stride, ((uint8_t *)0) + ofs);
+					glVertexAttribIPointer(i, 4, GL_UNSIGNED_INT, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 					ofs += 4 * 4;
 
 				} break;
 				case VS::ARRAY_WEIGHTS: {
-					glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, stride, ((uint8_t *)0) + ofs);
+					glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, stride, CAST_INT_TO_UCHAR_PTR(ofs));
 					ofs += 4 * 4;
 
 				} break;
@@ -5134,6 +5150,20 @@ void RasterizerStorageGLES3::skeleton_set_base_transform_2d(RID p_skeleton, cons
 	skeleton->base_transform_2d = p_base_transform;
 }
 
+void RasterizerStorageGLES3::skeleton_set_world_transform(RID p_skeleton, bool p_enable, const Transform &p_world_transform) {
+
+	Skeleton *skeleton = skeleton_owner.getornull(p_skeleton);
+
+	ERR_FAIL_COND(skeleton->use_2d);
+
+	skeleton->world_transform = p_world_transform;
+	skeleton->use_world_transform = p_enable;
+
+	if (!skeleton->update_list.in_list()) {
+		skeleton_update_list.add(&skeleton->update_list);
+	}
+}
+
 void RasterizerStorageGLES3::update_dirty_skeletons() {
 
 	glActiveTexture(GL_TEXTURE0);
@@ -5220,7 +5250,8 @@ void RasterizerStorageGLES3::light_set_param(RID p_light, VS::LightParam p_param
 			light->version++;
 			light->instance_change_notify(true, false);
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	light->param[p_param] = p_value;
@@ -5422,7 +5453,8 @@ AABB RasterizerStorageGLES3::light_get_aabb(RID p_light) const {
 
 			return AABB();
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	ERR_FAIL_V(AABB());
@@ -5438,6 +5470,8 @@ RID RasterizerStorageGLES3::reflection_probe_create() {
 	reflection_probe->intensity = 1.0;
 	reflection_probe->interior_ambient = Color();
 	reflection_probe->interior_ambient_energy = 1.0;
+	reflection_probe->interior_ambient_probe_contrib = 0.0;
+
 	reflection_probe->max_distance = 0;
 	reflection_probe->extents = Vector3(1, 1, 1);
 	reflection_probe->origin_offset = Vector3(0, 0, 0);
@@ -6052,7 +6086,7 @@ void RasterizerStorageGLES3::particles_set_amount(RID p_particles, int p_amount)
 
 		for (int j = 0; j < 6; j++) {
 			glEnableVertexAttribArray(j);
-			glVertexAttribPointer(j, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4 * 6, ((uint8_t *)0) + (j * 16));
+			glVertexAttribPointer(j, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4 * 6, CAST_INT_TO_UCHAR_PTR(j * 16));
 		}
 	}
 
@@ -6066,7 +6100,7 @@ void RasterizerStorageGLES3::particles_set_amount(RID p_particles, int p_amount)
 
 			for (int j = 0; j < 6; j++) {
 				glEnableVertexAttribArray(j);
-				glVertexAttribPointer(j, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4 * 6, ((uint8_t *)0) + (j * 16));
+				glVertexAttribPointer(j, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4 * 6, CAST_INT_TO_UCHAR_PTR(j * 16));
 			}
 			particles->particle_valid_histories[i] = false;
 		}
@@ -6144,7 +6178,7 @@ void RasterizerStorageGLES3::_particles_update_histories(Particles *particles) {
 
 			for (int j = 0; j < 6; j++) {
 				glEnableVertexAttribArray(j);
-				glVertexAttribPointer(j, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4 * 6, ((uint8_t *)0) + (j * 16));
+				glVertexAttribPointer(j, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4 * 6, CAST_INT_TO_UCHAR_PTR(j * 16));
 			}
 
 			particles->particle_valid_histories[i] = false;
@@ -6766,6 +6800,24 @@ void RasterizerStorageGLES3::_render_target_clear(RenderTarget *rt) {
 		glDeleteTextures(1, &rt->exposure.color);
 		rt->exposure.fbo = 0;
 	}
+
+	if (rt->external.fbo != 0) {
+		// free this
+		glDeleteFramebuffers(1, &rt->external.fbo);
+
+		// clean up our texture
+		Texture *t = texture_owner.get(rt->external.texture);
+		t->alloc_height = 0;
+		t->alloc_width = 0;
+		t->width = 0;
+		t->height = 0;
+		t->active = false;
+		texture_owner.free(rt->external.texture);
+		memdelete(t);
+
+		rt->external.fbo = 0;
+	}
+
 	Texture *tex = texture_owner.get(rt->texture);
 	tex->alloc_height = 0;
 	tex->alloc_width = 0;
@@ -7221,7 +7273,99 @@ RID RasterizerStorageGLES3::render_target_get_texture(RID p_render_target) const
 	RenderTarget *rt = render_target_owner.getornull(p_render_target);
 	ERR_FAIL_COND_V(!rt, RID());
 
-	return rt->texture;
+	if (rt->external.fbo == 0) {
+		return rt->texture;
+	} else {
+		return rt->external.texture;
+	}
+}
+
+void RasterizerStorageGLES3::render_target_set_external_texture(RID p_render_target, unsigned int p_texture_id) {
+	RenderTarget *rt = render_target_owner.getornull(p_render_target);
+	ERR_FAIL_COND(!rt);
+
+	if (p_texture_id == 0) {
+		if (rt->external.fbo != 0) {
+			// free this
+			glDeleteFramebuffers(1, &rt->external.fbo);
+
+			// clean up our texture
+			Texture *t = texture_owner.get(rt->external.texture);
+			t->alloc_height = 0;
+			t->alloc_width = 0;
+			t->width = 0;
+			t->height = 0;
+			t->active = false;
+			texture_owner.free(rt->external.texture);
+			memdelete(t);
+
+			rt->external.fbo = 0;
+		}
+	} else {
+		Texture *t;
+
+		if (rt->external.fbo == 0) {
+			// create our fbo
+			glGenFramebuffers(1, &rt->external.fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, rt->external.fbo);
+
+			// allocate a texture
+			t = memnew(Texture);
+
+			t->type = VS::TEXTURE_TYPE_2D;
+			t->flags = 0;
+			t->width = 0;
+			t->height = 0;
+			t->alloc_height = 0;
+			t->alloc_width = 0;
+			t->format = Image::FORMAT_RGBA8;
+			t->target = GL_TEXTURE_2D;
+			t->gl_format_cache = 0;
+			t->gl_internal_format_cache = 0;
+			t->gl_type_cache = 0;
+			t->data_size = 0;
+			t->compressed = false;
+			t->srgb = false;
+			t->total_data_size = 0;
+			t->ignore_mipmaps = false;
+			t->mipmaps = 1;
+			t->active = true;
+			t->tex_id = 0;
+			t->render_target = rt;
+
+			rt->external.texture = texture_owner.make_rid(t);
+		} else {
+			// bind our frame buffer
+			glBindFramebuffer(GL_FRAMEBUFFER, rt->external.fbo);
+
+			// find our texture
+			t = texture_owner.get(rt->external.texture);
+		}
+
+		// set our texture
+		t->tex_id = p_texture_id;
+
+		// size shouldn't be different
+		t->width = rt->width;
+		t->height = rt->height;
+		t->alloc_height = rt->width;
+		t->alloc_width = rt->height;
+
+		// is there a point to setting the internal formats? we don't know them..
+
+		// set our texture as the destination for our framebuffer
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, p_texture_id, 0);
+
+		// check status and unbind
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		glBindFramebuffer(GL_FRAMEBUFFER, RasterizerStorageGLES3::system_fbo);
+
+		if (status != GL_FRAMEBUFFER_COMPLETE) {
+			printf("framebuffer fail, status: %x\n", status);
+		}
+
+		ERR_FAIL_COND(status != GL_FRAMEBUFFER_COMPLETE);
+	}
 }
 
 void RasterizerStorageGLES3::render_target_set_flag(RID p_render_target, RenderTargetFlags p_flag, bool p_value) {
@@ -7241,7 +7385,8 @@ void RasterizerStorageGLES3::render_target_set_flag(RID p_render_target, RenderT
 			_render_target_allocate(rt);
 
 		} break;
-		default: {}
+		default: {
+		}
 	}
 }
 bool RasterizerStorageGLES3::render_target_was_used(RID p_render_target) {
@@ -7969,7 +8114,7 @@ void RasterizerStorageGLES3::initialize() {
 		glBindBuffer(GL_ARRAY_BUFFER, resources.quadie);
 		glVertexAttribPointer(VS::ARRAY_VERTEX, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(VS::ARRAY_TEX_UV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, ((uint8_t *)NULL) + 8);
+		glVertexAttribPointer(VS::ARRAY_TEX_UV, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, CAST_INT_TO_UCHAR_PTR(8));
 		glEnableVertexAttribArray(4);
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind
@@ -8014,8 +8159,8 @@ void RasterizerStorageGLES3::initialize() {
 
 	String renderer = (const char *)glGetString(GL_RENDERER);
 
-	config.no_depth_prepass = !bool(GLOBAL_GET("rendering/quality/depth_prepass/enable"));
-	if (!config.no_depth_prepass) {
+	config.use_depth_prepass = bool(GLOBAL_GET("rendering/quality/depth_prepass/enable"));
+	if (config.use_depth_prepass) {
 
 		String vendors = GLOBAL_GET("rendering/quality/depth_prepass/disable_for_vendors");
 		Vector<String> vendor_match = vendors.split(",");
@@ -8025,7 +8170,7 @@ void RasterizerStorageGLES3::initialize() {
 				continue;
 
 			if (renderer.findn(v) != -1) {
-				config.no_depth_prepass = true;
+				config.use_depth_prepass = false;
 			}
 		}
 	}

@@ -735,6 +735,10 @@ static void _overlay(const uint8_t *__restrict p_src, uint8_t *__restrict p_dst,
 	}
 }
 
+bool Image::is_size_po2() const {
+	return uint32_t(width) == next_power_of_2(width) && uint32_t(height) == next_power_of_2(height);
+}
+
 void Image::resize_to_po2(bool p_square) {
 
 	if (!_can_modify(format)) {
@@ -1262,7 +1266,8 @@ void Image::shrink_x2() {
 				case FORMAT_RGBAH: _generate_po2_mipmap<uint16_t, 4, false, Image::average_4_half, Image::renormalize_half>(reinterpret_cast<const uint16_t *>(r.ptr()), reinterpret_cast<uint16_t *>(w.ptr()), width, height); break;
 
 				case FORMAT_RGBE9995: _generate_po2_mipmap<uint32_t, 1, false, Image::average_4_rgbe9995, Image::renormalize_rgbe9995>(reinterpret_cast<const uint32_t *>(r.ptr()), reinterpret_cast<uint32_t *>(w.ptr()), width, height); break;
-				default: {}
+				default: {
+				}
 			}
 		}
 
@@ -1394,7 +1399,8 @@ Error Image::generate_mipmaps(bool p_renormalize) {
 					_generate_po2_mipmap<uint32_t, 1, false, Image::average_4_rgbe9995, Image::renormalize_rgbe9995>(reinterpret_cast<const uint32_t *>(&wp[prev_ofs]), reinterpret_cast<uint32_t *>(&wp[ofs]), prev_w, prev_h);
 
 				break;
-			default: {}
+			default: {
+			}
 		}
 
 		prev_ofs = ofs;
@@ -1608,7 +1614,8 @@ void Image::create(const char **p_xpm) {
 				if (y == (size_height - 1))
 					status = DONE;
 			} break;
-			default: {}
+			default: {
+			}
 		}
 
 		line++;
@@ -1681,7 +1688,8 @@ bool Image::is_invisible() const {
 		case FORMAT_DXT5: {
 			detected = true;
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	return !detected;
@@ -1725,7 +1733,8 @@ Image::AlphaMode Image::detect_alpha() const {
 		case FORMAT_DXT5: {
 			detected = true;
 		} break;
-		default: {}
+		default: {
+		}
 	}
 
 	if (detected)

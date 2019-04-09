@@ -55,16 +55,18 @@ void _collect_ysort_children(VisualServerCanvas::Item *p_canvas_item, Transform2
 	int child_item_count = p_canvas_item->child_items.size();
 	VisualServerCanvas::Item **child_items = p_canvas_item->child_items.ptrw();
 	for (int i = 0; i < child_item_count; i++) {
-		if (r_items) {
-			r_items[r_index] = child_items[i];
-			child_items[i]->ysort_xform = p_transform;
-			child_items[i]->ysort_pos = p_transform.xform(child_items[i]->xform.elements[2]);
+		if (child_items[i]->visible) {
+			if (r_items) {
+				r_items[r_index] = child_items[i];
+				child_items[i]->ysort_xform = p_transform;
+				child_items[i]->ysort_pos = p_transform.xform(child_items[i]->xform.elements[2]);
+			}
+
+			r_index++;
+
+			if (child_items[i]->sort_y)
+				_collect_ysort_children(child_items[i], p_transform * child_items[i]->xform, r_items, r_index);
 		}
-
-		r_index++;
-
-		if (child_items[i]->sort_y)
-			_collect_ysort_children(child_items[i], p_transform * child_items[i]->xform, r_items, r_index);
 	}
 }
 
@@ -319,6 +321,19 @@ void VisualServerCanvas::canvas_set_modulate(RID p_canvas, const Color &p_color)
 	canvas->modulate = p_color;
 }
 
+void VisualServerCanvas::canvas_set_disable_scale(bool p_disable) {
+	disable_scale = p_disable;
+}
+
+void VisualServerCanvas::canvas_set_parent(RID p_canvas, RID p_parent, float p_scale) {
+
+	Canvas *canvas = canvas_owner.get(p_canvas);
+	ERR_FAIL_COND(!canvas);
+
+	canvas->parent = p_parent;
+	canvas->parent_scale = p_scale;
+}
+
 RID VisualServerCanvas::canvas_item_create() {
 
 	Item *canvas_item = memnew(Item);
@@ -380,6 +395,10 @@ void VisualServerCanvas::canvas_item_set_visible(RID p_item, bool p_visible) {
 	ERR_FAIL_COND(!canvas_item);
 
 	canvas_item->visible = p_visible;
+
+	if (canvas_item->parent.is_valid() && canvas_item_owner.owns(canvas_item->parent)) {
+		_mark_ysort_dirty(canvas_item_owner.get(canvas_item->parent), canvas_item_owner);
+	}
 }
 void VisualServerCanvas::canvas_item_set_light_mask(RID p_item, int p_mask) {
 
@@ -616,7 +635,7 @@ void VisualServerCanvas::canvas_item_add_texture_rect(RID p_item, const Rect2 &p
 	if (p_tile) {
 		rect->flags |= RasterizerCanvas::CANVAS_RECT_TILE;
 		rect->flags |= RasterizerCanvas::CANVAS_RECT_REGION;
-		rect->source = Rect2(0, 0, p_rect.size.width, p_rect.size.height);
+		rect->source = Rect2(0, 0, fabsf(p_rect.size.width), fabsf(p_rect.size.height));
 	}
 
 	if (p_rect.size.x < 0) {
@@ -758,11 +777,12 @@ void VisualServerCanvas::canvas_item_add_triangle_array(RID p_item, const Vector
 	Item *canvas_item = canvas_item_owner.getornull(p_item);
 	ERR_FAIL_COND(!canvas_item);
 
-	int ps = p_points.size();
-	ERR_FAIL_COND(!p_colors.empty() && p_colors.size() != ps && p_colors.size() != 1);
-	ERR_FAIL_COND(!p_uvs.empty() && p_uvs.size() != ps);
-	ERR_FAIL_COND(!p_bones.empty() && p_bones.size() != ps * 4);
-	ERR_FAIL_COND(!p_weights.empty() && p_weights.size() != ps * 4);
+	int vertex_count = p_points.size();
+	ERR_FAIL_COND(vertex_count == 0);
+	ERR_FAIL_COND(!p_colors.empty() && p_colors.size() != vertex_count && p_colors.size() != 1);
+	ERR_FAIL_COND(!p_uvs.empty() && p_uvs.size() != vertex_count);
+	ERR_FAIL_COND(!p_bones.empty() && p_bones.size() != vertex_count * 4);
+	ERR_FAIL_COND(!p_weights.empty() && p_weights.size() != vertex_count * 4);
 
 	Vector<int> indices = p_indices;
 
@@ -770,9 +790,9 @@ void VisualServerCanvas::canvas_item_add_triangle_array(RID p_item, const Vector
 
 	if (indices.empty()) {
 
-		ERR_FAIL_COND(ps % 3 != 0);
+		ERR_FAIL_COND(vertex_count % 3 != 0);
 		if (p_count == -1)
-			count = ps;
+			count = vertex_count;
 	} else {
 
 		ERR_FAIL_COND(indices.size() % 3 != 0);
@@ -1433,4 +1453,5 @@ bool VisualServerCanvas::free(RID p_rid) {
 }
 
 VisualServerCanvas::VisualServerCanvas() {
+	disable_scale = false;
 }

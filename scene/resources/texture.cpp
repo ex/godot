@@ -426,6 +426,8 @@ ImageTexture::ImageTexture() {
 	texture = VisualServer::get_singleton()->texture_create();
 	storage = STORAGE_RAW;
 	lossy_storage_quality = 0.7;
+	image_stored = false;
+	format = Image::FORMAT_L8;
 }
 
 ImageTexture::~ImageTexture() {
@@ -838,6 +840,12 @@ void StreamTexture::reload_from_file() {
 		return;
 
 	load(path);
+}
+
+void StreamTexture::_validate_property(PropertyInfo &property) const {
+	if (property.name == "flags") {
+		property.usage = PROPERTY_USAGE_NOEDITOR;
+	}
 }
 
 void StreamTexture::_bind_methods() {
@@ -1514,6 +1522,7 @@ CubeMap::CubeMap() {
 	cubemap = VisualServer::get_singleton()->texture_create();
 	storage = STORAGE_RAW;
 	lossy_storage_quality = 0.7;
+	format = Image::FORMAT_BPTC_RGBA;
 }
 
 CubeMap::~CubeMap() {

@@ -711,7 +711,8 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 			} break;
 
-			default: {}
+			default: {
+			}
 		}
 
 		Item *itp = it;
@@ -900,21 +901,13 @@ void RichTextLabel::_find_click(ItemFrame *p_frame, const Point2i &p_click, Item
 
 Control::CursorShape RichTextLabel::get_cursor_shape(const Point2 &p_pos) const {
 
-	if (!underline_meta || selection.click)
+	if (selection.click)
 		return CURSOR_ARROW;
 
 	if (main->first_invalid_line < main->lines.size())
 		return CURSOR_ARROW; //invalid
 
-	int line = 0;
-	Item *item = NULL;
-
-	((RichTextLabel *)(this))->_find_click(main, p_pos, &item, &line);
-
-	if (item && ((RichTextLabel *)(this))->_find_meta(item, NULL))
-		return CURSOR_POINTING_HAND;
-
-	return CURSOR_ARROW;
+	return get_default_cursor_shape();
 }
 
 void RichTextLabel::_gui_input(Ref<InputEvent> p_event) {
@@ -1133,18 +1126,19 @@ void RichTextLabel::_gui_input(Ref<InputEvent> p_event) {
 		}
 
 		Variant meta;
-		if (item && !outside && _find_meta(item, &meta)) {
-			if (meta_hovering != item) {
+		ItemMeta *item_meta;
+		if (item && !outside && _find_meta(item, &meta, &item_meta)) {
+			if (meta_hovering != item_meta) {
 				if (meta_hovering) {
 					emit_signal("meta_hover_ended", current_meta);
 				}
-				meta_hovering = static_cast<ItemMeta *>(item);
+				meta_hovering = item_meta;
 				current_meta = meta;
 				emit_signal("meta_hover_started", meta);
 			}
 		} else if (meta_hovering) {
-			emit_signal("meta_hover_ended", current_meta);
 			meta_hovering = NULL;
+			emit_signal("meta_hover_ended", current_meta);
 			current_meta = false;
 		}
 	}
@@ -1269,7 +1263,7 @@ bool RichTextLabel::_find_strikethrough(Item *p_item) {
 	return false;
 }
 
-bool RichTextLabel::_find_meta(Item *p_item, Variant *r_meta) {
+bool RichTextLabel::_find_meta(Item *p_item, Variant *r_meta, ItemMeta **r_item) {
 
 	Item *item = p_item;
 
@@ -1280,6 +1274,8 @@ bool RichTextLabel::_find_meta(Item *p_item, Variant *r_meta) {
 			ItemMeta *meta = static_cast<ItemMeta *>(item);
 			if (r_meta)
 				*r_meta = meta->meta;
+			if (r_item)
+				*r_item = meta;
 			return true;
 		}
 
