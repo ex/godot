@@ -8,23 +8,61 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "RigidBody2D",
+"class": "Bullet",
+"language": "GDScript",
+"path": "res://player/bullet.gd"
+}, {
+"base": "Area2D",
+"class": "Coin",
+"language": "GDScript",
+"path": "res://coin/coin.gd"
+}, {
+"base": "KinematicBody2D",
+"class": "Enemy",
+"language": "GDScript",
+"path": "res://enemy/enemy.gd"
+}, {
+"base": "Node2D",
+"class": "MovingPlatform",
+"language": "GDScript",
+"path": "res://platform/moving_platform.gd"
+}, {
+"base": "KinematicBody2D",
+"class": "Player",
+"language": "GDScript",
+"path": "res://player/player.gd"
+} ]
 _global_script_class_icons={
-
+"Bullet": "",
+"Coin": "",
+"Enemy": "",
+"MovingPlatform": "",
+"Player": ""
 }
 
 [application]
 
 config/name="Platformer 2D"
-run/main_scene="res://stage.tscn"
+run/main_scene="res://Stage.tscn"
 config/icon="res://icon.png"
 target_fps="60"
+
+[debug]
+
+gdscript/completion/autocomplete_setters_and_getters=true
+gdscript/warnings/unsafe_property_access=true
+gdscript/warnings/unsafe_method_access=true
+gdscript/warnings/unsafe_cast=true
+gdscript/warnings/unsafe_call_argument=true
 
 [display]
 
 window/size/width=800
 window/size/height=480
 window/stretch/mode="2d"
+window/stretch/aspect="keep"
 stretch/aspect="keep_height"
 stretch/mode="2d"
 
@@ -81,6 +119,15 @@ use_pixel_snap=true
 [render]
 
 mipmap_policy=1
+
+[rendering]
+
+quality/intended_usage/framebuffer_allocation=0
+quality/intended_usage/framebuffer_allocation.mobile=1
+quality/filters/anisotropic_filter_level=2
+quality/filters/use_nearest_mipmap_filter=true
+quality/voxel_cone_tracing/high_quality=false
+quality/depth/hdr=false
 
 [texture_import]
 

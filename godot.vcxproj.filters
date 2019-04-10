@@ -6,1118 +6,1124 @@
 			<Extensions>h;hpp;hxx;hm;inl</Extensions>
 		</Filter>
 		<Filter Include="Header Files\core">
-			<UniqueIdentifier>{7CECE838-E75B-9644-49DB-22631B97B80A}</UniqueIdentifier>
+			<UniqueIdentifier>{30361471-67B9-D69D-BB70-1A0711E4ADA2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\core\bind">
-			<UniqueIdentifier>{CE826060-3E73-AF25-EE16-F13968AA756E}</UniqueIdentifier>
+			<UniqueIdentifier>{45DE3F74-C0AB-5127-8288-3449B6CDD86A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\core\io">
-			<UniqueIdentifier>{02E91A47-D10C-8039-1018-3D096618EBB8}</UniqueIdentifier>
+			<UniqueIdentifier>{B158A5A3-A9D6-FAED-1A49-70B035FCC46E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\core\math">
-			<UniqueIdentifier>{1BCB3E98-C21C-29A5-93CE-D0E406521146}</UniqueIdentifier>
+			<UniqueIdentifier>{5C090DF0-14FF-3AC9-E092-1CADC288ECED}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\core\os">
-			<UniqueIdentifier>{3AFBFEDB-B808-458A-EA94-E216B30B3D54}</UniqueIdentifier>
+			<UniqueIdentifier>{5F15BFC9-E631-E512-38BE-83089B4BE15F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers">
-			<UniqueIdentifier>{5B767C7E-292B-8CC5-8CCF-4A1189D28F2B}</UniqueIdentifier>
+			<UniqueIdentifier>{A40B1B24-C00B-4142-84F4-48BE7E38D355}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\alsa">
-			<UniqueIdentifier>{9372A896-AD51-C343-3321-01600BDCF7DE}</UniqueIdentifier>
+			<UniqueIdentifier>{CDB4E6A3-D56C-26E6-C2D5-E88B74F33C68}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\alsamidi">
-			<UniqueIdentifier>{CDD3350D-D7FE-34CE-62DF-0D6B7ADA6172}</UniqueIdentifier>
+			<UniqueIdentifier>{AE10C964-4BA5-7FCD-7AC1-98AEA53A877F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\convex_decomp">
-			<UniqueIdentifier>{0B44F75A-52E1-DC77-203E-F1BF1D8F3DF7}</UniqueIdentifier>
+			<UniqueIdentifier>{249DC554-55FA-D5C0-D93E-1F75F3FB3DC3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\coreaudio">
-			<UniqueIdentifier>{3EC51398-9435-B91B-6A2D-18BCBAC35708}</UniqueIdentifier>
+			<UniqueIdentifier>{37E3AEC0-8A33-881E-9A2A-C8A03C867571}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\coremidi">
-			<UniqueIdentifier>{8E6C64A0-4D31-40F1-304C-72C5E68C26C1}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\drivers\gl_context">
-			<UniqueIdentifier>{174103D4-66B3-B81F-CBEF-97CEF15A1E09}</UniqueIdentifier>
+			<UniqueIdentifier>{85999A03-B36D-9E4C-22FE-EE70195B9B39}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\gles2">
-			<UniqueIdentifier>{E45119CA-06B8-D4CE-FFDE-CEDB56A3B27F}</UniqueIdentifier>
+			<UniqueIdentifier>{C86AD3FD-074C-1253-F317-8003A9A9A57B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\gles3">
-			<UniqueIdentifier>{034C099E-C4E6-E6BB-912C-EDDB40D26307}</UniqueIdentifier>
+			<UniqueIdentifier>{6BB6E1B6-C682-CE69-060B-AD307CF22870}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\png">
-			<UniqueIdentifier>{CBE5A04B-81EC-A240-89D3-66F7355A9EC5}</UniqueIdentifier>
+			<UniqueIdentifier>{E8EF3796-7753-A186-B4B6-BC88CD236647}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\pulseaudio">
-			<UniqueIdentifier>{843D1142-4C64-DABD-17A5-7769015A5255}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\drivers\rtaudio">
-			<UniqueIdentifier>{7727A3B2-22DF-3EC9-4282-16A12AC9815E}</UniqueIdentifier>
+			<UniqueIdentifier>{AC28859E-3959-456F-563D-1E67F4DAB755}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\unix">
-			<UniqueIdentifier>{EAE6114D-6E7B-7FDB-9178-66D4BC9FA48E}</UniqueIdentifier>
+			<UniqueIdentifier>{90B3898C-527C-07C8-1C01-DDF80970E878}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\wasapi">
-			<UniqueIdentifier>{B49A7529-6CD3-F972-096C-40C99A2A6C73}</UniqueIdentifier>
+			<UniqueIdentifier>{A418F6ED-96AD-FB4E-3713-B5450FD98390}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\windows">
-			<UniqueIdentifier>{4B081CB9-8444-4DBF-DAF7-6D70BF244E03}</UniqueIdentifier>
+			<UniqueIdentifier>{6EF25C4E-BE61-F0C7-74D4-835622C46130}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\drivers\winmidi">
-			<UniqueIdentifier>{A02C375E-AA58-E656-B457-C411D31079E2}</UniqueIdentifier>
+			<UniqueIdentifier>{85B6CE63-BFCF-054C-9297-1B60EA27AAED}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\editor">
-			<UniqueIdentifier>{04AB032D-D5CB-507F-06F5-4564F192258A}</UniqueIdentifier>
+			<UniqueIdentifier>{74C0E24F-25D9-E75B-697F-DEEDE09F491A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\editor\collada">
-			<UniqueIdentifier>{C5BB07FF-C005-45FC-198A-2D63EDA6D941}</UniqueIdentifier>
+			<UniqueIdentifier>{D63CB329-5118-A160-4A59-8E781E835FC8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\editor\doc">
-			<UniqueIdentifier>{F1582E6B-1690-C0CB-9CDA-EA1EF642F3DD}</UniqueIdentifier>
+			<UniqueIdentifier>{C68F49F7-767D-1455-151C-2F38B6C68F8E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\editor\fileserver">
-			<UniqueIdentifier>{F51F176E-DC83-0FE1-3DA4-523BEF7EA4D5}</UniqueIdentifier>
+			<UniqueIdentifier>{E8E8F0D4-B0F0-B611-DDCC-E2BC5E2B8B83}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\editor\import">
-			<UniqueIdentifier>{9341EA49-7E20-B13E-BCFA-150AC640459F}</UniqueIdentifier>
+			<UniqueIdentifier>{03245A92-195E-5A85-74B5-9349801771B1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\editor\plugins">
-			<UniqueIdentifier>{1F235616-38D6-9D21-71AE-3807C2C0FFD2}</UniqueIdentifier>
+			<UniqueIdentifier>{C94B98A3-14EC-0A7A-3C11-55D06586D524}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\main">
-			<UniqueIdentifier>{1A84ACAB-239C-1E18-DA08-2D52477F1F1A}</UniqueIdentifier>
+			<UniqueIdentifier>{E7E5B5E2-D4C2-1C64-BB67-FDEAB158E5D2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules">
-			<UniqueIdentifier>{04B9A41C-41C0-9EAC-B0B1-F4C2540F8173}</UniqueIdentifier>
+			<UniqueIdentifier>{9D1A35CF-FD28-57B0-CAAB-D46A413505ED}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\modules\assimp">
+			<UniqueIdentifier>{47EC6E1E-6502-24AC-13DE-60DCF25EDD11}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\bmp">
-			<UniqueIdentifier>{628F74DA-2D6F-6CF0-739F-A3AB67EFBAC2}</UniqueIdentifier>
+			<UniqueIdentifier>{E8CECA32-C3A8-1F56-E31F-61DEC2BEA78B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\bullet">
-			<UniqueIdentifier>{E9AFE3F5-222E-3182-6806-8D2109B59AE7}</UniqueIdentifier>
+			<UniqueIdentifier>{672230E7-FE2B-A4C5-FFA4-478DB8262A38}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\csg">
-			<UniqueIdentifier>{F2C46301-0B09-172D-60B2-509960176DAA}</UniqueIdentifier>
+			<UniqueIdentifier>{4B4FD997-F156-47DB-D47D-84C3091A034C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\cvtt">
-			<UniqueIdentifier>{28130856-7B39-1B3F-EEB3-D7F062651510}</UniqueIdentifier>
+			<UniqueIdentifier>{CF08D18F-5833-D595-08A1-8789FCB9EF7F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\dds">
-			<UniqueIdentifier>{A6422536-7386-8854-F12C-E9D1D889375C}</UniqueIdentifier>
+			<UniqueIdentifier>{46816CA4-17D6-F772-254A-1312D3A52C4B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\enet">
-			<UniqueIdentifier>{3BAB76D7-43A8-FB79-4208-85E56E8331FE}</UniqueIdentifier>
+			<UniqueIdentifier>{C0F25111-5B08-5922-F83D-1B183A8F2C72}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\etc">
-			<UniqueIdentifier>{8299B3D2-3EE2-F6B8-200D-67133051A31F}</UniqueIdentifier>
+			<UniqueIdentifier>{BF75910E-A586-E042-A92E-3AB7676FEF85}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\freetype">
-			<UniqueIdentifier>{3A5A2CF5-9C53-38C4-9D88-BD7905994F0B}</UniqueIdentifier>
+			<UniqueIdentifier>{450B20FC-71BF-2F22-B7BF-E9B349EE5E90}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gdnative">
-			<UniqueIdentifier>{0E268E67-BD0F-DE0A-98A0-593427BDF51A}</UniqueIdentifier>
+			<UniqueIdentifier>{9E8E0DC2-DEEF-D1F3-2749-B9AF4FA9679F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gdnative\arvr">
-			<UniqueIdentifier>{D2CE4174-1B7B-B543-AE6A-18D028C8468F}</UniqueIdentifier>
+			<UniqueIdentifier>{F29DEFDA-84E0-62B3-C922-902FECC379D4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gdnative\nativescript">
-			<UniqueIdentifier>{7687B812-A10F-9D54-7349-FC43C8541417}</UniqueIdentifier>
+			<UniqueIdentifier>{89A0F835-1963-E47A-4133-AD7BFAEE07FD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gdnative\net">
-			<UniqueIdentifier>{9DAA2351-08FE-4C74-E729-EFBCB9A52052}</UniqueIdentifier>
+			<UniqueIdentifier>{71B4658E-7EFC-67FB-D3F1-3D0A3506C3CE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gdnative\pluginscript">
-			<UniqueIdentifier>{0D581E94-5A74-D5C3-AC7A-92749F33278D}</UniqueIdentifier>
+			<UniqueIdentifier>{562F5B18-5E7D-1F1F-813F-9C59233DEB07}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\modules\gdnative\videodecoder">
+			<UniqueIdentifier>{6C7953CD-888F-10BD-248C-320DA567D3D0}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gdscript">
-			<UniqueIdentifier>{7E8D8E74-5C91-DCEA-CB42-13BFE3D04CB8}</UniqueIdentifier>
+			<UniqueIdentifier>{5E4BC593-031E-9942-8D7C-75D32A7B34B2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gdscript\editor">
-			<UniqueIdentifier>{F2D9BBE2-02DD-348B-A177-E5873EB46011}</UniqueIdentifier>
+			<UniqueIdentifier>{F2CE02A5-0A06-DF49-4073-2E0FDCB8CC15}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\gridmap">
-			<UniqueIdentifier>{01A45991-7575-9E07-864F-49E78999B8F8}</UniqueIdentifier>
+			<UniqueIdentifier>{94B43E49-1EE6-E2B0-17AA-F16B77FE5232}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\hdr">
-			<UniqueIdentifier>{CA34BF36-4A27-1865-3A9D-10244521DB41}</UniqueIdentifier>
+			<UniqueIdentifier>{BBCABA7E-D675-104C-C137-F7B3AF9BF9FB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\jpg">
-			<UniqueIdentifier>{81087E3F-954D-5780-902B-E807335021EB}</UniqueIdentifier>
+			<UniqueIdentifier>{B7DC4B44-DE9F-A167-11CD-6BD1003464AF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\mbedtls">
-			<UniqueIdentifier>{11ECB634-4A51-21AC-4585-B3F5625A5238}</UniqueIdentifier>
+			<UniqueIdentifier>{D9AAAB46-F2B7-53F0-416E-4A3688A0F976}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\mobile_vr">
-			<UniqueIdentifier>{E0DD35F9-ED7F-3E56-82EE-5ECD31EC64F8}</UniqueIdentifier>
+			<UniqueIdentifier>{5043D0B2-6615-1339-3C38-1647DD7EE35F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\ogg">
-			<UniqueIdentifier>{DE45F3B4-6C83-D875-B0DE-0EC4C555E806}</UniqueIdentifier>
+			<UniqueIdentifier>{193C5C1B-7B70-8FA4-3700-E637F59C8756}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\opensimplex">
-			<UniqueIdentifier>{D6CACFD9-D6C1-76D4-8A64-94246B0382B5}</UniqueIdentifier>
+			<UniqueIdentifier>{B2CA5716-9010-301E-21ED-9823B42D68C4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\opus">
-			<UniqueIdentifier>{AD8EAE8E-717F-049E-9C6E-008E0DAA359E}</UniqueIdentifier>
+			<UniqueIdentifier>{E4D44C89-5231-189E-1403-AC75B44B6504}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\opus\stub">
-			<UniqueIdentifier>{3CF97D75-18AF-DAE7-1CC8-E91D66C6D0BF}</UniqueIdentifier>
+			<UniqueIdentifier>{3D180C62-BDD3-9526-2D65-5C6270C36CC9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\pvr">
-			<UniqueIdentifier>{AF52FA92-12F4-69B7-AB64-856FDF4823AA}</UniqueIdentifier>
+			<UniqueIdentifier>{B6949233-DAF3-1F64-F04E-D643C5EA3E1C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\recast">
-			<UniqueIdentifier>{EC898D2D-4619-C0E4-9764-4B50E78E742E}</UniqueIdentifier>
+			<UniqueIdentifier>{9135987F-4FD2-BE61-A491-5FF9335A6ACC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\regex">
-			<UniqueIdentifier>{A04E4E7C-374D-24A9-AB2E-7F103BF10338}</UniqueIdentifier>
+			<UniqueIdentifier>{D0AFF703-3E9B-84C2-9CCD-82CAEDE6B458}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\squish">
-			<UniqueIdentifier>{B438628B-0148-3751-D576-0CDD9AB9DCB7}</UniqueIdentifier>
+			<UniqueIdentifier>{A9B67423-769E-26FE-52E4-8896DD66E339}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\stb_vorbis">
-			<UniqueIdentifier>{68D7D400-E0C4-5282-2F68-728A7E625B74}</UniqueIdentifier>
+			<UniqueIdentifier>{32F46E02-1146-4F78-5A99-5BE3F3908292}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\svg">
-			<UniqueIdentifier>{07A348D0-BE73-F14B-ACD6-58571EC08C1B}</UniqueIdentifier>
+			<UniqueIdentifier>{F2004EA7-B962-013A-C3CC-6DC4F91DE322}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\tga">
-			<UniqueIdentifier>{7DDA3836-CBDF-EA69-0083-70E0C0FB6312}</UniqueIdentifier>
+			<UniqueIdentifier>{1B0C5EE9-6086-3A8E-72D3-9F7EA77E8833}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\theora">
-			<UniqueIdentifier>{F067818B-E045-EF60-416E-E47D2BA5EF37}</UniqueIdentifier>
+			<UniqueIdentifier>{DC8A4646-A2B5-5ADE-19EC-6DE689E6758B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\tinyexr">
-			<UniqueIdentifier>{20A5FBCB-BE61-BF88-1FB8-7FEA6CEA8C09}</UniqueIdentifier>
+			<UniqueIdentifier>{5EF3C38A-BC6D-ECC3-395F-260917AC5955}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\upnp">
-			<UniqueIdentifier>{7F34B053-66A5-9B53-E401-C9B6B68F2B63}</UniqueIdentifier>
+			<UniqueIdentifier>{BAFDE72D-E746-C48B-085D-C9862751CB8E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\visual_script">
-			<UniqueIdentifier>{9780EBFC-B77B-E2C7-2D20-862F9348E130}</UniqueIdentifier>
+			<UniqueIdentifier>{D09DF0B8-C4A4-D540-BC81-F2D3CE0A566D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\vorbis">
-			<UniqueIdentifier>{414A3D7E-7636-4549-78DD-DFD7D8C69096}</UniqueIdentifier>
+			<UniqueIdentifier>{738799AD-1037-8AF6-B519-5D76693663BA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\vorbis\stub">
-			<UniqueIdentifier>{AE5DB18B-ECB9-AA00-3138-9EC9FB268297}</UniqueIdentifier>
+			<UniqueIdentifier>{FF07D25C-9A74-8CB2-C497-EA07F381D6B1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\webm">
-			<UniqueIdentifier>{166DD754-6406-D273-9253-45C58856D4B9}</UniqueIdentifier>
+			<UniqueIdentifier>{11857F30-B584-87D8-D825-F227A27DDC77}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\webp">
-			<UniqueIdentifier>{82174383-CC8C-5C5D-CD6A-1D7BFE31C71E}</UniqueIdentifier>
+			<UniqueIdentifier>{FA0869F5-4F96-80D0-909B-583BD1876C5F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\websocket">
-			<UniqueIdentifier>{3DF398B3-5C1F-A5B8-456C-AB6DCD066CA2}</UniqueIdentifier>
+			<UniqueIdentifier>{195E6A67-5416-052C-BA82-D16FE340E357}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\modules\xatlas_unwrap">
-			<UniqueIdentifier>{3B646596-AD88-9AF2-6AF0-8ADEBFB2F00F}</UniqueIdentifier>
+			<UniqueIdentifier>{F4C63285-536D-7EC5-B4F2-6AF00B13074B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform">
-			<UniqueIdentifier>{17E8F8B5-13CD-DEF5-0C5E-157C73DB7261}</UniqueIdentifier>
+			<UniqueIdentifier>{2FE7BF36-9ACD-1C1F-35DF-3B30DEB2502F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\android">
-			<UniqueIdentifier>{D69262C4-73BA-B3C8-D233-9807A46CDB07}</UniqueIdentifier>
+			<UniqueIdentifier>{60AD6C8A-8DA4-7323-B53B-F0B62B34362A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\android\export">
-			<UniqueIdentifier>{47FCB70F-2BC8-4558-9F01-EB7BEB296E2D}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\platform\android\globals">
-			<UniqueIdentifier>{7B2F5E33-C817-F5D0-FCC1-FA766AF3161D}</UniqueIdentifier>
+			<UniqueIdentifier>{CC73B079-94AB-AC31-EF7E-A7EF9EB8581F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\iphone">
-			<UniqueIdentifier>{2ADB9717-01B3-E5D9-B1FF-774CF2D6EA80}</UniqueIdentifier>
+			<UniqueIdentifier>{2EBBA405-D48F-FC93-865A-25FD8A788AFE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\iphone\export">
-			<UniqueIdentifier>{02824CAD-E763-AAB1-D3D8-08302759B319}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\platform\iphone\globals">
-			<UniqueIdentifier>{969F5EA8-1CF6-B473-9D67-5E2B887CED6A}</UniqueIdentifier>
+			<UniqueIdentifier>{97C74335-397F-5CEE-EE2A-95EB38871F03}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\javascript">
-			<UniqueIdentifier>{D0BDAE28-4673-58E9-1335-49C968D862E7}</UniqueIdentifier>
+			<UniqueIdentifier>{198601F5-36FD-A3BD-E610-AC7F98225FCA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\javascript\export">
-			<UniqueIdentifier>{CC29E00D-07E9-6A43-C8D7-6329AE8C6708}</UniqueIdentifier>
+			<UniqueIdentifier>{FFD6F05C-2CCA-D74E-CF97-AA052F113941}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\osx">
-			<UniqueIdentifier>{0C94F1B6-6808-4EC0-040C-6FE9A7C058F8}</UniqueIdentifier>
+			<UniqueIdentifier>{08AF0A77-36F8-00C4-223E-4F6E20F30B5F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\osx\export">
-			<UniqueIdentifier>{D1C20A16-6E92-CD05-4295-E48BE7CAA247}</UniqueIdentifier>
+			<UniqueIdentifier>{B7B24DF5-05F7-0905-AC22-2E02B8D0DA66}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\uwp">
-			<UniqueIdentifier>{2C406777-A870-A399-262E-D2C3DEADE7EF}</UniqueIdentifier>
+			<UniqueIdentifier>{33BD62F7-7184-401A-43C4-4A1AE82394C6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\uwp\export">
-			<UniqueIdentifier>{68D74542-F3AA-3248-2664-029B53358A96}</UniqueIdentifier>
+			<UniqueIdentifier>{8D80E9F8-BC35-39E7-3A03-7CF15D663CF1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\windows">
-			<UniqueIdentifier>{07547BCC-C0D8-8966-2C3A-E228249399BB}</UniqueIdentifier>
+			<UniqueIdentifier>{4766B01B-5ABB-9EBA-96A0-03FC7187EBF3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\windows\export">
-			<UniqueIdentifier>{2CEC82FD-A494-E2B0-CBB8-75E51889BCFD}</UniqueIdentifier>
+			<UniqueIdentifier>{60E48A45-4318-C074-0651-D7C866616576}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\x11">
-			<UniqueIdentifier>{125D2B8F-AA72-D7B0-C185-6E7D62800C80}</UniqueIdentifier>
+			<UniqueIdentifier>{13DD9A20-C710-450A-5931-705AD59E0DFC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\platform\x11\export">
-			<UniqueIdentifier>{D1CB0D53-BACA-A112-1F28-05758A2DF14B}</UniqueIdentifier>
+			<UniqueIdentifier>{409EB259-A28C-B188-11AF-5B68A1ADD07E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene">
-			<UniqueIdentifier>{247674DD-EB2F-865E-C278-D1D4C790BA73}</UniqueIdentifier>
+			<UniqueIdentifier>{6EBD47BF-D29D-455D-940E-9BC8EFA7F4E8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene\2d">
-			<UniqueIdentifier>{C226F209-1D7D-82AE-CB7E-16937C4855C2}</UniqueIdentifier>
+			<UniqueIdentifier>{DF1CCB9E-4CFE-58F0-C2C2-54C64AE3ED1F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene\3d">
-			<UniqueIdentifier>{0C1DDF1D-BF76-0B2D-2604-A3B3AAFDDF29}</UniqueIdentifier>
+			<UniqueIdentifier>{4749FBDD-4AE8-BCD4-1F48-F5CBC1A17496}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene\animation">
-			<UniqueIdentifier>{8A0DCDFC-E2BC-4F6A-B2FB-9FB2303EAD9D}</UniqueIdentifier>
+			<UniqueIdentifier>{EC8E3862-8B73-3A07-6E43-44ED87D1A8E8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene\audio">
-			<UniqueIdentifier>{476B4860-0F32-5543-A8B4-9BB7DE5A4BCA}</UniqueIdentifier>
+			<UniqueIdentifier>{8236666E-4823-06E7-54BC-5422E76576A9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene\gui">
-			<UniqueIdentifier>{538F33BF-945C-9899-CE87-C8B750BA15A4}</UniqueIdentifier>
+			<UniqueIdentifier>{72876744-1797-AACA-D4F2-37C01EBFE2F7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene\main">
-			<UniqueIdentifier>{2B94736B-C124-12A9-70EA-39652F26BEE0}</UniqueIdentifier>
+			<UniqueIdentifier>{60F46495-8E04-0F5E-B4CC-BE0A5D79C1AE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene\resources">
-			<UniqueIdentifier>{F6D66ABE-526E-AE77-3FDD-264ACDD8322A}</UniqueIdentifier>
+			<UniqueIdentifier>{8FE1BB35-673B-70E9-FC9A-E52F67B6B334}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\scene\resources\default_theme">
-			<UniqueIdentifier>{A2105727-5C2A-CCBA-7F71-C2D2061421E1}</UniqueIdentifier>
+			<UniqueIdentifier>{27E5EB50-D6FC-E2D2-B968-46806AF8D83B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\servers">
-			<UniqueIdentifier>{45D7A692-2124-0897-7394-3DA82516F28A}</UniqueIdentifier>
+			<UniqueIdentifier>{EF774B78-1D53-040E-E7EA-42C684A88BAC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\servers\arvr">
-			<UniqueIdentifier>{625B1198-1E47-DFB8-C4E3-F706737A8EF4}</UniqueIdentifier>
+			<UniqueIdentifier>{D85FA9DC-6CAC-DBA8-73BC-86319628A258}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\servers\audio">
-			<UniqueIdentifier>{270AB95D-56DA-6695-3415-48D290A041C0}</UniqueIdentifier>
+			<UniqueIdentifier>{EC3901DE-4465-6D53-9081-3B945553AEC8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\servers\audio\effects">
-			<UniqueIdentifier>{6FC92527-3A80-ECF9-A950-18A2C153070B}</UniqueIdentifier>
+			<UniqueIdentifier>{A86C0F17-1374-D7DE-D417-1D95A83295EC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\servers\physics">
-			<UniqueIdentifier>{6E59D849-9775-359F-FABE-3E5A056C262E}</UniqueIdentifier>
+			<UniqueIdentifier>{76B857CA-63A0-8DB4-881A-59713B1983B6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\servers\physics\joints">
-			<UniqueIdentifier>{B9CFA4E5-AF1F-3BD4-66B0-4B5181D313C4}</UniqueIdentifier>
+			<UniqueIdentifier>{CF8A13AF-BACE-0E4B-53F9-4176190D9121}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\servers\physics_2d">
-			<UniqueIdentifier>{8FD6E1D8-FC0C-7E84-990E-DE9A1AB8A659}</UniqueIdentifier>
+			<UniqueIdentifier>{CC1F7D41-7722-EF19-D712-6F837867C0CE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\servers\visual">
-			<UniqueIdentifier>{081F0AF9-F758-3901-C83A-0759ABA9E044}</UniqueIdentifier>
+			<UniqueIdentifier>{A74D81BA-F661-7105-B727-5A54AC66574A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty">
-			<UniqueIdentifier>{5A7B74C3-829A-8900-9641-AB2281C4556F}</UniqueIdentifier>
+			<UniqueIdentifier>{BC5A5EEC-D245-0A81-EA6C-7ED0E1EBC16A}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\thirdparty\assimp">
+			<UniqueIdentifier>{9786F34B-AD82-C506-6383-0C639BE4EE21}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\thirdparty\assimp\code">
+			<UniqueIdentifier>{183A60FC-5061-C683-72D0-AC383B7C3991}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\b2d_convexdecomp">
-			<UniqueIdentifier>{D0DB0FBE-9BF1-2788-FA67-EF4C96D8B26F}</UniqueIdentifier>
+			<UniqueIdentifier>{CEFBE5F1-B107-2AF5-9992-02B77DD0B3FB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet">
-			<UniqueIdentifier>{66B022AF-6C45-673C-DE8F-96536C6BD5E6}</UniqueIdentifier>
+			<UniqueIdentifier>{DC131E80-5EDF-9383-0D16-BD73C6D37FB2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletCollision">
-			<UniqueIdentifier>{B72E4B8F-1460-9BD8-FC30-D8FA59CC662E}</UniqueIdentifier>
+			<UniqueIdentifier>{D0B81F81-9953-BDE9-EC7C-F02CC7FE8A77}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletCollision\BroadphaseCollision">
-			<UniqueIdentifier>{6D0976B9-4CDC-1A01-E7B3-2C824F36989D}</UniqueIdentifier>
+			<UniqueIdentifier>{8175CCED-E22E-7C9F-1673-33A89338DB6C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletCollision\CollisionDispatch">
-			<UniqueIdentifier>{4357BB54-6B71-7EA5-28E9-7452A938B0E3}</UniqueIdentifier>
+			<UniqueIdentifier>{842D8333-CC93-5FBD-9FAD-594692F83D2F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletCollision\CollisionShapes">
-			<UniqueIdentifier>{090283FE-A46A-D40C-9773-4E9567706E97}</UniqueIdentifier>
+			<UniqueIdentifier>{6CDF2132-A184-E1B6-3C11-98D893AECDC2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletCollision\Gimpact">
-			<UniqueIdentifier>{CFF4F318-ED77-8FB2-A14A-F2ED1BFD8F0E}</UniqueIdentifier>
+			<UniqueIdentifier>{C1D7E7AA-2C35-2098-A3FC-0A74CD1900B7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletCollision\NarrowPhaseCollision">
-			<UniqueIdentifier>{0534BEA1-66FA-7A3C-E8A0-B3EA4623B8D6}</UniqueIdentifier>
+			<UniqueIdentifier>{7D3C1445-6AD8-720D-9B1A-EB82C455838F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletDynamics">
-			<UniqueIdentifier>{2D3B1BC9-7FB2-93B8-9F5D-DE3EB8962617}</UniqueIdentifier>
+			<UniqueIdentifier>{77CCEC7D-7301-0775-757E-D5205D3BD269}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletDynamics\Character">
-			<UniqueIdentifier>{49280E6D-48F2-AE74-199D-CFACBB62C520}</UniqueIdentifier>
+			<UniqueIdentifier>{18BE0E24-37AE-DB3B-E8C7-F80041369722}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletDynamics\ConstraintSolver">
-			<UniqueIdentifier>{08A2E1AE-EBC2-48FA-AD1C-8F5759C292BD}</UniqueIdentifier>
+			<UniqueIdentifier>{EFF6BD9F-34DC-4466-0D87-AD4343CCE640}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletDynamics\Dynamics">
-			<UniqueIdentifier>{C3A17E14-66DB-3221-53EC-0FC096BB31C5}</UniqueIdentifier>
+			<UniqueIdentifier>{B268CE0D-3EB8-8F6B-7444-9629C6A87FF7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletDynamics\Featherstone">
-			<UniqueIdentifier>{6F5805F2-A8A5-5AE7-B0E1-9FC5BC790F05}</UniqueIdentifier>
+			<UniqueIdentifier>{1C1E21C2-3652-CA4D-E3D1-1BB43C7BC2FC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletDynamics\MLCPSolvers">
-			<UniqueIdentifier>{09FB54DF-0F76-EA16-9797-3B483B34CAE8}</UniqueIdentifier>
+			<UniqueIdentifier>{41F190A9-C9B0-FAE9-2B2E-FD82EA1A0440}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletDynamics\Vehicle">
-			<UniqueIdentifier>{2514A82D-417B-31DD-BA2F-B9A05F87A2F9}</UniqueIdentifier>
+			<UniqueIdentifier>{F2FA088F-C918-AA54-D544-3CF3A9D66876}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletInverseDynamics">
-			<UniqueIdentifier>{3432C847-2261-14B0-4321-10A0A9AE869B}</UniqueIdentifier>
+			<UniqueIdentifier>{97132D3B-F4AA-1FEC-8345-073A38DB8CA4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletInverseDynamics\details">
-			<UniqueIdentifier>{12070AEF-8AED-9B28-30B6-7A96CFF8794F}</UniqueIdentifier>
+			<UniqueIdentifier>{6DE62417-07C4-90E5-C347-23B9B215F8F9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\BulletSoftBody">
-			<UniqueIdentifier>{1B417CBF-71AB-0DD9-7671-FFF1D7BC5269}</UniqueIdentifier>
+			<UniqueIdentifier>{575D83DE-187E-8662-256A-A79CD3D8510A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\clew">
-			<UniqueIdentifier>{A98FB674-15D9-C50E-7F1A-99120642C6B6}</UniqueIdentifier>
+			<UniqueIdentifier>{4CEE331F-1BE3-2219-FEE1-6CDE8BB3F1FC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\bullet\LinearMath">
-			<UniqueIdentifier>{20D56594-C148-11D9-C0B6-18F5FE3D01E9}</UniqueIdentifier>
+			<UniqueIdentifier>{20B35A64-EA4C-F63B-625B-222F70B1676C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\cvtt">
-			<UniqueIdentifier>{59752170-D4FA-7082-4C82-2641E78A50FD}</UniqueIdentifier>
+			<UniqueIdentifier>{88DE5C13-F39B-8612-C225-CB1098DDFEF7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\etc2comp">
-			<UniqueIdentifier>{7131F530-B9E6-2326-755A-91D7DCB20DA9}</UniqueIdentifier>
+			<UniqueIdentifier>{A1DC756A-1468-9B0F-EA6E-853B03063718}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\jpeg-compressor">
-			<UniqueIdentifier>{5CA3EE98-8E64-28EC-2D7B-1A96F9D1DDC8}</UniqueIdentifier>
+			<UniqueIdentifier>{E246E6BF-D211-3B94-FC10-2DF071802148}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libpng">
-			<UniqueIdentifier>{88B686D0-C286-D34E-4425-1ACAB325B16A}</UniqueIdentifier>
+			<UniqueIdentifier>{43948EB9-BCF1-4A6C-DEFB-1F708B236395}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libsimplewebm">
-			<UniqueIdentifier>{3F1EC32C-958F-6F72-F0FB-08F4527C40A2}</UniqueIdentifier>
+			<UniqueIdentifier>{66545C4A-CEAF-341D-444B-AD2A0C940735}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libsimplewebm\libwebm">
-			<UniqueIdentifier>{6BBFE097-AD35-915D-4D62-5A4CDAA6E0CD}</UniqueIdentifier>
+			<UniqueIdentifier>{AAD841E3-6FAC-04B9-E1FA-885594DA31D1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libsimplewebm\libwebm\mkvparser">
-			<UniqueIdentifier>{C4C90D19-F4B1-22AD-ED1D-5E35F9FEEFA4}</UniqueIdentifier>
+			<UniqueIdentifier>{371DC518-27F5-3642-8DC4-5781C2477782}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libtheora">
-			<UniqueIdentifier>{89F879AB-76CB-B7C6-84BB-3BE8C9A88FC6}</UniqueIdentifier>
+			<UniqueIdentifier>{A695D596-DEBB-BA7F-DBD2-DA14C3F833E6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvorbis">
-			<UniqueIdentifier>{99A1A511-D9D7-56CA-EF2B-04A8CB8581C1}</UniqueIdentifier>
+			<UniqueIdentifier>{044828B3-D514-CE58-8B25-B909B11ECDA2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx">
-			<UniqueIdentifier>{5EFCBA17-42BC-9688-96A5-631DF0B771FA}</UniqueIdentifier>
+			<UniqueIdentifier>{1BF1CC77-0E6F-8B10-9916-97651285AA53}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vp8">
-			<UniqueIdentifier>{B3287C93-F8C7-9C44-A0F8-512D75FEC557}</UniqueIdentifier>
+			<UniqueIdentifier>{D4B740D9-2F1F-DD88-FD68-38D8EBCDB5A8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vp8\common">
-			<UniqueIdentifier>{AA0FB4F3-35E5-7711-B89D-56C3546F7BCC}</UniqueIdentifier>
+			<UniqueIdentifier>{194C45F0-2AF1-9025-1837-28FB6FE8E763}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vp8\decoder">
-			<UniqueIdentifier>{98E8E766-CB17-7E01-E637-EA76C768A106}</UniqueIdentifier>
+			<UniqueIdentifier>{AC1C173C-E4CC-D829-824C-25D30F5FDDF3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vp9">
-			<UniqueIdentifier>{D179FB92-2389-E5AE-C6A3-E160D2DA54A5}</UniqueIdentifier>
+			<UniqueIdentifier>{73FBFB08-BDB7-A252-1281-B7CBA0AB24B5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vp9\common">
-			<UniqueIdentifier>{ABE3E835-257E-E3CD-CFC4-58587C07761A}</UniqueIdentifier>
+			<UniqueIdentifier>{BBEDBCB8-05B1-7950-8B74-9E9266228080}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vp9\decoder">
-			<UniqueIdentifier>{0ED11673-0A26-1EF2-630B-74FB5C2E682A}</UniqueIdentifier>
+			<UniqueIdentifier>{79EA9486-708E-79E7-095C-62624CB38726}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vpx_dsp">
-			<UniqueIdentifier>{8A87620D-7260-79BD-D161-C909A9D2A923}</UniqueIdentifier>
+			<UniqueIdentifier>{2BA41B65-F027-1A71-6C2D-5CB74D543A17}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vpx_mem">
-			<UniqueIdentifier>{66EFC181-24B5-8DAC-6DC9-42CD1E4C2788}</UniqueIdentifier>
+			<UniqueIdentifier>{468B2AAC-1AE6-0543-9D41-522D42EDCC30}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libvpx\vpx_util">
-			<UniqueIdentifier>{E4E35017-4E68-2FA3-1856-CCF6AB3CEE6F}</UniqueIdentifier>
+			<UniqueIdentifier>{66B0CAD7-6C95-3534-921D-C164137B2C92}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libwebp">
-			<UniqueIdentifier>{EF2DE40A-144C-41A1-9A41-C79DEFFC7ED2}</UniqueIdentifier>
+			<UniqueIdentifier>{2DC6D5B0-0983-C96E-92AE-424B5524CDB9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libwebp\src">
-			<UniqueIdentifier>{78F4418C-8CA3-AE44-D3F2-C68C1021D817}</UniqueIdentifier>
+			<UniqueIdentifier>{FB091E85-6B77-809D-B31E-F5E4E7F591D9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libwebp\src\dec">
-			<UniqueIdentifier>{D71C99B9-3AA4-56FA-A4F5-34DC942DA569}</UniqueIdentifier>
+			<UniqueIdentifier>{0AE4B814-F963-016E-3FBF-EAF3F7C01F0E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libwebp\src\dsp">
-			<UniqueIdentifier>{C2DFF74F-61AB-67D4-C4DF-F6785F992FE6}</UniqueIdentifier>
+			<UniqueIdentifier>{56C254D0-E1F0-71A9-9F46-86F8AAF77089}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libwebp\src\enc">
-			<UniqueIdentifier>{637A0221-3937-C314-4972-A6E4F5D22DE5}</UniqueIdentifier>
+			<UniqueIdentifier>{D3720141-6503-5BFF-0A34-D5D0CFC05A4D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libwebp\src\utils">
-			<UniqueIdentifier>{8CFD2818-CD2C-44A2-5896-E3EC86B8F7E3}</UniqueIdentifier>
+			<UniqueIdentifier>{4FA5E23B-EAF8-FA01-9609-B3DA6FAF8C3C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libwebsockets">
-			<UniqueIdentifier>{32161EBC-20EB-B29E-8AE7-8ED9721FE940}</UniqueIdentifier>
+			<UniqueIdentifier>{3ADB1B7D-F1D7-E7E2-BDFF-F7E6EEA8DC70}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\libwebsockets\win32helpers">
-			<UniqueIdentifier>{82E9200B-A913-B70E-51F7-3ED209A07352}</UniqueIdentifier>
+			<UniqueIdentifier>{3158A789-19C8-169F-C91A-D91BBFFBBD8E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\miniupnpc">
-			<UniqueIdentifier>{F43DAEFA-CCC5-BA2C-3EA1-9E5B0E58E682}</UniqueIdentifier>
+			<UniqueIdentifier>{FD72221E-6933-B80A-8C20-886762DDBFDF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\minizip">
-			<UniqueIdentifier>{B4148CA4-AA37-911A-A037-FFFC92C3195F}</UniqueIdentifier>
+			<UniqueIdentifier>{D8BD6A19-53C8-5D0E-F71C-82CB501132BA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\misc">
-			<UniqueIdentifier>{E1310C5F-5499-D407-460E-D2247B496EF6}</UniqueIdentifier>
+			<UniqueIdentifier>{CF6FE3CF-3EB8-A76C-8042-1D536B0143A2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\nanosvg">
-			<UniqueIdentifier>{5A5F7541-B2EC-9699-AEB3-374E113F1655}</UniqueIdentifier>
+			<UniqueIdentifier>{0A95D0A9-5886-B447-9513-04AD0D729076}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\opus">
-			<UniqueIdentifier>{EB49C8E6-ED16-1E86-1043-B85D0869FA44}</UniqueIdentifier>
+			<UniqueIdentifier>{9F4DCB41-1B66-B508-FAB4-BACDEABE090B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\opus\celt">
-			<UniqueIdentifier>{39AEEACF-330A-3396-1DA4-F88AABA83F73}</UniqueIdentifier>
+			<UniqueIdentifier>{48F95336-2392-96D4-3A79-71C5DD0081AD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\opus\silk">
-			<UniqueIdentifier>{FA333360-7811-D117-4481-0D475F6202DB}</UniqueIdentifier>
+			<UniqueIdentifier>{53444BFF-4938-89DB-FD3F-4A0BAD2835AD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\pvrtccompressor">
-			<UniqueIdentifier>{FAE92B2D-B422-7311-AD8A-22DC3ED13E7E}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Header Files\thirdparty\rtaudio">
-			<UniqueIdentifier>{C9206B96-DFB5-03CE-09AE-D4DB15C9BCE6}</UniqueIdentifier>
+			<UniqueIdentifier>{BE5000DF-6EA2-F58E-318A-E70D600B4801}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\squish">
-			<UniqueIdentifier>{926FB0FE-6C4C-A708-7D5A-ABC28424228A}</UniqueIdentifier>
+			<UniqueIdentifier>{3341B53A-41B3-5F69-C4CD-16E7B5993DCA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\tinyexr">
-			<UniqueIdentifier>{98BBD3E4-9D2E-E96E-68F2-43E10E7630FA}</UniqueIdentifier>
+			<UniqueIdentifier>{2FB881DD-BCC4-6ECF-B5EC-E1A097535F74}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\xatlas">
-			<UniqueIdentifier>{A5225989-ADCB-22B8-D488-8318367337FA}</UniqueIdentifier>
+			<UniqueIdentifier>{9EAF2252-748E-EF89-7E98-FE03FF67F17C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\zlib">
-			<UniqueIdentifier>{8CE7096F-A8CC-00B3-5BC4-F0B3F9F3E977}</UniqueIdentifier>
+			<UniqueIdentifier>{CE153DA7-0EF9-C488-9452-BEA26DF7C42B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\zstd">
-			<UniqueIdentifier>{0E38B336-F28F-D48C-CAF6-10138E32F5CD}</UniqueIdentifier>
+			<UniqueIdentifier>{2BB36A6B-F2A1-9CFA-5D78-6182A571C8CC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\zstd\common">
-			<UniqueIdentifier>{1D941A12-497B-6E0D-BF21-8CEF4AE77DED}</UniqueIdentifier>
+			<UniqueIdentifier>{70E8CCBD-2E6F-558C-4E93-568B956D4B11}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Header Files\thirdparty\zstd\compress">
-			<UniqueIdentifier>{A24D1995-62CD-6508-09B6-53CFBB932127}</UniqueIdentifier>
+			<UniqueIdentifier>{20238405-6A01-713D-00F8-F1193CFD4E07}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files\thirdparty\zstd\decompress">
+			<UniqueIdentifier>{D6DDCD3A-2720-2479-3828-CDCE2BBABCA0}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files">
 			<UniqueIdentifier>{7b42d31d-d53c-4868-8b92-ca2bc9fc052f}</UniqueIdentifier>
 			<Extensions>cpp;c;cxx;l;y;def;odl;idl;hpj;bat</Extensions>
 		</Filter>
 		<Filter Include="Source Files\core">
-			<UniqueIdentifier>{2EBC0352-90C1-F404-1E98-D367F141EFE7}</UniqueIdentifier>
+			<UniqueIdentifier>{0DD3735A-4096-F33D-49F5-6323165982C6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\core\bind">
-			<UniqueIdentifier>{E342ECF4-63F2-FF55-23B9-DBA84639C88F}</UniqueIdentifier>
+			<UniqueIdentifier>{2AA9AB12-28E7-4F9B-3C6F-6946FB0D5E7A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\core\io">
-			<UniqueIdentifier>{4B5090D7-71FB-1016-8AA3-6A1925FB1540}</UniqueIdentifier>
+			<UniqueIdentifier>{D6463FB2-1631-2485-6CAC-419F6F925A63}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\core\math">
-			<UniqueIdentifier>{223E0CE9-15F1-9FA2-BEF7-71519EBDB7C3}</UniqueIdentifier>
+			<UniqueIdentifier>{FF28C3C5-8F07-2633-0E7E-1BD0D1D9E09A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\core\os">
-			<UniqueIdentifier>{13E09D7D-C43C-C329-55D6-55801D04BB61}</UniqueIdentifier>
+			<UniqueIdentifier>{9D4A12B3-84BE-ACA4-25A3-C91D2B094D51}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers">
-			<UniqueIdentifier>{F804E7D7-D460-B53B-CED7-F1337747D000}</UniqueIdentifier>
+			<UniqueIdentifier>{EBBF0A4E-136B-8406-35FC-CCA767B734DD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\alsa">
-			<UniqueIdentifier>{6631B44C-ADFC-C3B2-4545-BB9196F3C5DF}</UniqueIdentifier>
+			<UniqueIdentifier>{6E219088-5BD9-8CCF-8F68-BEDD3FD26F29}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\alsamidi">
-			<UniqueIdentifier>{DE50EA02-4FBC-0B0F-C7AD-07F7A5442D03}</UniqueIdentifier>
+			<UniqueIdentifier>{96FBD78F-2947-EED5-DEB7-0BF3572687E5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\convex_decomp">
-			<UniqueIdentifier>{A0F3428C-0836-28B1-95C4-6F5B6921C3E1}</UniqueIdentifier>
+			<UniqueIdentifier>{11147371-B5E0-38C5-71F3-54AA5C37D92D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\coreaudio">
-			<UniqueIdentifier>{583A0FD1-3F0C-C716-398D-B954EB331E50}</UniqueIdentifier>
+			<UniqueIdentifier>{C2692832-0C86-8F26-7209-B917C256048F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\coremidi">
-			<UniqueIdentifier>{2EAB9315-0880-063E-7100-EF0EF112C12B}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\drivers\gl_context">
-			<UniqueIdentifier>{AA9E8A74-60EF-C116-63CA-D0118338C6A3}</UniqueIdentifier>
+			<UniqueIdentifier>{8AB6D82E-2680-0586-9E2F-55445B94AFAB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\gles2">
-			<UniqueIdentifier>{FE9619B6-7E0B-F370-4150-73E03DEE66DF}</UniqueIdentifier>
+			<UniqueIdentifier>{32BF54C8-D4CE-66AF-0C49-EFB1758F78D0}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\gles3">
-			<UniqueIdentifier>{E74C9959-EA09-78B9-F5D6-CF980E911616}</UniqueIdentifier>
+			<UniqueIdentifier>{80904B66-7B30-BC70-CF0C-EFF52902B513}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\png">
-			<UniqueIdentifier>{99F41A8D-8C73-CB56-2911-FD487771F3AA}</UniqueIdentifier>
+			<UniqueIdentifier>{01E789A5-4FC6-3D5A-E908-8292EC1DDBAD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\pulseaudio">
-			<UniqueIdentifier>{8E92E1D8-4FBF-0DAC-30FC-2F1FAEB26051}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\drivers\rtaudio">
-			<UniqueIdentifier>{A85BD0F5-F927-69B6-BBA3-AA486D38DE1E}</UniqueIdentifier>
+			<UniqueIdentifier>{0B8DA410-83A7-83AF-4BAE-8EC366873588}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\unix">
-			<UniqueIdentifier>{4019CE7B-AB76-28E5-2E07-E579E4A046B5}</UniqueIdentifier>
+			<UniqueIdentifier>{B9A56BE4-FA20-9D36-E1A3-E56976ADC0F5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\wasapi">
-			<UniqueIdentifier>{F430946C-E42F-AAA9-FDFD-CD2A1D8C947C}</UniqueIdentifier>
+			<UniqueIdentifier>{AAAFDDD4-BC32-DFC9-FCEB-11B441A7B3C9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\windows">
-			<UniqueIdentifier>{A491978B-2E40-ECAF-946C-102B7F87643F}</UniqueIdentifier>
+			<UniqueIdentifier>{30B21C2A-3BE2-78E7-2C4B-79B85B4CE9C9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\drivers\winmidi">
-			<UniqueIdentifier>{8B8C5BBC-BE3B-CFF2-99CA-B4A2604F6CD4}</UniqueIdentifier>
+			<UniqueIdentifier>{CC807050-59AC-03B0-85F4-3AD6D2A295D5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\editor">
-			<UniqueIdentifier>{FFF3014C-96C1-3B12-7817-02A398911F60}</UniqueIdentifier>
+			<UniqueIdentifier>{72F2AB94-9DCF-1849-DC6B-1EED59E930F7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\editor\collada">
-			<UniqueIdentifier>{EAB5B76B-D46F-C303-7596-91160C0CFA6D}</UniqueIdentifier>
+			<UniqueIdentifier>{1CA913F9-2FF6-E3A2-E158-B0D4320AECD9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\editor\doc">
-			<UniqueIdentifier>{411FA00F-E2B4-B1E3-C93B-6C949F6BBDD0}</UniqueIdentifier>
+			<UniqueIdentifier>{EE7113B9-A651-4F53-49BF-2E12F075C7DB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\editor\fileserver">
-			<UniqueIdentifier>{BC0C8C5E-5357-E878-628D-EAD5713AE17B}</UniqueIdentifier>
+			<UniqueIdentifier>{64299D94-60EA-7DF1-BC3A-3445129322FD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\editor\import">
-			<UniqueIdentifier>{7247EED9-0BF8-3BEC-F98B-B16EA2B06209}</UniqueIdentifier>
+			<UniqueIdentifier>{CBB90B23-AA82-AC54-505F-E2865B389A43}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\editor\plugins">
-			<UniqueIdentifier>{73887FF4-F3E5-36CF-33C8-FC3F28846781}</UniqueIdentifier>
+			<UniqueIdentifier>{53E8ED9B-ED28-C50D-05A8-2EB6E0FFC498}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\main">
-			<UniqueIdentifier>{18D4CE27-73BB-3459-3AAF-6A43C08D3671}</UniqueIdentifier>
+			<UniqueIdentifier>{ACEFA095-A96F-0A4B-A7A9-48E1156046A3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules">
-			<UniqueIdentifier>{64C4AABC-CC0F-221B-9E7B-4B96E3DA90E7}</UniqueIdentifier>
+			<UniqueIdentifier>{EAE80A4F-3BFD-402D-A2F8-A72A01AD4E04}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\modules\assimp">
+			<UniqueIdentifier>{89396A30-89A7-AC63-89FC-53515DAEC305}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\bmp">
-			<UniqueIdentifier>{C7A9B709-EB27-D3AF-60A6-F881EF33478A}</UniqueIdentifier>
+			<UniqueIdentifier>{1485C913-055C-1B1A-79F0-70AB50CEA690}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\bullet">
-			<UniqueIdentifier>{FF0F338F-1109-EDC1-5660-0DD124514EB2}</UniqueIdentifier>
+			<UniqueIdentifier>{AB99BA2D-E291-8B84-F011-9B85A7493609}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\csg">
-			<UniqueIdentifier>{53570998-827B-4B6D-FFAA-C31F396770D1}</UniqueIdentifier>
+			<UniqueIdentifier>{594F9B8D-4293-18B3-6F91-4B3E13727833}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\cvtt">
-			<UniqueIdentifier>{91DAF6B7-6A22-0929-9E3A-120709D44DDE}</UniqueIdentifier>
+			<UniqueIdentifier>{FDAE3F49-BA42-C81B-B55B-062D09898432}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\dds">
-			<UniqueIdentifier>{5C4711C4-9983-3D17-3D51-8020F23762C6}</UniqueIdentifier>
+			<UniqueIdentifier>{D301E612-2968-89D8-50C9-D8B2FCA7ADA2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\enet">
-			<UniqueIdentifier>{816E36A3-76C7-C228-A367-D56B7A484724}</UniqueIdentifier>
+			<UniqueIdentifier>{A383C76C-D24E-32AA-5D02-816FB5A6C4DD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\etc">
-			<UniqueIdentifier>{2DE74E92-A16B-CB6F-37B6-46601A5A4C36}</UniqueIdentifier>
+			<UniqueIdentifier>{23677801-9FCB-E429-6932-9A7E37C76DC6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\freetype">
-			<UniqueIdentifier>{A512A0CE-4BA0-486D-274B-62381019CC86}</UniqueIdentifier>
+			<UniqueIdentifier>{9A51D653-992E-AB49-F08F-3047B323BFE8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdnative">
-			<UniqueIdentifier>{FC0EB446-3DE0-896A-CFEA-B590FBB9C5FA}</UniqueIdentifier>
+			<UniqueIdentifier>{ED913BA2-2B62-4473-13F0-B5BD686ACC63}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdnative\android">
-			<UniqueIdentifier>{9207F759-2EA2-0DE9-161D-DD72A5D355E7}</UniqueIdentifier>
+			<UniqueIdentifier>{CFE4D2A4-D510-490F-C07C-18401B9DBEE4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdnative\arvr">
-			<UniqueIdentifier>{81DAB992-A16B-98B9-A5C6-8E530A6D2319}</UniqueIdentifier>
+			<UniqueIdentifier>{BD9DC610-BD0B-A5B6-3E36-5EEF028EBAE5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdnative\gdnative">
-			<UniqueIdentifier>{EEF74066-3D77-2FBC-3CC3-0F0E532260F0}</UniqueIdentifier>
+			<UniqueIdentifier>{4F0D543B-EBE0-1829-31EE-6C70DE7B91F8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdnative\nativescript">
-			<UniqueIdentifier>{4B3CAD3B-7D41-95C0-463F-56B9984BB67E}</UniqueIdentifier>
+			<UniqueIdentifier>{42A0BFD8-EA14-09EB-7249-96A41F083469}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdnative\net">
-			<UniqueIdentifier>{B0333026-F03E-956C-84B0-9892C873A96B}</UniqueIdentifier>
+			<UniqueIdentifier>{C221EAED-DA92-6CE9-0247-F18D4F7EE931}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdnative\pluginscript">
-			<UniqueIdentifier>{114930A6-61B4-FB06-0CCE-7BC327F1533B}</UniqueIdentifier>
+			<UniqueIdentifier>{5CAE274A-4A3B-14FC-F6BB-BB571223C419}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\modules\gdnative\videodecoder">
+			<UniqueIdentifier>{4D3C19C8-6E4A-2D98-62EC-47267B6CBE66}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdscript">
-			<UniqueIdentifier>{F7A742AA-7E0A-D822-0800-7A4BFACE65AC}</UniqueIdentifier>
+			<UniqueIdentifier>{D238A0E1-E67D-47B0-096B-D14275714D14}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gdscript\editor">
-			<UniqueIdentifier>{E5F690EE-0CF9-0587-CD77-B0A5CC5592AB}</UniqueIdentifier>
+			<UniqueIdentifier>{F379E467-4765-EEE8-F4A0-3CA584E4F327}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\gridmap">
-			<UniqueIdentifier>{1BA0A407-A245-6FAC-3636-032AD7782AC0}</UniqueIdentifier>
+			<UniqueIdentifier>{E3B8822A-B1DE-D0B4-B861-75E417A60EE5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\hdr">
-			<UniqueIdentifier>{DE7683EB-89EB-8924-218E-4879491044B7}</UniqueIdentifier>
+			<UniqueIdentifier>{54413C83-942A-F0FD-247D-DFEBDA0C3CD6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\jpg">
-			<UniqueIdentifier>{4152A639-ECA8-F7CB-3338-E9C3246AFA3A}</UniqueIdentifier>
+			<UniqueIdentifier>{C0539D50-21B9-2A50-3E8F-C4A58A5419B4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\mbedtls">
-			<UniqueIdentifier>{7197C9E5-E889-9FDF-B57F-0A9F899A9B27}</UniqueIdentifier>
+			<UniqueIdentifier>{CE38EE72-A9C4-7A34-ECBB-67BE30F26CBF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\mobile_vr">
-			<UniqueIdentifier>{144940A2-9C40-5E28-F851-631767EEE3BB}</UniqueIdentifier>
+			<UniqueIdentifier>{E01F536B-7556-A6E9-015E-23E36CB39A97}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\ogg">
-			<UniqueIdentifier>{635FCD8A-327D-1A12-87BD-21318A76ED20}</UniqueIdentifier>
+			<UniqueIdentifier>{AB0D0A01-7BDB-E070-8EB8-8B0C77669621}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\opensimplex">
-			<UniqueIdentifier>{8C1B7DD2-8E92-9C50-D88B-FA7A0996EEA4}</UniqueIdentifier>
+			<UniqueIdentifier>{C6B3D144-CCEC-A1D0-F9AC-1C820F253DEC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\opus">
-			<UniqueIdentifier>{4BF6379A-1EB4-042A-D125-B33848A29B57}</UniqueIdentifier>
+			<UniqueIdentifier>{40F669BA-4BD0-CFBF-7116-0A55823E03D6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\opus\stub">
-			<UniqueIdentifier>{79403E8D-9F12-C888-277E-E0DA18548989}</UniqueIdentifier>
+			<UniqueIdentifier>{AC0CF288-1AD6-FF65-96A1-15B27D8EFB59}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\pvr">
-			<UniqueIdentifier>{EB764052-F3D3-702D-0428-05C6FF65FE46}</UniqueIdentifier>
+			<UniqueIdentifier>{E2CADA93-DB49-B9FD-DFD9-93EC410991F5}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\recast">
-			<UniqueIdentifier>{B38D6585-749E-5EF3-68C8-4DEF3D44AAD1}</UniqueIdentifier>
+			<UniqueIdentifier>{AA249EC4-6538-C41F-3999-43D4F09AA797}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\regex">
-			<UniqueIdentifier>{6FF37445-760D-89EA-1F9C-DA92EDF1A85D}</UniqueIdentifier>
+			<UniqueIdentifier>{000858DB-345E-C78E-941E-4458BA537A5A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\squish">
-			<UniqueIdentifier>{3A0174E9-D58E-05A5-376C-CE20E62DB81A}</UniqueIdentifier>
+			<UniqueIdentifier>{D6DCC5FC-9D38-073F-944C-014179955D8D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\stb_vorbis">
-			<UniqueIdentifier>{9754D969-9AF9-722A-3179-F31EC11A4A8A}</UniqueIdentifier>
+			<UniqueIdentifier>{8F399AF5-D5DC-F76B-94CC-36BDFED38351}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\svg">
-			<UniqueIdentifier>{7FEDC20E-0DCF-1793-ECF2-A9C705F172CA}</UniqueIdentifier>
+			<UniqueIdentifier>{61227B61-987D-C9F2-5A96-AA816E0C60FF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\tga">
-			<UniqueIdentifier>{51B6AD45-1D70-8CAA-8BDB-5BACD99E0DEC}</UniqueIdentifier>
+			<UniqueIdentifier>{4FED494A-4737-1BF7-88E1-24C6FFF80447}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\theora">
-			<UniqueIdentifier>{26E0338F-01CA-ACC6-E9B8-B19DB4EB42B7}</UniqueIdentifier>
+			<UniqueIdentifier>{695439FF-370F-B628-2100-1F50F664F837}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\tinyexr">
-			<UniqueIdentifier>{DC5E0E0B-856A-A2C8-99DF-EABFF0F3CA6D}</UniqueIdentifier>
+			<UniqueIdentifier>{904DFC2A-E5D2-349F-3BFC-76D1E03B5C2C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\upnp">
-			<UniqueIdentifier>{A852511D-D166-D92F-DDA7-D7633F683937}</UniqueIdentifier>
+			<UniqueIdentifier>{059AE8F9-719C-6047-CDB2-2EF2BFE2D50E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\visual_script">
-			<UniqueIdentifier>{6BE20697-7F0F-13DC-A3FE-AFB4D98B9768}</UniqueIdentifier>
+			<UniqueIdentifier>{F950DCB1-6521-5249-9486-3434600A6115}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\vorbis">
-			<UniqueIdentifier>{266E8843-9FFC-EB20-BB1F-03B357EEDCC0}</UniqueIdentifier>
+			<UniqueIdentifier>{468B1A70-761B-48AB-7A3C-4788EBEAEDD1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\vorbis\stub">
-			<UniqueIdentifier>{148F4F41-3746-3A0E-9169-A341AF6ABB89}</UniqueIdentifier>
+			<UniqueIdentifier>{E403A2D8-C08C-33D3-D5C8-D6339B2CF11D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\webm">
-			<UniqueIdentifier>{17E82776-71E6-0272-56FA-6C12D64EDF3C}</UniqueIdentifier>
+			<UniqueIdentifier>{827E5097-DBED-7664-702E-3ED4DF70B0EA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\webp">
-			<UniqueIdentifier>{CA8B6CB4-8C96-9F23-319B-31EF84B52766}</UniqueIdentifier>
+			<UniqueIdentifier>{D587190C-A3C5-640F-6F59-FF88EF961871}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\websocket">
-			<UniqueIdentifier>{B8EDAA89-9C53-79BC-9ED2-ED8EB7C06889}</UniqueIdentifier>
+			<UniqueIdentifier>{D2210F36-B2E6-943E-D70F-160161B0B99B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\modules\xatlas_unwrap">
-			<UniqueIdentifier>{E0F56742-5071-B4F8-E813-50078717B521}</UniqueIdentifier>
+			<UniqueIdentifier>{9B16EAA8-607B-3A98-8474-E0CADF9400FF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform">
-			<UniqueIdentifier>{81C1C9A7-733D-EB00-4610-DE483B5D3FDD}</UniqueIdentifier>
+			<UniqueIdentifier>{C8A67085-807F-65D0-6346-9736657416A3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\android">
-			<UniqueIdentifier>{04A2BE79-F2B9-944F-FEC9-B468A8E135FC}</UniqueIdentifier>
+			<UniqueIdentifier>{683C0807-613E-8D79-C6BF-A8DD878C32C9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\android\export">
-			<UniqueIdentifier>{A23A9EAC-7895-94B6-8FF0-41CBFB78A7EA}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\platform\android\globals">
-			<UniqueIdentifier>{1A4CA2CC-7515-CAAD-1EE7-6CBA4B4A5446}</UniqueIdentifier>
+			<UniqueIdentifier>{9C82E7C8-61F2-F0F0-6592-E72D0D85C2D3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\iphone">
-			<UniqueIdentifier>{CF1BE9D1-B8E0-B105-742F-8702E66DA68B}</UniqueIdentifier>
+			<UniqueIdentifier>{64D309B8-4200-261E-4C74-3F57CB9CE989}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\iphone\export">
-			<UniqueIdentifier>{F8AE7AF0-000A-05F9-F437-08C294EB45DB}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\platform\iphone\globals">
-			<UniqueIdentifier>{9F66060B-874C-EBBF-1996-BB83FA0FE588}</UniqueIdentifier>
+			<UniqueIdentifier>{758F90F5-29DC-C729-370C-700944FFC7F0}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\javascript">
-			<UniqueIdentifier>{D324E8CC-265A-63E9-36C7-290061329474}</UniqueIdentifier>
+			<UniqueIdentifier>{C993E4D9-D856-D9EC-3C58-82DF461EE7D9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\javascript\export">
-			<UniqueIdentifier>{3D70DB05-D03F-73AA-C643-2F9DD77850DB}</UniqueIdentifier>
+			<UniqueIdentifier>{51367FE8-7C72-4BA4-95C1-D2FDE222B560}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\osx">
-			<UniqueIdentifier>{98AEF40B-0BF2-7B35-C99C-7620D466D1E7}</UniqueIdentifier>
+			<UniqueIdentifier>{EA499F70-55AE-F927-8092-DD9F8B4BD14E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\osx\export">
-			<UniqueIdentifier>{5D9ED6B4-754A-4DAE-4E00-4CFD6694D8FD}</UniqueIdentifier>
+			<UniqueIdentifier>{7A91B431-C959-B336-4234-429A4EB82535}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\uwp">
-			<UniqueIdentifier>{EE797662-090E-CE57-79F3-9726EBA9A733}</UniqueIdentifier>
+			<UniqueIdentifier>{D8308069-3D59-DD17-5594-864559630435}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\uwp\export">
-			<UniqueIdentifier>{415FDD28-6A4D-D36E-7DEF-2F3481C93CE6}</UniqueIdentifier>
+			<UniqueIdentifier>{A282028B-D283-DC93-637D-A9AF44ED1D09}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\windows">
-			<UniqueIdentifier>{B25B2B2C-6A5D-8CF8-84AC-5636F7046C64}</UniqueIdentifier>
+			<UniqueIdentifier>{06B27191-91AA-B5D7-8867-685D62391449}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\windows\export">
-			<UniqueIdentifier>{2298AA2D-11D5-7FE3-A838-60135D56B24D}</UniqueIdentifier>
+			<UniqueIdentifier>{7C0C004C-10F1-5383-7AEE-CFA176C9AC59}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\x11">
-			<UniqueIdentifier>{CB3D3B7A-7480-A8BC-5B68-52489EC23D67}</UniqueIdentifier>
+			<UniqueIdentifier>{BEF77937-0268-B64B-721E-30C27BEBB5B8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\platform\x11\export">
-			<UniqueIdentifier>{2D0BC001-21D0-02E3-3A1A-C4CB214492D0}</UniqueIdentifier>
+			<UniqueIdentifier>{A244F1ED-D4FE-E55C-40ED-E16BE94AB70D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene">
-			<UniqueIdentifier>{6F82D5E8-941E-5685-A05A-9C135E6AAC58}</UniqueIdentifier>
+			<UniqueIdentifier>{16460F1B-59E5-E001-5867-21CF1F34ED73}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene\2d">
-			<UniqueIdentifier>{CB8C5C69-366A-EAF7-075E-0B4A982629AC}</UniqueIdentifier>
+			<UniqueIdentifier>{E3427CD5-B9B6-AAA8-89E9-88318025D84D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene\3d">
-			<UniqueIdentifier>{BB639BAF-289A-4321-652B-6E4E83EA3B53}</UniqueIdentifier>
+			<UniqueIdentifier>{D8057C1C-74E3-45DF-BA2F-5BD40AEA5EBB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene\animation">
-			<UniqueIdentifier>{6182443C-750E-119B-2DEE-B0395BE4DE15}</UniqueIdentifier>
+			<UniqueIdentifier>{83ABCBD8-335C-FF6A-DD36-0C0247908E87}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene\audio">
-			<UniqueIdentifier>{305CBB30-2791-7033-1E3D-0A048CF0C7C9}</UniqueIdentifier>
+			<UniqueIdentifier>{66613A51-087A-3EDC-893C-DBF506E63C45}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene\gui">
-			<UniqueIdentifier>{426AC658-1594-1954-8C87-5DFA285A06C1}</UniqueIdentifier>
+			<UniqueIdentifier>{DF4AC8D7-6952-70B7-366C-26FCEC631286}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene\main">
-			<UniqueIdentifier>{D012939B-1ECC-A1F5-7484-50BA0817562E}</UniqueIdentifier>
+			<UniqueIdentifier>{FAD358BE-F02B-CA86-D1A1-B22477028F4C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene\resources">
-			<UniqueIdentifier>{902FC4E0-26A5-9C74-9510-CABD34BACF9E}</UniqueIdentifier>
+			<UniqueIdentifier>{B878F8BF-3692-6574-7662-B973A98F4B44}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\scene\resources\default_theme">
-			<UniqueIdentifier>{4C0717CC-2D54-B71F-5D75-A71D3C5D0D65}</UniqueIdentifier>
+			<UniqueIdentifier>{056E8EFD-1C81-E2B0-1DF6-5E3A2D549528}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\servers">
-			<UniqueIdentifier>{5CE801FA-3E9A-6747-50A4-E3E2762F2A13}</UniqueIdentifier>
+			<UniqueIdentifier>{3995B872-E665-2A0E-D0C7-5EF6DC44888A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\servers\arvr">
-			<UniqueIdentifier>{BCE10792-4FD1-012C-A224-D55916D4A17E}</UniqueIdentifier>
+			<UniqueIdentifier>{9892B9D1-066F-FDF5-D629-BADA5830C24A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\servers\audio">
-			<UniqueIdentifier>{EEB17ACA-F907-617E-EA46-EAFBEA90E1E2}</UniqueIdentifier>
+			<UniqueIdentifier>{A9F38F9F-A6FD-BBF3-655C-100056A5B5A4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\servers\audio\effects">
-			<UniqueIdentifier>{14A91381-E2E2-904D-4962-C1122949176B}</UniqueIdentifier>
+			<UniqueIdentifier>{0D36A92D-5F04-934A-034F-9280B63939A7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\servers\physics">
-			<UniqueIdentifier>{EDFB27FA-FCC7-79F5-5082-F470C8700A8A}</UniqueIdentifier>
+			<UniqueIdentifier>{FB8A315D-8E8E-DBEC-E688-23348262DC58}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\servers\physics\joints">
-			<UniqueIdentifier>{E32D3ACD-4FC4-F25C-ACE8-4C5792322AE2}</UniqueIdentifier>
+			<UniqueIdentifier>{BC31469D-980D-BE94-F960-A73D1783B5AD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\servers\physics_2d">
-			<UniqueIdentifier>{04D8E91C-A3F7-9B64-07E1-8C477E63BECC}</UniqueIdentifier>
+			<UniqueIdentifier>{B3FBF321-40BF-2DF5-4622-A46722A938BD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\servers\visual">
-			<UniqueIdentifier>{7438119A-B52F-0439-8784-31628AE05E36}</UniqueIdentifier>
+			<UniqueIdentifier>{A197C8CF-38BD-2EEC-D426-131E7E2BE25C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty">
-			<UniqueIdentifier>{643EB753-2843-4F1B-8D94-986D93D63AB3}</UniqueIdentifier>
+			<UniqueIdentifier>{AE040B90-1A45-35D8-53A3-4BECB8C11B2E}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\assimp">
+			<UniqueIdentifier>{8FFBB95C-6976-1582-74A2-11D61C9F827D}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\assimp\code">
+			<UniqueIdentifier>{85F6AE03-75EC-55E2-4CED-10FFD4CCF168}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\b2d_convexdecomp">
-			<UniqueIdentifier>{525F6133-5D51-2DDF-89FB-B0FD7CDDEC57}</UniqueIdentifier>
+			<UniqueIdentifier>{E1A9FA40-FBE6-C51D-ED18-800F849C430B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet">
-			<UniqueIdentifier>{A0169389-8093-1407-CB43-F0CA4C4DC763}</UniqueIdentifier>
+			<UniqueIdentifier>{13195AA2-A554-89C7-EB15-8B673C4E831B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletCollision">
-			<UniqueIdentifier>{72286324-744E-2D7A-0322-FDD72F561147}</UniqueIdentifier>
+			<UniqueIdentifier>{A4CE6603-2E44-D4C8-04E1-86B1ECCBA8D9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletCollision\BroadphaseCollision">
-			<UniqueIdentifier>{D2433AA5-02D5-9644-FE02-52AF8CEE5C80}</UniqueIdentifier>
+			<UniqueIdentifier>{29466E1B-481C-4EA4-C079-3E5CDB4774A9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletCollision\CollisionDispatch">
-			<UniqueIdentifier>{654A4209-D259-0FCE-E7FF-BA68B961BF08}</UniqueIdentifier>
+			<UniqueIdentifier>{69E75AB0-B161-2E67-3C73-E329074D43BD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletCollision\CollisionShapes">
-			<UniqueIdentifier>{D622ED4B-C43B-707B-7F43-87778B3088F8}</UniqueIdentifier>
+			<UniqueIdentifier>{3CB3F421-E352-3D3A-C656-B7B2BF8070FC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletCollision\Gimpact">
-			<UniqueIdentifier>{5E102E80-8455-9469-F1FE-C8276A47F461}</UniqueIdentifier>
+			<UniqueIdentifier>{98CB2ABB-ABCC-495F-8BEF-0705966505CB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletCollision\NarrowPhaseCollision">
-			<UniqueIdentifier>{22FED7BA-6933-6F2D-DF72-70AC9DCCF0A1}</UniqueIdentifier>
+			<UniqueIdentifier>{1D87BC1C-DF69-7218-C019-32ECA4B0A9B3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletDynamics">
-			<UniqueIdentifier>{EDA0B745-F1D4-CE8A-7FB3-45046FB126DC}</UniqueIdentifier>
+			<UniqueIdentifier>{35D801FE-B899-2BCA-FB24-E47B8B091E98}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletDynamics\Character">
-			<UniqueIdentifier>{BFBA045A-7B28-0BE8-E30A-8B21B8505F18}</UniqueIdentifier>
+			<UniqueIdentifier>{6CC6C057-E6AC-CD82-9DAF-DF742852FEDD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletDynamics\ConstraintSolver">
-			<UniqueIdentifier>{7AA9314F-7175-7D65-F93F-53BFE600D303}</UniqueIdentifier>
+			<UniqueIdentifier>{46A5C566-1B71-7E1F-B731-310F82E36A8B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletDynamics\Dynamics">
-			<UniqueIdentifier>{6CE1274A-6363-CC08-571F-149DC865104C}</UniqueIdentifier>
+			<UniqueIdentifier>{554A7161-E59D-44A6-44FC-1304A6BA0426}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletDynamics\Featherstone">
-			<UniqueIdentifier>{A5B03092-A501-1BF8-C03D-4CB10E820A24}</UniqueIdentifier>
+			<UniqueIdentifier>{7E1426D6-67AF-CB63-97B9-4746544943E4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletDynamics\MLCPSolvers">
-			<UniqueIdentifier>{7BA4BED7-FF3C-C2C7-1C3E-D26EC364A955}</UniqueIdentifier>
+			<UniqueIdentifier>{688C160A-0F05-B389-2232-DA88DB519F91}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletDynamics\Vehicle">
-			<UniqueIdentifier>{51A7FA65-3650-9742-E0B9-C40DB397F92E}</UniqueIdentifier>
+			<UniqueIdentifier>{6CF1DF4A-CFC2-3FC5-8DE0-539046C3FC8D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletInverseDynamics">
-			<UniqueIdentifier>{8AD00514-6F47-3F1B-AC34-A8653C4FA04F}</UniqueIdentifier>
+			<UniqueIdentifier>{173464DD-6EFB-0C2D-247E-58CE782E27D0}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletInverseDynamics\details">
-			<UniqueIdentifier>{27076D9A-7841-BD9C-7049-E0F7811D8C4B}</UniqueIdentifier>
+			<UniqueIdentifier>{899A345B-12E9-B87F-B1F4-25AF28C250E2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\BulletSoftBody">
-			<UniqueIdentifier>{161ED51A-5633-1BAD-950A-EF19854C89C9}</UniqueIdentifier>
+			<UniqueIdentifier>{C75F5617-8818-37DD-63F2-D497FAA6E4DF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\clew">
-			<UniqueIdentifier>{6A34B3CB-FD6B-3B90-9980-26172B7A8E65}</UniqueIdentifier>
+			<UniqueIdentifier>{9C91B7A2-8380-3281-3EDD-3B3E0531A4EA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\bullet\LinearMath">
-			<UniqueIdentifier>{60028321-D838-2390-9250-572C409462B4}</UniqueIdentifier>
+			<UniqueIdentifier>{F133FDEC-9FB1-9AA2-9BE5-CB14E88CF441}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\cvtt">
-			<UniqueIdentifier>{881594F6-AA52-D2C8-6166-204D3152D6FC}</UniqueIdentifier>
+			<UniqueIdentifier>{7843221F-E4FF-72E3-4407-BFAC92EC179A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\enet">
-			<UniqueIdentifier>{707E2818-9713-0363-6943-88A9CF8DAE56}</UniqueIdentifier>
+			<UniqueIdentifier>{9FF81598-9BF1-7297-F93B-BF900F3A6FFE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\etc2comp">
-			<UniqueIdentifier>{3DC2DF17-54A8-452E-7D11-37C9C53188DE}</UniqueIdentifier>
+			<UniqueIdentifier>{39875997-78AE-725D-107F-E39E6B1FC68F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\glad">
-			<UniqueIdentifier>{185B25B8-ABFA-8132-2C10-59A725490EEE}</UniqueIdentifier>
+			<UniqueIdentifier>{5E0935FE-81F9-B8C7-FF01-991BF6F6FB3C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\jpeg-compressor">
-			<UniqueIdentifier>{115501C8-8548-D023-E106-88844B1DF2F5}</UniqueIdentifier>
+			<UniqueIdentifier>{4964B732-DD2B-5C90-443F-7516D0FFA0F4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libogg">
-			<UniqueIdentifier>{7D9263F2-9612-95FF-0E9C-F3EFB41D9CB2}</UniqueIdentifier>
+			<UniqueIdentifier>{8204D158-4215-C4CD-23A7-8887C5973F99}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libpng">
-			<UniqueIdentifier>{76AB7A8A-C862-1EA5-71B4-CDDA7B785BB0}</UniqueIdentifier>
+			<UniqueIdentifier>{163ED342-5C2A-536E-FEE2-AF7B244F6753}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libsimplewebm">
-			<UniqueIdentifier>{243352F0-E2C8-78A8-072C-08D0F6E8B1C6}</UniqueIdentifier>
+			<UniqueIdentifier>{8296467C-A90A-7502-7D12-EA80CDBB9E9B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libtheora">
-			<UniqueIdentifier>{2C9ED768-4C73-A8A9-7A61-C09F1AFA8C12}</UniqueIdentifier>
+			<UniqueIdentifier>{9FEE422B-1419-9168-F02C-C396D7C40052}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvorbis">
-			<UniqueIdentifier>{7DD41AE8-E125-C3A4-2126-3911BA94648C}</UniqueIdentifier>
+			<UniqueIdentifier>{3A3BE5FA-8413-C09E-1A4F-9717746C7DEA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx">
-			<UniqueIdentifier>{1138BD28-B9E9-928C-0DCA-44E2C3DCEFA8}</UniqueIdentifier>
+			<UniqueIdentifier>{68DC7A19-B34E-210A-9873-B246E8F5A51B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vp8">
-			<UniqueIdentifier>{C989EB86-E2F5-8B1B-321D-29D443DD5173}</UniqueIdentifier>
+			<UniqueIdentifier>{A893F62B-7744-317D-6BEE-11962A471846}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vp8\common">
-			<UniqueIdentifier>{2206F4FF-2042-B56D-A5D3-66188D9FCA2A}</UniqueIdentifier>
+			<UniqueIdentifier>{EA2A4479-E36D-84B3-F056-B235301FEE06}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vp8\common\generic">
-			<UniqueIdentifier>{39498638-EC7D-EAB6-FA88-3934E40578B2}</UniqueIdentifier>
+			<UniqueIdentifier>{17F76F63-B1F3-52CF-5D95-74CC8BDE693D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vp8\decoder">
-			<UniqueIdentifier>{2F875A75-22EE-B87F-BD3F-CAE0CCA0B27B}</UniqueIdentifier>
+			<UniqueIdentifier>{4805A865-9262-464B-5B46-66BA9EB15740}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vp9">
-			<UniqueIdentifier>{9A927E31-5D87-9449-FA91-B1602ADF4C47}</UniqueIdentifier>
+			<UniqueIdentifier>{45DC5845-AE0A-4B2D-1FE3-B90D351B394E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vp9\common">
-			<UniqueIdentifier>{649ECBAE-B667-7044-ADBE-8769FAC6F6D2}</UniqueIdentifier>
+			<UniqueIdentifier>{D9EE8DDD-FDA1-B7BB-F36A-17D0F143E280}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vp9\decoder">
-			<UniqueIdentifier>{471FDFEC-1E99-FA76-7A1E-7AFEC04A493C}</UniqueIdentifier>
+			<UniqueIdentifier>{EF860BDD-6DFD-F665-6EED-F8FAF4F7EA3C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vpx">
-			<UniqueIdentifier>{FA02E225-5C4D-8D7B-0E62-DF5874331872}</UniqueIdentifier>
+			<UniqueIdentifier>{E763A61C-76D5-1E2E-38C2-150AC4312FEA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vpx\src">
-			<UniqueIdentifier>{279EB9CA-EEC3-7A7F-6478-3A4AD3458317}</UniqueIdentifier>
+			<UniqueIdentifier>{C974B95B-582D-A03A-B7BE-0FF7B2C28F43}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vpx_dsp">
-			<UniqueIdentifier>{77127AC0-C7E1-C9D2-5720-FE04DDF75B4A}</UniqueIdentifier>
+			<UniqueIdentifier>{BAFFEF27-B9AF-B044-7A01-FDCC2CDDAEE7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vpx_mem">
-			<UniqueIdentifier>{8BB4F393-953C-9ADB-33AE-E545625A68EC}</UniqueIdentifier>
+			<UniqueIdentifier>{BEB5F605-C8DD-99C7-5246-F2BD6BF342DA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vpx_scale">
-			<UniqueIdentifier>{4601E3CB-9840-1E90-5EC5-57C477984311}</UniqueIdentifier>
+			<UniqueIdentifier>{C2763A91-5FF4-5B9E-1C59-B72C9E2117E7}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vpx_scale\generic">
-			<UniqueIdentifier>{95F3E959-F5BB-1089-975C-26C75F556F6C}</UniqueIdentifier>
+			<UniqueIdentifier>{335BB9AF-13FC-0262-FADD-69A32C9735E8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libvpx\vpx_util">
-			<UniqueIdentifier>{FA86913C-1591-1D32-0F0B-BDEED52A4013}</UniqueIdentifier>
+			<UniqueIdentifier>{1A34408D-C66B-0CD7-8254-2E1EDB492EF6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebp">
-			<UniqueIdentifier>{E7B9446B-AAAF-CC45-286B-4AB66AD45FBF}</UniqueIdentifier>
+			<UniqueIdentifier>{6503656F-0B41-0CA7-B4DD-C2D5122BC40C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebp\src">
-			<UniqueIdentifier>{CACF3555-AE09-B46E-D3FF-8A53A6990BEC}</UniqueIdentifier>
+			<UniqueIdentifier>{2C0DADF0-CA19-694E-9715-3429019B3462}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebp\src\dec">
-			<UniqueIdentifier>{2BF2B0FF-EEC9-0526-24D5-1DD780D339FB}</UniqueIdentifier>
+			<UniqueIdentifier>{9EBF108E-8746-4783-E3F2-62B652971259}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebp\src\demux">
-			<UniqueIdentifier>{AE9FA64B-698D-E754-B5A8-D8066B333190}</UniqueIdentifier>
+			<UniqueIdentifier>{F3E84AD0-BDE4-6225-FA50-B7EC63004B97}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebp\src\dsp">
-			<UniqueIdentifier>{87F28A32-18F5-31CC-C7D8-C6DD6AB9FDF5}</UniqueIdentifier>
+			<UniqueIdentifier>{0FD6402F-DF5D-0955-B787-66E7B4B303E2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebp\src\enc">
-			<UniqueIdentifier>{911187CE-705B-F6DB-AACE-AE57BFF0072B}</UniqueIdentifier>
+			<UniqueIdentifier>{6EE70A05-6E53-A692-0949-E2D2467A07F8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebp\src\mux">
-			<UniqueIdentifier>{E9ADC160-178F-00B7-D0CF-F643268B1C96}</UniqueIdentifier>
+			<UniqueIdentifier>{E4932EE1-7DFD-AA5B-04C0-4AF00DD900D2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebp\src\utils">
-			<UniqueIdentifier>{C916E0DB-F336-F580-F161-7781E6911FAC}</UniqueIdentifier>
+			<UniqueIdentifier>{C6ADE707-7E1C-EB8B-679E-69E9FE943571}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebsockets">
-			<UniqueIdentifier>{F8CBEE4E-2A25-76D0-C173-368EECFD9212}</UniqueIdentifier>
+			<UniqueIdentifier>{30FE3778-0BCF-20C4-F72E-FE49DD3A5204}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\core">
-			<UniqueIdentifier>{AA51433E-35BD-9B68-6EF2-482D7D5879E0}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib">
+			<UniqueIdentifier>{9197D096-7267-2E38-7FDB-AB2E6EA4C606}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\event-libs">
-			<UniqueIdentifier>{14B670D1-8018-BA15-A4FC-21866CDF7304}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\core">
+			<UniqueIdentifier>{029A5370-215C-20AC-8B4C-29F0CE24E593}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\event-libs\poll">
-			<UniqueIdentifier>{2F660A77-138A-1F5A-8532-8D3CA3CF7855}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\event-libs">
+			<UniqueIdentifier>{37D276F8-B84A-4BEF-D887-97D54E7C963E}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\misc">
-			<UniqueIdentifier>{63DD7F4E-5434-4C9E-25A1-FB8B6ADBF797}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\event-libs\poll">
+			<UniqueIdentifier>{111CBF7B-3EB1-E95D-241B-58868606AD87}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\plat">
-			<UniqueIdentifier>{9C0CF88A-9604-836F-2B16-3D25F16C4D62}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\misc">
+			<UniqueIdentifier>{6C6E0F3F-9F9A-AE96-4D07-7596E90946D1}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles">
-			<UniqueIdentifier>{DA38E19D-A8EB-7295-DC59-9EC9E886E6F9}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\plat">
+			<UniqueIdentifier>{E905EA0F-FF32-DDEB-0CB9-AC0DB21771FD}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles\h1">
-			<UniqueIdentifier>{C0B1F7A3-2D44-D966-20C6-3AC273A31C33}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\plat\windows">
+			<UniqueIdentifier>{499F0919-D111-CFEE-D921-DACD4185FDC5}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles\http">
-			<UniqueIdentifier>{E25E786C-F8F9-2D52-EE26-5F8A190498A2}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles">
+			<UniqueIdentifier>{A41FE4A9-C186-2294-7610-70F487B111D9}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles\http\client">
-			<UniqueIdentifier>{478C8965-276A-D9C2-CAD1-E5CFBE8B2F18}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\h1">
+			<UniqueIdentifier>{F1BA3FDE-3350-1235-4D8E-3C848CAB0F51}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles\http\server">
-			<UniqueIdentifier>{7F945A2A-5866-A4D5-96CF-F3728940A54B}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\http">
+			<UniqueIdentifier>{213E48B3-E127-E61F-5A46-C772709DF0D7}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles\listen">
-			<UniqueIdentifier>{8F30A6A2-012A-B16A-9C70-54367C1CA27B}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\http\client">
+			<UniqueIdentifier>{E4880000-9BD6-E662-8007-3C916D42C907}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles\pipe">
-			<UniqueIdentifier>{4A91661E-677B-1630-65F4-8173F82F3BDA}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\http\server">
+			<UniqueIdentifier>{86BBC681-1FF6-D1AD-E72A-921043610280}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles\raw">
-			<UniqueIdentifier>{185DCB52-A696-8D71-125E-4DC82777AA76}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\listen">
+			<UniqueIdentifier>{BDEF30BF-AF68-DD33-D838-CB472742C24A}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\roles\ws">
-			<UniqueIdentifier>{7488E970-0ECE-8A93-961D-8B182D0D72CE}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\pipe">
+			<UniqueIdentifier>{7F20A1D9-4E5F-5C48-34DF-58DEB4C2A6B6}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\tls">
-			<UniqueIdentifier>{3337EF17-E05A-2BE7-3F52-082ED8B632B8}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\raw-file">
+			<UniqueIdentifier>{90EC3D3C-841F-2800-EDC7-83AC6AC8B6C8}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\tls\mbedtls">
-			<UniqueIdentifier>{2BB01741-85DE-CE5C-A162-88ABDB756E48}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\raw-skt">
+			<UniqueIdentifier>{9B4A489A-D005-2D76-69F3-B85FF46BAD23}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper">
-			<UniqueIdentifier>{C282462C-A4AF-09CD-26A0-DFE56940CECB}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\roles\ws">
+			<UniqueIdentifier>{289C5273-1312-F2B2-7864-647DC65B44E6}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library">
-			<UniqueIdentifier>{517049A6-191A-FE6A-BA57-469840AA72DD}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\tls">
+			<UniqueIdentifier>{A90BB0BC-4F5C-21BB-F33A-2446A00381CF}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\platform">
-			<UniqueIdentifier>{F03F01C4-4644-6B4C-0488-AFFDEE583279}</UniqueIdentifier>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\tls\mbedtls">
+			<UniqueIdentifier>{E7436984-F3DB-AC97-6F21-3DB297F7BE84}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper">
+			<UniqueIdentifier>{C7FD3BCB-BAC0-79D9-C990-6381C626CF18}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library">
+			<UniqueIdentifier>{D63FE159-0BC1-57A6-555D-61CBEEC24EE0}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\platform">
+			<UniqueIdentifier>{0D66E0DA-58EF-3808-61E5-1FC37DA3BDD1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\libwebsockets\win32helpers">
-			<UniqueIdentifier>{BEF9A588-0B9B-6574-F80B-86218FF28EFA}</UniqueIdentifier>
+			<UniqueIdentifier>{F706B626-1BB4-BEA6-C8BA-263E2EB9C1F6}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\mbedtls">
-			<UniqueIdentifier>{F76B1D1D-E16F-BC5F-DF7C-8D87AFD23979}</UniqueIdentifier>
+			<UniqueIdentifier>{96B2FFCF-0AF0-A377-239B-D0FD65E45192}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\mbedtls\library">
-			<UniqueIdentifier>{35AA52EA-E398-8765-DB26-7B7E9FF88257}</UniqueIdentifier>
+			<UniqueIdentifier>{1129D753-C97F-F00F-16FB-72835C54E7DF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\miniupnpc">
-			<UniqueIdentifier>{932B8699-8EEE-47B3-1C9A-0F0419A9C265}</UniqueIdentifier>
+			<UniqueIdentifier>{CCBA5C74-316B-3B4A-3940-3835BFD54017}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\minizip">
-			<UniqueIdentifier>{AB3FA3F0-0160-4F89-973A-DF3208230202}</UniqueIdentifier>
+			<UniqueIdentifier>{AA707C76-2676-F098-FACC-1E5004EAF354}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\misc">
-			<UniqueIdentifier>{557ACECF-7C72-A8CE-01C4-C979158BEE2D}</UniqueIdentifier>
+			<UniqueIdentifier>{8664642F-1480-7B8F-3931-410452BB50F9}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\opus">
-			<UniqueIdentifier>{F3F86D9C-C0FF-F11E-28FE-D6B17CF43C47}</UniqueIdentifier>
+			<UniqueIdentifier>{CC4C463A-1C13-B67C-D38B-0ADF166CF30C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\opus\celt">
-			<UniqueIdentifier>{C9254B92-8D12-8F47-BAE2-719892013627}</UniqueIdentifier>
+			<UniqueIdentifier>{3526506C-395F-E977-F526-9A2655C29A10}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\opus\silk">
-			<UniqueIdentifier>{8654BAB9-C698-1E3E-49DF-0F5C9DB5DDB5}</UniqueIdentifier>
+			<UniqueIdentifier>{7B5ABD0E-AF7C-C010-1F4B-E31565365B05}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\opus\silk\float">
-			<UniqueIdentifier>{6F991432-65B6-A7C4-9934-1B7094D0E19C}</UniqueIdentifier>
+			<UniqueIdentifier>{939292A8-FA73-AF91-C67D-B332F876ED4C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\pvrtccompressor">
-			<UniqueIdentifier>{89EEF2A7-9568-4629-2CA1-545BCA557525}</UniqueIdentifier>
+			<UniqueIdentifier>{821D9537-6377-EC6D-7A4D-5807D7736B83}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\recastnavigation">
-			<UniqueIdentifier>{A5261CBD-98C7-84B9-E4A3-BCCF376C7BA7}</UniqueIdentifier>
+			<UniqueIdentifier>{95174204-AE9A-4524-7981-813D74952A77}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\recastnavigation\Recast">
-			<UniqueIdentifier>{5C1CF86E-F309-9F81-261B-D67C4DCBBFD3}</UniqueIdentifier>
+			<UniqueIdentifier>{1858B4B7-8E77-B2D6-002E-A0CB451594DC}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\recastnavigation\Recast\Source">
-			<UniqueIdentifier>{9C82BD75-AC49-E97E-A957-DB56B8CFB4E7}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source Files\thirdparty\rtaudio">
-			<UniqueIdentifier>{B923E80B-B97E-C9EB-A402-B761EECC9AB3}</UniqueIdentifier>
+			<UniqueIdentifier>{8E724989-E1F7-CB93-B84E-2D48F3DB88DE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\squish">
-			<UniqueIdentifier>{814D98D3-606C-95F6-985A-94546EF3A43F}</UniqueIdentifier>
+			<UniqueIdentifier>{5167ADD1-1363-C3FC-FBFC-F14CDEAA106C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\xatlas">
-			<UniqueIdentifier>{3E44CF9B-61C0-C206-E4AC-65B0BE55E3D5}</UniqueIdentifier>
+			<UniqueIdentifier>{D31F54BF-1A71-82F4-F84F-EB67AFA2993A}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\zlib">
-			<UniqueIdentifier>{76E609EF-DCF8-8A9C-394D-A5A35960A60E}</UniqueIdentifier>
+			<UniqueIdentifier>{644F4790-F927-2B8B-4654-FDC27E59F1FD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\zstd">
-			<UniqueIdentifier>{27BC35C9-D54F-7BE0-F12D-945435930CE3}</UniqueIdentifier>
+			<UniqueIdentifier>{467F9C70-FC38-7D65-5C8F-0A3886620C31}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\zstd\common">
-			<UniqueIdentifier>{C178AE90-C296-B07E-E5A5-E178FE639417}</UniqueIdentifier>
+			<UniqueIdentifier>{BC93F62E-CFFB-EF0E-41F4-278C5AE4D585}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\zstd\compress">
-			<UniqueIdentifier>{359781B4-CCAD-5A4F-61B2-A627BC52EE27}</UniqueIdentifier>
+			<UniqueIdentifier>{68D82429-C513-892F-5580-03878CD5FFC4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source Files\thirdparty\zstd\decompress">
-			<UniqueIdentifier>{28F4AA7B-DFEB-D9A6-54ED-158E90A4739F}</UniqueIdentifier>
+			<UniqueIdentifier>{65D211EB-2220-E0BE-3458-2B34220E66CE}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
@@ -1193,7 +1199,7 @@
 		<ClInclude Include="core\io\resource_format_binary.h">
 			<Filter>Header Files\core\io</Filter>
 		</ClInclude>
-		<ClInclude Include="core\io\resource_import.h">
+		<ClInclude Include="core\io\resource_importer.h">
 			<Filter>Header Files\core\io</Filter>
 		</ClInclude>
 		<ClInclude Include="core\io\resource_loader.h">
@@ -1232,6 +1238,9 @@
 		<ClInclude Include="core\math\audio_frame.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
+		<ClInclude Include="core\math\basis.h">
+			<Filter>Header Files\core\math</Filter>
+		</ClInclude>
 		<ClInclude Include="core\math\bsp_tree.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
@@ -1253,9 +1262,6 @@
 		<ClInclude Include="core\math\math_funcs.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
-		<ClInclude Include="core\math\matrix3.h">
-			<Filter>Header Files\core\math</Filter>
-		</ClInclude>
 		<ClInclude Include="core\math\plane.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
@@ -1263,6 +1269,12 @@
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
 		<ClInclude Include="core\math\quick_hull.h">
+			<Filter>Header Files\core\math</Filter>
+		</ClInclude>
+		<ClInclude Include="core\math\random_number_generator.h">
+			<Filter>Header Files\core\math</Filter>
+		</ClInclude>
+		<ClInclude Include="core\math\random_pcg.h">
 			<Filter>Header Files\core\math</Filter>
 		</ClInclude>
 		<ClInclude Include="core\math\rect2.h">
@@ -1322,9 +1334,6 @@
 		<ClInclude Include="core\os\semaphore.h">
 			<Filter>Header Files\core\os</Filter>
 		</ClInclude>
-		<ClInclude Include="core\os\shell.h">
-			<Filter>Header Files\core\os</Filter>
-		</ClInclude>
 		<ClInclude Include="core\os\thread.h">
 			<Filter>Header Files\core\os</Filter>
 		</ClInclude>
@@ -1353,9 +1362,6 @@
 			<Filter>Header Files\core</Filter>
 		</ClInclude>
 		<ClInclude Include="core\dictionary.h">
-			<Filter>Header Files\core</Filter>
-		</ClInclude>
-		<ClInclude Include="core\dvector.h">
 			<Filter>Header Files\core</Filter>
 		</ClInclude>
 		<ClInclude Include="core\engine.h">
@@ -1397,6 +1403,9 @@
 		<ClInclude Include="core\pool_allocator.h">
 			<Filter>Header Files\core</Filter>
 		</ClInclude>
+		<ClInclude Include="core\pool_vector.h">
+			<Filter>Header Files\core</Filter>
+		</ClInclude>
 		<ClInclude Include="core\print_string.h">
 			<Filter>Header Files\core</Filter>
 		</ClInclude>
@@ -1433,7 +1442,7 @@
 		<ClInclude Include="core\string_builder.h">
 			<Filter>Header Files\core</Filter>
 		</ClInclude>
-		<ClInclude Include="core\string_db.h">
+		<ClInclude Include="core\string_name.h">
 			<Filter>Header Files\core</Filter>
 		</ClInclude>
 		<ClInclude Include="core\translation.h">
@@ -1454,7 +1463,7 @@
 		<ClInclude Include="drivers\alsa\audio_driver_alsa.h">
 			<Filter>Header Files\drivers\alsa</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\alsamidi\alsa_midi.h">
+		<ClInclude Include="drivers\alsamidi\midi_driver_alsamidi.h">
 			<Filter>Header Files\drivers\alsamidi</Filter>
 		</ClInclude>
 		<ClInclude Include="drivers\convex_decomp\b2d_decompose.h">
@@ -1463,11 +1472,8 @@
 		<ClInclude Include="drivers\coreaudio\audio_driver_coreaudio.h">
 			<Filter>Header Files\drivers\coreaudio</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\coremidi\core_midi.h">
+		<ClInclude Include="drivers\coremidi\midi_driver_coremidi.h">
 			<Filter>Header Files\drivers\coremidi</Filter>
-		</ClInclude>
-		<ClInclude Include="drivers\gl_context\context_gl.h">
-			<Filter>Header Files\drivers\gl_context</Filter>
 		</ClInclude>
 		<ClInclude Include="drivers\gles2\rasterizer_canvas_gles2.h">
 			<Filter>Header Files\drivers\gles2</Filter>
@@ -1513,9 +1519,6 @@
 		</ClInclude>
 		<ClInclude Include="drivers\pulseaudio\audio_driver_pulseaudio.h">
 			<Filter>Header Files\drivers\pulseaudio</Filter>
-		</ClInclude>
-		<ClInclude Include="drivers\rtaudio\audio_driver_rtaudio.h">
-			<Filter>Header Files\drivers\rtaudio</Filter>
 		</ClInclude>
 		<ClInclude Include="drivers\unix\dir_access_unix.h">
 			<Filter>Header Files\drivers\unix</Filter>
@@ -1565,13 +1568,10 @@
 		<ClInclude Include="drivers\windows\semaphore_windows.h">
 			<Filter>Header Files\drivers\windows</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\windows\shell_windows.h">
-			<Filter>Header Files\drivers\windows</Filter>
-		</ClInclude>
 		<ClInclude Include="drivers\windows\thread_windows.h">
 			<Filter>Header Files\drivers\windows</Filter>
 		</ClInclude>
-		<ClInclude Include="drivers\winmidi\win_midi.h">
+		<ClInclude Include="drivers\winmidi\midi_driver_winmidi.h">
 			<Filter>Header Files\drivers\winmidi</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\collada\collada.h">
@@ -1665,6 +1665,9 @@
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\collision_shape_2d_editor_plugin.h">
+			<Filter>Header Files\editor\plugins</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\plugins\cpu_particles_2d_editor_plugin.h">
 			<Filter>Header Files\editor\plugins</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\plugins\cpu_particles_editor_plugin.h">
@@ -1835,16 +1838,25 @@
 		<ClInclude Include="editor\editor_export.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\editor_feature_profile.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\editor_file_dialog.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\editor_file_system.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
+		<ClInclude Include="editor\editor_folding.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
 		<ClInclude Include="editor\editor_fonts.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\editor_help.h">
+			<Filter>Header Files\editor</Filter>
+		</ClInclude>
+		<ClInclude Include="editor\editor_help_search.h">
 			<Filter>Header Files\editor</Filter>
 		</ClInclude>
 		<ClInclude Include="editor\editor_inspector.h">
@@ -2006,11 +2018,17 @@
 		<ClInclude Include="main\main.h">
 			<Filter>Header Files\main</Filter>
 		</ClInclude>
+		<ClInclude Include="main\main_timer_sync.h">
+			<Filter>Header Files\main</Filter>
+		</ClInclude>
 		<ClInclude Include="main\performance.h">
 			<Filter>Header Files\main</Filter>
 		</ClInclude>
-		<ClInclude Include="main\timer_sync.h">
-			<Filter>Header Files\main</Filter>
+		<ClInclude Include="modules\assimp\editor_scene_importer_assimp.h">
+			<Filter>Header Files\modules\assimp</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\assimp\register_types.h">
+			<Filter>Header Files\modules\assimp</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\bmp\image_loader_bmp.h">
 			<Filter>Header Files\modules\bmp</Filter>
@@ -2168,6 +2186,12 @@
 		<ClInclude Include="modules\gdnative\pluginscript\register_types.h">
 			<Filter>Header Files\modules\gdnative\pluginscript</Filter>
 		</ClInclude>
+		<ClInclude Include="modules\gdnative\videodecoder\register_types.h">
+			<Filter>Header Files\modules\gdnative\videodecoder</Filter>
+		</ClInclude>
+		<ClInclude Include="modules\gdnative\videodecoder\video_stream_gdnative.h">
+			<Filter>Header Files\modules\gdnative\videodecoder</Filter>
+		</ClInclude>
 		<ClInclude Include="modules\gdnative\gdnative.h">
 			<Filter>Header Files\modules\gdnative</Filter>
 		</ClInclude>
@@ -2318,7 +2342,7 @@
 		<ClInclude Include="modules\upnp\upnp.h">
 			<Filter>Header Files\modules\upnp</Filter>
 		</ClInclude>
-		<ClInclude Include="modules\upnp\upnpdevice.h">
+		<ClInclude Include="modules\upnp\upnp_device.h">
 			<Filter>Header Files\modules\upnp</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\visual_script\register_types.h">
@@ -2393,7 +2417,7 @@
 		<ClInclude Include="modules\websocket\websocket_client.h">
 			<Filter>Header Files\modules\websocket</Filter>
 		</ClInclude>
-		<ClInclude Include="modules\websocket\websocket_multiplayer.h">
+		<ClInclude Include="modules\websocket\websocket_multiplayer_peer.h">
 			<Filter>Header Files\modules\websocket</Filter>
 		</ClInclude>
 		<ClInclude Include="modules\websocket\websocket_peer.h">
@@ -2408,14 +2432,8 @@
 		<ClInclude Include="platform\android\export\export.h">
 			<Filter>Header Files\platform\android\export</Filter>
 		</ClInclude>
-		<ClInclude Include="platform\android\globals\global_defaults.h">
-			<Filter>Header Files\platform\android\globals</Filter>
-		</ClInclude>
 		<ClInclude Include="platform\iphone\export\export.h">
 			<Filter>Header Files\platform\iphone\export</Filter>
-		</ClInclude>
-		<ClInclude Include="platform\iphone\globals\global_defaults.h">
-			<Filter>Header Files\platform\iphone\globals</Filter>
 		</ClInclude>
 		<ClInclude Include="platform\javascript\export\export.h">
 			<Filter>Header Files\platform\javascript\export</Filter>
@@ -2483,7 +2501,7 @@
 		<ClInclude Include="scene\2d\mesh_instance_2d.h">
 			<Filter>Header Files\scene\2d</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\2d\navigation2d.h">
+		<ClInclude Include="scene\2d\navigation_2d.h">
 			<Filter>Header Files\scene\2d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\2d\navigation_polygon.h">
@@ -2522,9 +2540,6 @@
 		<ClInclude Include="scene\2d\remote_transform_2d.h">
 			<Filter>Header Files\scene\2d</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\2d\screen_button.h">
-			<Filter>Header Files\scene\2d</Filter>
-		</ClInclude>
 		<ClInclude Include="scene\2d\skeleton_2d.h">
 			<Filter>Header Files\scene\2d</Filter>
 		</ClInclude>
@@ -2532,6 +2547,9 @@
 			<Filter>Header Files\scene\2d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\2d\tile_map.h">
+			<Filter>Header Files\scene\2d</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\2d\touch_screen_button.h">
 			<Filter>Header Files\scene\2d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\2d\visibility_notifier_2d.h">
@@ -2630,9 +2648,6 @@
 		<ClInclude Include="scene\3d\room_instance.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\3d\scenario_fx.h">
-			<Filter>Header Files\scene\3d</Filter>
-		</ClInclude>
 		<ClInclude Include="scene\3d\skeleton.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
@@ -2661,6 +2676,9 @@
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\3d\voxel_light_baker.h">
+			<Filter>Header Files\scene\3d</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\3d\world_environment.h">
 			<Filter>Header Files\scene\3d</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\animation\animation_blend_space_1d.h">
@@ -2696,7 +2714,7 @@
 		<ClInclude Include="scene\animation\tween.h">
 			<Filter>Header Files\scene\animation</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\audio\audio_player.h">
+		<ClInclude Include="scene\audio\audio_stream_player.h">
 			<Filter>Header Files\scene\audio</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\gui\base_button.h">
@@ -2879,10 +2897,7 @@
 		<ClInclude Include="scene\resources\audio_stream_sample.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\resources\bit_mask.h">
-			<Filter>Header Files\scene\resources</Filter>
-		</ClInclude>
-		<ClInclude Include="scene\resources\bounds.h">
+		<ClInclude Include="scene\resources\bit_map.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\box_shape.h">
@@ -2898,9 +2913,6 @@
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\circle_shape_2d.h">
-			<Filter>Header Files\scene\resources</Filter>
-		</ClInclude>
-		<ClInclude Include="scene\resources\color_ramp.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\concave_polygon_shape.h">
@@ -2931,6 +2943,15 @@
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\font.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\resources\gradient.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\resources\height_map_shape.h">
+			<Filter>Header Files\scene\resources</Filter>
+		</ClInclude>
+		<ClInclude Include="scene\resources\line_shape_2d.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\material.h">
@@ -2972,10 +2993,10 @@
 		<ClInclude Include="scene\resources\rectangle_shape_2d.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\resources\room.h">
+		<ClInclude Include="scene\resources\resource_format_text.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\resources\scene_format_text.h">
+		<ClInclude Include="scene\resources\room.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\segment_shape_2d.h">
@@ -2990,10 +3011,7 @@
 		<ClInclude Include="scene\resources\shape_2d.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
-		<ClInclude Include="scene\resources\shape_line_2d.h">
-			<Filter>Header Files\scene\resources</Filter>
-		</ClInclude>
-		<ClInclude Include="scene\resources\sky_box.h">
+		<ClInclude Include="scene\resources\sky.h">
 			<Filter>Header Files\scene\resources</Filter>
 		</ClInclude>
 		<ClInclude Include="scene\resources\space_2d.h">
@@ -3233,7 +3251,7 @@
 		<ClInclude Include="servers\visual\visual_server_canvas.h">
 			<Filter>Header Files\servers\visual</Filter>
 		</ClInclude>
-		<ClInclude Include="servers\visual\visual_server_global.h">
+		<ClInclude Include="servers\visual\visual_server_globals.h">
 			<Filter>Header Files\servers\visual</Filter>
 		</ClInclude>
 		<ClInclude Include="servers\visual\visual_server_light_baker.h">
@@ -3268,6 +3286,159 @@
 		</ClInclude>
 		<ClInclude Include="servers\visual_server.h">
 			<Filter>Header Files\servers</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\BaseProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\CalcTangentsProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\CInterfaceIOWrapper.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\ComputeUVMappingProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\ConvertToLHProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\DeboneProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\DropFaceNormalsProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\EmbedTexturesProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXConverter.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXDocument.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXDocumentUtil.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXExporter.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXExportNode.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXExportProperty.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXImporter.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXMeshGeometry.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXParser.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXProperties.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXTokenizer.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FBXUtil.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FindDegenerates.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FindInstancesProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FindInvalidDataProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\FixNormalsStep.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\GenFaceNormalsProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\GenVertexNormalsProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\Importer.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\ImproveCacheLocality.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\JoinVerticesProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\LimitBoneWeightsProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\MakeVerboseFormat.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\MaterialSystem.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\MMDImporter.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\MMDPmxParser.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\OptimizeGraph.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\OptimizeMeshes.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\PretransformVertices.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\ProcessHelper.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\RemoveRedundantMaterials.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\RemoveVCProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\ScaleProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\ScenePreprocessor.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\simd.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\SortByPTypeProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\SplitByBoneCountProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\SplitLargeMeshes.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\TargetAnimation.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\TextureTransform.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\TriangulateProcess.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\ValidateDataStructure.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\assimp\code\VertexTriangleAdjacency.h">
+			<Filter>Header Files\thirdparty\assimp\code</Filter>
 		</ClInclude>
 		<ClInclude Include="thirdparty\b2d_convexdecomp\b2Polygon.h">
 			<Filter>Header Files\thirdparty\b2d_convexdecomp</Filter>
@@ -4037,9 +4208,6 @@
 		<ClInclude Include="thirdparty\libwebp\src\enc\cost_enc.h">
 			<Filter>Header Files\thirdparty\libwebp\src\enc</Filter>
 		</ClInclude>
-		<ClInclude Include="thirdparty\libwebp\src\enc\delta_palettization_enc.h">
-			<Filter>Header Files\thirdparty\libwebp\src\enc</Filter>
-		</ClInclude>
 		<ClInclude Include="thirdparty\libwebp\src\enc\histogram_enc.h">
 			<Filter>Header Files\thirdparty\libwebp\src\enc</Filter>
 		</ClInclude>
@@ -4256,9 +4424,6 @@
 		<ClInclude Include="thirdparty\pvrtccompressor\PvrTcPacket.h">
 			<Filter>Header Files\thirdparty\pvrtccompressor</Filter>
 		</ClInclude>
-		<ClInclude Include="thirdparty\rtaudio\RtAudio.h">
-			<Filter>Header Files\thirdparty\rtaudio</Filter>
-		</ClInclude>
 		<ClInclude Include="thirdparty\squish\alpha.h">
 			<Filter>Header Files\thirdparty\squish</Filter>
 		</ClInclude>
@@ -4313,6 +4478,9 @@
 		<ClInclude Include="thirdparty\zlib\zutil.h">
 			<Filter>Header Files\thirdparty\zlib</Filter>
 		</ClInclude>
+		<ClInclude Include="thirdparty\zstd\common\debug.h">
+			<Filter>Header Files\thirdparty\zstd\common</Filter>
+		</ClInclude>
 		<ClInclude Include="thirdparty\zstd\common\error_private.h">
 			<Filter>Header Files\thirdparty\zstd\common</Filter>
 		</ClInclude>
@@ -4324,6 +4492,9 @@
 		</ClInclude>
 		<ClInclude Include="thirdparty\zstd\common\xxhash.h">
 			<Filter>Header Files\thirdparty\zstd\common</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\zstd\compress\hist.h">
+			<Filter>Header Files\thirdparty\zstd\compress</Filter>
 		</ClInclude>
 		<ClInclude Include="thirdparty\zstd\compress\zstd_double_fast.h">
 			<Filter>Header Files\thirdparty\zstd\compress</Filter>
@@ -4342,6 +4513,12 @@
 		</ClInclude>
 		<ClInclude Include="thirdparty\zstd\compress\zstdmt_compress.h">
 			<Filter>Header Files\thirdparty\zstd\compress</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\zstd\decompress\zstd_ddict.h">
+			<Filter>Header Files\thirdparty\zstd\decompress</Filter>
+		</ClInclude>
+		<ClInclude Include="thirdparty\zstd\decompress\zstd_decompress_block.h">
+			<Filter>Header Files\thirdparty\zstd\decompress</Filter>
 		</ClInclude>
 	</ItemGroup>
 	<ItemGroup>
@@ -4417,7 +4594,7 @@
 		<ClCompile Include="core\io\resource_format_binary.cpp">
 			<Filter>Source Files\core\io</Filter>
 		</ClCompile>
-		<ClCompile Include="core\io\resource_import.cpp">
+		<ClCompile Include="core\io\resource_importer.cpp">
 			<Filter>Source Files\core\io</Filter>
 		</ClCompile>
 		<ClCompile Include="core\io\resource_loader.cpp">
@@ -4456,6 +4633,9 @@
 		<ClCompile Include="core\math\audio_frame.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
+		<ClCompile Include="core\math\basis.cpp">
+			<Filter>Source Files\core\math</Filter>
+		</ClCompile>
 		<ClCompile Include="core\math\bsp_tree.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
@@ -4477,9 +4657,6 @@
 		<ClCompile Include="core\math\math_funcs.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
-		<ClCompile Include="core\math\matrix3.cpp">
-			<Filter>Source Files\core\math</Filter>
-		</ClCompile>
 		<ClCompile Include="core\math\plane.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
@@ -4487,6 +4664,12 @@
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
 		<ClCompile Include="core\math\quick_hull.cpp">
+			<Filter>Source Files\core\math</Filter>
+		</ClCompile>
+		<ClCompile Include="core\math\random_number_generator.cpp">
+			<Filter>Source Files\core\math</Filter>
+		</ClCompile>
+		<ClCompile Include="core\math\random_pcg.cpp">
 			<Filter>Source Files\core\math</Filter>
 		</ClCompile>
 		<ClCompile Include="core\math\rect2.cpp">
@@ -4546,9 +4729,6 @@
 		<ClCompile Include="core\os\semaphore.cpp">
 			<Filter>Source Files\core\os</Filter>
 		</ClCompile>
-		<ClCompile Include="core\os\shell.cpp">
-			<Filter>Source Files\core\os</Filter>
-		</ClCompile>
 		<ClCompile Include="core\os\thread.cpp">
 			<Filter>Source Files\core\os</Filter>
 		</ClCompile>
@@ -4577,9 +4757,6 @@
 			<Filter>Source Files\core</Filter>
 		</ClCompile>
 		<ClCompile Include="core\dictionary.cpp">
-			<Filter>Source Files\core</Filter>
-		</ClCompile>
-		<ClCompile Include="core\dvector.cpp">
 			<Filter>Source Files\core</Filter>
 		</ClCompile>
 		<ClCompile Include="core\engine.cpp">
@@ -4621,6 +4798,9 @@
 		<ClCompile Include="core\pool_allocator.cpp">
 			<Filter>Source Files\core</Filter>
 		</ClCompile>
+		<ClCompile Include="core\pool_vector.cpp">
+			<Filter>Source Files\core</Filter>
+		</ClCompile>
 		<ClCompile Include="core\print_string.cpp">
 			<Filter>Source Files\core</Filter>
 		</ClCompile>
@@ -4657,7 +4837,7 @@
 		<ClCompile Include="core\string_builder.cpp">
 			<Filter>Source Files\core</Filter>
 		</ClCompile>
-		<ClCompile Include="core\string_db.cpp">
+		<ClCompile Include="core\string_name.cpp">
 			<Filter>Source Files\core</Filter>
 		</ClCompile>
 		<ClCompile Include="core\translation.cpp">
@@ -4675,9 +4855,6 @@
 		<ClCompile Include="core\variant_call.cpp">
 			<Filter>Source Files\core</Filter>
 		</ClCompile>
-		<ClCompile Include="core\variant_construct_string.cpp">
-			<Filter>Source Files\core</Filter>
-		</ClCompile>
 		<ClCompile Include="core\variant_op.cpp">
 			<Filter>Source Files\core</Filter>
 		</ClCompile>
@@ -4687,7 +4864,7 @@
 		<ClCompile Include="drivers\alsa\audio_driver_alsa.cpp">
 			<Filter>Source Files\drivers\alsa</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\alsamidi\alsa_midi.cpp">
+		<ClCompile Include="drivers\alsamidi\midi_driver_alsamidi.cpp">
 			<Filter>Source Files\drivers\alsamidi</Filter>
 		</ClCompile>
 		<ClCompile Include="drivers\convex_decomp\b2d_decompose.cpp">
@@ -4696,11 +4873,8 @@
 		<ClCompile Include="drivers\coreaudio\audio_driver_coreaudio.cpp">
 			<Filter>Source Files\drivers\coreaudio</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\coremidi\core_midi.cpp">
+		<ClCompile Include="drivers\coremidi\midi_driver_coremidi.cpp">
 			<Filter>Source Files\drivers\coremidi</Filter>
-		</ClCompile>
-		<ClCompile Include="drivers\gl_context\context_gl.cpp">
-			<Filter>Source Files\drivers\gl_context</Filter>
 		</ClCompile>
 		<ClCompile Include="drivers\gles2\rasterizer_canvas_gles2.cpp">
 			<Filter>Source Files\drivers\gles2</Filter>
@@ -4746,9 +4920,6 @@
 		</ClCompile>
 		<ClCompile Include="drivers\pulseaudio\audio_driver_pulseaudio.cpp">
 			<Filter>Source Files\drivers\pulseaudio</Filter>
-		</ClCompile>
-		<ClCompile Include="drivers\rtaudio\audio_driver_rtaudio.cpp">
-			<Filter>Source Files\drivers\rtaudio</Filter>
 		</ClCompile>
 		<ClCompile Include="drivers\unix\dir_access_unix.cpp">
 			<Filter>Source Files\drivers\unix</Filter>
@@ -4798,13 +4969,10 @@
 		<ClCompile Include="drivers\windows\semaphore_windows.cpp">
 			<Filter>Source Files\drivers\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\windows\shell_windows.cpp">
-			<Filter>Source Files\drivers\windows</Filter>
-		</ClCompile>
 		<ClCompile Include="drivers\windows\thread_windows.cpp">
 			<Filter>Source Files\drivers\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="drivers\winmidi\win_midi.cpp">
+		<ClCompile Include="drivers\winmidi\midi_driver_winmidi.cpp">
 			<Filter>Source Files\drivers\winmidi</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\collada\collada.cpp">
@@ -4898,6 +5066,9 @@
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\collision_shape_2d_editor_plugin.cpp">
+			<Filter>Source Files\editor\plugins</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\plugins\cpu_particles_2d_editor_plugin.cpp">
 			<Filter>Source Files\editor\plugins</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\plugins\cpu_particles_editor_plugin.cpp">
@@ -5068,16 +5239,25 @@
 		<ClCompile Include="editor\editor_export.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\editor_feature_profile.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\editor_file_dialog.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\editor_file_system.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
+		<ClCompile Include="editor\editor_folding.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
 		<ClCompile Include="editor\editor_fonts.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\editor_help.cpp">
+			<Filter>Source Files\editor</Filter>
+		</ClCompile>
+		<ClCompile Include="editor\editor_help_search.cpp">
 			<Filter>Source Files\editor</Filter>
 		</ClCompile>
 		<ClCompile Include="editor\editor_inspector.cpp">
@@ -5233,11 +5413,17 @@
 		<ClCompile Include="main\main.cpp">
 			<Filter>Source Files\main</Filter>
 		</ClCompile>
+		<ClCompile Include="main\main_timer_sync.cpp">
+			<Filter>Source Files\main</Filter>
+		</ClCompile>
 		<ClCompile Include="main\performance.cpp">
 			<Filter>Source Files\main</Filter>
 		</ClCompile>
-		<ClCompile Include="main\timer_sync.cpp">
-			<Filter>Source Files\main</Filter>
+		<ClCompile Include="modules\assimp\editor_scene_importer_assimp.cpp">
+			<Filter>Source Files\modules\assimp</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\assimp\register_types.cpp">
+			<Filter>Source Files\modules\assimp</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\bmp\image_loader_bmp.cpp">
 			<Filter>Source Files\modules\bmp</Filter>
@@ -5458,6 +5644,12 @@
 		<ClCompile Include="modules\gdnative\pluginscript\register_types.cpp">
 			<Filter>Source Files\modules\gdnative\pluginscript</Filter>
 		</ClCompile>
+		<ClCompile Include="modules\gdnative\videodecoder\register_types.cpp">
+			<Filter>Source Files\modules\gdnative\videodecoder</Filter>
+		</ClCompile>
+		<ClCompile Include="modules\gdnative\videodecoder\video_stream_gdnative.cpp">
+			<Filter>Source Files\modules\gdnative\videodecoder</Filter>
+		</ClCompile>
 		<ClCompile Include="modules\gdnative\gdnative.cpp">
 			<Filter>Source Files\modules\gdnative</Filter>
 		</ClCompile>
@@ -5611,7 +5803,7 @@
 		<ClCompile Include="modules\upnp\upnp.cpp">
 			<Filter>Source Files\modules\upnp</Filter>
 		</ClCompile>
-		<ClCompile Include="modules\upnp\upnpdevice.cpp">
+		<ClCompile Include="modules\upnp\upnp_device.cpp">
 			<Filter>Source Files\modules\upnp</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\visual_script\register_types.cpp">
@@ -5686,7 +5878,7 @@
 		<ClCompile Include="modules\websocket\websocket_client.cpp">
 			<Filter>Source Files\modules\websocket</Filter>
 		</ClCompile>
-		<ClCompile Include="modules\websocket\websocket_multiplayer.cpp">
+		<ClCompile Include="modules\websocket\websocket_multiplayer_peer.cpp">
 			<Filter>Source Files\modules\websocket</Filter>
 		</ClCompile>
 		<ClCompile Include="modules\websocket\websocket_peer.cpp">
@@ -5701,14 +5893,8 @@
 		<ClCompile Include="platform\android\export\export.cpp">
 			<Filter>Source Files\platform\android\export</Filter>
 		</ClCompile>
-		<ClCompile Include="platform\android\globals\global_defaults.cpp">
-			<Filter>Source Files\platform\android\globals</Filter>
-		</ClCompile>
 		<ClCompile Include="platform\iphone\export\export.cpp">
 			<Filter>Source Files\platform\iphone\export</Filter>
-		</ClCompile>
-		<ClCompile Include="platform\iphone\globals\global_defaults.cpp">
-			<Filter>Source Files\platform\iphone\globals</Filter>
 		</ClCompile>
 		<ClCompile Include="platform\javascript\export\export.cpp">
 			<Filter>Source Files\platform\javascript\export</Filter>
@@ -5722,13 +5908,10 @@
 		<ClCompile Include="platform\windows\export\export.cpp">
 			<Filter>Source Files\platform\windows\export</Filter>
 		</ClCompile>
-		<ClCompile Include="platform\windows\context_gl_win.cpp">
+		<ClCompile Include="platform\windows\context_gl_windows.cpp">
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="platform\windows\crash_handler_win.cpp">
-			<Filter>Source Files\platform\windows</Filter>
-		</ClCompile>
-		<ClCompile Include="platform\windows\ctxgl_procaddr.cpp">
+		<ClCompile Include="platform\windows\crash_handler_windows.cpp">
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
 		<ClCompile Include="platform\windows\godot.natvis">
@@ -5737,13 +5920,13 @@
 		<ClCompile Include="platform\windows\godot_res.rc">
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="platform\windows\godot_win.cpp">
+		<ClCompile Include="platform\windows\godot_windows.cpp">
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="platform\windows\joypad.cpp">
+		<ClCompile Include="platform\windows\joypad_windows.cpp">
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="platform\windows\key_mapping_win.cpp">
+		<ClCompile Include="platform\windows\key_mapping_windows.cpp">
 			<Filter>Source Files\platform\windows</Filter>
 		</ClCompile>
 		<ClCompile Include="platform\windows\os_windows.cpp">
@@ -5809,7 +5992,7 @@
 		<ClCompile Include="scene\2d\mesh_instance_2d.cpp">
 			<Filter>Source Files\scene\2d</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\2d\navigation2d.cpp">
+		<ClCompile Include="scene\2d\navigation_2d.cpp">
 			<Filter>Source Files\scene\2d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\2d\navigation_polygon.cpp">
@@ -5848,9 +6031,6 @@
 		<ClCompile Include="scene\2d\remote_transform_2d.cpp">
 			<Filter>Source Files\scene\2d</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\2d\screen_button.cpp">
-			<Filter>Source Files\scene\2d</Filter>
-		</ClCompile>
 		<ClCompile Include="scene\2d\skeleton_2d.cpp">
 			<Filter>Source Files\scene\2d</Filter>
 		</ClCompile>
@@ -5858,6 +6038,9 @@
 			<Filter>Source Files\scene\2d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\2d\tile_map.cpp">
+			<Filter>Source Files\scene\2d</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\2d\touch_screen_button.cpp">
 			<Filter>Source Files\scene\2d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\2d\visibility_notifier_2d.cpp">
@@ -5956,9 +6139,6 @@
 		<ClCompile Include="scene\3d\room_instance.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\3d\scenario_fx.cpp">
-			<Filter>Source Files\scene\3d</Filter>
-		</ClCompile>
 		<ClCompile Include="scene\3d\skeleton.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
@@ -5987,6 +6167,9 @@
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\3d\voxel_light_baker.cpp">
+			<Filter>Source Files\scene\3d</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\3d\world_environment.cpp">
 			<Filter>Source Files\scene\3d</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\animation\animation_blend_space_1d.cpp">
@@ -6022,7 +6205,7 @@
 		<ClCompile Include="scene\animation\tween.cpp">
 			<Filter>Source Files\scene\animation</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\audio\audio_player.cpp">
+		<ClCompile Include="scene\audio\audio_stream_player.cpp">
 			<Filter>Source Files\scene\audio</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\gui\base_button.cpp">
@@ -6205,10 +6388,7 @@
 		<ClCompile Include="scene\resources\audio_stream_sample.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\resources\bit_mask.cpp">
-			<Filter>Source Files\scene\resources</Filter>
-		</ClCompile>
-		<ClCompile Include="scene\resources\bounds.cpp">
+		<ClCompile Include="scene\resources\bit_map.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\box_shape.cpp">
@@ -6224,9 +6404,6 @@
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\circle_shape_2d.cpp">
-			<Filter>Source Files\scene\resources</Filter>
-		</ClCompile>
-		<ClCompile Include="scene\resources\color_ramp.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\concave_polygon_shape.cpp">
@@ -6257,6 +6434,15 @@
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\font.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\resources\gradient.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\resources\height_map_shape.cpp">
+			<Filter>Source Files\scene\resources</Filter>
+		</ClCompile>
+		<ClCompile Include="scene\resources\line_shape_2d.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\material.cpp">
@@ -6298,10 +6484,10 @@
 		<ClCompile Include="scene\resources\rectangle_shape_2d.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\resources\room.cpp">
+		<ClCompile Include="scene\resources\resource_format_text.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\resources\scene_format_text.cpp">
+		<ClCompile Include="scene\resources\room.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\segment_shape_2d.cpp">
@@ -6316,10 +6502,7 @@
 		<ClCompile Include="scene\resources\shape_2d.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
-		<ClCompile Include="scene\resources\shape_line_2d.cpp">
-			<Filter>Source Files\scene\resources</Filter>
-		</ClCompile>
-		<ClCompile Include="scene\resources\sky_box.cpp">
+		<ClCompile Include="scene\resources\sky.cpp">
 			<Filter>Source Files\scene\resources</Filter>
 		</ClCompile>
 		<ClCompile Include="scene\resources\space_2d.cpp">
@@ -6559,7 +6742,7 @@
 		<ClCompile Include="servers\visual\visual_server_canvas.cpp">
 			<Filter>Source Files\servers\visual</Filter>
 		</ClCompile>
-		<ClCompile Include="servers\visual\visual_server_global.cpp">
+		<ClCompile Include="servers\visual\visual_server_globals.cpp">
 			<Filter>Source Files\servers\visual</Filter>
 		</ClCompile>
 		<ClCompile Include="servers\visual\visual_server_light_baker.cpp">
@@ -6594,6 +6777,237 @@
 		</ClCompile>
 		<ClCompile Include="servers\visual_server.cpp">
 			<Filter>Source Files\servers</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\BaseImporter.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\BaseProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\Bitmap.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\CalcTangentsProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\CInterfaceIOWrapper.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\ComputeUVMappingProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\ConvertToLHProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\CreateAnimMesh.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\DeboneProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\DefaultIOStream.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\DefaultIOSystem.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\DefaultLogger.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\DropFaceNormalsProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\EmbedTexturesProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\Exporter.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXAnimation.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXBinaryTokenizer.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXConverter.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXDeformer.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXDocument.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXDocumentUtil.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXExporter.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXExportNode.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXExportProperty.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXImporter.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXMaterial.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXMeshGeometry.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXModel.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXNodeAttribute.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXParser.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXProperties.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXTokenizer.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FBXUtil.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FindDegenerates.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FindInstancesProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FindInvalidDataProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FIReader.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\FixNormalsStep.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\GenFaceNormalsProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\GenVertexNormalsProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\Importer.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\ImporterRegistry.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\ImproveCacheLocality.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\JoinVerticesProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\LimitBoneWeightsProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\MakeVerboseFormat.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\MaterialSystem.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\MMDImporter.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\MMDPmxParser.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\OptimizeGraph.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\OptimizeMeshes.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\PostStepRegistry.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\PretransformVertices.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\ProcessHelper.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\RawLoader.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\RemoveComments.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\RemoveRedundantMaterials.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\RemoveVCProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\ScaleProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\scene.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\SceneCombiner.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\ScenePreprocessor.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\SGSpatialSort.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\simd.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\SkeletonMeshBuilder.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\SortByPTypeProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\SpatialSort.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\SplitByBoneCountProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\SplitLargeMeshes.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\StandardShapes.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\Subdivision.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\TargetAnimation.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\TextureTransform.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\TriangulateProcess.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\ValidateDataStructure.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\Version.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\assimp\code\VertexTriangleAdjacency.cpp">
+			<Filter>Source Files\thirdparty\assimp\code</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\b2d_convexdecomp\b2Polygon.cpp">
 			<Filter>Source Files\thirdparty\b2d_convexdecomp</Filter>
@@ -7606,6 +8020,9 @@
 		<ClCompile Include="thirdparty\libwebp\src\dsp\cost_mips_dsp_r2.c">
 			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\libwebp\src\dsp\cost_neon.c">
+			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\libwebp\src\dsp\cost_sse2.c">
 			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
 		</ClCompile>
@@ -7637,9 +8054,6 @@
 			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\libwebp\src\dsp\enc.c">
-			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\libwebp\src\dsp\enc_avx2.c">
 			<Filter>Source Files\thirdparty\libwebp\src\dsp</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\libwebp\src\dsp\enc_mips32.c">
@@ -7789,9 +8203,6 @@
 		<ClCompile Include="thirdparty\libwebp\src\enc\cost_enc.c">
 			<Filter>Source Files\thirdparty\libwebp\src\enc</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebp\src\enc\delta_palettization_enc.c">
-			<Filter>Source Files\thirdparty\libwebp\src\enc</Filter>
-		</ClCompile>
 		<ClCompile Include="thirdparty\libwebp\src\enc\filter_enc.c">
 			<Filter>Source Files\thirdparty\libwebp\src\enc</Filter>
 		</ClCompile>
@@ -7891,131 +8302,161 @@
 		<ClCompile Include="thirdparty\libwebp\src\utils\utils.c">
 			<Filter>Source Files\thirdparty\libwebp\src\utils</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\core\alloc.c">
-			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\adopt.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\core\context.c">
-			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\alloc.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\core\libwebsockets.c">
-			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\connect.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\core\output.c">
-			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\context.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\core\pollfd.c">
-			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\dummy-callback.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\core\service.c">
-			<Filter>Source Files\thirdparty\libwebsockets\core</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\libwebsockets.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\event-libs\poll\poll.c">
-			<Filter>Source Files\thirdparty\libwebsockets\event-libs\poll</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\output.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\misc\base64-decode.c">
-			<Filter>Source Files\thirdparty\libwebsockets\misc</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\pollfd.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\misc\lejp.c">
-			<Filter>Source Files\thirdparty\libwebsockets\misc</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\core\service.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\core</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\misc\sha-1.c">
-			<Filter>Source Files\thirdparty\libwebsockets\misc</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\event-libs\poll\poll.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\event-libs\poll</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\plat\lws-plat-win.c">
-			<Filter>Source Files\thirdparty\libwebsockets\plat</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\misc\base64-decode.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\misc</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\h1\ops-h1.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\h1</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\misc\lejp.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\misc</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\http\client\client-handshake.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\http\client</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\misc\sha-1.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\misc</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\http\client\client.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\http\client</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\plat\windows\windows-fds.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\plat\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\http\server\fops-zip.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\http\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\plat\windows\windows-file.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\plat\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\http\server\lejp-conf.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\http\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\plat\windows\windows-init.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\plat\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\http\server\parsers.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\http\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\plat\windows\windows-misc.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\plat\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\http\server\server.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\http\server</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\plat\windows\windows-pipe.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\plat\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\http\header.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\http</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\plat\windows\windows-service.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\plat\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\listen\ops-listen.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\listen</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\plat\windows\windows-sockets.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\plat\windows</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\pipe\ops-pipe.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\pipe</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\h1\ops-h1.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\h1</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\raw\ops-raw.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\raw</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\http\client\client-handshake.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\http\client</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\ws\client-parser-ws.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\ws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\http\client\client.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\http\client</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\ws\client-ws.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\ws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\http\server\fops-zip.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\http\server</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\ws\ops-ws.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\ws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\http\server\lejp-conf.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\http\server</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\roles\ws\server-ws.c">
-			<Filter>Source Files\thirdparty\libwebsockets\roles\ws</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\http\server\parsers.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\http\server</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_cert.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\http\server\server.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\http\server</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_lib.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\http\header.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\http</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_methods.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\listen\ops-listen.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\listen</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_pkey.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\pipe\ops-pipe.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\pipe</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_stack.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\raw-file\ops-raw-file.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\raw-file</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\library\ssl_x509.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\library</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\raw-skt\ops-raw-skt.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\raw-skt</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\platform\ssl_pm.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\platform</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\ws\client-parser-ws.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\ws</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\wrapper\platform\ssl_port.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls\wrapper\platform</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\ws\client-ws.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\ws</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\lws-genhash.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\ws\ops-ws.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\ws</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\lws-genrsa.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\roles\ws\server-ws.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\roles\ws</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\mbedtls-client.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library\ssl_cert.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\mbedtls-server.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library\ssl_lib.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\mbedtls\ssl.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls\mbedtls</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library\ssl_methods.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\tls-client.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library\ssl_pkey.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\tls-server.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library\ssl_stack.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\libwebsockets\tls\tls.c">
-			<Filter>Source Files\thirdparty\libwebsockets\tls</Filter>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library\ssl_x509.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\library</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\platform\ssl_pm.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\platform</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\platform\ssl_port.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls\wrapper\platform</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\lws-genhash.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\lws-genrsa.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\mbedtls-client.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\mbedtls-server.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\mbedtls\ssl.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls\mbedtls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\tls-client.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\tls-server.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\libwebsockets\lib\tls\tls.c">
+			<Filter>Source Files\thirdparty\libwebsockets\lib\tls</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\libwebsockets\win32helpers\getopt.c">
 			<Filter>Source Files\thirdparty\libwebsockets\win32helpers</Filter>
@@ -8728,9 +9169,6 @@
 		<ClCompile Include="thirdparty\opus\analysis.c">
 			<Filter>Source Files\thirdparty\opus</Filter>
 		</ClCompile>
-		<ClCompile Include="thirdparty\opus\http.c">
-			<Filter>Source Files\thirdparty\opus</Filter>
-		</ClCompile>
 		<ClCompile Include="thirdparty\opus\info.c">
 			<Filter>Source Files\thirdparty\opus</Filter>
 		</ClCompile>
@@ -8768,9 +9206,6 @@
 			<Filter>Source Files\thirdparty\opus</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\opus\stream.c">
-			<Filter>Source Files\thirdparty\opus</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\opus\wincerts.c">
 			<Filter>Source Files\thirdparty\opus</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\pvrtccompressor\BitScale.cpp">
@@ -8820,9 +9255,6 @@
 		</ClCompile>
 		<ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastRegion.cpp">
 			<Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
-		</ClCompile>
-		<ClCompile Include="thirdparty\rtaudio\RtAudio.cpp">
-			<Filter>Source Files\thirdparty\rtaudio</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\squish\alpha.cpp">
 			<Filter>Source Files\thirdparty\squish</Filter>
@@ -8887,6 +9319,9 @@
 		<ClCompile Include="thirdparty\zlib\zutil.c">
 			<Filter>Source Files\thirdparty\zlib</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\zstd\common\debug.c">
+			<Filter>Source Files\thirdparty\zstd\common</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\zstd\common\entropy_common.c">
 			<Filter>Source Files\thirdparty\zstd\common</Filter>
 		</ClCompile>
@@ -8909,6 +9344,9 @@
 			<Filter>Source Files\thirdparty\zstd\common</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\zstd\compress\fse_compress.c">
+			<Filter>Source Files\thirdparty\zstd\compress</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\zstd\compress\hist.c">
 			<Filter>Source Files\thirdparty\zstd\compress</Filter>
 		</ClCompile>
 		<ClCompile Include="thirdparty\zstd\compress\huf_compress.c">
@@ -8938,7 +9376,13 @@
 		<ClCompile Include="thirdparty\zstd\decompress\huf_decompress.c">
 			<Filter>Source Files\thirdparty\zstd\decompress</Filter>
 		</ClCompile>
+		<ClCompile Include="thirdparty\zstd\decompress\zstd_ddict.c">
+			<Filter>Source Files\thirdparty\zstd\decompress</Filter>
+		</ClCompile>
 		<ClCompile Include="thirdparty\zstd\decompress\zstd_decompress.c">
+			<Filter>Source Files\thirdparty\zstd\decompress</Filter>
+		</ClCompile>
+		<ClCompile Include="thirdparty\zstd\decompress\zstd_decompress_block.c">
 			<Filter>Source Files\thirdparty\zstd\decompress</Filter>
 		</ClCompile>
 	</ItemGroup>
