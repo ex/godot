@@ -6,12 +6,10 @@
 	</description>
 	<tutorials>
 	</tutorials>
-	<demos>
-	</demos>
 	<methods>
 	</methods>
 	<members>
-		<member name="function" type="int" setter="set_function" getter="get_function" enum="VisualShaderNodeScalarFunc.Function">
+		<member name="function" type="int" setter="set_function" getter="get_function" enum="VisualShaderNodeScalarFunc.Function" default="13">
 		</member>
 	</members>
 	<constants>
@@ -76,6 +74,8 @@
 		<constant name="FUNC_ROUNDEVEN" value="29" enum="Function">
 		</constant>
 		<constant name="FUNC_TRUNC" value="30" enum="Function">
+		</constant>
+		<constant name="FUNC_ONEMINUS" value="31" enum="Function">
 		</constant>
 	</constants>
 </class>

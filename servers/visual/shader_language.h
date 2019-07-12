@@ -33,6 +33,7 @@
 
 #include "core/list.h"
 #include "core/map.h"
+#include "core/script_language.h"
 #include "core/string_name.h"
 #include "core/typedefs.h"
 #include "core/ustring.h"
@@ -80,6 +81,7 @@ public:
 		TK_TYPE_SAMPLERCUBE,
 		TK_INTERPOLATION_FLAT,
 		TK_INTERPOLATION_SMOOTH,
+		TK_CONST,
 		TK_PRECISION_LOW,
 		TK_PRECISION_MID,
 		TK_PRECISION_HIGH,
@@ -440,6 +442,13 @@ public:
 	};
 
 	struct ShaderNode : public Node {
+
+		struct Constant {
+			DataType type;
+			DataPrecision precision;
+			ConstantNode *initializer;
+		};
+
 		struct Function {
 			StringName name;
 			FunctionNode *function;
@@ -492,6 +501,7 @@ public:
 			}
 		};
 
+		Map<StringName, Constant> constants;
 		Map<StringName, Varying> varyings;
 		Map<StringName, Uniform> uniforms;
 		Vector<StringName> render_modes;
@@ -632,6 +642,7 @@ private:
 		IDENTIFIER_FUNCTION_ARGUMENT,
 		IDENTIFIER_LOCAL_VAR,
 		IDENTIFIER_BUILTIN_VAR,
+		IDENTIFIER_CONSTANT,
 	};
 
 	bool _find_identifier(const BlockNode *p_block, const Map<StringName, BuiltInInfo> &p_builtin_types, const StringName &p_identifier, DataType *r_data_type = NULL, IdentifierType *r_type = NULL);
@@ -679,7 +690,7 @@ public:
 
 	static String get_shader_type(const String &p_code);
 	Error compile(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types);
-	Error complete(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types, List<String> *r_options, String &r_call_hint);
+	Error complete(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types, List<ScriptCodeCompletionOption> *r_options, String &r_call_hint);
 
 	String get_error_text();
 	int get_error_line();

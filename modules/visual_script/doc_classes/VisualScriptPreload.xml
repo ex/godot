@@ -12,12 +12,10 @@
 	</description>
 	<tutorials>
 	</tutorials>
-	<demos>
-	</demos>
 	<methods>
 	</methods>
 	<members>
-		<member name="resource" type="Resource" setter="set_preload" getter="get_preload">
+		<member name="resource" type="Resource" setter="set_preload" getter="get_preload" default="null">
 			The [Resource] to load.
 		</member>
 	</members>

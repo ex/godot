@@ -1,13 +1,26 @@
-import imp
 import os
+import os.path
 import sys
 import subprocess
 
-from distutils.version import LooseVersion
-from SCons.Script import BoolVariable, Dir, Environment, Variables
+from SCons.Script import Dir, Environment
 
 if os.name == 'nt':
     from . import mono_reg_utils as monoreg
+
+
+android_arch_dirs = {
+    'armv7': 'armeabi-v7a',
+    'arm64v8': 'arm64-v8a',
+    'x86': 'x86',
+    'x86_64': 'x86_64'
+}
+
+
+def get_android_out_dir(env):
+    return os.path.join(Dir('#platform/android/java/libs').abspath,
+                        'release' if env['target'] == 'release' else 'debug',
+                        android_arch_dirs[env['android_arch']])
 
 
 def find_file_in_dir(directory, files, prefix='', extension=''):
@@ -20,57 +33,64 @@ def find_file_in_dir(directory, files, prefix='', extension=''):
 
 
 def copy_file(src_dir, dst_dir, name):
-    from shutil import copyfile
+    from shutil import copy
 
-    src_path = os.path.join(src_dir, name)
-    dst_path = os.path.join(dst_dir, name)
+    src_path = os.path.join(Dir(src_dir).abspath, name)
+    dst_dir = Dir(dst_dir).abspath
 
     if not os.path.isdir(dst_dir):
-        os.mkdir(dst_dir)
+        os.makedirs(dst_dir)
 
-    copyfile(src_path, dst_path)
+    copy(src_path, dst_dir)
 
 
 def configure(env, env_mono):
-    envvars = Variables()
-    envvars.Add(BoolVariable('mono_static', 'Statically link mono', False))
-    envvars.Add(BoolVariable('copy_mono_root', 'Make a copy of the mono installation directory to bundle with the editor', False))
-    envvars.Update(env)
-
     bits = env['bits']
+    is_android = env['platform'] == 'android'
 
     tools_enabled = env['tools']
     mono_static = env['mono_static']
     copy_mono_root = env['copy_mono_root']
 
+    mono_prefix = env['mono_prefix']
+
     mono_lib_names = ['mono-2.0-sgen', 'monosgen-2.0']
 
-    if env['platform'] == 'windows':
-        mono_root = ''
+    is_travis = os.environ.get('TRAVIS') == 'true'
 
-        if bits == '32':
-            if os.getenv('MONO32_PREFIX'):
-                mono_root = os.getenv('MONO32_PREFIX')
-            elif os.name == 'nt':
-                mono_root = monoreg.find_mono_root_dir(bits)
-        else:
-            if os.getenv('MONO64_PREFIX'):
-                mono_root = os.getenv('MONO64_PREFIX')
-            elif os.name == 'nt':
-                mono_root = monoreg.find_mono_root_dir(bits)
+    if is_travis:
+        # Travis CI may have a Mono version lower than 5.12
+        env_mono.Append(CPPDEFINES=['NO_PENDING_EXCEPTIONS'])
+
+    if is_android and not env['android_arch'] in android_arch_dirs:
+        raise RuntimeError('This module does not support for the specified \'android_arch\': ' + env['android_arch'])
+
+    if is_android and tools_enabled:
+        # TODO: Implement this. We have to add the data directory to the apk, concretely the Api and Tools folders.
+        raise RuntimeError('This module does not currently support building for android with tools enabled')
+
+    if is_android and mono_static:
+        # When static linking and doing something that requires libmono-native, we get a dlopen error as libmono-native seems to depend on libmonosgen-2.0
+        raise RuntimeError('Linking Mono statically is not currently supported on Android')
+
+    if (os.getenv('MONO32_PREFIX') or os.getenv('MONO64_PREFIX')) and not mono_prefix:
+        print("WARNING: The environment variables 'MONO32_PREFIX' and 'MONO64_PREFIX' are deprecated; use the 'mono_prefix' SCons parameter instead")
+
+    if env['platform'] == 'windows':
+        mono_root = mono_prefix
+
+        if not mono_root and os.name == 'nt':
+            mono_root = monoreg.find_mono_root_dir(bits)
 
         if not mono_root:
-            raise RuntimeError('Mono installation directory not found')
+            raise RuntimeError("Mono installation directory not found; specify one manually with the 'mono_prefix' SCons parameter")
 
         print('Found Mono root directory: ' + mono_root)
-
-        mono_version = mono_root_try_find_mono_version(mono_root)
-        configure_for_mono_version(env_mono, mono_version)
 
         mono_lib_path = os.path.join(mono_root, 'lib')
 
         env.Append(LIBPATH=mono_lib_path)
-        env_mono.Append(CPPPATH=os.path.join(mono_root, 'include', 'mono-2.0'))
+        env_mono.Prepend(CPPPATH=os.path.join(mono_root, 'include', 'mono-2.0'))
 
         if mono_static:
             lib_suffix = Environment()['LIBSUFFIX']
@@ -113,21 +133,18 @@ def configure(env, env_mono):
             if not mono_dll_name:
                 raise RuntimeError('Could not find mono shared library in: ' + mono_bin_path)
 
-            copy_file(mono_bin_path, 'bin', mono_dll_name + '.dll')
+            copy_file(mono_bin_path, '#bin', mono_dll_name + '.dll')
     else:
         is_apple = (sys.platform == 'darwin' or "osxcross" in env)
 
         sharedlib_ext = '.dylib' if is_apple else '.so'
 
-        mono_root = ''
+        mono_root = mono_prefix
         mono_lib_path = ''
+        mono_so_name = ''
 
-        if bits == '32':
-            if os.getenv('MONO32_PREFIX'):
-                mono_root = os.getenv('MONO32_PREFIX')
-        else:
-            if os.getenv('MONO64_PREFIX'):
-                mono_root = os.getenv('MONO64_PREFIX')
+        if not mono_root and is_android:
+            raise RuntimeError("Mono installation directory not found; specify one manually with the 'mono_prefix' SCons parameter")
 
         if not mono_root and is_apple:
             # Try with some known directories under OSX
@@ -142,25 +159,23 @@ def configure(env, env_mono):
         if not mono_root and mono_static:
             mono_root = pkgconfig_try_find_mono_root(mono_lib_names, sharedlib_ext)
             if not mono_root:
-                raise RuntimeError('Building with mono_static=yes, but failed to find the mono prefix with pkg-config. Specify one manually')
+                raise RuntimeError("Building with mono_static=yes, but failed to find the mono prefix with pkg-config; " + \
+                    "specify one manually with the 'mono_prefix' SCons parameter")
 
         if mono_root:
             print('Found Mono root directory: ' + mono_root)
 
-            mono_version = mono_root_try_find_mono_version(mono_root)
-            configure_for_mono_version(env_mono, mono_version)
-
             mono_lib_path = os.path.join(mono_root, 'lib')
 
             env.Append(LIBPATH=mono_lib_path)
-            env_mono.Append(CPPPATH=os.path.join(mono_root, 'include', 'mono-2.0'))
+            env_mono.Prepend(CPPPATH=os.path.join(mono_root, 'include', 'mono-2.0'))
 
             mono_lib = find_file_in_dir(mono_lib_path, mono_lib_names, prefix='lib', extension='.a')
 
             if not mono_lib:
                 raise RuntimeError('Could not find mono library in: ' + mono_lib_path)
 
-            env_mono.Append(CPPFLAGS=['-D_REENTRANT'])
+            env_mono.Append(CPPDEFINES=['_REENTRANT'])
 
             if mono_static:
                 mono_lib_file = os.path.join(mono_lib_path, 'lib' + mono_lib + '.a')
@@ -174,6 +189,8 @@ def configure(env, env_mono):
 
             if is_apple:
                 env.Append(LIBS=['iconv', 'pthread'])
+            elif is_android:
+                pass # Nothing
             else:
                 env.Append(LIBS=['m', 'rt', 'dl', 'pthread'])
 
@@ -183,21 +200,15 @@ def configure(env, env_mono):
                 if not mono_so_name:
                     raise RuntimeError('Could not find mono shared library in: ' + mono_lib_path)
 
-                copy_file(mono_lib_path, 'bin', 'lib' + mono_so_name + sharedlib_ext)
+                copy_file(mono_lib_path, '#bin', 'lib' + mono_so_name + sharedlib_ext)
         else:
             assert not mono_static
 
             # TODO: Add option to force using pkg-config
             print('Mono root directory not found. Using pkg-config instead')
 
-            mono_version = pkgconfig_try_find_mono_version()
-            configure_for_mono_version(env_mono, mono_version)
-
             env.ParseConfig('pkg-config monosgen-2 --libs')
             env_mono.ParseConfig('pkg-config monosgen-2 --cflags')
-
-            mono_lib_path = ''
-            mono_so_name = ''
 
             tmpenv = Environment()
             tmpenv.AppendENVPath('PKG_CONFIG_PATH', os.getenv('PKG_CONFIG_PATH'))
@@ -213,15 +224,25 @@ def configure(env, env_mono):
             if not mono_so_name:
                 raise RuntimeError('Could not find mono shared library in: ' + str(tmpenv['LIBPATH']))
 
-            copy_file(mono_lib_path, 'bin', 'lib' + mono_so_name + sharedlib_ext)
+        if not mono_static:
+            libs_output_dir = get_android_out_dir(env) if is_android else '#bin'
+            copy_file(mono_lib_path, libs_output_dir, 'lib' + mono_so_name + sharedlib_ext)
 
         env.Append(LINKFLAGS='-rdynamic')
 
-    if not tools_enabled:
+    if not tools_enabled and not is_android:
         if not mono_root:
             mono_root = subprocess.check_output(['pkg-config', 'mono-2', '--variable=prefix']).decode('utf8').strip()
 
         make_template_dir(env, mono_root)
+    elif not tools_enabled and is_android:
+        # Compress Android Mono Config
+        from . import make_android_mono_config
+        config_file_path = os.path.join(mono_root, 'etc', 'mono', 'config')
+        make_android_mono_config.generate_compressed_config(config_file_path, 'mono_gd/')
+
+        # Copy the required shared libraries
+        copy_mono_shared_libs(env, mono_root, None)
 
     if copy_mono_root:
         if not mono_root:
@@ -241,7 +262,7 @@ def make_template_dir(env, mono_root):
 
     template_dir_name = ''
 
-    if platform in ['windows', 'osx', 'x11']:
+    if platform in ['windows', 'osx', 'x11', 'android']:
         template_dir_name = 'data.mono.%s.%s.%s' % (platform, env['bits'], target)
     else:
         assert False
@@ -261,7 +282,7 @@ def make_template_dir(env, mono_root):
 
     # Copy the required shared libraries
 
-    copy_mono_shared_libs(mono_root, template_mono_root_dir, env['platform'])
+    copy_mono_shared_libs(env, mono_root, template_mono_root_dir)
 
 
 def copy_mono_root_files(env, mono_root):
@@ -285,7 +306,7 @@ def copy_mono_root_files(env, mono_root):
 
     # Copy the required shared libraries
 
-    copy_mono_shared_libs(mono_root, editor_mono_root_dir, env['platform'])
+    copy_mono_shared_libs(env, mono_root, editor_mono_root_dir)
 
     # Copy framework assemblies
 
@@ -332,15 +353,22 @@ def copy_mono_etc_dir(mono_root, target_mono_config_dir, platform):
     copy_tree(os.path.join(mono_etc_dir, '2.0'), os.path.join(target_mono_config_dir, '2.0'))
     copy_tree(os.path.join(mono_etc_dir, '4.0'), os.path.join(target_mono_config_dir, '4.0'))
     copy_tree(os.path.join(mono_etc_dir, '4.5'), os.path.join(target_mono_config_dir, '4.5'))
-    copy_tree(os.path.join(mono_etc_dir, 'mconfig'), os.path.join(target_mono_config_dir, 'mconfig'))
+    if os.path.isdir(os.path.join(mono_etc_dir, 'mconfig')):
+        copy_tree(os.path.join(mono_etc_dir, 'mconfig'), os.path.join(target_mono_config_dir, 'mconfig'))
 
     for file in glob(os.path.join(mono_etc_dir, '*')):
         if os.path.isfile(file):
             copy(file, target_mono_config_dir)
 
 
-def copy_mono_shared_libs(mono_root, target_mono_root_dir, platform):
+def copy_mono_shared_libs(env, mono_root, target_mono_root_dir):
     from shutil import copy
+
+    def copy_if_exists(src, dst):
+        if os.path.isfile(src):
+            copy(src, dst)
+
+    platform = env['platform']
 
     if platform == 'windows':
         target_mono_bin_dir = os.path.join(target_mono_root_dir, 'bin')
@@ -348,26 +376,24 @@ def copy_mono_shared_libs(mono_root, target_mono_root_dir, platform):
         if not os.path.isdir(target_mono_bin_dir):
             os.makedirs(target_mono_bin_dir)
 
-        copy(os.path.join(mono_root, 'bin', 'MonoPosixHelper.dll'), os.path.join(target_mono_bin_dir, 'MonoPosixHelper.dll'))
+        copy(os.path.join(mono_root, 'bin', 'MonoPosixHelper.dll'), target_mono_bin_dir)
     else:
-        target_mono_lib_dir = os.path.join(target_mono_root_dir, 'lib')
+        target_mono_lib_dir = get_android_out_dir(env) if platform == 'android' else os.path.join(target_mono_root_dir, 'lib')
 
         if not os.path.isdir(target_mono_lib_dir):
             os.makedirs(target_mono_lib_dir)
 
         if platform == 'osx':
-            copy(os.path.join(mono_root, 'lib', 'libMonoPosixHelper.dylib'), os.path.join(target_mono_lib_dir, 'libMonoPosixHelper.dylib'))
-        elif platform == 'x11':
-            copy(os.path.join(mono_root, 'lib', 'libmono-btls-shared.so'), os.path.join(target_mono_lib_dir, 'libmono-btls-shared.so'))
-            copy(os.path.join(mono_root, 'lib', 'libMonoPosixHelper.so'), os.path.join(target_mono_lib_dir, 'libMonoPosixHelper.so'))
+            # TODO: Make sure nothing is missing
+            copy(os.path.join(mono_root, 'lib', 'libMonoPosixHelper.dylib'), target_mono_lib_dir)
+        elif platform == 'x11' or platform == 'android':
+            lib_file_names = [lib_name + '.so' for lib_name in [
+                'libmono-btls-shared', 'libmono-ee-interp', 'libmono-native', 'libMonoPosixHelper',
+                'libmono-profiler-aot', 'libmono-profiler-coverage', 'libmono-profiler-log', 'libMonoSupportW'
+            ]]
 
-
-def configure_for_mono_version(env, mono_version):
-    if mono_version is None:
-        raise RuntimeError('Mono JIT compiler version not found')
-    print('Found Mono JIT compiler version: ' + str(mono_version))
-    if mono_version >= LooseVersion('5.12.0'):
-        env.Append(CPPFLAGS=['-DHAS_PENDING_EXCEPTIONS'])
+            for lib_file_name in lib_file_names:
+                copy_if_exists(os.path.join(mono_root, 'lib', lib_file_name), target_mono_lib_dir)
 
 
 def pkgconfig_try_find_mono_root(mono_lib_names, sharedlib_ext):
@@ -379,36 +405,3 @@ def pkgconfig_try_find_mono_root(mono_lib_names, sharedlib_ext):
         if name_found and os.path.isdir(os.path.join(hint_dir, '..', 'include', 'mono-2.0')):
             return os.path.join(hint_dir, '..')
     return ''
-
-
-def pkgconfig_try_find_mono_version():
-    from compat import decode_utf8
-
-    lines = subprocess.check_output(['pkg-config', 'monosgen-2', '--modversion']).splitlines()
-    greater_version = None
-    for line in lines:
-        try:
-            version = LooseVersion(decode_utf8(line))
-            if greater_version is None or version > greater_version:
-                greater_version = version
-        except ValueError:
-            pass
-    return greater_version
-
-
-def mono_root_try_find_mono_version(mono_root):
-    from compat import decode_utf8
-
-    mono_bin = os.path.join(mono_root, 'bin')
-    if os.path.isfile(os.path.join(mono_bin, 'mono')):
-        mono_binary = os.path.join(mono_bin, 'mono')
-    elif os.path.isfile(os.path.join(mono_bin, 'mono.exe')):
-        mono_binary = os.path.join(mono_bin, 'mono.exe')
-    else:
-        return None
-    output = subprocess.check_output([mono_binary, '--version'])
-    first_line = decode_utf8(output.splitlines()[0])
-    try:
-        return LooseVersion(first_line.split()[len('Mono JIT compiler version'.split())])
-    except (ValueError, IndexError):
-        return None

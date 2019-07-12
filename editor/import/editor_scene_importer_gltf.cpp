@@ -30,6 +30,7 @@
 
 #include "editor_scene_importer_gltf.h"
 #include "core/io/json.h"
+#include "core/math/crypto_core.h"
 #include "core/math/math_defs.h"
 #include "core/os/file_access.h"
 #include "core/os/os.h"
@@ -37,7 +38,6 @@
 #include "scene/3d/mesh_instance.h"
 #include "scene/animation/animation_player.h"
 #include "scene/resources/surface_tool.h"
-#include "thirdparty/misc/base64.h"
 
 uint32_t EditorSceneImporterGLTF::get_import_flags() const {
 
@@ -279,7 +279,8 @@ static Vector<uint8_t> _parse_base64_uri(const String &uri) {
 	Vector<uint8_t> buf;
 	buf.resize(strlen / 4 * 3 + 1 + 1);
 
-	int len = base64_decode((char *)buf.ptr(), (char *)substr.get_data(), strlen);
+	size_t len = 0;
+	ERR_FAIL_COND_V(CryptoCore::b64_decode(buf.ptrw(), buf.size(), &len, (unsigned char *)substr.get_data(), strlen) != OK, Vector<uint8_t>());
 
 	buf.resize(len);
 
@@ -1326,9 +1327,7 @@ Error EditorSceneImporterGLTF::_parse_materials(GLTFState &state) {
 				if (bct.has("index")) {
 					Ref<Texture> t = _get_texture(state, bct["index"]);
 					material->set_texture(SpatialMaterial::TEXTURE_METALLIC, t);
-					material->set_metallic_texture_channel(SpatialMaterial::TEXTURE_CHANNEL_BLUE);
 					material->set_texture(SpatialMaterial::TEXTURE_ROUGHNESS, t);
-					material->set_roughness_texture_channel(SpatialMaterial::TEXTURE_CHANNEL_GREEN);
 					if (!mr.has("metallicFactor")) {
 						material->set_metallic(1);
 					}
@@ -1353,7 +1352,6 @@ Error EditorSceneImporterGLTF::_parse_materials(GLTFState &state) {
 			Dictionary bct = d["occlusionTexture"];
 			if (bct.has("index")) {
 				material->set_texture(SpatialMaterial::TEXTURE_AMBIENT_OCCLUSION, _get_texture(state, bct["index"]));
-				material->set_ao_texture_channel(SpatialMaterial::TEXTURE_CHANNEL_RED);
 				material->set_feature(SpatialMaterial::FEATURE_AMBIENT_OCCLUSION, true);
 			}
 		}
@@ -2090,22 +2088,23 @@ void EditorSceneImporterGLTF::_import_animation(GLTFState &state, AnimationPlaye
 				animation->add_track(Animation::TYPE_VALUE);
 				animation->track_set_path(track_idx, node_path);
 
-				if (track.weight_tracks[i].interpolation <= GLTFAnimation::INTERP_STEP) {
-					animation->track_set_interpolation_type(track_idx, track.weight_tracks[i].interpolation == GLTFAnimation::INTERP_STEP ? Animation::INTERPOLATION_NEAREST : Animation::INTERPOLATION_NEAREST);
+				// Only LINEAR and STEP (NEAREST) can be supported out of the box by Godot's Animation,
+				// the other modes have to be baked.
+				GLTFAnimation::Interpolation gltf_interp = track.weight_tracks[i].interpolation;
+				if (gltf_interp == GLTFAnimation::INTERP_LINEAR || gltf_interp == GLTFAnimation::INTERP_STEP) {
+					animation->track_set_interpolation_type(track_idx, gltf_interp == GLTFAnimation::INTERP_STEP ? Animation::INTERPOLATION_NEAREST : Animation::INTERPOLATION_LINEAR);
 					for (int j = 0; j < track.weight_tracks[i].times.size(); j++) {
 						float t = track.weight_tracks[i].times[j];
 						float w = track.weight_tracks[i].values[j];
 						animation->track_insert_key(track_idx, t, w);
 					}
 				} else {
-					//must bake, apologies.
+					// CATMULLROMSPLINE or CUBIC_SPLINE have to be baked, apologies.
 					float increment = 1.0 / float(bake_fps);
 					float time = 0.0;
-
 					bool last = false;
 					while (true) {
-
-						_interpolate_track<float>(track.weight_tracks[i].times, track.weight_tracks[i].values, time, track.weight_tracks[i].interpolation);
+						_interpolate_track<float>(track.weight_tracks[i].times, track.weight_tracks[i].values, time, gltf_interp);
 						if (last) {
 							break;
 						}

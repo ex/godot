@@ -677,6 +677,19 @@ void InputDefault::set_use_accumulated_input(bool p_enable) {
 	use_accumulated_input = p_enable;
 }
 
+void InputDefault::release_pressed_events() {
+
+	flush_accumulated_events(); // this is needed to release actions strengths
+
+	keys_pressed.clear();
+	joy_buttons_pressed.clear();
+	_joy_axis.clear();
+
+	for (Map<StringName, InputDefault::Action>::Element *E = action_state.front(); E; E = E->next()) {
+		action_release(E->key());
+	}
+}
+
 InputDefault::InputDefault() {
 
 	use_accumulated_input = true;
@@ -713,14 +726,14 @@ InputDefault::InputDefault() {
 			if (entries[i] == "")
 				continue;
 			parse_mapping(entries[i]);
-		};
-	};
+		}
+	}
 
 	int i = 0;
 	while (DefaultControllerMappings::mappings[i]) {
 
 		parse_mapping(DefaultControllerMappings::mappings[i++]);
-	};
+	}
 }
 
 void InputDefault::joy_button(int p_device, int p_button, bool p_pressed) {
@@ -735,14 +748,14 @@ void InputDefault::joy_button(int p_device, int p_button, bool p_pressed) {
 	if (joy.mapping == -1) {
 		_button_event(p_device, p_button, p_pressed);
 		return;
-	};
+	}
 
 	const Map<int, JoyEvent>::Element *el = map_db[joy.mapping].buttons.find(p_button);
 	if (!el) {
 		//don't process un-mapped events for now, it could mess things up badly for devices with additional buttons/axis
 		//return _button_event(p_last_id, p_device, p_button, p_pressed);
 		return;
-	};
+	}
 
 	JoyEvent map = el->get();
 	if (map.type == TYPE_BUTTON) {
@@ -754,14 +767,13 @@ void InputDefault::joy_button(int p_device, int p_button, bool p_pressed) {
 		}
 		_button_event(p_device, map.index, p_pressed);
 		return;
-	};
+	}
 
 	if (map.type == TYPE_AXIS) {
 		_axis_event(p_device, map.index, p_pressed ? 1.0 : 0.0);
-	};
-
-	return; // no event?
-};
+	}
+	// no event?
+}
 
 void InputDefault::joy_axis(int p_device, int p_axis, const JoyAxis &p_value) {
 
@@ -861,23 +873,22 @@ void InputDefault::joy_axis(int p_device, int p_axis, const JoyAxis &p_value) {
 			return;
 		}
 		float deadzone = p_value.min == 0 ? 0.5f : 0.0f;
-		bool pressed = p_value.value > deadzone ? true : false;
+		bool pressed = p_value.value > deadzone;
 		if (pressed == joy_buttons_pressed.has(_combine_device(map.index, p_device))) {
 			// button already pressed or released, this is an axis bounce value
 			return;
-		};
+		}
 		_button_event(p_device, map.index, pressed);
 		return;
-	};
+	}
 
 	if (map.type == TYPE_AXIS) {
 
 		_axis_event(p_device, map.index, val);
 		return;
-	};
+	}
 	//printf("invalid mapping\n");
-	return;
-};
+}
 
 void InputDefault::joy_hat(int p_device, int p_val) {
 
@@ -896,20 +907,20 @@ void InputDefault::joy_hat(int p_device, int p_val) {
 
 	if ((p_val & HAT_MASK_UP) != (cur_val & HAT_MASK_UP)) {
 		_button_event(p_device, map[HAT_UP].index, p_val & HAT_MASK_UP);
-	};
+	}
 
 	if ((p_val & HAT_MASK_RIGHT) != (cur_val & HAT_MASK_RIGHT)) {
 		_button_event(p_device, map[HAT_RIGHT].index, p_val & HAT_MASK_RIGHT);
-	};
+	}
 	if ((p_val & HAT_MASK_DOWN) != (cur_val & HAT_MASK_DOWN)) {
 		_button_event(p_device, map[HAT_DOWN].index, p_val & HAT_MASK_DOWN);
-	};
+	}
 	if ((p_val & HAT_MASK_LEFT) != (cur_val & HAT_MASK_LEFT)) {
 		_button_event(p_device, map[HAT_LEFT].index, p_val & HAT_MASK_LEFT);
-	};
+	}
 
 	joy_names[p_device].hat_current = p_val;
-};
+}
 
 void InputDefault::_button_event(int p_device, int p_index, bool p_pressed) {
 
@@ -920,7 +931,7 @@ void InputDefault::_button_event(int p_device, int p_index, bool p_pressed) {
 	ievent->set_pressed(p_pressed);
 
 	parse_input_event(ievent);
-};
+}
 
 void InputDefault::_axis_event(int p_device, int p_axis, float p_value) {
 

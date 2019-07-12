@@ -9,14 +9,18 @@
 	</description>
 	<tutorials>
 	</tutorials>
-	<demos>
-	</demos>
 	<methods>
 		<method name="call_func" qualifiers="vararg">
 			<return type="Variant">
 			</return>
 			<description>
 				Calls the referenced function previously set by [method set_function] or [method @GDScript.funcref].
+			</description>
+		</method>
+		<method name="is_valid" qualifiers="const">
+			<return type="bool">
+			</return>
+			<description>
 			</description>
 		</method>
 		<method name="set_function">

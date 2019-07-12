@@ -6,12 +6,10 @@
 	</description>
 	<tutorials>
 	</tutorials>
-	<demos>
-	</demos>
 	<methods>
 	</methods>
 	<members>
-		<member name="constant" type="bool" setter="set_constant" getter="get_constant">
+		<member name="constant" type="bool" setter="set_constant" getter="get_constant" default="false">
 		</member>
 	</members>
 	<constants>

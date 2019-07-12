@@ -59,6 +59,9 @@ GodotJavaWrapper::GodotJavaWrapper(JNIEnv *p_env, jobject p_godot_instance) {
 	_get_clipboard = p_env->GetMethodID(cls, "getClipboard", "()Ljava/lang/String;");
 	_set_clipboard = p_env->GetMethodID(cls, "setClipboard", "(Ljava/lang/String;)V");
 	_request_permission = p_env->GetMethodID(cls, "requestPermission", "(Ljava/lang/String;)Z");
+	_init_input_devices = p_env->GetMethodID(cls, "initInputDevices", "()V");
+	_get_surface = p_env->GetMethodID(cls, "getSurface", "()Landroid/view/Surface;");
+	_is_activity_resumed = p_env->GetMethodID(cls, "isActivityResumed", "()Z");
 }
 
 GodotJavaWrapper::~GodotJavaWrapper() {
@@ -179,6 +182,31 @@ bool GodotJavaWrapper::request_permission(const String &p_name) {
 		JNIEnv *env = ThreadAndroid::get_env();
 		jstring jStrName = env->NewStringUTF(p_name.utf8().get_data());
 		return env->CallBooleanMethod(godot_instance, _request_permission, jStrName);
+	} else {
+		return false;
+	}
+}
+
+void GodotJavaWrapper::init_input_devices() {
+	if (_init_input_devices) {
+		JNIEnv *env = ThreadAndroid::get_env();
+		env->CallVoidMethod(godot_instance, _init_input_devices);
+	}
+}
+
+jobject GodotJavaWrapper::get_surface() {
+	if (_get_surface) {
+		JNIEnv *env = ThreadAndroid::get_env();
+		return env->CallObjectMethod(godot_instance, _get_surface);
+	} else {
+		return NULL;
+	}
+}
+
+bool GodotJavaWrapper::is_activity_resumed() {
+	if (_is_activity_resumed) {
+		JNIEnv *env = ThreadAndroid::get_env();
+		return env->CallBooleanMethod(godot_instance, _is_activity_resumed);
 	} else {
 		return false;
 	}

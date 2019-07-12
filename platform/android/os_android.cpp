@@ -176,6 +176,9 @@ Error OS_Android::initialize(const VideoMode &p_desired, int p_video_driver, int
 	input = memnew(InputDefault);
 	input->set_fallback_mapping("Default Android Gamepad");
 
+	///@TODO implement a subclass for Android and instantiate that instead
+	camera_server = memnew(CameraServer);
+
 	//power_manager = memnew(PowerAndroid);
 
 	return OK;
@@ -193,6 +196,9 @@ void OS_Android::delete_main_loop() {
 }
 
 void OS_Android::finalize() {
+
+	memdelete(camera_server);
+
 	memdelete(input);
 }
 
@@ -251,6 +257,10 @@ int OS_Android::get_mouse_button_state() const {
 }
 
 void OS_Android::set_window_title(const String &p_title) {
+	//This queries/updates the currently connected devices/joypads
+	//Set_window_title is called when initializing the main loop (main.cpp)
+	//therefore this place is found to be suitable (I found no better).
+	godot_java->init_input_devices();
 }
 
 void OS_Android::set_video_mode(const VideoMode &p_video_mode, int p_screen) {
@@ -277,7 +287,7 @@ Size2 OS_Android::get_window_size() const {
 	return Vector2(default_videomode.width, default_videomode.height);
 }
 
-String OS_Android::get_name() {
+String OS_Android::get_name() const {
 
 	return "Android";
 }

@@ -37,6 +37,7 @@
 #include "drivers/coreaudio/audio_driver_coreaudio.h"
 #include "drivers/unix/os_unix.h"
 
+#include "camera_ios.h"
 #include "game_center.h"
 #include "icloud.h"
 #include "in_app_store.h"
@@ -59,6 +60,8 @@ private:
 	VisualServer *visual_server;
 
 	AudioDriverCoreAudio audio_driver;
+
+	CameraServer *camera_server;
 
 #ifdef GAME_CENTER_ENABLED
 	GameCenter *game_center;
@@ -107,7 +110,7 @@ private:
 	void queue_event(const Ref<InputEvent> &p_event);
 
 	String data_dir;
-	String unique_ID;
+	String unique_id;
 	String locale_code;
 
 	InputDefault *input;
@@ -174,7 +177,7 @@ public:
 
 	void set_data_dir(String p_dir);
 
-	virtual String get_name();
+	virtual String get_name() const;
 
 	Error shell_open(String p_uri);
 
@@ -183,7 +186,7 @@ public:
 	void set_locale(String p_locale);
 	String get_locale() const;
 
-	void set_unique_id(String p_ID);
+	void set_unique_id(String p_id);
 	String get_unique_id() const;
 
 	virtual Error native_video_play(String p_path, float p_volume, String p_audio_track, String p_subtitle_track);

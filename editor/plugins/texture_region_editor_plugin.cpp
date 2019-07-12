@@ -135,8 +135,7 @@ void TextureRegionEditor::_region_draw() {
 
 	Ref<Texture> select_handle = get_icon("EditorHandle", "EditorIcons");
 
-	Rect2 scroll_rect(Point2(), mtx.basis_xform(base_tex->get_size()));
-	scroll_rect.expand_to(mtx.basis_xform(edit_draw->get_size()));
+	Rect2 scroll_rect;
 
 	Vector2 endpoints[4] = {
 		mtx.basis_xform(rect.position),
@@ -167,7 +166,9 @@ void TextureRegionEditor::_region_draw() {
 		scroll_rect.expand_to(endpoints[i]);
 	}
 
-	scroll_rect = scroll_rect.grow(200);
+	scroll_rect.position -= edit_draw->get_size();
+	scroll_rect.size += edit_draw->get_size() * 2.0;
+
 	updating_scroll = true;
 	hscroll->set_min(scroll_rect.position.x);
 	hscroll->set_max(scroll_rect.position.x + scroll_rect.size.x);
@@ -191,8 +192,8 @@ void TextureRegionEditor::_region_draw() {
 	}
 	updating_scroll = false;
 
-	float margins[4];
 	if (node_ninepatch || obj_styleBox.is_valid()) {
+		float margins[4];
 		if (node_ninepatch) {
 			margins[0] = node_ninepatch->get_patch_margin(MARGIN_TOP);
 			margins[1] = node_ninepatch->get_patch_margin(MARGIN_BOTTOM);
@@ -203,6 +204,11 @@ void TextureRegionEditor::_region_draw() {
 			margins[1] = obj_styleBox->get_margin_size(MARGIN_BOTTOM);
 			margins[2] = obj_styleBox->get_margin_size(MARGIN_LEFT);
 			margins[3] = obj_styleBox->get_margin_size(MARGIN_RIGHT);
+		} else {
+			margins[0] = 0;
+			margins[1] = 0;
+			margins[2] = 0;
+			margins[3] = 0;
 		}
 		Vector2 pos[4] = {
 			mtx.basis_xform(Vector2(0, margins[0])) + Vector2(0, endpoints[0].y - draw_ofs.y * draw_zoom),

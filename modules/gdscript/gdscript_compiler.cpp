@@ -1073,7 +1073,7 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 						int set_index;
 						bool named = false;
 
-						if (static_cast<const GDScriptParser::OperatorNode *>(op)->op == GDScriptParser::OperatorNode::OP_INDEX_NAMED) {
+						if (op->op == GDScriptParser::OperatorNode::OP_INDEX_NAMED) {
 
 							set_index = codegen.get_name_map_pos(static_cast<const GDScriptParser::IdentifierNode *>(op->arguments[1])->name);
 							named = true;
@@ -1259,8 +1259,6 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 			ERR_FAIL_V(-1); //unreachable code
 		} break;
 	}
-
-	ERR_FAIL_V(-1); //unreachable code
 }
 
 Error GDScriptCompiler::_parse_block(CodeGen &codegen, const GDScriptParser::BlockNode *p_block, int p_stack_level, int p_break_addr, int p_continue_addr) {
@@ -1977,12 +1975,12 @@ Error GDScriptCompiler::_parse_class_level(GDScript *p_script, const GDScriptPar
 
 	for (int i = 0; i < p_class->subclasses.size(); i++) {
 		StringName name = p_class->subclasses[i]->name;
-
-		GDScript *subclass = p_script->subclasses[name].ptr();
+		Ref<GDScript> &subclass = p_script->subclasses[name];
+		GDScript *subclass_ptr = subclass.ptr();
 
 		// Subclass might still be parsing, just skip it
-		if (!parsed_classes.has(subclass) && !parsing_classes.has(subclass)) {
-			Error err = _parse_class_level(subclass, p_class->subclasses[i], p_keep_state);
+		if (!parsed_classes.has(subclass_ptr) && !parsing_classes.has(subclass_ptr)) {
+			Error err = _parse_class_level(subclass_ptr, p_class->subclasses[i], p_keep_state);
 			if (err)
 				return err;
 		}

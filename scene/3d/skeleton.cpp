@@ -162,7 +162,7 @@ void Skeleton::_update_process_order() {
 	//now check process order
 	int pass_count = 0;
 	while (pass_count < len * len) {
-		//using bubblesort because of simplicity, it wont run every frame though.
+		//using bubblesort because of simplicity, it won't run every frame though.
 		//bublesort worst case is O(n^2), and this may be an infinite loop if cyclic
 		bool swapped = false;
 		for (int i = 0; i < len; i++) {
@@ -772,6 +772,8 @@ void Skeleton::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_bone_rest", "bone_idx"), &Skeleton::get_bone_rest);
 	ClassDB::bind_method(D_METHOD("set_bone_rest", "bone_idx", "rest"), &Skeleton::set_bone_rest);
+
+	ClassDB::bind_method(D_METHOD("localize_rests"), &Skeleton::localize_rests);
 
 	ClassDB::bind_method(D_METHOD("set_bone_disable_rest", "bone_idx", "disable"), &Skeleton::set_bone_disable_rest);
 	ClassDB::bind_method(D_METHOD("is_bone_rest_disabled", "bone_idx"), &Skeleton::is_bone_rest_disabled);

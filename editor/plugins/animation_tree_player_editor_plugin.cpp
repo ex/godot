@@ -511,9 +511,7 @@ void AnimationTreePlayerEditor::_draw_node(const StringName &p_node) {
 	font->draw_halign(ci, ofs + ascofs, HALIGN_CENTER, w, p_node, font_color);
 	ofs.y += h;
 
-	int count = 2; // title and name
 	int inputs = anim_tree->node_get_input_count(p_node);
-	count += inputs ? inputs : 1;
 
 	float icon_h_ofs = Math::floor((font->get_height() - slot_icon->get_height()) / 2.0) + 1;
 
@@ -618,7 +616,7 @@ AnimationTreePlayerEditor::ClickType AnimationTreePlayerEditor::_locate_click(co
 
 	for (const List<StringName>::Element *E = order.back(); E; E = E->prev()) {
 
-		StringName node = E->get();
+		const StringName &node = E->get();
 
 		AnimationTreePlayer::NodeType type = anim_tree->node_get_type(node);
 
@@ -840,7 +838,7 @@ void AnimationTreePlayerEditor::_gui_input(Ref<InputEvent> p_event) {
 			click_motion = Point2(mm->get_position().x, mm->get_position().y);
 			update();
 		}
-		if ((mm->get_button_mask() & 4 || Input::get_singleton()->is_key_pressed(KEY_SPACE))) {
+		if (mm->get_button_mask() & 4 || Input::get_singleton()->is_key_pressed(KEY_SPACE)) {
 
 			h_scroll->set_value(h_scroll->get_value() - mm->get_relative().x);
 			v_scroll->set_value(v_scroll->get_value() - mm->get_relative().y);

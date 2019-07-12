@@ -126,8 +126,8 @@ Node *EditorSceneImporterAssimp::import_scene(const String &p_path, uint32_t p_f
 	int32_t post_process_Steps = aiProcess_CalcTangentSpace |
 								 //aiProcess_FlipUVs |
 								 //aiProcess_FlipWindingOrder |
-								 aiProcess_DropNormals |
-								 aiProcess_GenSmoothNormals |
+								 //aiProcess_DropNormals |
+								 //aiProcess_GenSmoothNormals |
 								 aiProcess_JoinIdenticalVertices |
 								 aiProcess_ImproveCacheLocality |
 								 aiProcess_LimitBoneWeights |
@@ -310,8 +310,8 @@ void EditorSceneImporterAssimp::_generate_bone_groups(ImportState &state, const 
 			const aiBone *bone = mesh->mBones[j];
 			String name = _assimp_get_string(bone->mName);
 			ownership[name] = owned_by;
-			//store the actuall full path for the bone transform
-			//when skeleton finds it's place in the tree, it will be restored
+			//store the actual full path for the bone transform
+			//when skeleton finds its place in the tree, it will be restored
 			bind_xforms[name] = mesh_offset * _assimp_matrix_transform(bone->mOffsetMatrix);
 		}
 	}
@@ -848,16 +848,14 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 
 		if (AI_SUCCESS == ai_material->GetTexture(tex_normal, 0, &ai_filename, NULL, NULL, NULL, NULL, map_mode)) {
 			filename = _assimp_raw_string_to_string(ai_filename);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
 				Ref<Texture> texture = _load_texture(state, path);
 
-				if (texture != NULL) {
-					if (map_mode != NULL) {
-						_set_texture_mapping_mode(map_mode, texture);
-					}
+				if (texture.is_valid()) {
+					_set_texture_mapping_mode(map_mode, texture);
 					mat->set_feature(SpatialMaterial::Feature::FEATURE_NORMAL_MAPPING, true);
 					mat->set_texture(SpatialMaterial::TEXTURE_NORMAL, texture);
 				}
@@ -871,7 +869,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_NORMAL_TEXTURE, ai_filename)) {
 			filename = _assimp_raw_string_to_string(ai_filename);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -894,7 +892,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 
 		if (AI_SUCCESS == ai_material->GetTexture(tex_emissive, 0, &ai_filename, NULL, NULL, NULL, NULL, map_mode)) {
 			filename = _assimp_raw_string_to_string(ai_filename);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -916,7 +914,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiTextureMapMode map_mode[2];
 		if (AI_SUCCESS == ai_material->GetTexture(tex_albedo, 0, &ai_filename, NULL, NULL, NULL, NULL, map_mode)) {
 			filename = _assimp_raw_string_to_string(ai_filename);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -946,7 +944,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 	aiTextureMapMode map_mode[2];
 	if (AI_SUCCESS == ai_material->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, &tex_gltf_base_color_path, NULL, NULL, NULL, NULL, map_mode)) {
 		String filename = _assimp_raw_string_to_string(tex_gltf_base_color_path);
-		String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+		String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 		bool found = false;
 		_find_texture_path(state.path, path, found);
 		if (found) {
@@ -975,7 +973,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_pbs_base_color_path = aiString();
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_BASE_COLOR_TEXTURE, tex_fbx_pbs_base_color_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_pbs_base_color_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1007,7 +1005,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_pbs_normal_path = aiString();
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_NORMAL_TEXTURE, tex_fbx_pbs_normal_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_pbs_normal_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1029,7 +1027,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_stingray_normal_path = aiString();
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_STINGRAY_NORMAL_TEXTURE, tex_fbx_stingray_normal_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_stingray_normal_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1047,7 +1045,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_pbs_base_color_path = aiString();
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_STINGRAY_COLOR_TEXTURE, tex_fbx_pbs_base_color_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_pbs_base_color_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1079,7 +1077,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_pbs_emissive_path = aiString();
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_STINGRAY_EMISSIVE_TEXTURE, tex_fbx_pbs_emissive_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_pbs_emissive_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1109,7 +1107,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 	aiString tex_gltf_pbr_metallicroughness_path;
 	if (AI_SUCCESS == ai_material->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, &tex_gltf_pbr_metallicroughness_path)) {
 		String filename = _assimp_raw_string_to_string(tex_gltf_pbr_metallicroughness_path);
-		String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+		String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 		bool found = false;
 		_find_texture_path(state.path, path, found);
 		if (found) {
@@ -1136,7 +1134,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_pbs_metallic_path;
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_STINGRAY_METALLIC_TEXTURE, tex_fbx_pbs_metallic_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_pbs_metallic_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1156,7 +1154,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_pbs_rough_path;
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_STINGRAY_ROUGHNESS_TEXTURE, tex_fbx_pbs_rough_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_pbs_rough_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1179,7 +1177,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_pbs_metallic_path;
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_METALNESS_TEXTURE, tex_fbx_pbs_metallic_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_pbs_metallic_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1199,7 +1197,7 @@ Ref<Material> EditorSceneImporterAssimp::_generate_material_from_index(ImportSta
 		aiString tex_fbx_pbs_rough_path;
 		if (AI_SUCCESS == ai_material->Get(AI_MATKEY_FBX_MAYA_DIFFUSE_ROUGHNESS_TEXTURE, tex_fbx_pbs_rough_path)) {
 			String filename = _assimp_raw_string_to_string(tex_fbx_pbs_rough_path);
-			String path = state.path.get_base_dir() + "/" + filename.replace("\\", "/");
+			String path = state.path.get_base_dir().plus_file(filename.replace("\\", "/"));
 			bool found = false;
 			_find_texture_path(state.path, path, found);
 			if (found) {
@@ -1460,7 +1458,7 @@ void EditorSceneImporterAssimp::_generate_node(ImportState &state, const aiNode 
 				int mesh_index = p_assimp_node->mMeshes[i];
 				surface_indices.push_back(mesh_index);
 
-				//take the chane and attempt to find the skeleton from the bones
+				//take the chance and attempt to find the skeleton from the bones
 				if (!skeleton) {
 					aiMesh *ai_mesh = state.assimp_scene->mMeshes[p_assimp_node->mMeshes[i]];
 					for (uint32_t j = 0; j < ai_mesh->mNumBones; j++) {
@@ -1598,7 +1596,7 @@ void EditorSceneImporterAssimp::_generate_node(ImportState &state, const aiNode 
 
 		skeleton->localize_rests();
 		node_name = "Skeleton"; //don't use the bone root name
-		node_transform = Transform(); //dont transform
+		node_transform = Transform(); //don't transform
 
 		new_node = skeleton;
 	} else {
@@ -1686,7 +1684,7 @@ void EditorSceneImporterAssimp::_find_texture_path(const String &p_path, _Direct
 		path = name;
 		return;
 	}
-	String name_ignore_sub_directory = p_path.get_base_dir() + "/" + path.get_file().get_basename() + extension;
+	String name_ignore_sub_directory = p_path.get_base_dir().plus_file(path.get_file().get_basename()) + extension;
 	if (dir.file_exists(name_ignore_sub_directory)) {
 		found = true;
 		path = name_ignore_sub_directory;

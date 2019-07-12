@@ -41,7 +41,7 @@
  */
 
 /**
- * Pointer to the error macro priting function. Reassign to any function to have errors printed
+ * Pointer to the error macro printing function. Reassign to any function to have errors printed
  */
 
 /** Function used by the error macros */
@@ -86,7 +86,7 @@ void _err_print_index_error(const char *p_function, const char *p_file, int p_li
 
 #define _FNL __FILE__ ":"
 
-/** An index has failed if m_index<0 or m_index >=m_size, the function exists */
+/** An index has failed if m_index<0 or m_index >=m_size, the function exits */
 
 extern bool _err_error_exists;
 
@@ -136,11 +136,11 @@ extern bool _err_error_exists;
 		if (unlikely((m_index) < 0 || (m_index) >= (m_size))) {                                                     \
 			_err_print_index_error(FUNCTION_STR, __FILE__, __LINE__, m_index, m_size, _STR(m_index), _STR(m_size)); \
 			return;                                                                                                 \
-		} else                                                                                                      \
-			_err_error_exists = false;                                                                              \
+		}                                                                                                           \
+		_err_error_exists = false;                                                                                  \
 	} while (0); // (*)
 
-/** An index has failed if m_index<0 or m_index >=m_size, the function exists.
+/** An index has failed if m_index<0 or m_index >=m_size, the function exits.
 * This function returns an error value, if returning Error, please select the most
 * appropriate error condition from error_macros.h
 */
@@ -150,11 +150,11 @@ extern bool _err_error_exists;
 		if (unlikely((m_index) < 0 || (m_index) >= (m_size))) {                                                     \
 			_err_print_index_error(FUNCTION_STR, __FILE__, __LINE__, m_index, m_size, _STR(m_index), _STR(m_size)); \
 			return m_retval;                                                                                        \
-		} else                                                                                                      \
-			_err_error_exists = false;                                                                              \
+		}                                                                                                           \
+		_err_error_exists = false;                                                                                  \
 	} while (0); // (*)
 
-/** An index has failed if m_index >=m_size, the function exists.
+/** An index has failed if m_index >=m_size, the function exits.
 * This function returns an error value, if returning Error, please select the most
 * appropriate error condition from error_macros.h
 */
@@ -164,8 +164,8 @@ extern bool _err_error_exists;
 		if (unlikely((m_index) >= (m_size))) {                                                                      \
 			_err_print_index_error(FUNCTION_STR, __FILE__, __LINE__, m_index, m_size, _STR(m_index), _STR(m_size)); \
 			return m_retval;                                                                                        \
-		} else                                                                                                      \
-			_err_error_exists = false;                                                                              \
+		}                                                                                                           \
+		_err_error_exists = false;                                                                                  \
 	} while (0); // (*)
 
 /** Use this one if there is no sensible fallback, that is, the error is unrecoverable.
@@ -188,8 +188,8 @@ extern bool _err_error_exists;
 		if (unlikely(!m_param)) {                                                                           \
 			_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "Parameter ' " _STR(m_param) " ' is null."); \
 			return;                                                                                         \
-		} else                                                                                              \
-			_err_error_exists = false;                                                                      \
+		}                                                                                                   \
+		_err_error_exists = false;                                                                          \
 	}
 
 #define ERR_FAIL_NULL_V(m_param, m_retval)                                                                  \
@@ -197,8 +197,8 @@ extern bool _err_error_exists;
 		if (unlikely(!m_param)) {                                                                           \
 			_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "Parameter ' " _STR(m_param) " ' is null."); \
 			return m_retval;                                                                                \
-		} else                                                                                              \
-			_err_error_exists = false;                                                                      \
+		}                                                                                                   \
+		_err_error_exists = false;                                                                          \
 	}
 
 /** An error condition happened (m_cond tested true) (WARNING this is the opposite as assert().
@@ -210,8 +210,8 @@ extern bool _err_error_exists;
 		if (unlikely(m_cond)) {                                                                            \
 			_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "Condition ' " _STR(m_cond) " ' is true."); \
 			return;                                                                                        \
-		} else                                                                                             \
-			_err_error_exists = false;                                                                     \
+		}                                                                                                  \
+		_err_error_exists = false;                                                                         \
 	}
 
 /** Use this one if there is no sensible fallback, that is, the error is unrecoverable.
@@ -236,8 +236,8 @@ extern bool _err_error_exists;
 		if (unlikely(m_cond)) {                                                                                                      \
 			_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "Condition ' " _STR(m_cond) " ' is true. returned: " _STR(m_retval)); \
 			return m_retval;                                                                                                         \
-		} else                                                                                                                       \
-			_err_error_exists = false;                                                                                               \
+		}                                                                                                                            \
+		_err_error_exists = false;                                                                                                   \
 	}
 
 /** An error condition happened (m_cond tested true) (WARNING this is the opposite as assert().
@@ -249,8 +249,8 @@ extern bool _err_error_exists;
 		if (unlikely(m_cond)) {                                                                                          \
 			_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "Condition ' " _STR(m_cond) " ' is true. Continuing..:"); \
 			continue;                                                                                                    \
-		} else                                                                                                           \
-			_err_error_exists = false;                                                                                   \
+		}                                                                                                                \
+		_err_error_exists = false;                                                                                       \
 	}
 
 /** An error condition happened (m_cond tested true) (WARNING this is the opposite as assert().
@@ -262,8 +262,8 @@ extern bool _err_error_exists;
 		if (unlikely(m_cond)) {                                                                                        \
 			_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "Condition ' " _STR(m_cond) " ' is true. Breaking..:"); \
 			break;                                                                                                     \
-		} else                                                                                                         \
-			_err_error_exists = false;                                                                                 \
+		}                                                                                                              \
+		_err_error_exists = false;                                                                                     \
 	}
 
 /** Print an error string and return

@@ -33,6 +33,7 @@
 #include "core/color_names.inc"
 #include "core/core_string_names.h"
 #include "core/io/compression.h"
+#include "core/math/crypto_core.h"
 #include "core/object.h"
 #include "core/os/os.h"
 #include "core/script_language.h"
@@ -264,6 +265,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM1R(String, right);
 	VCALL_LOCALMEM0R(String, dedent);
 	VCALL_LOCALMEM2R(String, strip_edges);
+	VCALL_LOCALMEM0R(String, strip_escapes);
 	VCALL_LOCALMEM1R(String, lstrip);
 	VCALL_LOCALMEM1R(String, rstrip);
 	VCALL_LOCALMEM0R(String, get_extension);
@@ -273,8 +275,10 @@ struct _VariantCall {
 	VCALL_LOCALMEM2(String, erase);
 	VCALL_LOCALMEM0R(String, hash);
 	VCALL_LOCALMEM0R(String, md5_text);
+	VCALL_LOCALMEM0R(String, sha1_text);
 	VCALL_LOCALMEM0R(String, sha256_text);
 	VCALL_LOCALMEM0R(String, md5_buffer);
+	VCALL_LOCALMEM0R(String, sha1_buffer);
 	VCALL_LOCALMEM0R(String, sha256_buffer);
 	VCALL_LOCALMEM0R(String, empty);
 	VCALL_LOCALMEM0R(String, is_abs_path);
@@ -283,6 +287,8 @@ struct _VariantCall {
 	VCALL_LOCALMEM0R(String, get_file);
 	VCALL_LOCALMEM0R(String, xml_escape);
 	VCALL_LOCALMEM0R(String, xml_unescape);
+	VCALL_LOCALMEM0R(String, http_escape);
+	VCALL_LOCALMEM0R(String, http_unescape);
 	VCALL_LOCALMEM0R(String, c_escape);
 	VCALL_LOCALMEM0R(String, c_unescape);
 	VCALL_LOCALMEM0R(String, json_escape);
@@ -313,7 +319,7 @@ struct _VariantCall {
 		retval.resize(len);
 		PoolByteArray::Write w = retval.write();
 		copymem(w.ptr(), charstr.ptr(), len);
-		w = PoolVector<uint8_t>::Write();
+		w.release();
 
 		r_ret = retval;
 	}
@@ -328,7 +334,7 @@ struct _VariantCall {
 		retval.resize(len);
 		PoolByteArray::Write w = retval.write();
 		copymem(w.ptr(), charstr.ptr(), len);
-		w = PoolVector<uint8_t>::Write();
+		w.release();
 
 		r_ret = retval;
 	}
@@ -346,6 +352,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM2R(Vector2, linear_interpolate);
 	VCALL_LOCALMEM2R(Vector2, slerp);
 	VCALL_LOCALMEM4R(Vector2, cubic_interpolate);
+	VCALL_LOCALMEM2R(Vector2, move_toward);
 	VCALL_LOCALMEM1R(Vector2, rotated);
 	VCALL_LOCALMEM0R(Vector2, tangent);
 	VCALL_LOCALMEM0R(Vector2, floor);
@@ -387,6 +394,7 @@ struct _VariantCall {
 	VCALL_LOCALMEM2R(Vector3, linear_interpolate);
 	VCALL_LOCALMEM2R(Vector3, slerp);
 	VCALL_LOCALMEM4R(Vector3, cubic_interpolate);
+	VCALL_LOCALMEM2R(Vector3, move_toward);
 	VCALL_LOCALMEM1R(Vector3, dot);
 	VCALL_LOCALMEM1R(Vector3, cross);
 	VCALL_LOCALMEM1R(Vector3, outer);
@@ -585,6 +593,16 @@ struct _VariantCall {
 		decompressed.resize(result);
 
 		r_ret = decompressed;
+	}
+
+	static void _call_PoolByteArray_sha256_string(Variant &r_ret, Variant &p_self, const Variant **p_args) {
+		PoolByteArray *ba = reinterpret_cast<PoolByteArray *>(p_self._data._mem);
+		PoolByteArray::Read r = ba->read();
+		String s;
+		unsigned char hash[32];
+		CryptoCore::sha256((unsigned char *)r.ptr(), ba->size(), hash);
+		s = String::hex_encode_buffer(hash, 32);
+		r_ret = s;
 	}
 
 	VCALL_LOCALMEM0R(PoolByteArray, size);
@@ -1480,7 +1498,7 @@ void register_variant_methods() {
 	ADDFUNC1R(STRING, INT, String, casecmp_to, STRING, "to", varray());
 	ADDFUNC1R(STRING, INT, String, nocasecmp_to, STRING, "to", varray());
 	ADDFUNC0R(STRING, INT, String, length, varray());
-	ADDFUNC2R(STRING, STRING, String, substr, INT, "from", INT, "len", varray());
+	ADDFUNC2R(STRING, STRING, String, substr, INT, "from", INT, "len", varray(-1));
 
 	ADDFUNC2R(STRING, INT, String, find, STRING, "what", INT, "from", varray(0));
 
@@ -1502,9 +1520,9 @@ void register_variant_methods() {
 	ADDFUNC2R(STRING, STRING, String, replacen, STRING, "what", STRING, "forwhat", varray());
 	ADDFUNC2R(STRING, STRING, String, insert, INT, "position", STRING, "what", varray());
 	ADDFUNC0R(STRING, STRING, String, capitalize, varray());
-	ADDFUNC3R(STRING, POOL_STRING_ARRAY, String, split, STRING, "divisor", BOOL, "allow_empty", INT, "maxsplit", varray(true, 0));
-	ADDFUNC3R(STRING, POOL_STRING_ARRAY, String, rsplit, STRING, "divisor", BOOL, "allow_empty", INT, "maxsplit", varray(true, 0));
-	ADDFUNC2R(STRING, POOL_REAL_ARRAY, String, split_floats, STRING, "divisor", BOOL, "allow_empty", varray(true));
+	ADDFUNC3R(STRING, POOL_STRING_ARRAY, String, split, STRING, "delimiter", BOOL, "allow_empty", INT, "maxsplit", varray(true, 0));
+	ADDFUNC3R(STRING, POOL_STRING_ARRAY, String, rsplit, STRING, "delimiter", BOOL, "allow_empty", INT, "maxsplit", varray(true, 0));
+	ADDFUNC2R(STRING, POOL_REAL_ARRAY, String, split_floats, STRING, "delimiter", BOOL, "allow_empty", varray(true));
 
 	ADDFUNC0R(STRING, STRING, String, to_upper, varray());
 	ADDFUNC0R(STRING, STRING, String, to_lower, varray());
@@ -1512,6 +1530,7 @@ void register_variant_methods() {
 	ADDFUNC1R(STRING, STRING, String, left, INT, "position", varray());
 	ADDFUNC1R(STRING, STRING, String, right, INT, "position", varray());
 	ADDFUNC2R(STRING, STRING, String, strip_edges, BOOL, "left", BOOL, "right", varray(true, true));
+	ADDFUNC0R(STRING, STRING, String, strip_escapes, varray());
 	ADDFUNC1R(STRING, STRING, String, lstrip, STRING, "chars", varray());
 	ADDFUNC1R(STRING, STRING, String, rstrip, STRING, "chars", varray());
 	ADDFUNC0R(STRING, STRING, String, get_extension, varray());
@@ -1522,8 +1541,10 @@ void register_variant_methods() {
 	ADDFUNC2(STRING, NIL, String, erase, INT, "position", INT, "chars", varray());
 	ADDFUNC0R(STRING, INT, String, hash, varray());
 	ADDFUNC0R(STRING, STRING, String, md5_text, varray());
+	ADDFUNC0R(STRING, STRING, String, sha1_text, varray());
 	ADDFUNC0R(STRING, STRING, String, sha256_text, varray());
 	ADDFUNC0R(STRING, POOL_BYTE_ARRAY, String, md5_buffer, varray());
+	ADDFUNC0R(STRING, POOL_BYTE_ARRAY, String, sha1_buffer, varray());
 	ADDFUNC0R(STRING, POOL_BYTE_ARRAY, String, sha256_buffer, varray());
 	ADDFUNC0R(STRING, BOOL, String, empty, varray());
 	ADDFUNC0R(STRING, BOOL, String, is_abs_path, varray());
@@ -1532,6 +1553,8 @@ void register_variant_methods() {
 	ADDFUNC0R(STRING, STRING, String, get_file, varray());
 	ADDFUNC0R(STRING, STRING, String, xml_escape, varray());
 	ADDFUNC0R(STRING, STRING, String, xml_unescape, varray());
+	ADDFUNC0R(STRING, STRING, String, http_escape, varray());
+	ADDFUNC0R(STRING, STRING, String, http_unescape, varray());
 	ADDFUNC0R(STRING, STRING, String, c_escape, varray());
 	ADDFUNC0R(STRING, STRING, String, c_unescape, varray());
 	ADDFUNC0R(STRING, STRING, String, json_escape, varray());
@@ -1569,6 +1592,7 @@ void register_variant_methods() {
 	ADDFUNC2R(VECTOR2, VECTOR2, Vector2, linear_interpolate, VECTOR2, "b", REAL, "t", varray());
 	ADDFUNC2R(VECTOR2, VECTOR2, Vector2, slerp, VECTOR2, "b", REAL, "t", varray());
 	ADDFUNC4R(VECTOR2, VECTOR2, Vector2, cubic_interpolate, VECTOR2, "b", VECTOR2, "pre_a", VECTOR2, "post_b", REAL, "t", varray());
+	ADDFUNC2R(VECTOR2, VECTOR2, Vector2, move_toward, VECTOR2, "to", REAL, "delta", varray());
 	ADDFUNC1R(VECTOR2, VECTOR2, Vector2, rotated, REAL, "phi", varray());
 	ADDFUNC0R(VECTOR2, VECTOR2, Vector2, tangent, varray());
 	ADDFUNC0R(VECTOR2, VECTOR2, Vector2, floor, varray());
@@ -1610,6 +1634,7 @@ void register_variant_methods() {
 	ADDFUNC2R(VECTOR3, VECTOR3, Vector3, slerp, VECTOR3, "b", REAL, "t", varray());
 	ADDFUNC4R(VECTOR3, VECTOR3, Vector3, cubic_interpolate, VECTOR3, "b", VECTOR3, "pre_a", VECTOR3, "post_b", REAL, "t", varray());
 	ADDFUNC1R(VECTOR3, VECTOR3, Vector3, direction_to, VECTOR3, "b", varray());
+	ADDFUNC2R(VECTOR3, VECTOR3, Vector3, move_toward, VECTOR3, "to", REAL, "delta", varray());
 	ADDFUNC1R(VECTOR3, REAL, Vector3, dot, VECTOR3, "b", varray());
 	ADDFUNC1R(VECTOR3, VECTOR3, Vector3, cross, VECTOR3, "b", varray());
 	ADDFUNC1R(VECTOR3, BASIS, Vector3, outer, VECTOR3, "b", varray());
@@ -1733,6 +1758,7 @@ void register_variant_methods() {
 
 	ADDFUNC0R(POOL_BYTE_ARRAY, STRING, PoolByteArray, get_string_from_ascii, varray());
 	ADDFUNC0R(POOL_BYTE_ARRAY, STRING, PoolByteArray, get_string_from_utf8, varray());
+	ADDFUNC0R(POOL_BYTE_ARRAY, STRING, PoolByteArray, sha256_string, varray());
 	ADDFUNC1R(POOL_BYTE_ARRAY, POOL_BYTE_ARRAY, PoolByteArray, compress, INT, "compression_mode", varray(0));
 	ADDFUNC2R(POOL_BYTE_ARRAY, POOL_BYTE_ARRAY, PoolByteArray, decompress, INT, "buffer_size", INT, "compression_mode", varray(0));
 

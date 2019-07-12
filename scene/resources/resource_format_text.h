@@ -128,7 +128,6 @@ public:
 };
 
 class ResourceFormatLoaderText : public ResourceFormatLoader {
-	GDCLASS(ResourceFormatLoaderText, ResourceFormatLoader)
 public:
 	static ResourceFormatLoaderText *singleton;
 	virtual Ref<ResourceInteractiveLoader> load_interactive(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
@@ -172,10 +171,9 @@ class ResourceFormatSaverTextInstance {
 	struct ResourceSort {
 		RES resource;
 		int index;
-		bool operator<(const ResourceSort& p_right) const {
+		bool operator<(const ResourceSort &p_right) const {
 			return index < p_right.index;
 		}
-
 	};
 
 	void _find_resources(const Variant &p_variant, bool p_main = false);
@@ -188,7 +186,6 @@ public:
 };
 
 class ResourceFormatSaverText : public ResourceFormatSaver {
-	GDCLASS(ResourceFormatSaverText, ResourceFormatSaver)
 public:
 	static ResourceFormatSaverText *singleton;
 	virtual Error save(const String &p_path, const RES &p_resource, uint32_t p_flags = 0);

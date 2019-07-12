@@ -52,6 +52,7 @@ name is available.
     Clay John (clayjohn)
     Dana Olson (adolson)
     Daniel J. Ramirez (djrm)
+    Daniel Rakos (aqnuep)
     Dharkael (lupoDharkael)
     Dmitry Koteroff (Krakean)
     DualMatrix
@@ -89,6 +90,7 @@ name is available.
     Kostadin Damyanov (Max-Might)
     K. S. Ernest (iFire) Lee (fire)
     Leon Krause (eska014)
+    Lucien Menassol (Kanabenki)
     m4nu3lf
     Marcelo Fernandez (marcelofg55)
     Marc Gilleron (Zylann)
@@ -133,6 +135,7 @@ name is available.
     Thomas Herzog (karroffel)
     Timo (toger5)
     Timo Schwarzer (timoschwarzer)
+    Tomasz Chabora (KoBeWi)
     Vinzenz Feenstra (vinzenz)
     박한얼 (volzhs)
     V. Vamsi Krishna (vkbsb)

@@ -471,7 +471,7 @@ void AnimationNodeBlendTreeEditor::_node_selected(Object *p_node) {
 void AnimationNodeBlendTreeEditor::_open_in_editor(const String &p_which) {
 
 	Ref<AnimationNode> an = blend_tree->get_node(p_which);
-	ERR_FAIL_COND(!an.is_valid())
+	ERR_FAIL_COND(!an.is_valid());
 	AnimationTreeEditor::get_singleton()->enter_editor(p_which);
 }
 
@@ -598,7 +598,7 @@ bool AnimationNodeBlendTreeEditor::_update_filters(const Ref<AnimationNode> &ano
 			Skeleton *skeleton = Object::cast_to<Skeleton>(node);
 			if (skeleton && skeleton->find_bone(concat) != -1) {
 				//path in skeleton
-				String bone = concat;
+				const String &bone = concat;
 				int idx = skeleton->find_bone(bone);
 				List<String> bone_path;
 				while (idx != -1) {
@@ -796,15 +796,15 @@ void AnimationNodeBlendTreeEditor::_node_renamed(const String &p_text, Ref<Anima
 	GraphNode *gn = Object::cast_to<GraphNode>(graph->get_node(prev_name));
 	ERR_FAIL_COND(!gn);
 
-	String new_name = p_text;
+	const String &new_name = p_text;
 
-	ERR_FAIL_COND(new_name == "" || new_name.find(".") != -1 || new_name.find("/") != -1)
+	ERR_FAIL_COND(new_name == "" || new_name.find(".") != -1 || new_name.find("/") != -1);
 
 	if (new_name == prev_name) {
 		return; //nothing to do
 	}
 
-	String base_name = new_name;
+	const String &base_name = new_name;
 	int base = 1;
 	String name = base_name;
 	while (blend_tree->has_node(name)) {
@@ -878,9 +878,7 @@ void AnimationNodeBlendTreeEditor::edit(const Ref<AnimationNode> &p_node) {
 		blend_tree->disconnect("removed_from_graph", this, "_removed_from_graph");
 	}
 
-	if (p_node.is_valid()) {
-		blend_tree = p_node;
-	}
+	blend_tree = p_node;
 
 	if (blend_tree.is_null()) {
 		hide();
@@ -949,7 +947,7 @@ AnimationNodeBlendTreeEditor::AnimationNodeBlendTreeEditor() {
 	filter_dialog->add_child(filter_vbox);
 
 	filter_enabled = memnew(CheckBox);
-	filter_enabled->set_text(TTR("Enable filtering"));
+	filter_enabled->set_text(TTR("Enable Filtering"));
 	filter_enabled->connect("pressed", this, "_filter_toggled");
 	filter_vbox->add_child(filter_enabled);
 
@@ -964,5 +962,5 @@ AnimationNodeBlendTreeEditor::AnimationNodeBlendTreeEditor() {
 	open_file->set_title(TTR("Open Animation Node"));
 	open_file->set_mode(EditorFileDialog::MODE_OPEN_FILE);
 	open_file->connect("file_selected", this, "_file_opened");
-	undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	undo_redo = EditorNode::get_undo_redo();
 }

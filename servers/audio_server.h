@@ -45,7 +45,7 @@ class AudioDriver {
 
 	static AudioDriver *singleton;
 	uint64_t _last_mix_time;
-	uint64_t _mix_amount;
+	uint64_t _last_mix_frames;
 
 #ifdef DEBUG_ENABLED
 	uint64_t prof_ticks;
@@ -71,7 +71,8 @@ protected:
 #endif
 
 public:
-	double get_mix_time() const; //useful for video -> audio sync
+	double get_time_since_last_mix() const; //useful for video -> audio sync
+	double get_time_to_next_mix() const;
 
 	enum SpeakerMode {
 		SPEAKER_MODE_STEREO,
@@ -146,9 +147,10 @@ class AudioBusLayout;
 
 class AudioServer : public Object {
 
-	GDCLASS(AudioServer, Object)
+	GDCLASS(AudioServer, Object);
+
 public:
-	//re-expose this her, as AudioDriver is not exposed to script
+	//re-expose this here, as AudioDriver is not exposed to script
 	enum SpeakerMode {
 		SPEAKER_MODE_STEREO,
 		SPEAKER_SURROUND_31,
@@ -163,6 +165,9 @@ public:
 	typedef void (*AudioCallback)(void *p_userdata);
 
 private:
+	uint64_t mix_time;
+	int mix_size;
+
 	uint32_t buffer_size;
 	uint64_t mix_count;
 	uint64_t mix_frames;
@@ -175,6 +180,8 @@ private:
 
 	int channel_count;
 	int to_mix;
+
+	float global_rate_scale;
 
 	struct Bus {
 
@@ -334,6 +341,9 @@ public:
 
 	bool is_bus_channel_active(int p_bus, int p_channel) const;
 
+	void set_global_rate_scale(float p_scale);
+	float get_global_rate_scale() const;
+
 	virtual void init();
 	virtual void finish();
 	virtual void update();
@@ -351,8 +361,9 @@ public:
 
 	static AudioServer *get_singleton();
 
-	virtual double get_mix_time() const; //useful for video -> audio sync
-	virtual double get_output_delay() const;
+	virtual double get_output_latency() const;
+	virtual double get_time_to_next_mix() const;
+	virtual double get_time_since_last_mix() const;
 
 	void *audio_data_alloc(uint32_t p_data_len, const uint8_t *p_from_data = NULL);
 	void audio_data_free(void *p_data);
@@ -377,7 +388,6 @@ public:
 	String capture_get_device();
 	void capture_set_device(const String &p_name);
 
-	float get_output_latency() { return output_latency; }
 	AudioServer();
 	virtual ~AudioServer();
 };
@@ -386,7 +396,7 @@ VARIANT_ENUM_CAST(AudioServer::SpeakerMode)
 
 class AudioBusLayout : public Resource {
 
-	GDCLASS(AudioBusLayout, Resource)
+	GDCLASS(AudioBusLayout, Resource);
 
 	friend class AudioServer;
 

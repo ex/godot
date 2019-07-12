@@ -68,12 +68,14 @@ public:
 
 	enum Flags {
 		FLAG_ALIGN_Y_TO_VELOCITY,
+		FLAG_ROTATE_Y, // Unused, but exposed for consistency with 3D.
+		FLAG_DISABLE_Z, // Unused, but exposed for consistency with 3D.
 		FLAG_MAX
 	};
 
 	enum EmissionShape {
 		EMISSION_SHAPE_POINT,
-		EMISSION_SHAPE_CIRCLE,
+		EMISSION_SHAPE_SPHERE,
 		EMISSION_SHAPE_RECTANGLE,
 		EMISSION_SHAPE_POINTS,
 		EMISSION_SHAPE_DIRECTED_POINTS,
@@ -116,7 +118,7 @@ private:
 		const Particle *particles;
 
 		bool operator()(int p_a, int p_b) const {
-			return particles[p_a].time < particles[p_b].time;
+			return particles[p_a].time > particles[p_b].time;
 		}
 	};
 
@@ -142,6 +144,8 @@ private:
 	int fixed_fps;
 	bool fractional_delta;
 
+	Transform2D inv_emission_transform;
+
 	DrawOrder draw_order;
 
 	Ref<Texture> texture;
@@ -149,6 +153,7 @@ private:
 
 	////////
 
+	Vector2 direction;
 	float spread;
 	float flatness;
 
@@ -230,6 +235,9 @@ public:
 
 	///////////////////
 
+	void set_direction(Vector2 p_direction);
+	Vector2 get_direction() const;
+
 	void set_spread(float p_spread);
 	float get_spread() const;
 
@@ -248,7 +256,7 @@ public:
 	void set_color(const Color &p_color);
 	Color get_color() const;
 
-	void set_color_ramp(const Ref<Gradient> &p_texture);
+	void set_color_ramp(const Ref<Gradient> &p_ramp);
 	Ref<Gradient> get_color_ramp() const;
 
 	void set_particle_flag(Flags p_flag, bool p_enable);

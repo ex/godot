@@ -709,7 +709,7 @@ bool Variant::is_zero() const {
 		// atomic types
 		case BOOL: {
 
-			return _data._bool == false;
+			return !(_data._bool);
 		} break;
 		case INT: {
 
@@ -1171,8 +1171,6 @@ Variant::operator signed int() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator unsigned int() const {
 
@@ -1188,8 +1186,6 @@ Variant::operator unsigned int() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 Variant::operator int64_t() const {
@@ -1206,8 +1202,6 @@ Variant::operator int64_t() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 /*
@@ -1244,8 +1238,6 @@ Variant::operator uint64_t() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 #ifdef NEED_LONG_INT
@@ -1300,8 +1292,6 @@ Variant::operator signed short() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator unsigned short() const {
 
@@ -1317,8 +1307,6 @@ Variant::operator unsigned short() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator signed char() const {
 
@@ -1334,8 +1322,6 @@ Variant::operator signed char() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator unsigned char() const {
 
@@ -1351,8 +1337,6 @@ Variant::operator unsigned char() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 Variant::operator CharType() const {
@@ -1374,8 +1358,6 @@ Variant::operator float() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator double() const {
 
@@ -1391,8 +1373,6 @@ Variant::operator double() const {
 			return 0;
 		}
 	}
-
-	return true;
 }
 
 Variant::operator StringName() const {
@@ -1415,7 +1395,12 @@ struct _VariantStrPair {
 };
 
 Variant::operator String() const {
+	List<const void *> stack;
 
+	return stringify(stack);
+}
+
+String Variant::stringify(List<const void *> &stack) const {
 	switch (type) {
 
 		case NIL: return "Null";
@@ -1467,6 +1452,12 @@ Variant::operator String() const {
 		case DICTIONARY: {
 
 			const Dictionary &d = *reinterpret_cast<const Dictionary *>(_data._mem);
+			if (stack.find(d.id())) {
+				return "{...}";
+			}
+
+			stack.push_back(d.id());
+
 			//const String *K=NULL;
 			String str("{");
 			List<Variant> keys;
@@ -1477,8 +1468,9 @@ Variant::operator String() const {
 			for (List<Variant>::Element *E = keys.front(); E; E = E->next()) {
 
 				_VariantStrPair sp;
-				sp.key = String(E->get());
-				sp.value = d[E->get()];
+				sp.key = E->get().stringify(stack);
+				sp.value = d[E->get()].stringify(stack);
+
 				pairs.push_back(sp);
 			}
 
@@ -1561,12 +1553,19 @@ Variant::operator String() const {
 		case ARRAY: {
 
 			Array arr = operator Array();
+			if (stack.find(arr.id())) {
+				return "[...]";
+			}
+			stack.push_back(arr.id());
+
 			String str("[");
 			for (int i = 0; i < arr.size(); i++) {
 				if (i)
 					str += ", ";
-				str += String(arr[i]);
-			};
+
+				str += arr[i].stringify(stack);
+			}
+
 			str += "]";
 			return str;
 
@@ -1582,7 +1581,7 @@ Variant::operator String() const {
 					};
 				};
 #endif
-				return "[" + _get_obj().obj->get_class() + ":" + itos(_get_obj().obj->get_instance_id()) + "]";
+				return _get_obj().obj->to_string();
 			} else
 				return "[Object:null]";
 
@@ -2419,9 +2418,6 @@ Variant::Variant(const PoolVector<Face3> &p_face_array) {
 			for (int j = 0; j < 3; j++)
 				w[i * 3 + j] = r[i].vertex[j];
 		}
-
-		r = PoolVector<Face3>::Read();
-		w = PoolVector<Vector3>::Write();
 	}
 
 	type = NIL;

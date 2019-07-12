@@ -447,9 +447,8 @@ Error ResourceInteractiveLoaderText::poll() {
 			resource_cache.push_back(res);
 #ifdef TOOLS_ENABLED
 			//remember ID for saving
-			res->set_id_for_path(local_path,index);
+			res->set_id_for_path(local_path, index);
 #endif
-
 		}
 
 		ExtResource er;
@@ -1226,10 +1225,7 @@ Ref<ResourceInteractiveLoader> ResourceFormatLoaderText::load_interactive(const 
 	Error err;
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ, &err);
 
-	if (err != OK) {
-
-		ERR_FAIL_COND_V(err != OK, Ref<ResourceInteractiveLoader>());
-	}
+	ERR_FAIL_COND_V(err != OK, Ref<ResourceInteractiveLoader>());
 
 	Ref<ResourceInteractiveLoaderText> ria = memnew(ResourceInteractiveLoaderText);
 	String path = p_original_path != "" ? p_original_path : p_path;
@@ -1325,13 +1321,10 @@ Error ResourceFormatLoaderText::convert_file_to_binary(const String &p_src_path,
 	Error err;
 	FileAccess *f = FileAccess::open(p_src_path, FileAccess::READ, &err);
 
-	if (err != OK) {
-
-		ERR_FAIL_COND_V(err != OK, ERR_CANT_OPEN);
-	}
+	ERR_FAIL_COND_V(err != OK, ERR_CANT_OPEN);
 
 	Ref<ResourceInteractiveLoaderText> ria = memnew(ResourceInteractiveLoaderText);
-	String path = p_src_path;
+	const String &path = p_src_path;
 	ria->local_path = ProjectSettings::get_singleton()->localize_path(path);
 	ria->res_path = ria->local_path;
 	//ria->set_local_path( ProjectSettings::get_singleton()->localize_path(p_path) );
@@ -1448,7 +1441,7 @@ void ResourceFormatSaverTextInstance::_find_resources(const Variant &p_variant, 
 			int len = varray.size();
 			for (int i = 0; i < len; i++) {
 
-				Variant v = varray.get(i);
+				const Variant &v = varray.get(i);
 				_find_resources(v);
 			}
 
@@ -1544,12 +1537,6 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 		f->store_line("]\n"); //one empty line
 	}
 
-	{
-
-
-
-	}
-
 #ifdef TOOLS_ENABLED
 	//keep order from cached ids
 	Set<int> cached_ids_found;
@@ -1569,7 +1556,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 		}
 
 		int attempt = 1; //start from one, more readable format
-		while(cached_ids_found.has(attempt)) {
+		while (cached_ids_found.has(attempt)) {
 			attempt++;
 		}
 
@@ -1577,7 +1564,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 		E->get() = attempt;
 		//update also in resource
 		Ref<Resource> res = E->key();
-		res->set_id_for_path(local_path,attempt);
+		res->set_id_for_path(local_path, attempt);
 	}
 #else
 	//make sure to start from one, as it makes format more readable
@@ -1597,7 +1584,6 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 	}
 
 	sorted_er.sort();
-
 
 	for (int i = 0; i < sorted_er.size(); i++) {
 		String p = sorted_er[i].resource->get_path();
@@ -1717,15 +1703,15 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 			Vector<StringName> groups = state->get_node_groups(i);
 
 			String header = "[node";
-			header += " name=\"" + String(name) + "\"";
+			header += " name=\"" + String(name).c_escape() + "\"";
 			if (type != StringName()) {
 				header += " type=\"" + String(type) + "\"";
 			}
 			if (path != NodePath()) {
-				header += " parent=\"" + String(path.simplified()) + "\"";
+				header += " parent=\"" + String(path.simplified()).c_escape() + "\"";
 			}
 			if (owner != NodePath() && owner != NodePath(".")) {
-				header += " owner=\"" + String(owner.simplified()) + "\"";
+				header += " owner=\"" + String(owner.simplified()).c_escape() + "\"";
 			}
 			if (index >= 0) {
 				header += " index=\"" + itos(index) + "\"";
