@@ -159,7 +159,11 @@ bool GDScriptLanguage::validate(const String &p_script, int &r_line_error, int &
 		for (int i = 0; i < cl->subclasses.size(); i++) {
 			for (int j = 0; j < cl->subclasses[i]->functions.size(); j++) {
 
-				funcs[cl->subclasses[i]->functions[j]->line] = String(cl->subclasses[i]->name) + "." + String(cl->subclasses[i]->functions[j]->name);
+				funcs[cl->subclasses[i]->functions[j]->line] = String(cl->subclasses[i]->name) + "." + cl->subclasses[i]->functions[j]->name;
+			}
+			for (int j = 0; j < cl->subclasses[i]->static_functions.size(); j++) {
+
+				funcs[cl->subclasses[i]->static_functions[j]->line] = String(cl->subclasses[i]->name) + "." + cl->subclasses[i]->static_functions[j]->name;
 			}
 		}
 
@@ -219,7 +223,7 @@ bool GDScriptLanguage::debug_break_parse(const String &p_file, int p_line, const
 		_debug_parse_err_line = p_line;
 		_debug_parse_err_file = p_file;
 		_debug_error = p_error;
-		ScriptDebugger::get_singleton()->debug(this, false);
+		ScriptDebugger::get_singleton()->debug(this, false, true);
 		return true;
 	} else {
 		return false;
@@ -233,7 +237,8 @@ bool GDScriptLanguage::debug_break(const String &p_error, bool p_allow_continue)
 		_debug_parse_err_line = -1;
 		_debug_parse_err_file = "";
 		_debug_error = p_error;
-		ScriptDebugger::get_singleton()->debug(this, p_allow_continue);
+		bool is_error_breakpoint = p_error != "Breakpoint";
+		ScriptDebugger::get_singleton()->debug(this, p_allow_continue, is_error_breakpoint);
 		return true;
 	} else {
 		return false;
@@ -382,8 +387,6 @@ void GDScriptLanguage::debug_get_globals(List<String> *p_globals, List<Variant> 
 
 String GDScriptLanguage::debug_parse_stack_level_expression(int p_level, const String &p_expression, int p_max_subitems, int p_max_depth) {
 
-	if (_debug_parse_err_line >= 0)
-		return "";
 	return "";
 }
 
@@ -632,7 +635,7 @@ static GDScriptCompletionIdentifier _type_from_gdtype(const GDScriptDataType &p_
 
 	switch (p_gdtype.kind) {
 		case GDScriptDataType::UNINITIALIZED: {
-			ERR_EXPLAIN("Uninitialized completion. Please report a bug.");
+			ERR_PRINT("Uninitialized completion. Please report a bug.");
 		} break;
 		case GDScriptDataType::BUILTIN: {
 			ci.type.kind = GDScriptParser::DataType::BUILTIN;
@@ -1934,9 +1937,18 @@ static void _find_identifiers_in_base(const GDScriptCompletionContext &p_context
 				Ref<GDScript> script = base_type.script_type;
 				if (script.is_valid()) {
 					if (!_static && !p_only_functions) {
-						for (const Set<StringName>::Element *E = script->get_members().front(); E; E = E->next()) {
-							ScriptCodeCompletionOption option(E->get().operator String(), ScriptCodeCompletionOption::KIND_MEMBER);
-							r_result.insert(option.display, option);
+						if (p_context.base && p_context.base->get_script_instance()) {
+							List<PropertyInfo> members;
+							p_context.base->get_script_instance()->get_property_list(&members);
+							for (List<PropertyInfo>::Element *E = members.front(); E; E = E->next()) {
+								ScriptCodeCompletionOption option(E->get().name, ScriptCodeCompletionOption::KIND_MEMBER);
+								r_result.insert(option.display, option);
+							}
+						} else {
+							for (const Set<StringName>::Element *E = script->get_members().front(); E; E = E->next()) {
+								ScriptCodeCompletionOption option(E->get().operator String(), ScriptCodeCompletionOption::KIND_MEMBER);
+								r_result.insert(option.display, option);
+							}
 						}
 					}
 					if (!p_only_functions) {
@@ -2822,6 +2834,16 @@ Error GDScriptLanguage::complete_code(const String &p_code, const String &p_path
 				clss = clss->owner;
 				for (int i = 0; i < Variant::VARIANT_MAX; i++) {
 					ScriptCodeCompletionOption option(Variant::get_type_name((Variant::Type)i), ScriptCodeCompletionOption::KIND_CLASS);
+					options.insert(option.display, option);
+				}
+				List<PropertyInfo> props;
+				ProjectSettings::get_singleton()->get_property_list(&props);
+				for (List<PropertyInfo>::Element *E = props.front(); E; E = E->next()) {
+					String s = E->get().name;
+					if (!s.begins_with("autoload/")) {
+						continue;
+					}
+					ScriptCodeCompletionOption option(s.get_slice("/", 1), ScriptCodeCompletionOption::KIND_CLASS);
 					options.insert(option.display, option);
 				}
 			}

@@ -36,15 +36,17 @@ name is available.
     Andy Moss (MillionOstrich)
     Anish Bhobe (KidRigger)
     Anton Yabchinskiy (a12n)
+    Anutrix
     Aren Villanueva (kurikaesu)
     Ariel Manzur (punto-)
     Bastiaan Olij (BastiaanOlij)
     Ben Brookshire (sheepandshepherd)
-    Benjamin (Nallebeorn)
+    Benjamin Larsson (Nallebeorn)
     Bernard Liebl (poke1024)
     Błażej Szczygieł (zaps166)
     Bojidar Marinov (bojidar-bg)
     bruvzg
+    Cameron Reikes (creikey)
     Camille Mohr-Daurat (pouleyKetchoupp)
     Carl Olsson (not-surt)
     Carter Anderson (cart)
@@ -56,6 +58,7 @@ name is available.
     Dharkael (lupoDharkael)
     Dmitry Koteroff (Krakean)
     DualMatrix
+    Emmanuel Barroga (codecustard)
     Emmanuel Leblond (touilleMan)
     Eric Lasota (elasota)
     est31
@@ -68,7 +71,8 @@ name is available.
     Gerrit Großkopf (Grosskopf)
     Gilles Roudiere (groud)
     Guilherme Felipe de C. G. da Silva (guilhermefelipecgs)
-    Hein-Pieter van Braam (hpvb)
+    Hanif Bin Ariffin (hbina)
+    Hein-Pieter van Braam-Stewart (hpvb)
     Hiroshi Ogawa (hi-ogawa)
     homer666
     Hubert Jarosz (Marqin)
@@ -104,9 +108,12 @@ name is available.
     Masoud BH (masoudbh3)
     Matthias Hölzl (hoelzl)
     Max Hilbrunner (mhilbrunner)
+    merumelu
     Michael Alexsander Silva Dias (YeldhamDev)
+    MichiRecRoom (LikeLakers2)
     mrezai
     Nathan Warden (NathanWarden)
+    Nils André-Chang (NilsIrl)
     Nuno Donato (nunodonato)
     Ovnuniarchos
     Pascal Richter (ShyRed)
@@ -121,21 +128,26 @@ name is available.
     Rafał Mikrut (qarmin)
     Ralf Hölzemer (rollenrolm)
     Ramesh Ravone (RameshRavone)
+    raphael10241024
     Ray Koopa (RayKoopa)
     Rémi Verschelde (akien-mga)
     Rhody Lugo (rraallvv)
     Roberto F. Arroyo (robfram)
+    Robin Hübner (profan)
     romulox-x
     Ruslan Mustakov (endragor)
     Saniko (sanikoyes)
+    santouits
     SaracenOne
     sersoong
     Simon Wenner (swenner)
+    Swarnim Arun (minraws)
     Theo Hallenius (TheoXD)
     Thomas Herzog (karroffel)
     Timo (toger5)
     Timo Schwarzer (timoschwarzer)
     Tomasz Chabora (KoBeWi)
+    Twarit Waikar (IronicallySerious)
     Vinzenz Feenstra (vinzenz)
     박한얼 (volzhs)
     V. Vamsi Krishna (vkbsb)
@@ -144,7 +156,6 @@ name is available.
     Wilson E. Alvarez (Rubonnek)
     Xavier Cho (mysticfall)
     yg2f (SuperUserNameMan)
-    Yuri Roubinski (Chaosus)
+    Yuri Roubinsky (Chaosus)
     Zher Huei Lee (leezh)
     ZuBsPaCe
-    Дмитрий Сальников (DmitriySalnikov)

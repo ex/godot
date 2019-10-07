@@ -44,7 +44,7 @@ void CPUParticles2D::set_emitting(bool p_emitting) {
 
 void CPUParticles2D::set_amount(int p_amount) {
 
-	ERR_FAIL_COND(p_amount < 1);
+	ERR_FAIL_COND_MSG(p_amount < 1, "Amount of particles must be greater than 0.");
 
 	particles.resize(p_amount);
 	{
@@ -62,7 +62,7 @@ void CPUParticles2D::set_amount(int p_amount) {
 }
 void CPUParticles2D::set_lifetime(float p_lifetime) {
 
-	ERR_FAIL_COND(p_lifetime <= 0);
+	ERR_FAIL_COND_MSG(p_lifetime <= 0, "Particles lifetime must be greater than 0.");
 	lifetime = p_lifetime;
 }
 
@@ -82,6 +82,10 @@ void CPUParticles2D::set_explosiveness_ratio(float p_ratio) {
 void CPUParticles2D::set_randomness_ratio(float p_ratio) {
 
 	randomness_ratio = p_ratio;
+}
+void CPUParticles2D::set_lifetime_randomness(float p_random) {
+
+	lifetime_randomness = p_random;
 }
 void CPUParticles2D::set_use_local_coordinates(bool p_enable) {
 
@@ -122,6 +126,10 @@ float CPUParticles2D::get_explosiveness_ratio() const {
 float CPUParticles2D::get_randomness_ratio() const {
 
 	return randomness_ratio;
+}
+float CPUParticles2D::get_lifetime_randomness() const {
+
+	return lifetime_randomness;
 }
 
 bool CPUParticles2D::get_use_local_coordinates() const {
@@ -611,6 +619,10 @@ void CPUParticles2D::_particles_process(float p_delta) {
 			}
 		}
 
+		if (p.time * (1.0 - explosiveness_ratio) > p.lifetime) {
+			restart = true;
+		}
+
 		if (restart) {
 
 			if (!emitting) {
@@ -654,6 +666,7 @@ void CPUParticles2D::_particles_process(float p_delta) {
 			p.custom[3] = 0.0;
 			p.transform = Transform2D();
 			p.time = 0;
+			p.lifetime = lifetime * (1.0 - Math::randf() * lifetime_randomness);
 			p.base_color = Color(1, 1, 1, 1);
 
 			switch (emission_shape) {
@@ -696,6 +709,8 @@ void CPUParticles2D::_particles_process(float p_delta) {
 
 		} else if (!p.active) {
 			continue;
+		} else if (p.time > p.lifetime) {
+			p.active = false;
 		} else {
 
 			uint32_t alt_seed = p.seed;
@@ -851,8 +866,8 @@ void CPUParticles2D::_particles_process(float p_delta) {
 		}
 
 		//scale by scale
-		float base_scale = Math::lerp(parameters[PARAM_SCALE] * tex_scale, 1.0f, p.scale_rand * randomness[PARAM_SCALE]);
-		if (base_scale == 0.0) base_scale = 0.000001;
+		float base_scale = tex_scale * Math::lerp(parameters[PARAM_SCALE], 1.0f, p.scale_rand * randomness[PARAM_SCALE]);
+		if (base_scale < 0.000001) base_scale = 0.000001;
 
 		p.transform.elements[0] *= base_scale;
 		p.transform.elements[1] *= base_scale;
@@ -947,9 +962,13 @@ void CPUParticles2D::_set_redraw(bool p_redraw) {
 	if (redraw) {
 		VS::get_singleton()->connect("frame_pre_draw", this, "_update_render_thread");
 		VS::get_singleton()->canvas_item_set_update_when_visible(get_canvas_item(), true);
+
+		VS::get_singleton()->multimesh_set_visible_instances(multimesh, -1);
 	} else {
 		VS::get_singleton()->disconnect("frame_pre_draw", this, "_update_render_thread");
 		VS::get_singleton()->canvas_item_set_update_when_visible(get_canvas_item(), false);
+
+		VS::get_singleton()->multimesh_set_visible_instances(multimesh, 0);
 	}
 #ifndef NO_THREADS
 	update_mutex->unlock();
@@ -978,9 +997,6 @@ void CPUParticles2D::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_EXIT_TREE) {
 		_set_redraw(false);
-	}
-
-	if (p_what == NOTIFICATION_PAUSED || p_what == NOTIFICATION_UNPAUSED) {
 	}
 
 	if (p_what == NOTIFICATION_DRAW) {
@@ -1106,8 +1122,9 @@ void CPUParticles2D::_notification(int p_what) {
 }
 
 void CPUParticles2D::convert_from_particles(Node *p_particles) {
+
 	Particles2D *particles = Object::cast_to<Particles2D>(p_particles);
-	ERR_FAIL_COND(!particles);
+	ERR_FAIL_COND_MSG(!particles, "Only Particles2D nodes can be converted to CPUParticles2D.");
 
 	set_emitting(particles->is_emitting());
 	set_amount(particles->get_amount());
@@ -1153,6 +1170,7 @@ void CPUParticles2D::convert_from_particles(Node *p_particles) {
 
 	Vector2 gravity = Vector2(material->get_gravity().x, material->get_gravity().y);
 	set_gravity(gravity);
+	set_lifetime_randomness(material->get_lifetime_randomness());
 
 #define CONVERT_PARAM(m_param)                                                            \
 	set_param(m_param, material->get_param(ParticlesMaterial::m_param));                  \
@@ -1187,6 +1205,7 @@ void CPUParticles2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_pre_process_time", "secs"), &CPUParticles2D::set_pre_process_time);
 	ClassDB::bind_method(D_METHOD("set_explosiveness_ratio", "ratio"), &CPUParticles2D::set_explosiveness_ratio);
 	ClassDB::bind_method(D_METHOD("set_randomness_ratio", "ratio"), &CPUParticles2D::set_randomness_ratio);
+	ClassDB::bind_method(D_METHOD("set_lifetime_randomness", "random"), &CPUParticles2D::set_lifetime_randomness);
 	ClassDB::bind_method(D_METHOD("set_use_local_coordinates", "enable"), &CPUParticles2D::set_use_local_coordinates);
 	ClassDB::bind_method(D_METHOD("set_fixed_fps", "fps"), &CPUParticles2D::set_fixed_fps);
 	ClassDB::bind_method(D_METHOD("set_fractional_delta", "enable"), &CPUParticles2D::set_fractional_delta);
@@ -1199,6 +1218,7 @@ void CPUParticles2D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_pre_process_time"), &CPUParticles2D::get_pre_process_time);
 	ClassDB::bind_method(D_METHOD("get_explosiveness_ratio"), &CPUParticles2D::get_explosiveness_ratio);
 	ClassDB::bind_method(D_METHOD("get_randomness_ratio"), &CPUParticles2D::get_randomness_ratio);
+	ClassDB::bind_method(D_METHOD("get_lifetime_randomness"), &CPUParticles2D::get_lifetime_randomness);
 	ClassDB::bind_method(D_METHOD("get_use_local_coordinates"), &CPUParticles2D::get_use_local_coordinates);
 	ClassDB::bind_method(D_METHOD("get_fixed_fps"), &CPUParticles2D::get_fixed_fps);
 	ClassDB::bind_method(D_METHOD("get_fractional_delta"), &CPUParticles2D::get_fractional_delta);
@@ -1225,6 +1245,7 @@ void CPUParticles2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "speed_scale", PROPERTY_HINT_RANGE, "0,64,0.01"), "set_speed_scale", "get_speed_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "explosiveness", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_explosiveness_ratio", "get_explosiveness_ratio");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "randomness", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_randomness_ratio", "get_randomness_ratio");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "lifetime_randomness", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_lifetime_randomness", "get_lifetime_randomness");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "fixed_fps", PROPERTY_HINT_RANGE, "0,1000,1"), "set_fixed_fps", "get_fixed_fps");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "fract_delta"), "set_fractional_delta", "get_fractional_delta");
 	ADD_GROUP("Drawing", "");
@@ -1404,6 +1425,7 @@ CPUParticles2D::CPUParticles2D() {
 	set_pre_process_time(0);
 	set_explosiveness_ratio(0);
 	set_randomness_ratio(0);
+	set_lifetime_randomness(0);
 	set_use_local_coordinates(true);
 
 	set_draw_order(DRAW_ORDER_INDEX);

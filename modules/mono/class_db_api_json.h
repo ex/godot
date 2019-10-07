@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,9 +31,16 @@
 #ifndef CLASS_DB_API_JSON_H
 #define CLASS_DB_API_JSON_H
 
+// 'core/method_bind.h' defines DEBUG_METHODS_ENABLED, but it looks like we
+// cannot include it here. That's why we include it through 'core/class_db.h'.
 #include "core/class_db.h"
+
+#ifdef DEBUG_METHODS_ENABLED
+
 #include "core/ustring.h"
 
 void class_db_api_to_json(const String &p_output_file, ClassDB::APIType p_api);
+
+#endif // DEBUG_METHODS_ENABLED
 
 #endif // CLASS_DB_API_JSON_H

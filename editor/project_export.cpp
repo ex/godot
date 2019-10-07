@@ -931,17 +931,8 @@ void ProjectExportDialog::_export_project() {
 		export_project->add_filter("*." + extension_list[i] + " ; " + platform->get_name() + " Export");
 	}
 
-	String current_preset_export_path = current->get_export_path();
-
-	if (current_preset_export_path != "") {
-
-		if (!DirAccess::exists(current_preset_export_path.get_base_dir())) {
-
-			DirAccessRef da(DirAccess::create(DirAccess::ACCESS_FILESYSTEM));
-			da->make_dir_recursive(current_preset_export_path.get_base_dir());
-		}
-
-		export_project->set_current_path(current_preset_export_path);
+	if (current->get_export_path() != "") {
+		export_project->set_current_path(current->get_export_path());
 	} else {
 		if (extension_list.size() >= 1) {
 			export_project->set_current_file(default_filename + "." + extension_list[0]);
@@ -1125,6 +1116,7 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	sections = memnew(TabContainer);
 	sections->set_tab_align(TabContainer::ALIGN_LEFT);
+	sections->set_use_hidden_tabs_for_min_size(true);
 	settings_vb->add_child(sections);
 	sections->set_v_size_flags(SIZE_EXPAND_FILL);
 
@@ -1157,11 +1149,15 @@ ProjectExportDialog::ProjectExportDialog() {
 	include_files->connect("item_edited", this, "_tree_changed");
 
 	include_filters = memnew(LineEdit);
-	resources_vb->add_margin_child(TTR("Filters to export non-resource files (comma separated, e.g: *.json, *.txt)"), include_filters);
+	resources_vb->add_margin_child(
+			TTR("Filters to export non-resource files/folders\n(comma-separated, e.g: *.json, *.txt, docs/*)"),
+			include_filters);
 	include_filters->connect("text_changed", this, "_filter_changed");
 
 	exclude_filters = memnew(LineEdit);
-	resources_vb->add_margin_child(TTR("Filters to exclude files from project (comma separated, e.g: *.json, *.txt)"), exclude_filters);
+	resources_vb->add_margin_child(
+			TTR("Filters to exclude files/folders from project\n(comma-separated, e.g: *.json, *.txt, docs/*)"),
+			exclude_filters);
 	exclude_filters->connect("text_changed", this, "_filter_changed");
 
 	VBoxContainer *patch_vb = memnew(VBoxContainer);

@@ -116,8 +116,7 @@ int AudioStreamPlaybackOGGVorbis::mix(int16_t *p_buffer, int p_frames) {
 		if (ret < 0) {
 
 			playing = false;
-			ERR_EXPLAIN("Error reading OGG Vorbis File: " + file);
-			ERR_BREAK(ret < 0);
+			ERR_BREAK_MSG(ret < 0, "Error reading OGG Vorbis file: " + file + ".");
 		} else if (ret == 0) { // end of song, reload?
 
 			ov_clear(&vf);
@@ -243,10 +242,7 @@ Error AudioStreamPlaybackOGGVorbis::set_file(const String &p_file) {
 	stream_valid = false;
 	Error err;
 	f = FileAccess::open(file, FileAccess::READ, &err);
-
-	if (err) {
-		ERR_FAIL_COND_V(err, err);
-	}
+	ERR_FAIL_COND_V_MSG(err, err, "Cannot open file '" + p_file + "'.");
 
 	int errv = ov_open_callbacks(f, &vf, NULL, 0, _ov_callbacks);
 	switch (errv) {
@@ -295,9 +291,7 @@ Error AudioStreamPlaybackOGGVorbis::_load_stream() {
 
 	Error err;
 	f = FileAccess::open(file, FileAccess::READ, &err);
-	if (err) {
-		ERR_FAIL_COND_V(err, err);
-	}
+	ERR_FAIL_COND_V_MSG(err != OK, err, "Cannot open file '" + file + "'.");
 
 	int errv = ov_open_callbacks(f, &vf, NULL, 0, _ov_callbacks);
 	switch (errv) {

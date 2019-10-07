@@ -498,7 +498,16 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 						Vector2(line->to.x, line->to.y)
 					};
 
+#ifdef GLES_OVER_GL
+					if (line->antialiased)
+						glEnable(GL_LINE_SMOOTH);
+#endif
 					_draw_gui_primitive(2, verts, NULL, NULL);
+
+#ifdef GLES_OVER_GL
+					if (line->antialiased)
+						glDisable(GL_LINE_SMOOTH);
+#endif
 				} else {
 					Vector2 t = (line->from - line->to).normalized().tangent() * line->width * 0.5;
 
@@ -510,6 +519,19 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 					};
 
 					_draw_gui_primitive(4, verts, NULL, NULL);
+#ifdef GLES_OVER_GL
+					if (line->antialiased) {
+						glEnable(GL_LINE_SMOOTH);
+						for (int j = 0; j < 4; j++) {
+							Vector2 vertsl[2] = {
+								verts[j],
+								verts[(j + 1) % 4],
+							};
+							_draw_gui_primitive(2, vertsl, NULL, NULL);
+						}
+						glDisable(GL_LINE_SMOOTH);
+					}
+#endif
 				}
 			} break;
 
@@ -919,6 +941,13 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 				}
 
 				_draw_polygon(polygon->indices.ptr(), polygon->count, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1, polygon->weights.ptr(), polygon->bones.ptr());
+#ifdef GLES_OVER_GL
+				if (polygon->antialiased) {
+					glEnable(GL_LINE_SMOOTH);
+					_draw_generic(GL_LINE_LOOP, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1);
+					glDisable(GL_LINE_SMOOTH);
+				}
+#endif
 			} break;
 			case Item::Command::TYPE_MESH: {
 
@@ -1120,7 +1149,22 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 
 				if (pline->triangles.size()) {
 					_draw_generic(GL_TRIANGLE_STRIP, pline->triangles.size(), pline->triangles.ptr(), NULL, pline->triangle_colors.ptr(), pline->triangle_colors.size() == 1);
+#ifdef GLES_OVER_GL
+					glEnable(GL_LINE_SMOOTH);
+					if (pline->multiline) {
+						//needs to be different
+					} else {
+						_draw_generic(GL_LINE_LOOP, pline->lines.size(), pline->lines.ptr(), NULL, pline->line_colors.ptr(), pline->line_colors.size() == 1);
+					}
+					glDisable(GL_LINE_SMOOTH);
+#endif
 				} else {
+
+#ifdef GLES_OVER_GL
+					if (pline->antialiased)
+						glEnable(GL_LINE_SMOOTH);
+#endif
+
 					if (pline->multiline) {
 						int todo = pline->lines.size() / 2;
 						int max_per_call = data.polygon_buffer_size / (sizeof(real_t) * 4);
@@ -1135,6 +1179,11 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 					} else {
 						_draw_generic(GL_LINES, pline->lines.size(), pline->lines.ptr(), NULL, pline->line_colors.ptr(), pline->line_colors.size() == 1);
 					}
+
+#ifdef GLES_OVER_GL
+					if (pline->antialiased)
+						glDisable(GL_LINE_SMOOTH);
+#endif
 				}
 			} break;
 
@@ -1216,14 +1265,11 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 void RasterizerCanvasGLES2::_copy_screen(const Rect2 &p_rect) {
 
 	if (storage->frame.current_rt->flags[RasterizerStorage::RENDER_TARGET_DIRECT_TO_SCREEN]) {
-		ERR_PRINT_ONCE("Cannot use screen texture copying in render target set to render direct to screen");
+		ERR_PRINT_ONCE("Cannot use screen texture copying in render target set to render direct to screen.");
 		return;
 	}
 
-	if (storage->frame.current_rt->copy_screen_effect.color == 0) {
-		ERR_EXPLAIN("Can't use screen texture copying in a render target configured without copy buffers");
-		ERR_FAIL();
-	}
+	ERR_FAIL_COND_MSG(storage->frame.current_rt->copy_screen_effect.color == 0, "Can't use screen texture copying in a render target configured without copy buffers.");
 
 	glDisable(GL_BLEND);
 
@@ -1601,6 +1647,7 @@ void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, cons
 
 					//always re-set uniforms, since light parameters changed
 					_set_uniforms();
+					state.canvas_shader.use_material((void *)material_ptr);
 
 					glActiveTexture(GL_TEXTURE0 + storage->config.max_texture_image_units - 4);
 					RasterizerStorageGLES2::Texture *t = storage->texture_owner.getornull(light->texture);

@@ -250,7 +250,9 @@ public:
 		NOTIFICATION_TRANSLATION_CHANGED = MainLoop::NOTIFICATION_TRANSLATION_CHANGED,
 		NOTIFICATION_WM_ABOUT = MainLoop::NOTIFICATION_WM_ABOUT,
 		NOTIFICATION_CRASH = MainLoop::NOTIFICATION_CRASH,
-		NOTIFICATION_OS_IME_UPDATE = MainLoop::NOTIFICATION_OS_IME_UPDATE
+		NOTIFICATION_OS_IME_UPDATE = MainLoop::NOTIFICATION_OS_IME_UPDATE,
+		NOTIFICATION_APP_RESUMED = MainLoop::NOTIFICATION_APP_RESUMED,
+		NOTIFICATION_APP_PAUSED = MainLoop::NOTIFICATION_APP_PAUSED
 
 	};
 
@@ -300,7 +302,7 @@ public:
 	};
 
 	void get_groups(List<GroupInfo> *p_groups) const;
-	bool has_persistent_groups() const;
+	int get_persistent_group_count() const;
 
 	void move_child(Node *p_child, int p_pos);
 	void raise();
@@ -317,6 +319,9 @@ public:
 
 	void set_filename(const String &p_filename);
 	String get_filename() const;
+
+	void set_editor_description(const String &p_editor_description);
+	String get_editor_description() const;
 
 	void set_editable_instance(Node *p_node, bool p_editable);
 	bool is_editable_instance(const Node *p_node) const;
@@ -362,8 +367,6 @@ public:
 #ifdef TOOLS_ENABLED
 	Node *duplicate_from_editor(Map<const Node *, Node *> &r_duplimap) const;
 #endif
-
-	//Node *clone_tree() const;
 
 	// used by editors, to save what has changed only
 	void set_scene_instance_state(const Ref<SceneState> &p_state);

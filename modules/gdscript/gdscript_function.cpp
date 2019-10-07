@@ -86,8 +86,7 @@ Variant *GDScriptFunction::_get_variant(int p_address, GDScriptInstance *p_insta
 				o = o->_owner;
 			}
 
-			ERR_EXPLAIN("GDScriptCompiler bug...");
-			ERR_FAIL_V(NULL);
+			ERR_FAIL_V_MSG(NULL, "GDScriptCompiler bug.");
 		} break;
 		case ADDR_TYPE_LOCAL_CONSTANT: {
 #ifdef DEBUG_ENABLED
@@ -128,8 +127,7 @@ Variant *GDScriptFunction::_get_variant(int p_address, GDScriptInstance *p_insta
 		} break;
 	}
 
-	ERR_EXPLAIN("Bad Code! (Addressing Mode)");
-	ERR_FAIL_V(NULL);
+	ERR_FAIL_V_MSG(NULL, "Bad code! (unknown addressing mode).");
 	return NULL;
 }
 
@@ -433,6 +431,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 		profile.frame_call_count++;
 	}
 	bool exit_ok = false;
+	bool yielded = false;
 #endif
 
 #ifdef DEBUG_ENABLED
@@ -1325,6 +1324,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 
 #ifdef DEBUG_ENABLED
 				exit_ok = true;
+				yielded = true;
 #endif
 				OPCODE_BREAK;
 			}
@@ -1419,7 +1419,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 				if (!container->iter_init(*counter, valid)) {
 #ifdef DEBUG_ENABLED
 					if (!valid) {
-						err_text = "Unable to iterate on object of type  " + Variant::get_type_name(container->get_type()) + "'.";
+						err_text = "Unable to iterate on object of type '" + Variant::get_type_name(container->get_type()) + "'.";
 						OPCODE_BREAK;
 					}
 #endif
@@ -1432,7 +1432,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 					*iterator = container->iter_get(*counter, valid);
 #ifdef DEBUG_ENABLED
 					if (!valid) {
-						err_text = "Unable to obtain iterator object of type  " + Variant::get_type_name(container->get_type()) + "'.";
+						err_text = "Unable to obtain iterator object of type '" + Variant::get_type_name(container->get_type()) + "'.";
 						OPCODE_BREAK;
 					}
 #endif
@@ -1452,7 +1452,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 				if (!container->iter_next(*counter, valid)) {
 #ifdef DEBUG_ENABLED
 					if (!valid) {
-						err_text = "Unable to iterate on object of type  " + Variant::get_type_name(container->get_type()) + "' (type changed since first iteration?).";
+						err_text = "Unable to iterate on object of type '" + Variant::get_type_name(container->get_type()) + "' (type changed since first iteration?).";
 						OPCODE_BREAK;
 					}
 #endif
@@ -1465,7 +1465,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 					*iterator = container->iter_get(*counter, valid);
 #ifdef DEBUG_ENABLED
 					if (!valid) {
-						err_text = "Unable to obtain iterator object of type  " + Variant::get_type_name(container->get_type()) + "' (but was obtained on first iteration?).";
+						err_text = "Unable to obtain iterator object of type '" + Variant::get_type_name(container->get_type()) + "' (but was obtained on first iteration?).";
 						OPCODE_BREAK;
 					}
 #endif
@@ -1475,20 +1475,25 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 			DISPATCH_OPCODE;
 
 			OPCODE(OPCODE_ASSERT) {
-				CHECK_SPACE(2);
+				CHECK_SPACE(3);
 
 #ifdef DEBUG_ENABLED
 				GET_VARIANT_PTR(test, 1);
+				GET_VARIANT_PTR(message, 2);
 				bool result = test->booleanize();
 
 				if (!result) {
-
-					err_text = "Assertion failed.";
+					const String &message_str = *message;
+					if (message_str.empty()) {
+						err_text = "Assertion failed.";
+					} else {
+						err_text = "Assertion failed: " + message_str;
+					}
 					OPCODE_BREAK;
 				}
 
 #endif
-				ip += 2;
+				ip += 3;
 			}
 			DISPATCH_OPCODE;
 
@@ -1590,8 +1595,6 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 		profile.frame_self_time += time_taken - function_call_time;
 		GDScriptLanguage::get_singleton()->script_frame_time += time_taken - function_call_time;
 	}
-
-	bool yielded = retvalue.is_ref() && Object::cast_to<GDScriptFunctionState>(retvalue);
 
 	// Check if this is the last time the function is resuming from yield
 	// Will be true if never yielded as well
@@ -1784,19 +1787,8 @@ GDScriptFunction::~GDScriptFunction() {
 
 Variant GDScriptFunctionState::_signal_callback(const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
 
-	if (state.instance_id && !ObjectDB::get_instance(state.instance_id)) {
-#ifdef DEBUG_ENABLED
-		ERR_EXPLAIN("Resumed function '" + String(function->get_name()) + "()' after yield, but class instance is gone. At script: " + state.script->get_path() + ":" + itos(state.line));
-		ERR_FAIL_V(Variant());
-#else
-		return Variant();
-#endif
-	}
-
 	Variant arg;
 	r_error.error = Variant::CallError::CALL_OK;
-
-	ERR_FAIL_COND_V(!function, Variant());
 
 	if (p_argcount == 0) {
 		r_error.error = Variant::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
@@ -1823,44 +1815,7 @@ Variant GDScriptFunctionState::_signal_callback(const Variant **p_args, int p_ar
 		return Variant();
 	}
 
-	state.result = arg;
-	Variant ret = function->call(NULL, NULL, 0, r_error, &state);
-
-	bool completed = true;
-
-	// If the return value is a GDScriptFunctionState reference,
-	// then the function did yield again after resuming.
-	if (ret.is_ref()) {
-		GDScriptFunctionState *gdfs = Object::cast_to<GDScriptFunctionState>(ret);
-		if (gdfs && gdfs->function == function) {
-			completed = false;
-			gdfs->first_state = first_state.is_valid() ? first_state : Ref<GDScriptFunctionState>(this);
-		}
-	}
-
-	function = NULL; //cleaned up;
-	state.result = Variant();
-
-	if (completed) {
-		if (first_state.is_valid()) {
-			first_state->emit_signal("completed", ret);
-		} else {
-			emit_signal("completed", ret);
-		}
-	}
-
-#ifdef DEBUG_ENABLED
-	if (ScriptDebugger::get_singleton())
-		GDScriptLanguage::get_singleton()->exit_function();
-	if (state.stack_size) {
-		//free stack
-		Variant *stack = (Variant *)state.stack.ptr();
-		for (int i = 0; i < state.stack_size; i++)
-			stack[i].~Variant();
-	}
-#endif
-
-	return ret;
+	return resume(arg);
 }
 
 bool GDScriptFunctionState::is_valid(bool p_extended_check) const {
@@ -1882,8 +1837,7 @@ Variant GDScriptFunctionState::resume(const Variant &p_arg) {
 	ERR_FAIL_COND_V(!function, Variant());
 	if (state.instance_id && !ObjectDB::get_instance(state.instance_id)) {
 #ifdef DEBUG_ENABLED
-		ERR_EXPLAIN("Resumed function '" + String(function->get_name()) + "()' after yield, but class instance is gone. At script: " + state.script->get_path() + ":" + itos(state.line));
-		ERR_FAIL_V(Variant());
+		ERR_FAIL_V_MSG(Variant(), "Resumed function '" + String(function->get_name()) + "()' after yield, but class instance is gone. At script: " + state.script->get_path() + ":" + itos(state.line));
 #else
 		return Variant();
 #endif

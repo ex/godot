@@ -377,11 +377,6 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 			}
 
 		} break;
-		/*case Variant::RESOURCE: {
-
-			ERR_EXPLAIN("Can't marshallize resources");
-			ERR_FAIL_V(ERR_INVALID_DATA); //no, i'm sorry, no go
-		} break;*/
 		case Variant::_RID: {
 
 			r_variant = RID();
@@ -483,7 +478,7 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 
 				int used;
 				Error err = decode_variant(key, buf, len, &used, p_allow_objects);
-				ERR_FAIL_COND_V(err, err);
+				ERR_FAIL_COND_V_MSG(err != OK, err, "Error when trying to decode Variant.");
 
 				buf += used;
 				len -= used;
@@ -492,7 +487,7 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 				}
 
 				err = decode_variant(value, buf, len, &used, p_allow_objects);
-				ERR_FAIL_COND_V(err, err);
+				ERR_FAIL_COND_V_MSG(err != OK, err, "Error when trying to decode Variant.");
 
 				buf += used;
 				len -= used;
@@ -527,7 +522,7 @@ Error decode_variant(Variant &r_variant, const uint8_t *p_buffer, int p_len, int
 				int used = 0;
 				Variant v;
 				Error err = decode_variant(v, buf, len, &used, p_allow_objects);
-				ERR_FAIL_COND_V(err, err);
+				ERR_FAIL_COND_V_MSG(err != OK, err, "Error when trying to decode Variant.");
 				buf += used;
 				len -= used;
 				varr.push_back(v);
@@ -1066,11 +1061,6 @@ Error encode_variant(const Variant &p_variant, uint8_t *r_buffer, int &r_len, bo
 			r_len += 4 * 4;
 
 		} break;
-		/*case Variant::RESOURCE: {
-
-			ERR_EXPLAIN("Can't marshallize resources");
-			ERR_FAIL_V(ERR_INVALID_DATA); //no, i'm sorry, no go
-		} break;*/
 		case Variant::_RID: {
 
 		} break;

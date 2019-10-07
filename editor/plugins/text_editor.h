@@ -46,7 +46,7 @@ private:
 	MenuButton *edit_menu;
 	PopupMenu *highlighter_menu;
 	MenuButton *search_menu;
-	MenuButton *bookmarks_menu;
+	PopupMenu *bookmarks_menu;
 	PopupMenu *context_menu;
 
 	GotoLineDialog *goto_line_dialog;
@@ -87,6 +87,7 @@ private:
 		SEARCH_FIND_NEXT,
 		SEARCH_FIND_PREV,
 		SEARCH_REPLACE,
+		SEARCH_IN_FILES,
 		SEARCH_GOTO_LINE,
 		BOOKMARK_TOGGLE,
 		BOOKMARK_GOTO_NEXT,
@@ -100,7 +101,7 @@ protected:
 	void _notification(int p_what);
 
 	void _edit_option(int p_op);
-	void _make_context_menu(bool p_selection, bool p_can_fold, bool p_is_folded);
+	void _make_context_menu(bool p_selection, bool p_can_fold, bool p_is_folded, Vector2 p_position);
 	void _text_edit_gui_input(const Ref<InputEvent> &ev);
 
 	Map<String, SyntaxHighlighter *> highlighters;
@@ -131,6 +132,7 @@ public:
 	virtual Vector<String> get_functions();
 	virtual void get_breakpoints(List<int> *p_breakpoints);
 	virtual void goto_line(int p_line, bool p_with_error = false);
+	void goto_line_selection(int p_line, int p_begin, int p_end);
 	virtual void set_executing_line(int p_line);
 	virtual void clear_executing_line();
 	virtual void trim_trailing_whitespace();
@@ -154,6 +156,7 @@ public:
 	static void register_editor();
 
 	TextEditor();
+	~TextEditor();
 };
 
 #endif // TEXT_EDITOR_H

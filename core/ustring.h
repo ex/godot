@@ -36,10 +36,6 @@
 #include "core/typedefs.h"
 #include "core/vector.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 template <class T>
 class CharProxy {
 	friend class CharString;
@@ -137,6 +133,7 @@ class String {
 	void copy_from(const CharType &p_char);
 	void copy_from_unchecked(const CharType *p_char, const int p_length);
 	bool _base_is_subsequence_of(const String &p_string, bool case_insensitive) const;
+	int _count(const String &p_string, int p_from, int p_to, bool p_case_insensitive) const;
 
 public:
 	enum {
@@ -226,6 +223,7 @@ public:
 	String replace(const String &p_key, const String &p_with) const;
 	String replace(const char *p_key, const char *p_with) const;
 	String replacen(const String &p_key, const String &p_with) const;
+	String repeat(int p_count) const;
 	String insert(int p_at_pos, const String &p_string) const;
 	String pad_decimals(int p_digits) const;
 	String pad_zeros(int p_digits) const;
@@ -279,6 +277,9 @@ public:
 	String to_upper() const;
 	String to_lower() const;
 
+	int count(const String &p_string, int p_from = 0, int p_to = 0) const;
+	int countn(const String &p_string, int p_from = 0, int p_to = 0) const;
+
 	String left(int p_pos) const;
 	String right(int p_pos) const;
 	String dedent() const;
@@ -321,7 +322,7 @@ public:
 	String path_to_file(const String &p_path) const;
 	String get_base_dir() const;
 	String get_file() const;
-	static String humanize_size(size_t p_size);
+	static String humanize_size(uint64_t p_size);
 	String simplify_path() const;
 
 	String xml_escape(bool p_escape_quotes = false) const;

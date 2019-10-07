@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ukrainian (Godot Engine)\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-07-09 10:46+0000\n"
+"PO-Revision-Date: 2019-09-07 13:51+0000\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <https://hosted.weblate.org/projects/godot-engine/"
 "godot/uk/>\n"
@@ -25,7 +25,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 3.8-dev\n"
+"X-Generator: Weblate 3.9-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -68,8 +68,36 @@ msgstr "Некоректні аргументи для побудови «%s»"
 msgid "On call to '%s':"
 msgstr "При виклику «%s»:"
 
+#: core/ustring.cpp
+msgid "B"
+msgstr ""
+
+#: core/ustring.cpp
+msgid "KiB"
+msgstr ""
+
+#: core/ustring.cpp
+#, fuzzy
+msgid "MiB"
+msgstr "Поєднання"
+
+#: core/ustring.cpp
+msgid "GiB"
+msgstr ""
+
+#: core/ustring.cpp
+msgid "TiB"
+msgstr ""
+
+#: core/ustring.cpp
+msgid "PiB"
+msgstr ""
+
+#: core/ustring.cpp
+msgid "EiB"
+msgstr ""
+
 #: editor/animation_bezier_editor.cpp
-#: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Free"
 msgstr "Вивільнити"
 
@@ -135,6 +163,26 @@ msgstr "Змінити значення ключового кадру"
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Change Call"
+msgstr "Змінити виклик анімації"
+
+#: editor/animation_track_editor.cpp
+msgid "Anim Multi Change Keyframe Time"
+msgstr "Змінити час ключового кадру анімації"
+
+#: editor/animation_track_editor.cpp
+msgid "Anim Multi Change Transition"
+msgstr "Змінити перехід анімації"
+
+#: editor/animation_track_editor.cpp
+msgid "Anim Multi Change Transform"
+msgstr "Змінити перетворення анімації"
+
+#: editor/animation_track_editor.cpp
+msgid "Anim Multi Change Keyframe Value"
+msgstr "Змінити значення ключового кадру анімації"
+
+#: editor/animation_track_editor.cpp
+msgid "Anim Multi Change Call"
 msgstr "Змінити виклик анімації"
 
 #: editor/animation_track_editor.cpp
@@ -466,6 +514,11 @@ msgid "Select None"
 msgstr "Скасувати позначення"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
+msgid "Select an AnimationPlayer node to create and edit animations."
+msgstr "Шлях до вузла AnimationPlayer, де містяться анімації, не встановлено."
+
+#: editor/animation_track_editor.cpp
 msgid "Only show tracks from nodes selected in tree."
 msgstr "Показувати доріжки лише для вузлів, які позначено у ієрархії."
 
@@ -641,16 +694,16 @@ msgid "Line Number:"
 msgstr "Номер рядка:"
 
 #: editor/code_editor.cpp
-msgid "Found %d match(es)."
-msgstr ""
-
-#: editor/code_editor.cpp editor/editor_help.cpp
-msgid "No Matches"
-msgstr "Немає збігів"
-
-#: editor/code_editor.cpp
 msgid "Replaced %d occurrence(s)."
 msgstr "Замінено %d випадок(-ів)."
+
+#: editor/code_editor.cpp editor/editor_help.cpp
+msgid "%d match."
+msgstr "%d відповідник."
+
+#: editor/code_editor.cpp editor/editor_help.cpp
+msgid "%d matches."
+msgstr "%d відповідників."
 
 #: editor/code_editor.cpp editor/find_in_files.cpp
 msgid "Match Case"
@@ -788,7 +841,8 @@ msgstr "Не вдалося з'єднати сигнал"
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/resource_preloader_editor_plugin.cpp
 #: editor/plugins/script_editor_plugin.cpp
-#: editor/plugins/sprite_frames_editor_plugin.cpp editor/project_export.cpp
+#: editor/plugins/sprite_frames_editor_plugin.cpp
+#: editor/plugins/version_control_editor_plugin.cpp editor/project_export.cpp
 #: editor/project_settings_editor.cpp editor/property_editor.cpp
 #: editor/run_settings_dialog.cpp editor/settings_config_dialog.cpp
 #: modules/visual_script/visual_script_editor.cpp
@@ -800,9 +854,8 @@ msgid "Connect"
 msgstr "З'єднати"
 
 #: editor/connections_dialog.cpp
-#, fuzzy
 msgid "Signal:"
-msgstr "Сигнали:"
+msgstr "Сигнал:"
 
 #: editor/connections_dialog.cpp
 msgid "Connect '%s' to '%s'"
@@ -878,8 +931,7 @@ msgstr "Вибране:"
 msgid "Recent:"
 msgstr "Нещодавні:"
 
-#: editor/create_dialog.cpp editor/plugins/asset_library_editor_plugin.cpp
-#: editor/plugins/script_editor_plugin.cpp editor/project_manager.cpp
+#: editor/create_dialog.cpp editor/plugins/script_editor_plugin.cpp
 #: editor/property_selector.cpp editor/quick_open.cpp
 #: modules/visual_script/visual_script_property_selector.cpp
 msgid "Search:"
@@ -891,7 +943,8 @@ msgstr "Пошук:"
 msgid "Matches:"
 msgstr "Збіги:"
 
-#: editor/create_dialog.cpp editor/plugin_config_dialog.cpp
+#: editor/create_dialog.cpp editor/editor_plugin_settings.cpp
+#: editor/plugin_config_dialog.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
 #: editor/plugins/visual_shader_editor_plugin.cpp editor/property_selector.cpp
 #: modules/visual_script/visual_script_property_selector.cpp
@@ -967,9 +1020,9 @@ msgid "Owners Of:"
 msgstr "Власники:"
 
 #: editor/dependency_editor.cpp
-#, fuzzy
 msgid "Remove selected files from the project? (Can't be restored)"
-msgstr "Видалити вибрані файли з проєкту? (скасування неможливе)"
+msgstr ""
+"Вилучити позначені файли з проєкту? (Вилучені файли не вдасться відновити)"
 
 #: editor/dependency_editor.cpp
 msgid ""
@@ -981,7 +1034,7 @@ msgstr ""
 "працювати.\n"
 "Видалити їх у будь-якому разі? (скасування неможливе)"
 
-#: editor/dependency_editor.cpp editor/export_template_manager.cpp
+#: editor/dependency_editor.cpp
 msgid "Cannot remove:"
 msgstr "Неможливо вилучити:"
 
@@ -1017,7 +1070,7 @@ msgstr "Остаточно вилучити %d об'єкт(и)? (Неможли�
 msgid "Show Dependencies"
 msgstr "Показати залежності"
 
-#: editor/dependency_editor.cpp editor/editor_node.cpp
+#: editor/dependency_editor.cpp
 msgid "Orphan Resource Explorer"
 msgstr "Огляд підключених ресурсів"
 
@@ -1106,18 +1159,18 @@ msgid "License"
 msgstr "Ліцензія"
 
 #: editor/editor_about.cpp
-msgid "Thirdparty License"
-msgstr "Ліцензія третьої сторони"
+msgid "Third-party Licenses"
+msgstr "Ліцензування сторонніх компонентів"
 
 #: editor/editor_about.cpp
 msgid ""
-"Godot Engine relies on a number of thirdparty free and open source "
+"Godot Engine relies on a number of third-party free and open source "
 "libraries, all compatible with the terms of its MIT license. The following "
-"is an exhaustive list of all such thirdparty components with their "
+"is an exhaustive list of all such third-party components with their "
 "respective copyright statements and license terms."
 msgstr ""
 "Рушій Godot спирається на ряд сторонніх безкоштовних і відкритих бібліотек, "
-"сумісних з умовами ліцензії MIT. Нижче наводиться вичерпний список всіх "
+"сумісних з умовами ліцензування MIT. Нижче наведено вичерпний список всіх "
 "таких сторонніх компонентів з відповідними заявами авторських прав і умов "
 "ліцензійної угоди."
 
@@ -1134,8 +1187,8 @@ msgid "Licenses"
 msgstr "Ліцензії"
 
 #: editor/editor_asset_installer.cpp editor/project_manager.cpp
-msgid "Error opening package file, not in zip format."
-msgstr "Помилка відкриття файла пакунка, не у форматі zip."
+msgid "Error opening package file, not in ZIP format."
+msgstr "Помилка під час спроби відкрити файл пакунка — дані не у форматі zip."
 
 #: editor/editor_asset_installer.cpp
 msgid "Uncompressing Assets"
@@ -1151,7 +1204,6 @@ msgid "Success!"
 msgstr "Успіх!"
 
 #: editor/editor_asset_installer.cpp editor/editor_node.cpp
-#: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Install"
 msgstr "Встановити"
 
@@ -1204,7 +1256,8 @@ msgid "Delete Bus Effect"
 msgstr "Вилучити ефект шини"
 
 #: editor/editor_audio_buses.cpp
-msgid "Audio Bus, Drag and Drop to rearrange."
+#, fuzzy
+msgid "Drag & drop to rearrange."
 msgstr "Аудіо шина, перетягнути, щоб змінити."
 
 #: editor/editor_audio_buses.cpp
@@ -1395,6 +1448,7 @@ msgid "Add AutoLoad"
 msgstr "Додати автозавантаження"
 
 #: editor/editor_autoload_settings.cpp editor/editor_file_dialog.cpp
+#: editor/editor_plugin_settings.cpp
 #: editor/plugins/animation_tree_editor_plugin.cpp scene/gui/file_dialog.cpp
 msgid "Path:"
 msgstr "Шлях:"
@@ -1520,6 +1574,8 @@ msgstr "Файл шаблону не знайдено:"
 #: editor/editor_export.cpp
 msgid "On 32-bit exports the embedded PCK cannot be bigger than 4 GiB."
 msgstr ""
+"При експортуванні у 32-бітовому режимі вбудовані PCK не можуть перевищувати "
+"за розміром 4 ГіБ."
 
 #: editor/editor_feature_profile.cpp
 msgid "3D Editor"
@@ -1623,16 +1679,16 @@ msgstr "Зробити поточним"
 
 #: editor/editor_feature_profile.cpp
 #: editor/plugins/animation_player_editor_plugin.cpp
+#: editor/plugins/version_control_editor_plugin.cpp
 msgid "New"
 msgstr "Новий"
 
 #: editor/editor_feature_profile.cpp editor/editor_node.cpp
-#: editor/plugins/asset_library_editor_plugin.cpp editor/project_manager.cpp
+#: editor/project_manager.cpp
 msgid "Import"
 msgstr "Імпортувати"
 
-#: editor/editor_feature_profile.cpp editor/editor_node.cpp
-#: editor/project_export.cpp
+#: editor/editor_feature_profile.cpp editor/project_export.cpp
 msgid "Export"
 msgstr "Експортування"
 
@@ -1693,7 +1749,8 @@ msgstr "Показати у менеджері файлів"
 msgid "New Folder..."
 msgstr "Створити теку..."
 
-#: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
+#: editor/editor_file_dialog.cpp
+#: editor/plugins/version_control_editor_plugin.cpp
 msgid "Refresh"
 msgstr "Оновити"
 
@@ -1744,7 +1801,7 @@ msgstr "Йти вперед"
 msgid "Go Up"
 msgstr "Вгору"
 
-#: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
+#: editor/editor_file_dialog.cpp
 msgid "Toggle Hidden Files"
 msgstr "Перемкнути приховані файли"
 
@@ -1769,23 +1826,27 @@ msgid "Move Favorite Down"
 msgstr "Перемістити вибране вниз"
 
 #: editor/editor_file_dialog.cpp
-msgid "Previous Folder"
-msgstr "Попередня тека"
+msgid "Go to previous folder."
+msgstr "Перейти до попередньої теки."
 
 #: editor/editor_file_dialog.cpp
-msgid "Next Folder"
-msgstr "Наступна тека"
+msgid "Go to next folder."
+msgstr "Перейти до наступної теки."
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Go to parent folder."
 msgstr "Перейти до батьківської теки."
 
+#: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
+msgid "Refresh files."
+msgstr "Освіжити файли."
+
 #: editor/editor_file_dialog.cpp
 msgid "(Un)favorite current folder."
 msgstr "Перемкнути стан вибраності для поточної теки."
 
-#: editor/editor_file_dialog.cpp
-msgid "Toggle visibility of hidden files."
+#: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
+msgid "Toggle the visibility of hidden files."
 msgstr "Увімкнути або вимкнути видимість прихованих файлів."
 
 #: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
@@ -1847,7 +1908,8 @@ msgid "Inherited by:"
 msgstr "Успадковано:"
 
 #: editor/editor_help.cpp
-msgid "Brief Description:"
+#, fuzzy
+msgid "Brief Description"
 msgstr "Стислий опис:"
 
 #: editor/editor_help.cpp
@@ -1855,36 +1917,16 @@ msgid "Properties"
 msgstr "Властивості"
 
 #: editor/editor_help.cpp
-msgid "Properties:"
-msgstr "Властивості:"
-
-#: editor/editor_help.cpp
 msgid "Methods"
 msgstr "Методи"
-
-#: editor/editor_help.cpp
-msgid "Methods:"
-msgstr "Методи:"
 
 #: editor/editor_help.cpp
 msgid "Theme Properties"
 msgstr "Властивості теми"
 
 #: editor/editor_help.cpp
-msgid "Theme Properties:"
-msgstr "Властивості теми:"
-
-#: editor/editor_help.cpp modules/visual_script/visual_script_editor.cpp
-msgid "Signals:"
-msgstr "Сигнали:"
-
-#: editor/editor_help.cpp
 msgid "Enumerations"
 msgstr "Перелічуваний"
-
-#: editor/editor_help.cpp
-msgid "Enumerations:"
-msgstr "Перелічуваний:"
 
 #: editor/editor_help.cpp
 msgid "enum  "
@@ -1895,19 +1937,12 @@ msgid "Constants"
 msgstr "Константи"
 
 #: editor/editor_help.cpp
-msgid "Constants:"
-msgstr "Константи:"
-
-#: editor/editor_help.cpp
 msgid "Class Description"
 msgstr "Опис класу"
 
 #: editor/editor_help.cpp
-msgid "Class Description:"
-msgstr "Опис класу:"
-
-#: editor/editor_help.cpp
-msgid "Online Tutorials:"
+#, fuzzy
+msgid "Online Tutorials"
 msgstr "Підручники в інтернеті:"
 
 #: editor/editor_help.cpp
@@ -1925,10 +1960,6 @@ msgid "Property Descriptions"
 msgstr "Описи властивостей"
 
 #: editor/editor_help.cpp
-msgid "Property Descriptions:"
-msgstr "Описи властивостей:"
-
-#: editor/editor_help.cpp
 msgid ""
 "There is currently no description for this property. Please help us by "
 "[color=$color][url=$url]contributing one[/url][/color]!"
@@ -1939,10 +1970,6 @@ msgstr ""
 #: editor/editor_help.cpp
 msgid "Method Descriptions"
 msgstr "Описи методів"
-
-#: editor/editor_help.cpp
-msgid "Method Descriptions:"
-msgstr "Описи методів:"
 
 #: editor/editor_help.cpp
 msgid ""
@@ -2013,8 +2040,8 @@ msgstr "Вивід:"
 msgid "Copy Selection"
 msgstr "Копіювати позначене"
 
-#: editor/editor_log.cpp editor/editor_profiler.cpp
-#: editor/editor_properties.cpp
+#: editor/editor_log.cpp editor/editor_network_profiler.cpp
+#: editor/editor_profiler.cpp editor/editor_properties.cpp
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 #: editor/property_editor.cpp editor/scene_tree_dock.cpp
 #: editor/script_editor_debugger.cpp
@@ -2026,6 +2053,53 @@ msgstr "Очистити"
 #: editor/editor_log.cpp
 msgid "Clear Output"
 msgstr "Очистити вивід"
+
+#: editor/editor_network_profiler.cpp editor/editor_node.cpp
+#: editor/editor_profiler.cpp
+msgid "Stop"
+msgstr "Зупинити"
+
+#: editor/editor_network_profiler.cpp editor/editor_profiler.cpp
+#: editor/plugins/animation_state_machine_editor.cpp editor/rename_dialog.cpp
+msgid "Start"
+msgstr "Початок"
+
+#: editor/editor_network_profiler.cpp
+msgid "%s/s"
+msgstr ""
+
+#: editor/editor_network_profiler.cpp
+#, fuzzy
+msgid "Down"
+msgstr "Завантажити"
+
+#: editor/editor_network_profiler.cpp
+msgid "Up"
+msgstr ""
+
+#: editor/editor_network_profiler.cpp editor/editor_node.cpp
+msgid "Node"
+msgstr "Вузол"
+
+#: editor/editor_network_profiler.cpp
+msgid "Incoming RPC"
+msgstr ""
+
+#: editor/editor_network_profiler.cpp
+msgid "Incoming RSET"
+msgstr ""
+
+#: editor/editor_network_profiler.cpp
+msgid "Outgoing RPC"
+msgstr ""
+
+#: editor/editor_network_profiler.cpp
+msgid "Outgoing RSET"
+msgstr ""
+
+#: editor/editor_node.cpp editor/project_manager.cpp
+msgid "New Window"
+msgstr "Нове вікно"
 
 #: editor/editor_node.cpp
 msgid "Project export failed with error code %d."
@@ -2348,6 +2422,14 @@ msgid "Pick a Main Scene"
 msgstr "Виберіть головну сцену"
 
 #: editor/editor_node.cpp
+msgid "Close Scene"
+msgstr "Закрити сцену"
+
+#: editor/editor_node.cpp
+msgid "Reopen Closed Scene"
+msgstr "Повторно відкрити закриту сцену"
+
+#: editor/editor_node.cpp
 msgid "Unable to enable addon plugin at: '%s' parsing of config failed."
 msgstr ""
 "Не вдається ввімкнути плагін addon:  '%s' не вдалося проаналізувати "
@@ -2464,6 +2546,10 @@ msgstr "Відтворити цю сцену"
 msgid "Close Tab"
 msgstr "Закрити вкладку"
 
+#: editor/editor_node.cpp
+msgid "Undo Close Tab"
+msgstr "Скасувати закриття вкладки"
+
 #: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
 msgid "Close Other Tabs"
 msgstr "Закрити інші вкладки"
@@ -2517,6 +2603,10 @@ msgid "Go to previously opened scene."
 msgstr "Перейти до раніше відкритої сцени."
 
 #: editor/editor_node.cpp
+msgid "Copy Text"
+msgstr "Копіювати текст"
+
+#: editor/editor_node.cpp
 msgid "Next tab"
 msgstr "Наступна вкладка"
 
@@ -2544,6 +2634,10 @@ msgstr "Нова успадкована сцена..."
 msgid "Open Scene..."
 msgstr "Відкрити сцену..."
 
+#: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
+msgid "Open Recent"
+msgstr "Відкрити останні"
+
 #: editor/editor_node.cpp
 msgid "Save Scene"
 msgstr "Зберегти сцену"
@@ -2551,14 +2645,6 @@ msgstr "Зберегти сцену"
 #: editor/editor_node.cpp
 msgid "Save All Scenes"
 msgstr "Зберегти всі сцени"
-
-#: editor/editor_node.cpp
-msgid "Close Scene"
-msgstr "Закрити сцену"
-
-#: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
-msgid "Open Recent"
-msgstr "Відкрити останні"
 
 #: editor/editor_node.cpp
 msgid "Convert To..."
@@ -2590,25 +2676,46 @@ msgstr "Повернути сцену"
 msgid "Miscellaneous project or scene-wide tools."
 msgstr "Різні проєктні або сценографічні інструменти."
 
-#: editor/editor_node.cpp
+#: editor/editor_node.cpp editor/script_create_dialog.cpp
 msgid "Project"
 msgstr "Проєкт"
 
 #: editor/editor_node.cpp
-msgid "Project Settings"
-msgstr "Параметри проєкту"
+msgid "Project Settings..."
+msgstr "Параметри проєкту…"
+
+#: editor/editor_node.cpp editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Version Control"
+msgstr "Версія:"
+
+#: editor/editor_node.cpp editor/plugins/version_control_editor_plugin.cpp
+msgid "Set Up Version Control"
+msgstr ""
+
+#: editor/editor_node.cpp
+msgid "Shut Down Version Control"
+msgstr ""
+
+#: editor/editor_node.cpp
+msgid "Export..."
+msgstr "Експортувати…"
+
+#: editor/editor_node.cpp
+msgid "Install Android Build Template..."
+msgstr "Встановити шаблон збирання для Android…"
+
+#: editor/editor_node.cpp
+msgid "Open Project Data Folder"
+msgstr "Відкриття теки даних проєкту"
 
 #: editor/editor_node.cpp editor/plugins/tile_set_editor_plugin.cpp
 msgid "Tools"
 msgstr "Інструменти"
 
 #: editor/editor_node.cpp
-msgid "Open Project Data Folder"
-msgstr "Відкриття теки даних проєкту"
-
-#: editor/editor_node.cpp
-msgid "Install Android Build Template"
-msgstr "Встановити шаблон збирання Android"
+msgid "Orphan Resource Explorer..."
+msgstr "Керування осиротілими ресурсами…"
 
 #: editor/editor_node.cpp
 msgid "Quit to Project List"
@@ -2706,13 +2813,13 @@ msgstr ""
 "При віддаленому використанні на пристрої, це більш ефективно з мережевою "
 "файловою системою."
 
-#: editor/editor_node.cpp
+#: editor/editor_node.cpp editor/script_create_dialog.cpp
 msgid "Editor"
 msgstr "Редактор"
 
-#: editor/editor_node.cpp editor/settings_config_dialog.cpp
-msgid "Editor Settings"
-msgstr "Параметри редактора"
+#: editor/editor_node.cpp
+msgid "Editor Settings..."
+msgstr "Параметри редактора…"
 
 #: editor/editor_node.cpp
 msgid "Editor Layout"
@@ -2725,14 +2832,6 @@ msgstr "Зробити знімок вікна"
 #: editor/editor_node.cpp
 msgid "Screenshots are stored in the Editor Data/Settings Folder."
 msgstr "Знімки зберігаються у теці Data/Settings редактора."
-
-#: editor/editor_node.cpp
-msgid "Automatically Open Screenshots"
-msgstr "Автоматично відкривати знімки вікон"
-
-#: editor/editor_node.cpp
-msgid "Open in an external image editor."
-msgstr "Відкрити у зовнішньому редакторі зображень."
 
 #: editor/editor_node.cpp
 msgid "Toggle Fullscreen"
@@ -2755,14 +2854,14 @@ msgid "Open Editor Settings Folder"
 msgstr "Відкрити теку параметрів редактора"
 
 #: editor/editor_node.cpp
-msgid "Manage Editor Features"
-msgstr "Керування можливостями редактора"
-
-#: editor/editor_node.cpp editor/project_export.cpp
-msgid "Manage Export Templates"
-msgstr "Управління шаблонами експорту"
+msgid "Manage Editor Features..."
+msgstr "Керування можливостями редактора…"
 
 #: editor/editor_node.cpp
+msgid "Manage Export Templates..."
+msgstr "Керування шаблонами експортування…"
+
+#: editor/editor_node.cpp editor/plugins/shader_editor_plugin.cpp
 msgid "Help"
 msgstr "Довідка"
 
@@ -2770,12 +2869,13 @@ msgstr "Довідка"
 #: editor/plugins/script_editor_plugin.cpp
 #: editor/plugins/script_text_editor.cpp
 #: editor/plugins/shader_editor_plugin.cpp editor/plugins/text_editor.cpp
-#: editor/plugins/visual_shader_editor_plugin.cpp
+#: editor/plugins/visual_shader_editor_plugin.cpp editor/project_manager.cpp
 #: editor/project_settings_editor.cpp editor/rename_dialog.cpp
 msgid "Search"
 msgstr "Пошук"
 
 #: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
+#: editor/plugins/shader_editor_plugin.cpp
 msgid "Online Docs"
 msgstr "Онлайн документація"
 
@@ -2814,10 +2914,6 @@ msgstr "Пауза сцени"
 #: editor/editor_node.cpp
 msgid "Stop the scene."
 msgstr "Зупинити сцену."
-
-#: editor/editor_node.cpp editor/editor_profiler.cpp
-msgid "Stop"
-msgstr "Зупинити"
 
 #: editor/editor_node.cpp
 msgid "Play the edited scene."
@@ -2869,10 +2965,6 @@ msgid "Inspector"
 msgstr "Інспектор"
 
 #: editor/editor_node.cpp
-msgid "Node"
-msgstr "Вузол"
-
-#: editor/editor_node.cpp
 msgid "Expand Bottom Panel"
 msgstr "Розгорнути нижню панель"
 
@@ -2896,19 +2988,22 @@ msgstr "Керування шаблонами"
 
 #: editor/editor_node.cpp
 msgid ""
-"This will install the Android project for custom builds.\n"
-"Note that, in order to use it, it needs to be enabled per export preset."
+"This will set up your project for custom Android builds by installing the "
+"source template to \"res://android/build\".\n"
+"You can then apply modifications and build your own custom APK on export "
+"(adding modules, changing the AndroidManifest.xml, etc.).\n"
+"Note that in order to make custom builds instead of using pre-built APKs, "
+"the \"Use Custom Build\" option should be enabled in the Android export "
+"preset."
 msgstr ""
-"У результаті виконання цієї дії буде встановлено проєкт Android для "
-"нетипового збирання.\n"
-"Зауважте, що для того, щоб ним можна було скористатися, його слід увімкнути "
-"експортуванням набору правил."
 
 #: editor/editor_node.cpp
+#, fuzzy
 msgid ""
-"Android build template is already installed and it won't be overwritten.\n"
-"Remove the \"build\" directory manually before attempting this operation "
-"again."
+"The Android build template is already installed in this project and it won't "
+"be overwritten.\n"
+"Remove the \"res://android/build\" directory manually before attempting this "
+"operation again."
 msgstr ""
 "Шаблон збирання для Android вже встановлено. Його не буде перезаписано.\n"
 "Вилучіть каталог «build» вручну, перш ніж намагатися повторити цю дію."
@@ -2973,6 +3068,11 @@ msgstr "Відкрити наступний редактор"
 msgid "Open the previous Editor"
 msgstr "Відкрити попередній редактор"
 
+#: editor/editor_path.cpp
+#, fuzzy
+msgid "No sub-resources found."
+msgstr "Не задано джерело поверхні."
+
 #: editor/editor_plugin.cpp
 msgid "Creating Mesh Previews"
 msgstr "Створення попереднього перегляду сітки"
@@ -2980,6 +3080,11 @@ msgstr "Створення попереднього перегляду сітк�
 #: editor/editor_plugin.cpp
 msgid "Thumbnail..."
 msgstr "Мініатюра..."
+
+#: editor/editor_plugin_settings.cpp
+#, fuzzy
+msgid "Main Script:"
+msgstr "Відкрити скрипт:"
 
 #: editor/editor_plugin_settings.cpp
 msgid "Edit Plugin"
@@ -3009,11 +3114,6 @@ msgstr "Статус:"
 #: editor/editor_plugin_settings.cpp
 msgid "Edit:"
 msgstr "Редагувати:"
-
-#: editor/editor_profiler.cpp editor/plugins/animation_state_machine_editor.cpp
-#: editor/rename_dialog.cpp
-msgid "Start"
-msgstr "Початок"
 
 #: editor/editor_profiler.cpp
 msgid "Measure:"
@@ -3054,6 +3154,10 @@ msgstr "Час"
 #: editor/editor_profiler.cpp
 msgid "Calls"
 msgstr "Виклики"
+
+#: editor/editor_properties.cpp
+msgid "Edit Text:"
+msgstr "Редагувати текст:"
 
 #: editor/editor_properties.cpp editor/script_create_dialog.cpp
 msgid "On"
@@ -3227,8 +3331,8 @@ msgid "Import From Node:"
 msgstr "Імпортувати з вузла:"
 
 #: editor/export_template_manager.cpp
-msgid "Re-Download"
-msgstr "Перезавантажити"
+msgid "Redownload"
+msgstr "Отримати повторно"
 
 #: editor/export_template_manager.cpp
 msgid "Uninstall"
@@ -3242,6 +3346,10 @@ msgstr "(Встановлено)"
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Download"
 msgstr "Завантажити"
+
+#: editor/export_template_manager.cpp
+msgid "Official export templates aren't available for development builds."
+msgstr "Для тестових збірок не передбачено офіційних шаблонів експортування."
 
 #: editor/export_template_manager.cpp
 msgid "(Missing)"
@@ -3307,12 +3415,10 @@ msgid "No response."
 msgstr "Немає відповіді."
 
 #: editor/export_template_manager.cpp
-#: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Request Failed."
 msgstr "Запит не вдався."
 
 #: editor/export_template_manager.cpp
-#: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Redirect Loop."
 msgstr "Циклічне переспрямування."
 
@@ -3326,16 +3432,20 @@ msgid "Download Complete."
 msgstr "Завантаження закінчено."
 
 #: editor/export_template_manager.cpp
-msgid ""
-"Templates installation failed. The problematic templates archives can be "
-"found at '%s'."
-msgstr ""
-"Не вдалося встановити шаблони. Проблемні архіви із шаблонами можна знайти "
-"тут: «%s»."
+msgid "Cannot remove temporary file:"
+msgstr "Не вдалося вилучити тимчасовий файл:"
 
 #: editor/export_template_manager.cpp
-msgid "Error requesting url: "
-msgstr "Помилка запиту url: "
+msgid ""
+"Templates installation failed.\n"
+"The problematic templates archives can be found at '%s'."
+msgstr ""
+"Не вдалося встановити шаблони.\n"
+"Проблемні архіви із шаблонами можна знайти тут: «%s»."
+
+#: editor/export_template_manager.cpp
+msgid "Error requesting URL:"
+msgstr "Помилка під час запиту за такою адресою:"
 
 #: editor/export_template_manager.cpp
 msgid "Connecting to Mirror..."
@@ -3419,20 +3529,9 @@ msgstr "Завантажити шаблони"
 msgid "Select mirror from list: (Shift+Click: Open in Browser)"
 msgstr "Виберіть дзеркало зі списку: (Shift+клацання: відкрити у браузері)"
 
-#: editor/file_type_cache.cpp
-msgid "Can't open file_type_cache.cch for writing, not saving file type cache!"
-msgstr ""
-"Не вдається відкрити file_type_cache.cch для запису, не буде збережений файл "
-"тип кешу!"
-
 #: editor/filesystem_dock.cpp
 msgid "Favorites"
 msgstr "Вибране"
-
-#: editor/filesystem_dock.cpp
-msgid "Cannot navigate to '%s' as it has not been found in the file system!"
-msgstr ""
-"Неможливо перейти до '%s' , оскільки він не був знайдений в файловій системі!"
 
 #: editor/filesystem_dock.cpp
 msgid "Status: Import of file failed. Please fix file and reimport manually."
@@ -3469,12 +3568,12 @@ msgid "Provided name contains invalid characters."
 msgstr "Надане ім'я містить некоректні символи."
 
 #: editor/filesystem_dock.cpp
-msgid "Name contains invalid characters."
-msgstr "Назва містить некоректні символи."
-
-#: editor/filesystem_dock.cpp
 msgid "A file or folder with this name already exists."
 msgstr "Файл або тека з таким іменем вже існує."
+
+#: editor/filesystem_dock.cpp
+msgid "Name contains invalid characters."
+msgstr "Назва містить некоректні символи."
 
 #: editor/filesystem_dock.cpp
 msgid "Renaming file:"
@@ -3531,6 +3630,10 @@ msgstr "Дублювати..."
 #: editor/filesystem_dock.cpp
 msgid "Move To..."
 msgstr "Перемістити до..."
+
+#: editor/filesystem_dock.cpp
+msgid "New Scene..."
+msgstr "Створити сцену…"
 
 #: editor/filesystem_dock.cpp editor/plugins/script_editor_plugin.cpp
 msgid "New Script..."
@@ -3597,6 +3700,10 @@ msgstr "У вказаному каталозі вже міститься тек�
 msgid "Overwrite"
 msgstr "Перезаписати"
 
+#: editor/filesystem_dock.cpp
+msgid "Create Scene"
+msgstr "Створити сцену"
+
 #: editor/filesystem_dock.cpp editor/plugins/script_editor_plugin.cpp
 msgid "Create Script"
 msgstr "Створити скрипт"
@@ -3659,6 +3766,14 @@ msgid "Search complete"
 msgstr "Пошук завершено"
 
 #: editor/groups_editor.cpp
+msgid "Add to Group"
+msgstr "Додати до групи"
+
+#: editor/groups_editor.cpp
+msgid "Remove from Group"
+msgstr "Вилучити з групи"
+
+#: editor/groups_editor.cpp
 msgid "Group name already exists."
 msgstr "Група із такою назвою вже існує."
 
@@ -3666,12 +3781,20 @@ msgstr "Група із такою назвою вже існує."
 msgid "Invalid group name."
 msgstr "Неприпустима назва групи."
 
+#: editor/groups_editor.cpp
+msgid "Rename Group"
+msgstr "Перейменування групи"
+
+#: editor/groups_editor.cpp
+msgid "Delete Group"
+msgstr "Вилучення групи"
+
 #: editor/groups_editor.cpp editor/node_dock.cpp
 msgid "Groups"
 msgstr "Групи"
 
 #: editor/groups_editor.cpp
-msgid "Nodes not in Group"
+msgid "Nodes Not in Group"
 msgstr "Вузли поза групою"
 
 #: editor/groups_editor.cpp editor/scene_tree_dock.cpp
@@ -3684,12 +3807,12 @@ msgid "Nodes in Group"
 msgstr "Вузли у групі"
 
 #: editor/groups_editor.cpp
-msgid "Add to Group"
-msgstr "Додати до групи"
+msgid "Empty groups will be automatically removed."
+msgstr "Порожні групи буде автоматично вилучено."
 
 #: editor/groups_editor.cpp
-msgid "Remove from Group"
-msgstr "Вилучити з групи"
+msgid "Group Editor"
+msgstr "Редактор груп"
 
 #: editor/groups_editor.cpp
 msgid "Manage Groups"
@@ -3788,9 +3911,10 @@ msgstr " Файли"
 msgid "Import As:"
 msgstr "Імпортувати як:"
 
-#: editor/import_dock.cpp editor/property_editor.cpp
-msgid "Preset..."
-msgstr "Заздалегідь установлений..."
+#: editor/import_dock.cpp
+#, fuzzy
+msgid "Preset"
+msgstr "Набори"
 
 #: editor/import_dock.cpp
 msgid "Reimport"
@@ -3897,8 +4021,8 @@ msgid "MultiNode Set"
 msgstr "Мультивузловий набір"
 
 #: editor/node_dock.cpp
-msgid "Select a Node to edit Signals and Groups."
-msgstr "Виберіть вузол для редагування сигналів та груп."
+msgid "Select a single node to edit its signals and groups."
+msgstr "Виберіть окремий вузол для редагування його сигналів та груп."
 
 #: editor/plugin_config_dialog.cpp
 msgid "Edit a Plugin"
@@ -4234,6 +4358,7 @@ msgid "Change Animation Name:"
 msgstr "Змінити ім'я анімації:"
 
 #: editor/plugins/animation_player_editor_plugin.cpp
+#: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Delete Animation?"
 msgstr "Видалити анімацію?"
 
@@ -4662,10 +4787,6 @@ msgid "View Files"
 msgstr "Перегляд файлів"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
-msgid "Can't resolve hostname:"
-msgstr "Неможливо розпізнати ім'я хоста:"
-
-#: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Connection error, please try again."
 msgstr "Помилка з'єднання, будь ласка, повторіть спробу."
 
@@ -4678,12 +4799,40 @@ msgid "No response from host:"
 msgstr "Немає відповіді від хоста:"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Can't resolve hostname:"
+msgstr "Неможливо розпізнати ім'я хоста:"
+
+#: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Request failed, return code:"
 msgstr "Помилка запиту, код повернення:"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Request failed."
+msgstr "Не вдалося виконати запит."
+
+#: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Cannot save response to:"
+msgstr "Не вдалося зберегти відповідь сюди:"
+
+#: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Write error."
+msgstr "Помилка під час записування."
+
+#: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Request failed, too many redirects"
 msgstr "Запит не вдався, забагато перенаправлень"
+
+#: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Redirect loop."
+msgstr "Циклічне переспрямування."
+
+#: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Request failed, timeout"
+msgstr "Помилка запиту, перевищено час очікування на відповідь"
+
+#: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Timeout."
+msgstr "Перевищено час очікування на відповідь."
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Bad download hash, assuming file has been tampered with."
@@ -4726,6 +4875,10 @@ msgid "Idle"
 msgstr "Простій"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Install..."
+msgstr "Встановити…"
+
+#: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Retry"
 msgstr "Повторити спробу"
 
@@ -4754,22 +4907,20 @@ msgid "Last"
 msgstr "Останній"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
-#: modules/gdnative/gdnative_library_editor_plugin.cpp
 msgid "All"
 msgstr "Все"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
-#: editor/project_settings_editor.cpp
-msgid "Plugins"
-msgstr "Плаґіни (додатки)"
+msgid "Import..."
+msgstr "Імпортувати…"
+
+#: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Plugins..."
+msgstr "Додатки…"
 
 #: editor/plugins/asset_library_editor_plugin.cpp editor/project_manager.cpp
 msgid "Sort:"
 msgstr "Сортувати:"
-
-#: editor/plugins/asset_library_editor_plugin.cpp
-msgid "Reverse"
-msgstr "Зворотний"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 #: editor/project_settings_editor.cpp
@@ -4781,8 +4932,8 @@ msgid "Site:"
 msgstr "Сайт:"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
-msgid "Support..."
-msgstr "Підтримка..."
+msgid "Support"
+msgstr "Підтримка"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Official"
@@ -4791,6 +4942,10 @@ msgstr "Офіційний"
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Testing"
 msgstr "Тестування"
+
+#: editor/plugins/asset_library_editor_plugin.cpp
+msgid "Loading..."
+msgstr "Завантаження…"
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Assets ZIP File"
@@ -4850,32 +5005,32 @@ msgid "Rotation Step:"
 msgstr "Крок повороту:"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-msgid "Move vertical guide"
+msgid "Move Vertical Guide"
 msgstr "Перемістити вертикальну напрямну"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-msgid "Create new vertical guide"
-msgstr "Створити нову вертикальну напрямну"
+msgid "Create Vertical Guide"
+msgstr "Створити вертикальну напрямну"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-msgid "Remove vertical guide"
+msgid "Remove Vertical Guide"
 msgstr "Вилучити вертикальну напрямну"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-msgid "Move horizontal guide"
+msgid "Move Horizontal Guide"
 msgstr "Перемістити горизонтальну напрямну"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-msgid "Create new horizontal guide"
-msgstr "Створити нову горизонтальну напрямну"
+msgid "Create Horizontal Guide"
+msgstr "Створити горизонтальну напрямну"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-msgid "Remove horizontal guide"
+msgid "Remove Horizontal Guide"
 msgstr "Вилучити горизонтальну напрямну"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-msgid "Create new horizontal and vertical guides"
-msgstr "Створити нові горизонтальні та вертикальні напрямні"
+msgid "Create Horizontal and Vertical Guides"
+msgstr "Створити горизонтальні та вертикальні напрямні"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Move pivot"
@@ -4958,6 +5113,10 @@ msgid "Paste Pose"
 msgstr "Вставити позу"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+msgid "Clear Guides"
+msgstr "Вилучити напрямні"
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Create Custom Bone(s) from Node(s)"
 msgstr "Створити нетипові кістки з вузлів"
 
@@ -4988,6 +5147,7 @@ msgid "Zoom Reset"
 msgstr "Відновити початковий масштаб"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Select Mode"
 msgstr "Режим виділення"
 
@@ -5010,14 +5170,17 @@ msgid "Alt+RMB: Depth list selection"
 msgstr "Альт+ПКМ: Список вибору глибини"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Move Mode"
 msgstr "Режим переміщення"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Rotate Mode"
 msgstr "Режим повороту"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Scale Mode"
 msgstr "Режим масштабування"
 
@@ -5039,10 +5202,16 @@ msgid "Pan Mode"
 msgstr "Режим панорамування"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Ruler Mode"
+msgstr "Режим виконання:"
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Toggle snapping."
 msgstr "Увімкнути або вимкнути прив'язування."
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Use Snap"
 msgstr "За допомогою функції прив'язки"
 
@@ -5059,11 +5228,6 @@ msgid "Use Rotation Snap"
 msgstr "Використання обертання прив'язки"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Configure Snap..."
-msgstr "Налаштування прив'язки..."
-
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Snap Relative"
 msgstr "Відносна прив'язка"
 
@@ -5074,6 +5238,11 @@ msgstr "Використати прилипання до пікселів"
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Smart Snapping"
 msgstr "Інтелектуальне прилипання"
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Configure Snap..."
+msgstr "Налаштування прив'язки..."
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Snap to Parent"
@@ -5288,16 +5457,6 @@ msgstr "Редагувати полігон (вилучити точку)"
 #: editor/plugins/collision_shape_2d_editor_plugin.cpp
 msgid "Set Handle"
 msgstr "Встановити обробник"
-
-#: editor/plugins/cpu_particles_2d_editor_plugin.cpp
-#: editor/plugins/particles_2d_editor_plugin.cpp
-msgid "Error loading image:"
-msgstr "Помилка завантаження зображення:"
-
-#: editor/plugins/cpu_particles_2d_editor_plugin.cpp
-#: editor/plugins/particles_2d_editor_plugin.cpp
-msgid "No pixels with transparency > 128 in image..."
-msgstr "В зображенні немає пікселів з прозорістю > 128..."
 
 #: editor/plugins/cpu_particles_2d_editor_plugin.cpp
 #: editor/plugins/particles_2d_editor_plugin.cpp
@@ -5611,14 +5770,6 @@ msgid "Surface source is invalid (no faces)."
 msgstr "Неправильне джерело поверхні (немає граней)."
 
 #: editor/plugins/multimesh_editor_plugin.cpp
-msgid "Parent has no solid faces to populate."
-msgstr "Предок не має суцільних граней для заповнення."
-
-#: editor/plugins/multimesh_editor_plugin.cpp
-msgid "Couldn't map area."
-msgstr "Не вдалося відобразити ділянку."
-
-#: editor/plugins/multimesh_editor_plugin.cpp
 msgid "Select a Source Mesh:"
 msgstr "Виберіть джерело сітки:"
 
@@ -5703,20 +5854,24 @@ msgid "Generation Time (sec):"
 msgstr "Час генерації (сек):"
 
 #: editor/plugins/particles_editor_plugin.cpp
-msgid "Faces contain no area!"
-msgstr "Грані не містять ділянки!"
+msgid "The geometry's faces don't contain any area."
+msgstr "Сторони геометричної фігури не обмежують жодної площі."
 
 #: editor/plugins/particles_editor_plugin.cpp
-msgid "No faces!"
-msgstr "Немає граней!"
+msgid "The geometry doesn't contain any faces."
+msgstr "Геометрія не містить жодної грані."
 
 #: editor/plugins/particles_editor_plugin.cpp
-msgid "Node does not contain geometry."
-msgstr "Вузол не містить геометрії."
+msgid "\"%s\" doesn't inherit from Spatial."
+msgstr "«%s» не успадковує властивості від Spatial."
 
 #: editor/plugins/particles_editor_plugin.cpp
-msgid "Node does not contain geometry (faces)."
-msgstr "Вузол не містить геометрії (граней)."
+msgid "\"%s\" doesn't contain geometry."
+msgstr "«%s» не містить геометричної конструкції."
+
+#: editor/plugins/particles_editor_plugin.cpp
+msgid "\"%s\" doesn't contain face geometry."
+msgstr "«%s» не містить геометрії граней."
 
 #: editor/plugins/particles_editor_plugin.cpp
 msgid "Create Emitter"
@@ -6049,7 +6204,6 @@ msgid "Grid Settings"
 msgstr "Параметри сітки"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Snap"
 msgstr "Прилипання"
 
@@ -6117,7 +6271,7 @@ msgstr "Екземпляр:"
 
 #: editor/plugins/resource_preloader_editor_plugin.cpp
 #: editor/plugins/theme_editor_plugin.cpp editor/project_settings_editor.cpp
-#: editor/scene_tree_editor.cpp
+#: editor/scene_tree_editor.cpp editor/script_editor_debugger.cpp
 msgid "Type:"
 msgstr "Тип:"
 
@@ -6155,12 +6309,8 @@ msgid "Error writing TextFile:"
 msgstr "Помилка під час спроби записати TextFile:"
 
 #: editor/plugins/script_editor_plugin.cpp
-msgid "Error: could not load file."
-msgstr "Помилка: не вдалося завантажити файл."
-
-#: editor/plugins/script_editor_plugin.cpp
-msgid "Error could not load file."
-msgstr "Помилка: не вдалося завантажити файл."
+msgid "Could not load file at:"
+msgstr "Не вдалося завантажити цей файл:"
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Error saving file!"
@@ -6183,7 +6333,7 @@ msgid "Error Importing"
 msgstr "Помилка імпортування"
 
 #: editor/plugins/script_editor_plugin.cpp
-msgid "New TextFile..."
+msgid "New Text File..."
 msgstr "Створити текстовий файл…"
 
 #: editor/plugins/script_editor_plugin.cpp
@@ -6264,6 +6414,10 @@ msgid "Open..."
 msgstr "Відкрити..."
 
 #: editor/plugins/script_editor_plugin.cpp
+msgid "Reopen Closed Script"
+msgstr "Повторно відкрити закритий скрипт"
+
+#: editor/plugins/script_editor_plugin.cpp
 msgid "Save All"
 msgstr "Зберегти все"
 
@@ -6301,12 +6455,12 @@ msgid "Save Theme"
 msgstr "Зберегти тему"
 
 #: editor/plugins/script_editor_plugin.cpp
-msgid "Close Docs"
-msgstr "Закрити документацію"
-
-#: editor/plugins/script_editor_plugin.cpp
 msgid "Close All"
 msgstr "Закрити все"
+
+#: editor/plugins/script_editor_plugin.cpp
+msgid "Close Docs"
+msgstr "Закрити документацію"
 
 #: editor/plugins/script_editor_plugin.cpp editor/project_manager.cpp
 msgid "Run"
@@ -6317,12 +6471,12 @@ msgid "Toggle Scripts Panel"
 msgstr "Перемкнути панель скриптів"
 
 #: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
-msgid "Step Over"
-msgstr "Крок через"
-
-#: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
 msgid "Step Into"
 msgstr "Крок в"
+
+#: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
+msgid "Step Over"
+msgstr "Крок через"
 
 #: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
 msgid "Break"
@@ -6395,11 +6549,15 @@ msgstr "Зневаджувач"
 msgid "Search Results"
 msgstr "Результати пошуку"
 
+#: editor/plugins/script_editor_plugin.cpp
+msgid "Clear Recent Scripts"
+msgstr "Спорожнити список нещодавніх скриптів"
+
 #: editor/plugins/script_text_editor.cpp
 msgid "Connections to method:"
 msgstr "З'єднання з методом:"
 
-#: editor/plugins/script_text_editor.cpp
+#: editor/plugins/script_text_editor.cpp editor/script_editor_debugger.cpp
 msgid "Source"
 msgstr "Джерело"
 
@@ -6463,8 +6621,9 @@ msgid "Syntax Highlighter"
 msgstr "Засіб підсвічування синтаксису"
 
 #: editor/plugins/script_text_editor.cpp
+#: editor/plugins/shader_editor_plugin.cpp editor/plugins/text_editor.cpp
 msgid "Go To"
-msgstr ""
+msgstr "Перейти"
 
 #: editor/plugins/script_text_editor.cpp
 #: editor/plugins/shader_editor_plugin.cpp editor/plugins/text_editor.cpp
@@ -6472,9 +6631,8 @@ msgid "Bookmarks"
 msgstr "Закладки"
 
 #: editor/plugins/script_text_editor.cpp
-#, fuzzy
 msgid "Breakpoints"
-msgstr "Створити точки."
+msgstr "Точки зупину"
 
 #: editor/plugins/script_text_editor.cpp scene/gui/line_edit.cpp
 #: scene/gui/text_edit.cpp
@@ -6498,22 +6656,6 @@ msgid "Toggle Comment"
 msgstr "Перемкнути коментар"
 
 #: editor/plugins/script_text_editor.cpp
-msgid "Toggle Bookmark"
-msgstr "Увімкнути або вимкнути закладку"
-
-#: editor/plugins/script_text_editor.cpp
-msgid "Go to Next Bookmark"
-msgstr "Перейти до наступної закладки"
-
-#: editor/plugins/script_text_editor.cpp
-msgid "Go to Previous Bookmark"
-msgstr "Перейти до попередньої закладки"
-
-#: editor/plugins/script_text_editor.cpp
-msgid "Remove All Bookmarks"
-msgstr "Вилучити всі закладки"
-
-#: editor/plugins/script_text_editor.cpp
 msgid "Fold/Unfold Line"
 msgstr "Згорнути/розгорнути рядок"
 
@@ -6534,6 +6676,10 @@ msgid "Complete Symbol"
 msgstr "Завершити символ"
 
 #: editor/plugins/script_text_editor.cpp
+msgid "Evaluate Selection"
+msgstr "Оцінка позначеного"
+
+#: editor/plugins/script_text_editor.cpp
 msgid "Trim Trailing Whitespace"
 msgstr "Обрізати кінцевий пробіл"
 
@@ -6548,6 +6694,42 @@ msgstr "Перетворити відступ на табуляції"
 #: editor/plugins/script_text_editor.cpp
 msgid "Auto Indent"
 msgstr "Автовідступ"
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Find Previous"
+msgstr "Знайти попереднє"
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Find in Files..."
+msgstr "Знайти у файлах…"
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Contextual Help"
+msgstr "Контекстна довідка"
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Toggle Bookmark"
+msgstr "Увімкнути або вимкнути закладку"
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Go to Next Bookmark"
+msgstr "Перейти до наступної закладки"
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Go to Previous Bookmark"
+msgstr "Перейти до попередньої закладки"
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Remove All Bookmarks"
+msgstr "Вилучити всі закладки"
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Go to Function..."
+msgstr "Перейти до функції..."
+
+#: editor/plugins/script_text_editor.cpp
+msgid "Go to Line..."
+msgstr "Перейти до рядка..."
 
 #: editor/plugins/script_text_editor.cpp
 #: modules/visual_script/visual_script_editor.cpp
@@ -6565,26 +6747,6 @@ msgstr "Перейти до наступної точки зупинки"
 #: editor/plugins/script_text_editor.cpp
 msgid "Go to Previous Breakpoint"
 msgstr "Перейти до попередньої точки зупинки"
-
-#: editor/plugins/script_text_editor.cpp
-msgid "Find Previous"
-msgstr "Знайти попереднє"
-
-#: editor/plugins/script_text_editor.cpp
-msgid "Find in Files..."
-msgstr "Знайти у файлах…"
-
-#: editor/plugins/script_text_editor.cpp
-msgid "Go to Function..."
-msgstr "Перейти до функції..."
-
-#: editor/plugins/script_text_editor.cpp
-msgid "Go to Line..."
-msgstr "Перейти до рядка..."
-
-#: editor/plugins/script_text_editor.cpp
-msgid "Contextual Help"
-msgstr "Контекстна довідка"
 
 #: editor/plugins/shader_editor_plugin.cpp
 msgid ""
@@ -6763,8 +6925,12 @@ msgid "Rear"
 msgstr "Ззаду"
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "Align with View"
-msgstr "Вирівняти з переглядом"
+msgid "Align Transform with View"
+msgstr "Вирівняти перетворення з переглядом"
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Align Rotation with View"
+msgstr "Вирівняти обертання із переглядом"
 
 #: editor/plugins/spatial_editor_plugin.cpp editor/scene_tree_dock.cpp
 msgid "No parent to instance a child at."
@@ -6819,8 +6985,8 @@ msgid "Audio Listener"
 msgstr "Прослуховування звуку"
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "Doppler Enable"
-msgstr "Ефект Доплера"
+msgid "Enable Doppler"
+msgstr "Увімкнути ефект Доплера"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Cinematic Preview"
@@ -6876,8 +7042,8 @@ msgid "Snap Nodes To Floor"
 msgstr "Приліпити вузли до підлоги"
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "Select Mode (Q)"
-msgstr "Режим виділення (Q)"
+msgid "Couldn't find a solid floor to snap the selection to."
+msgstr "Не вдалося знайти твердої основи для прилипання позначеного фрагмента."
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid ""
@@ -6890,28 +7056,8 @@ msgstr ""
 "Alt+Права кнопка: Вибір у списку за глибиною"
 
 #: editor/plugins/spatial_editor_plugin.cpp
-msgid "Move Mode (W)"
-msgstr "Режим пересування (W)"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Rotate Mode (E)"
-msgstr "Режим обертання (E)"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Scale Mode (R)"
-msgstr "Режим масштабування (R)"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Local Coords"
-msgstr "Локальні координати"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Local Space Mode (%s)"
-msgstr "Режим локального простору (%s)"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Snap Mode (%s)"
-msgstr "Режим прилипання (%s)"
+msgid "Use Local Space"
+msgstr "Використати локальний простір"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Bottom View"
@@ -6952,26 +7098,6 @@ msgstr "Фокус на центрі"
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Focus Selection"
 msgstr "Фокусувати позначене"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Align Selection With View"
-msgstr "Вирівняти позначене із переглядом"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Tool Select"
-msgstr "Інструмент позначення"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Tool Move"
-msgstr "Інструмент пересування"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Tool Rotate"
-msgstr "Інструмент обертання"
-
-#: editor/plugins/spatial_editor_plugin.cpp
-msgid "Tool Scale"
-msgstr "Інструмент масштабування"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Toggle Freelook"
@@ -7028,8 +7154,8 @@ msgstr "Перегляд ґратки"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 #: modules/gridmap/grid_map_editor_plugin.cpp
-msgid "Settings"
-msgstr "Параметри"
+msgid "Settings..."
+msgstr "Параметри…"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Snap Settings"
@@ -7210,6 +7336,11 @@ msgid "(empty)"
 msgstr "(порожньо)"
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
+#, fuzzy
+msgid "Move Frame"
+msgstr "Вставити кадр"
+
+#: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Animations:"
 msgstr "Анімації:"
 
@@ -7323,10 +7454,6 @@ msgid "TextureRegion"
 msgstr "TextureRegion"
 
 #: editor/plugins/theme_editor_plugin.cpp
-msgid "Can't save theme to file:"
-msgstr "Не вдалося зберегти тему до файла:"
-
-#: editor/plugins/theme_editor_plugin.cpp
 msgid "Add All Items"
 msgstr "Додати усі елементи"
 
@@ -7411,12 +7538,12 @@ msgid "Submenu"
 msgstr "Підменю"
 
 #: editor/plugins/theme_editor_plugin.cpp
-msgid "Item 1"
-msgstr "Елемент 1"
+msgid "Subitem 1"
+msgstr "Піделемент 1"
 
 #: editor/plugins/theme_editor_plugin.cpp
-msgid "Item 2"
-msgstr "Елемент 2"
+msgid "Subitem 2"
+msgstr "Піделемент 2"
 
 #: editor/plugins/theme_editor_plugin.cpp
 msgid "Has"
@@ -7520,14 +7647,6 @@ msgid "Transpose"
 msgstr "Транспонувати"
 
 #: editor/plugins/tile_map_editor_plugin.cpp
-msgid "Mirror X"
-msgstr "Віддзеркалити за X"
-
-#: editor/plugins/tile_map_editor_plugin.cpp
-msgid "Mirror Y"
-msgstr "Віддзеркалити за Y"
-
-#: editor/plugins/tile_map_editor_plugin.cpp
 msgid "Disable Autotile"
 msgstr "Вимкнути автоплитки"
 
@@ -7536,16 +7655,25 @@ msgid "Enable Priority"
 msgstr "Увімкнути пріоритетність"
 
 #: editor/plugins/tile_map_editor_plugin.cpp
+#, fuzzy
+msgid "Filter tiles"
+msgstr "Фільтрувати файли..."
+
+#: editor/plugins/tile_map_editor_plugin.cpp
+msgid "Give a TileSet resource to this TileMap to use its tiles."
+msgstr ""
+
+#: editor/plugins/tile_map_editor_plugin.cpp
 msgid "Paint Tile"
 msgstr "Намалювати плитку"
 
 #: editor/plugins/tile_map_editor_plugin.cpp
 msgid ""
-"Shift+RMB: Line Draw\n"
-"Shift+Ctrl+RMB: Rectangle Paint"
+"Shift+LMB: Line Draw\n"
+"Shift+Ctrl+LMB: Rectangle Paint"
 msgstr ""
-"Shift+права кнопка: малювати лінію\n"
-"Shift+Ctrl+права кнопка: малювати прямокутник"
+"Shift+ліва кнопка: малювати лінію\n"
+"Shift+Ctrl+ліва кнопка: малювати прямокутник"
 
 #: editor/plugins/tile_map_editor_plugin.cpp
 msgid "Pick Tile"
@@ -7668,6 +7796,11 @@ msgstr ""
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Display Tile Names (Hold Alt Key)"
 msgstr "Показати назви плиток (якщо затиснути клавішу Alt)"
+
+#: editor/plugins/tile_set_editor_plugin.cpp
+msgid ""
+"Add or select a texture on the left panel to edit the tiles bound to it."
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Remove selected texture? This will remove all tiles which use it."
@@ -7842,6 +7975,115 @@ msgstr "Значення цієї властивості не можна змі�
 msgid "TileSet"
 msgstr "Набір плиток"
 
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "No VCS addons are available."
+msgstr "Назва батьківського запису вузла, якщо такий є"
+
+#: editor/plugins/version_control_editor_plugin.cpp editor/rename_dialog.cpp
+msgid "Error"
+msgstr "Помилка"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "No commit message was provided"
+msgstr "Ім'я не вказано"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "No files added to stage"
+msgstr ""
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Commit"
+msgstr "Спільнота"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "VCS Addon is not initialized"
+msgstr ""
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "Version Control System"
+msgstr ""
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Initialize"
+msgstr "З Великої"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "Staging area"
+msgstr ""
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Detect new changes"
+msgstr "Створити прямокутник."
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Changes"
+msgstr "Змінити"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "Modified"
+msgstr ""
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Renamed"
+msgstr "Перейменувати"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Deleted"
+msgstr "Вилучити"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Typechange"
+msgstr "Змінити"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Stage Selected"
+msgstr "Вилучити вибране"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Stage All"
+msgstr "Зберегти все"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "Add a commit message"
+msgstr ""
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#, fuzzy
+msgid "Commit Changes"
+msgstr "Синхронізувати зміни в скрипті"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+#: modules/gdnative/gdnative_library_singleton_editor.cpp
+msgid "Status"
+msgstr "Статус"
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "View file diffs before committing them to the latest version"
+msgstr ""
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "No file diff is active"
+msgstr ""
+
+#: editor/plugins/version_control_editor_plugin.cpp
+msgid "Detect changes in file diff"
+msgstr ""
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "(GLES3 only)"
+msgstr "(лише GLES3)"
+
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Add input +"
 msgstr "Додати вхід +"
@@ -7919,6 +8161,11 @@ msgid "Duplicate Nodes"
 msgstr "Дублювати вузли"
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Paste Nodes"
+msgstr "Вставити вузли"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Delete Nodes"
 msgstr "Вилучити вузли"
 
@@ -7937,6 +8184,10 @@ msgstr "Фрагмент"
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Light"
 msgstr "Світло"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Show resulted shader code."
+msgstr "Показати отриманий код шейдера."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Create Shader Node"
@@ -8011,6 +8262,22 @@ msgid "Color uniform."
 msgstr "Однорідний колір."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Returns the boolean result of the %s comparison between two parameters."
+msgstr "Повертає булевий результат порівняння %s між двома параметрами."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Equal (==)"
+msgstr "Рівність (==)"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Greater Than (>)"
+msgstr "Більше (>)"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Greater Than or Equal (>=)"
+msgstr "Більше або дорівнює (>=)"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
 "Returns an associated vector if the provided scalars are equal, greater or "
 "less."
@@ -8020,9 +8287,52 @@ msgstr ""
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
+"Returns the boolean result of the comparison between INF and a scalar "
+"parameter."
+msgstr "Повертає булевий результат порівняння між INF та скалярним параметром."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid ""
+"Returns the boolean result of the comparison between NaN and a scalar "
+"parameter."
+msgstr "Повертає булевий результат порівняння між NaN і скалярним параметром."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Less Than (<)"
+msgstr "Менше (<)"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Less Than or Equal (<=)"
+msgstr "Менше або дорівнює (<=)"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Not Equal (!=)"
+msgstr "Не дорівнює (!=)"
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid ""
 "Returns an associated vector if the provided boolean value is true or false."
 msgstr ""
 "Повертає пов'язаний вектор за заданим булевим значенням «true» або «false»."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+#, fuzzy
+msgid ""
+"Returns an associated scalar if the provided boolean value is true or false."
+msgstr ""
+"Повертає пов'язаний вектор за заданим булевим значенням «true» або «false»."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Returns the boolean result of the comparison between two parameters."
+msgstr "Повертає булевий результат порівняння між двома параметрами."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid ""
+"Returns the boolean result of the comparison between INF (or NaN) and a "
+"scalar parameter."
+msgstr ""
+"Повертає булевий результат порівняння між INF (або NaN) та скалярним "
+"параметром."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Boolean constant."
@@ -8113,16 +8423,16 @@ msgid "Returns the arc-cosine of the parameter."
 msgstr "Повертає арккосинус параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Returns the inverse hyperbolic cosine of the parameter."
-msgstr "(Лише GLES3) Повертає обернений гіперболічний косинус параметра."
+msgid "Returns the inverse hyperbolic cosine of the parameter."
+msgstr "Повертає обернений гіперболічний косинус параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Returns the arc-sine of the parameter."
 msgstr "Повертає арксинус параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Returns the inverse hyperbolic sine of the parameter."
-msgstr "(Лише GLES3) Повертає обернений гіперболічний синус параметра."
+msgid "Returns the inverse hyperbolic sine of the parameter."
+msgstr "Повертає обернений гіперболічний синус параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Returns the arc-tangent of the parameter."
@@ -8133,8 +8443,8 @@ msgid "Returns the arc-tangent of the parameters."
 msgstr "Повертає арктангенс параметрів."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Returns the inverse hyperbolic tangent of the parameter."
-msgstr "(Лише GLES3) Повертає обернений гіперболічний тангенс параметра."
+msgid "Returns the inverse hyperbolic tangent of the parameter."
+msgstr "Повертає обернений гіперболічний тангенс параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
@@ -8152,8 +8462,8 @@ msgid "Returns the cosine of the parameter."
 msgstr "Повертає косинус параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Returns the hyperbolic cosine of the parameter."
-msgstr "(Лише GLES3) Повертає гіперболічний косинус параметра."
+msgid "Returns the hyperbolic cosine of the parameter."
+msgstr "Повертає гіперболічний косинус параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Converts a quantity in radians to degrees."
@@ -8225,12 +8535,12 @@ msgid "1.0 / scalar"
 msgstr "1.0 / скаляр"
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Finds the nearest integer to the parameter."
-msgstr "(Лише GLES3) Знаходить найближче ціле значення до параметра."
+msgid "Finds the nearest integer to the parameter."
+msgstr "Знаходить найближче ціле значення до параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Finds the nearest even integer to the parameter."
-msgstr "(Лише GLES3) Знаходить найближче парне ціле значення до параметра."
+msgid "Finds the nearest even integer to the parameter."
+msgstr "Знаходить найближче парне ціле значення до параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Clamps the value between 0.0 and 1.0."
@@ -8245,8 +8555,8 @@ msgid "Returns the sine of the parameter."
 msgstr "Повертає синус параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Returns the hyperbolic sine of the parameter."
-msgstr "(Лише GLES3) Повертає гіперболічний синус параметра."
+msgid "Returns the hyperbolic sine of the parameter."
+msgstr "Повертає гіперболічний синус параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Returns the square root of the parameter."
@@ -8256,7 +8566,7 @@ msgstr "Повертає квадратний корінь з параметра
 msgid ""
 "SmoothStep function( scalar(edge0), scalar(edge1), scalar(x) ).\n"
 "\n"
-"Returns 0.0 if 'x' is smaller then 'edge0' and 1.0 if x is larger than "
+"Returns 0.0 if 'x' is smaller than 'edge0' and 1.0 if x is larger than "
 "'edge1'. Otherwise the return value is interpolated between 0.0 and 1.0 "
 "using Hermite polynomials."
 msgstr ""
@@ -8270,7 +8580,7 @@ msgstr ""
 msgid ""
 "Step function( scalar(edge), scalar(x) ).\n"
 "\n"
-"Returns 0.0 if 'x' is smaller then 'edge' and otherwise 1.0."
+"Returns 0.0 if 'x' is smaller than 'edge' and otherwise 1.0."
 msgstr ""
 "Функція-сходинка ( скаляр(межа), скаляр(x) ).\n"
 "\n"
@@ -8281,12 +8591,12 @@ msgid "Returns the tangent of the parameter."
 msgstr "Повертає тангенс параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Returns the hyperbolic tangent of the parameter."
-msgstr "(Лише GLES3) Повертає гіперболічний тангенс параметра."
+msgid "Returns the hyperbolic tangent of the parameter."
+msgstr "Повертає гіперболічний тангенс параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Finds the truncated value of the parameter."
-msgstr "(Лише GLES3) Визначає обрізане до цілого значення параметра."
+msgid "Finds the truncated value of the parameter."
+msgstr "Визначає обрізане до цілого значення параметра."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Adds scalar to scalar."
@@ -8325,12 +8635,16 @@ msgid "Perform the texture lookup."
 msgstr "Виконує пошук текстури."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "Cubic texture uniform."
-msgstr "Однорідна кубічна текстура."
+msgid "Cubic texture uniform lookup."
+msgstr "Пошук однорідної кубічної текстури."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "2D texture uniform."
-msgstr "Однорідна пласка текстура."
+msgid "2D texture uniform lookup."
+msgstr "Пошук однорідної пласкої текстури."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "2D texture uniform lookup with triplanar."
+msgstr "Однорідний пошук пласкої текстури за допомогою трьох площин."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Transform function."
@@ -8338,7 +8652,7 @@ msgstr "Функція перетворення."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"(GLES3 only) Calculate the outer product of a pair of vectors.\n"
+"Calculate the outer product of a pair of vectors.\n"
 "\n"
 "OuterProduct treats the first parameter 'c' as a column vector (matrix with "
 "one column) and the second parameter 'r' as a row vector (matrix with one "
@@ -8346,7 +8660,7 @@ msgid ""
 "whose number of rows is the number of components in 'c' and whose number of "
 "columns is the number of components in 'r'."
 msgstr ""
-"(Лише GLES3) Обчислити зовнішній добуток пари векторів.\n"
+"Обчислити зовнішній добуток пари векторів.\n"
 "\n"
 "OuterProduct вважає перший параметр, «c», є вектором-стовпчиком (матрицею із "
 "одного стовпчика) а другий параметр, «r», є вектором-рядком (матрицею із "
@@ -8363,16 +8677,16 @@ msgid "Decomposes transform to four vectors."
 msgstr "Розкладає перетворення на чотири вектори."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Calculates the determinant of a transform."
-msgstr "(Лише GLES3) Обчислює визначник перетворення."
+msgid "Calculates the determinant of a transform."
+msgstr "Обчислює визначник перетворення."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Calculates the inverse of a transform."
-msgstr "(Лише GLES3) Обчислює обернену матрицю перетворення."
+msgid "Calculates the inverse of a transform."
+msgstr "Обчислює обернену матрицю перетворення."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) Calculates the transpose of a transform."
-msgstr "(Лише GLES3) Обчислює транспозицію перетворення."
+msgid "Calculates the transpose of a transform."
+msgstr "Обчислює транспозицію перетворення."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Multiplies transform by transform."
@@ -8420,7 +8734,7 @@ msgstr "Обчислює скалярний добуток двох вектор
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"Returns a vector that points in the same direction as a reference vector. "
+"Returns the vector that points in the same direction as a reference vector. "
 "The function has three vector parameters : N, the vector to orient, I, the "
 "incident vector, and Nref, the reference vector. If the dot product of I and "
 "Nref is smaller than zero the return value is N. Otherwise -N is returned."
@@ -8439,6 +8753,11 @@ msgid "Linear interpolation between two vectors."
 msgstr "Лінійна інтерполяція від двох векторних значень."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "Linear interpolation between two vectors using scalar."
+msgstr ""
+"Лінійна інтерполяція від двох векторних значень з використанням скаляра."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Calculates the normalize product of vector."
 msgstr "Повертає нормалізований векторний добуток векторів."
 
@@ -8452,21 +8771,21 @@ msgstr "1.0 / вектор"
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"Returns a vector that points in the direction of reflection ( a : incident "
+"Returns the vector that points in the direction of reflection ( a : incident "
 "vector, b : normal vector )."
 msgstr ""
 "Повертає вектор, який вказує напрямок відбиття ( a — вектор падіння, b — "
 "вектор нормалі )."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "Returns a vector that points in the direction of refraction."
+msgid "Returns the vector that points in the direction of refraction."
 msgstr "Повертає вектор, який вказує напрямок рефракції."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
 "SmoothStep function( vector(edge0), vector(edge1), vector(x) ).\n"
 "\n"
-"Returns 0.0 if 'x' is smaller then 'edge0' and 1.0 if 'x' is larger than "
+"Returns 0.0 if 'x' is smaller than 'edge0' and 1.0 if 'x' is larger than "
 "'edge1'. Otherwise the return value is interpolated between 0.0 and 1.0 "
 "using Hermite polynomials."
 msgstr ""
@@ -8480,7 +8799,7 @@ msgstr ""
 msgid ""
 "SmoothStep function( scalar(edge0), scalar(edge1), vector(x) ).\n"
 "\n"
-"Returns 0.0 if 'x' is smaller then 'edge0' and 1.0 if 'x' is larger than "
+"Returns 0.0 if 'x' is smaller than 'edge0' and 1.0 if 'x' is larger than "
 "'edge1'. Otherwise the return value is interpolated between 0.0 and 1.0 "
 "using Hermite polynomials."
 msgstr ""
@@ -8494,7 +8813,7 @@ msgstr ""
 msgid ""
 "Step function( vector(edge), vector(x) ).\n"
 "\n"
-"Returns 0.0 if 'x' is smaller then 'edge' and otherwise 1.0."
+"Returns 0.0 if 'x' is smaller than 'edge' and otherwise 1.0."
 msgstr ""
 "Функція-сходинка ( вектор(межа), вектор(x) ).\n"
 "\n"
@@ -8504,7 +8823,7 @@ msgstr ""
 msgid ""
 "Step function( scalar(edge), vector(x) ).\n"
 "\n"
-"Returns 0.0 if 'x' is smaller then 'edge' and otherwise 1.0."
+"Returns 0.0 if 'x' is smaller than 'edge' and otherwise 1.0."
 msgstr ""
 "Функція-сходинка ( скаляр(межа), вектор(x) ).\n"
 "\n"
@@ -8558,64 +8877,70 @@ msgstr ""
 "напрямку погляду камери (функції слід передати відповіді вхідні дані)."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) (Fragment/Light mode only) Scalar derivative function."
+msgid ""
+"Custom Godot Shader Language expression, which placed on top of the resulted "
+"shader. You can place various function definitions inside and call it later "
+"in the Expressions. You can also declare varyings, uniforms and constants."
 msgstr ""
-"(Лише GLES3) (лише у режимі фрагментів або світла) Функція скалярної "
-"похідної."
+"Нетиповий вираз мовою шейдерів Godot, який буде додано над отриманим "
+"шейдером. Ви можете розташовувати різні визначення функцій всередині коду і "
+"викликати його пізніше у виразах. Ви також можете оголошувати змінні, "
+"уніформи та сталі."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
-msgid "(GLES3 only) (Fragment/Light mode only) Vector derivative function."
-msgstr ""
-"(Лише GLES3) (лише у режимі фрагментів або світла) Функція векторної "
-"похідної."
+msgid "(Fragment/Light mode only) Scalar derivative function."
+msgstr "(лише у режимі фрагментів або світла) Функція скалярної похідної."
+
+#: editor/plugins/visual_shader_editor_plugin.cpp
+msgid "(Fragment/Light mode only) Vector derivative function."
+msgstr "(лише у режимі фрагментів або світла) Функція векторної похідної."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"(GLES3 only) (Fragment/Light mode only) (Vector) Derivative in 'x' using "
-"local differencing."
+"(Fragment/Light mode only) (Vector) Derivative in 'x' using local "
+"differencing."
 msgstr ""
-"(Лише GLES3) (лише у режимі фрагментів або світла) (вектор) Похідна у «x» на "
-"основі локального диференціювання."
+"(лише у режимі фрагментів або світла) (вектор) Похідна у «x» на основі "
+"локального диференціювання."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"(GLES3 only) (Fragment/Light mode only) (Scalar) Derivative in 'x' using "
-"local differencing."
+"(Fragment/Light mode only) (Scalar) Derivative in 'x' using local "
+"differencing."
 msgstr ""
-"(Лише GLES3) (лише у режимі фрагментів або світла) (скаляр) Похідна у «x» на "
-"основі локального диференціювання."
+"(лише у режимі фрагментів або світла) (скаляр) Похідна у «x» на основі "
+"локального диференціювання."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"(GLES3 only) (Fragment/Light mode only) (Vector) Derivative in 'y' using "
-"local differencing."
+"(Fragment/Light mode only) (Vector) Derivative in 'y' using local "
+"differencing."
 msgstr ""
-"(Лише GLES3) (лише у режимі фрагментів або світла) (вектор) Похідна у «y» на "
-"основі локального диференціювання."
+"(лише у режимі фрагментів або світла) (вектор) Похідна у «y» на основі "
+"локального диференціювання."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"(GLES3 only) (Fragment/Light mode only) (Scalar) Derivative in 'y' using "
-"local differencing."
+"(Fragment/Light mode only) (Scalar) Derivative in 'y' using local "
+"differencing."
 msgstr ""
-"(Лише GLES3) (лише у режимі фрагментів або світла) (скаляр) Похідна у «y» на "
-"основі локального диференціювання."
+"(лише у режимі фрагментів або світла) (скаляр) Похідна у «y» на основі "
+"локального диференціювання."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"(GLES3 only) (Fragment/Light mode only) (Vector) Sum of absolute derivative "
-"in 'x' and 'y'."
+"(Fragment/Light mode only) (Vector) Sum of absolute derivative in 'x' and "
+"'y'."
 msgstr ""
-"(Лише GLES3) (лише у режимі фрагментів або світла) (вектор) Сума похідних за "
-"модулем у «x» та «y»."
+"(лише у режимі фрагментів або світла) (вектор) Сума похідних за модулем у "
+"«x» та «y»."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid ""
-"(GLES3 only) (Fragment/Light mode only) (Scalar) Sum of absolute derivative "
-"in 'x' and 'y'."
+"(Fragment/Light mode only) (Scalar) Sum of absolute derivative in 'x' and "
+"'y'."
 msgstr ""
-"(Лише GLES3) (лише у режимі фрагментів або світла) Сума похідних за модулем "
-"у «x» та «y»."
+"(лише у режимі фрагментів або світла) Сума похідних за модулем у «x» та «y»."
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "VisualShader"
@@ -8791,6 +9116,10 @@ msgid "Export templates for this platform are missing:"
 msgstr "Немає шаблонів експортування для цієї платформи:"
 
 #: editor/project_export.cpp
+msgid "Manage Export Templates"
+msgstr "Управління шаблонами експорту"
+
+#: editor/project_export.cpp
 msgid "Export With Debug"
 msgstr "Експортувати із діагностикою"
 
@@ -8949,6 +9278,14 @@ msgid "Unnamed Project"
 msgstr "Проєкт без назви"
 
 #: editor/project_manager.cpp
+msgid "Missing Project"
+msgstr "Не вистачає проєкту"
+
+#: editor/project_manager.cpp
+msgid "Error: Project is missing on the filesystem."
+msgstr "Помилка: у файловій системі немає проєкту."
+
+#: editor/project_manager.cpp
 msgid "Can't open project at '%s'."
 msgstr "Не вдалося відкрити проєкт у «%s»."
 
@@ -9046,10 +9383,11 @@ msgstr ""
 
 #: editor/project_manager.cpp
 msgid ""
-"Remove all missing projects from the list? (Folders contents will not be "
-"modified)"
+"Remove all missing projects from the list?\n"
+"The project folders' contents won't be modified."
 msgstr ""
-"Вилучити усі проєкти, які не знайдено, зі списку? (Вміст тек не буде змінено)"
+"Вилучити усі проєкти, яких не знайдено, зі списку?\n"
+"Вміст тек проєктів змінено не буде."
 
 #: editor/project_manager.cpp
 msgid ""
@@ -9073,8 +9411,8 @@ msgid "Project Manager"
 msgstr "Керівник проекту"
 
 #: editor/project_manager.cpp
-msgid "Project List"
-msgstr "Список проєктів"
+msgid "Projects"
+msgstr "Проєкти"
 
 #: editor/project_manager.cpp
 msgid "Scan"
@@ -9095,10 +9433,6 @@ msgstr "Вилучити пропущене"
 #: editor/project_manager.cpp
 msgid "Templates"
 msgstr "Шаблони"
-
-#: editor/project_manager.cpp
-msgid "Exit"
-msgstr "Вихід"
 
 #: editor/project_manager.cpp
 msgid "Restart Now"
@@ -9309,6 +9643,11 @@ msgid "Settings saved OK."
 msgstr "Параметри успішно збережено."
 
 #: editor/project_settings_editor.cpp
+#, fuzzy
+msgid "Moved Input Action Event"
+msgstr "Додати подію за вхідною дією"
+
+#: editor/project_settings_editor.cpp
 msgid "Override for Feature"
 msgstr "Перевизначено для можливості"
 
@@ -9440,6 +9779,14 @@ msgstr "Мови:"
 msgid "AutoLoad"
 msgstr "Автозавантаження"
 
+#: editor/project_settings_editor.cpp
+msgid "Plugins"
+msgstr "Плаґіни (додатки)"
+
+#: editor/property_editor.cpp
+msgid "Preset..."
+msgstr "Заздалегідь установлений..."
+
 #: editor/property_editor.cpp
 msgid "Zero"
 msgstr "Нуль"
@@ -9491,15 +9838,6 @@ msgstr "Вибір віртуального методу"
 #: editor/property_selector.cpp
 msgid "Select Method"
 msgstr "Вибір методу"
-
-#: editor/pvrtc_compress.cpp
-msgid "Could not execute PVRTC tool:"
-msgstr "Не вдалося виконати інструмент PVRTC:"
-
-#: editor/pvrtc_compress.cpp
-msgid "Can't load back converted image using PVRTC tool:"
-msgstr ""
-"Не вдалося завантажити перетворене зображення за допомогою засобу PVRTC:"
 
 #: editor/rename_dialog.cpp editor/scene_tree_dock.cpp
 msgid "Batch Rename"
@@ -9619,10 +9957,6 @@ msgstr "ВЕРХНІЙ РЕГІСТР"
 msgid "Reset"
 msgstr "Скинути"
 
-#: editor/rename_dialog.cpp
-msgid "Error"
-msgstr "Помилка"
-
 #: editor/reparent_dialog.cpp editor/scene_tree_dock.cpp
 msgid "Reparent Node"
 msgstr "Змінити батьківський вузол"
@@ -9680,6 +10014,11 @@ msgid "Instance Scene(s)"
 msgstr "Сцени екземпляра"
 
 #: editor/scene_tree_dock.cpp
+#, fuzzy
+msgid "Replace with Branch Scene"
+msgstr "Зберегти гілку як сцену"
+
+#: editor/scene_tree_dock.cpp
 msgid "Instance Child Scene"
 msgstr "Створити екземпляр дочірньої сцени"
 
@@ -9722,8 +10061,23 @@ msgid "Make node as Root"
 msgstr "Зробити вузол кореневим"
 
 #: editor/scene_tree_dock.cpp
-msgid "Delete Node(s)?"
-msgstr "Вилучити вузли?"
+#, fuzzy
+msgid "Delete %d nodes?"
+msgstr "Вилучити вузли"
+
+#: editor/scene_tree_dock.cpp
+#, fuzzy
+msgid "Delete the root node \"%s\"?"
+msgstr "Вилучити взули графу шейдера"
+
+#: editor/scene_tree_dock.cpp
+msgid "Delete node \"%s\" and its children?"
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+#, fuzzy
+msgid "Delete node \"%s\"?"
+msgstr "Вилучити вузли"
 
 #: editor/scene_tree_dock.cpp
 msgid "Can not perform with the root node."
@@ -9798,6 +10152,10 @@ msgid "Remove Node(s)"
 msgstr "Вилучити вузли"
 
 #: editor/scene_tree_dock.cpp
+msgid "Change type of node(s)"
+msgstr "Змінити тип вузлів"
+
+#: editor/scene_tree_dock.cpp
 msgid ""
 "Couldn't save new scene. Likely dependencies (instances) couldn't be "
 "satisfied."
@@ -9840,6 +10198,10 @@ msgstr "Змінити тип"
 #: editor/scene_tree_dock.cpp
 msgid "Extend Script"
 msgstr "Розширити скрипт"
+
+#: editor/scene_tree_dock.cpp
+msgid "Reparent to New Node"
+msgstr "Змінити батьківський вузол на новий"
 
 #: editor/scene_tree_dock.cpp
 msgid "Make Scene Root"
@@ -9915,26 +10277,26 @@ msgstr "Попередження щодо налаштовування вузл�
 
 #: editor/scene_tree_editor.cpp
 msgid ""
-"Node has connection(s) and group(s).\n"
+"Node has %s connection(s) and %s group(s).\n"
 "Click to show signals dock."
 msgstr ""
-"Вузол містить з'єднання і групи.\n"
+"Вузол містить %s з'єднання і %s групи.\n"
 "Клацніть, щоб переглянути панель сигналів."
 
 #: editor/scene_tree_editor.cpp
 msgid ""
-"Node has connections.\n"
+"Node has %s connection(s).\n"
 "Click to show signals dock."
 msgstr ""
-"Вузол містить з'єднання\n"
+"Вузол містить %s з'єднань.\n"
 "Клацніть, щоб переглянути панель сигналів."
 
 #: editor/scene_tree_editor.cpp
 msgid ""
-"Node is in group(s).\n"
+"Node is in %s group(s).\n"
 "Click to show groups dock."
 msgstr ""
-"Вузол належить групам.\n"
+"Вузол належить %s групам.\n"
 "Клацніть, щоб переглянути панель груп."
 
 #: editor/scene_tree_editor.cpp
@@ -10030,6 +10392,10 @@ msgid "Error loading script from %s"
 msgstr "Помилка під час спроби завантажити скрипт з %s"
 
 #: editor/script_create_dialog.cpp
+msgid "Overrides"
+msgstr "Перевизначення"
+
+#: editor/script_create_dialog.cpp
 msgid "N/A"
 msgstr "Н/З"
 
@@ -10058,8 +10424,8 @@ msgid "Script is valid."
 msgstr "Скрипт є коректним."
 
 #: editor/script_create_dialog.cpp
-msgid "Allowed: a-z, A-Z, 0-9 and _"
-msgstr "Можна використовувати: a-z, A-Z, 0-9 і _"
+msgid "Allowed: a-z, A-Z, 0-9, _ and ."
+msgstr "Можна використовувати: a-z, A-Z, 0-9, _ і ."
 
 #: editor/script_create_dialog.cpp
 msgid "Built-in script (into scene file)."
@@ -10106,24 +10472,60 @@ msgid "Bytes:"
 msgstr "Байтів:"
 
 #: editor/script_editor_debugger.cpp
-msgid "Stack Trace"
-msgstr "Трасування стека"
+#, fuzzy
+msgid "Warning:"
+msgstr "Попередження:"
 
 #: editor/script_editor_debugger.cpp
-msgid "Pick one or more items from the list to display the graph."
-msgstr "Виберіть один або декілька пунктів зі списку для перегляду графу."
+msgid "Error:"
+msgstr "Помилка:"
+
+#: editor/script_editor_debugger.cpp
+#, fuzzy
+msgid "C++ Error"
+msgstr "Помилка копіювання"
+
+#: editor/script_editor_debugger.cpp
+#, fuzzy
+msgid "C++ Error:"
+msgstr "Помилка:"
+
+#: editor/script_editor_debugger.cpp
+#, fuzzy
+msgid "C++ Source"
+msgstr "Джерело"
+
+#: editor/script_editor_debugger.cpp
+#, fuzzy
+msgid "Source:"
+msgstr "Джерело"
+
+#: editor/script_editor_debugger.cpp
+#, fuzzy
+msgid "C++ Source:"
+msgstr "Джерело"
+
+#: editor/script_editor_debugger.cpp
+msgid "Stack Trace"
+msgstr "Трасування стека"
 
 #: editor/script_editor_debugger.cpp
 msgid "Errors"
 msgstr "Помилки"
 
 #: editor/script_editor_debugger.cpp
-msgid "Child Process Connected"
+#, fuzzy
+msgid "Child process connected."
 msgstr "З'єднано дочірній процес"
 
 #: editor/script_editor_debugger.cpp
 msgid "Copy Error"
 msgstr "Помилка копіювання"
+
+#: editor/script_editor_debugger.cpp
+#, fuzzy
+msgid "Skip Breakpoints"
+msgstr "Точки зупину"
 
 #: editor/script_editor_debugger.cpp
 msgid "Inspect Previous Instance"
@@ -10142,6 +10544,11 @@ msgid "Profiler"
 msgstr "Засіб профілювання"
 
 #: editor/script_editor_debugger.cpp
+#, fuzzy
+msgid "Network Profiler"
+msgstr "Експорт профілю"
+
+#: editor/script_editor_debugger.cpp
 msgid "Monitor"
 msgstr "Монітор"
 
@@ -10152,6 +10559,10 @@ msgstr "Значення"
 #: editor/script_editor_debugger.cpp
 msgid "Monitors"
 msgstr "Монітори"
+
+#: editor/script_editor_debugger.cpp
+msgid "Pick one or more items from the list to display the graph."
+msgstr "Виберіть один або декілька пунктів зі списку для перегляду графу."
 
 #: editor/script_editor_debugger.cpp
 msgid "List of Video Memory Usage by Resource:"
@@ -10216,6 +10627,10 @@ msgstr "Відновити скорочення"
 #: editor/settings_config_dialog.cpp
 msgid "Change Shortcut"
 msgstr "Змінити скорочення"
+
+#: editor/settings_config_dialog.cpp
+msgid "Editor Settings"
+msgstr "Параметри редактора"
 
 #: editor/settings_config_dialog.cpp
 msgid "Shortcuts"
@@ -10346,16 +10761,16 @@ msgid "Library"
 msgstr "Бібліотека"
 
 #: modules/gdnative/gdnative_library_singleton_editor.cpp
-msgid "Status"
-msgstr "Статус"
-
-#: modules/gdnative/gdnative_library_singleton_editor.cpp
 msgid "Libraries: "
 msgstr "Бібліотеки: "
 
 #: modules/gdnative/register_types.cpp
 msgid "GDNative"
 msgstr "GDNative"
+
+#: modules/gdscript/gdscript_functions.cpp
+msgid "Expected a string of length 1 (a character)."
+msgstr ""
 
 #: modules/gdscript/gdscript_functions.cpp
 msgid "Step argument is zero!"
@@ -10511,6 +10926,15 @@ msgstr "Параметри GridMap"
 msgid "Pick Distance:"
 msgstr "Відстань вибору:"
 
+#: modules/gridmap/grid_map_editor_plugin.cpp
+#, fuzzy
+msgid "Filter meshes"
+msgstr "Фільтрувати методи"
+
+#: modules/gridmap/grid_map_editor_plugin.cpp
+msgid "Give a MeshLibrary resource to this GridMap to use its meshes."
+msgstr ""
+
 #: modules/mono/csharp_script.cpp
 msgid "Class name can't be a reserved keyword"
 msgstr "Назвою класу не може бути зарезервоване ключове слово"
@@ -10636,8 +11060,28 @@ msgid "Set Variable Type"
 msgstr "Встановити тип змінної"
 
 #: modules/visual_script/visual_script_editor.cpp
+msgid "Override an existing built-in function."
+msgstr "Перевизначення наявної вбудованої функції."
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Create a new function."
+msgstr "Створити функцію."
+
+#: modules/visual_script/visual_script_editor.cpp
 msgid "Variables:"
 msgstr "Змінні:"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Create a new variable."
+msgstr "Створити змінну."
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Signals:"
+msgstr "Сигнали:"
+
+#: modules/visual_script/visual_script_editor.cpp
+msgid "Create a new signal."
+msgstr "Створити сигнал."
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Name is not a valid identifier:"
@@ -10796,6 +11240,11 @@ msgid "Editing Signal:"
 msgstr "Редагування сигналу:"
 
 #: modules/visual_script/visual_script_editor.cpp
+#, fuzzy
+msgid "Make Tool:"
+msgstr "Зробити локальним"
+
+#: modules/visual_script/visual_script_editor.cpp
 msgid "Base Type:"
 msgstr "Базовий тип:"
 
@@ -10826,10 +11275,6 @@ msgstr "Копіювати вузли"
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Cut Nodes"
 msgstr "Вирізати вузли"
-
-#: modules/visual_script/visual_script_editor.cpp
-msgid "Paste Nodes"
-msgstr "Вставити вузли"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Edit Member"
@@ -10956,8 +11401,10 @@ msgstr ""
 "редактора."
 
 #: platform/android/export/export.cpp
+#, fuzzy
 msgid ""
-"Android project is not installed for compiling. Install from Editor menu."
+"Android build template not installed in the project. Install it from the "
+"Project menu."
 msgstr ""
 "Для збирання не встановлено проєкт Android. Встановіть його за допомогою "
 "меню редактора."
@@ -11138,7 +11585,6 @@ msgid "Invalid splash screen image dimensions (should be 620x300)."
 msgstr "Некоректні розмірності зображення вікна вітання (мають бути 620x300)."
 
 #: scene/2d/animated_sprite.cpp
-#, fuzzy
 msgid ""
 "A SpriteFrames resource must be created or set in the \"Frames\" property in "
 "order for AnimatedSprite to display frames."
@@ -11206,11 +11652,10 @@ msgstr ""
 "увімкненим параметром «Анімація часток»."
 
 #: scene/2d/light_2d.cpp
-#, fuzzy
 msgid ""
 "A texture with the shape of the light must be supplied to the \"Texture\" "
 "property."
-msgstr "Для властивості «texture» слід надати текстуру із формою освітлення."
+msgstr "Для властивості «Texture» слід надати текстуру із формою освітлення."
 
 #: scene/2d/light_occluder_2d.cpp
 msgid ""
@@ -11220,11 +11665,10 @@ msgstr ""
 "багатокутник затуляння."
 
 #: scene/2d/light_occluder_2d.cpp
-#, fuzzy
 msgid "The occluder polygon for this occluder is empty. Please draw a polygon."
 msgstr ""
 "Для цього затуляння багатокутник є порожнім. Будь ласка, намалюйте "
-"багатокутник!"
+"багатокутник."
 
 #: scene/2d/navigation_polygon.cpp
 msgid ""
@@ -11324,7 +11768,6 @@ msgstr ""
 "форми."
 
 #: scene/2d/visibility_notifier_2d.cpp
-#, fuzzy
 msgid ""
 "VisibilityEnabler2D works best when used with the edited scene root directly "
 "as parent."
@@ -11333,9 +11776,8 @@ msgstr ""
 "безпосереднім батьківським елементом — редагованим коренем сцени."
 
 #: scene/3d/arvr_nodes.cpp
-#, fuzzy
 msgid "ARVRCamera must have an ARVROrigin node as its parent."
-msgstr "ARVRCamera повинен мати батьківським вузлом вузол ARVROrigin"
+msgstr "ARVRCamera повинен мати батьківським вузлом вузол ARVROrigin."
 
 #: scene/3d/arvr_nodes.cpp
 msgid "ARVRController must have an ARVROrigin node as its parent."
@@ -11425,13 +11867,12 @@ msgstr ""
 "Area, StaticBody, RigidBody, KinematicBody тощо, щоб надати їм форми."
 
 #: scene/3d/collision_shape.cpp
-#, fuzzy
 msgid ""
 "A shape must be provided for CollisionShape to function. Please create a "
 "shape resource for it."
 msgstr ""
 "Для забезпечення працездатності CollisionShape слід надати форму. Будь "
-"ласка, створіть ресурс форми для цього елемента!"
+"ласка, створіть ресурс форми для цього елемента."
 
 #: scene/3d/collision_shape.cpp
 msgid ""
@@ -11467,7 +11908,7 @@ msgstr ""
 
 #: scene/3d/light.cpp
 msgid "A SpotLight with an angle wider than 90 degrees cannot cast shadows."
-msgstr ""
+msgstr "SpotLight з кутом, який є більшим за 90 градусів, не може давати тіні."
 
 #: scene/3d/navigation_mesh.cpp
 msgid "A NavigationMesh resource must be set or created for this node to work."
@@ -11513,12 +11954,11 @@ msgid "PathFollow only works when set as a child of a Path node."
 msgstr "PathFollow працюватиме лише як дочірній елемент вузла Path."
 
 #: scene/3d/path.cpp
-#, fuzzy
 msgid ""
 "PathFollow's ROTATION_ORIENTED requires \"Up Vector\" to be enabled in its "
 "parent Path's Curve resource."
 msgstr ""
-"PathFollow ROTATION_ORIENTED потребує вмикання «Up Vector» у його "
+"ROTATION_ORIENTED у PathFollow потребує вмикання «Up Vector» у його "
 "батьківському ресурсі Curve у Path."
 
 #: scene/3d/physics_body.cpp
@@ -11532,13 +11972,12 @@ msgstr ""
 "Замість цієї зміни, вам варто змінити розміри дочірніх форм зіткнення."
 
 #: scene/3d/remote_transform.cpp
-#, fuzzy
 msgid ""
 "The \"Remote Path\" property must point to a valid Spatial or Spatial-"
 "derived node to work."
 msgstr ""
-"Щоб усе працювало як слід, властивість шляху (path) має вказувати на "
-"коректний вузол Spatial."
+"Щоб усе працювало як слід, властивість «Remote Path» має вказувати на "
+"коректний вузол Spatial або похідний від Spatial."
 
 #: scene/3d/soft_body.cpp
 msgid "This body will be ignored until you set a mesh."
@@ -11554,13 +11993,12 @@ msgstr ""
 "Замість цієї зміни, вам варто змінити розміри дочірніх форм зіткнення."
 
 #: scene/3d/sprite_3d.cpp
-#, fuzzy
 msgid ""
 "A SpriteFrames resource must be created or set in the \"Frames\" property in "
 "order for AnimatedSprite3D to display frames."
 msgstr ""
-"Щоб AnimatedSprite могла показувати кадри, має бути створено або встановлено "
-"у властивості «Frames» ресурс SpriteFrames."
+"Щоб AnimatedSprite3D могла показувати кадри, має бути створено або "
+"встановлено у властивості «Frames» ресурс SpriteFrames."
 
 #: scene/3d/vehicle_body.cpp
 msgid ""
@@ -11575,6 +12013,8 @@ msgid ""
 "WorldEnvironment requires its \"Environment\" property to contain an "
 "Environment to have a visible effect."
 msgstr ""
+"Щоб WorldEnvironment мала видимий ефект, її властивість «Environment» має "
+"містити середовище."
 
 #: scene/3d/world_environment.cpp
 msgid ""
@@ -11613,7 +12053,6 @@ msgid "Nothing connected to input '%s' of node '%s'."
 msgstr "Нічого не з'єднано із входом «%s» вузла «%s»."
 
 #: scene/animation/animation_tree.cpp
-#, fuzzy
 msgid "No root AnimationNode for the graph is set."
 msgstr "Кореневий елемент AnimationNode для графу не встановлено."
 
@@ -11627,7 +12066,6 @@ msgstr ""
 "Шлях, встановлений для AnimationPlayer, не веде до вузла AnimationPlayer."
 
 #: scene/animation/animation_tree.cpp
-#, fuzzy
 msgid "The AnimationPlayer root node is not a valid node."
 msgstr "Кореневий елемент AnimationPlayer не є коректним вузлом."
 
@@ -11657,7 +12095,6 @@ msgid "Add current color as a preset."
 msgstr "Додати поточний колір як шаблон."
 
 #: scene/gui/container.cpp
-#, fuzzy
 msgid ""
 "Container by itself serves no purpose unless a script configures its "
 "children placement behavior.\n"
@@ -11686,7 +12123,6 @@ msgid "Please Confirm..."
 msgstr "Будь ласка, підтвердьте..."
 
 #: scene/gui/popup.cpp
-#, fuzzy
 msgid ""
 "Popups will hide by default unless you call popup() or any of the popup*() "
 "functions. Making them visible for editing is fine, but they will hide upon "
@@ -11697,12 +12133,10 @@ msgstr ""
 "практика. Втім, слід пам'ятати, що під час запуску їх буде приховано."
 
 #: scene/gui/range.cpp
-#, fuzzy
 msgid "If \"Exp Edit\" is enabled, \"Min Value\" must be greater than 0."
-msgstr "Якщо exp_edit має значення true, min_value має бути > 0."
+msgstr "Якщо увімкнено «Exp Edit», «Min Value» має бути > 0."
 
 #: scene/gui/scroll_container.cpp
-#, fuzzy
 msgid ""
 "ScrollContainer is intended to work with a single child control.\n"
 "Use a container as child (VBox, HBox, etc.), or a Control and set the custom "
@@ -11737,34 +12171,21 @@ msgstr ""
 "Control, щоб у неї був розмір. Крім того, можна зробити її RenderTarget і "
 "пов'язати її внутрішню текстуру з одним із вузлів для показу."
 
-#: scene/resources/dynamic_font.cpp
-msgid "Error initializing FreeType."
-msgstr "Помилка ініціалізації FreeType."
-
-#: scene/resources/dynamic_font.cpp
-msgid "Unknown font format."
-msgstr "Невідомий формат шрифту."
-
-#: scene/resources/dynamic_font.cpp
-msgid "Error loading font."
-msgstr "Помилка завантаження шрифту."
-
-#: scene/resources/dynamic_font.cpp
-msgid "Invalid font size."
-msgstr "Некоректний розмір шрифту."
-
 #: scene/resources/visual_shader.cpp
 msgid "Input"
 msgstr "Вхідні дані"
 
 #: scene/resources/visual_shader_nodes.cpp
-#, fuzzy
 msgid "Invalid source for preview."
-msgstr "Некоректне джерело програми побудови тіней."
+msgstr "Некоректне джерело для попереднього перегляду."
 
 #: scene/resources/visual_shader_nodes.cpp
 msgid "Invalid source for shader."
 msgstr "Некоректне джерело програми побудови тіней."
+
+#: scene/resources/visual_shader_nodes.cpp
+msgid "Invalid comparison function for that type."
+msgstr "Некоректна функція порівняння для цього типу."
 
 #: servers/visual/shader_language.cpp
 msgid "Assignment to function."
@@ -11781,6 +12202,169 @@ msgstr "Змінні величини можна пов'язувати лише 
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr "Сталі не можна змінювати."
+
+#~ msgid "Properties:"
+#~ msgstr "Властивості:"
+
+#~ msgid "Methods:"
+#~ msgstr "Методи:"
+
+#~ msgid "Theme Properties:"
+#~ msgstr "Властивості теми:"
+
+#~ msgid "Enumerations:"
+#~ msgstr "Перелічуваний:"
+
+#~ msgid "Constants:"
+#~ msgstr "Константи:"
+
+#~ msgid "Class Description:"
+#~ msgstr "Опис класу:"
+
+#~ msgid "Property Descriptions:"
+#~ msgstr "Описи властивостей:"
+
+#~ msgid "Method Descriptions:"
+#~ msgstr "Описи методів:"
+
+#~ msgid ""
+#~ "This will install the Android project for custom builds.\n"
+#~ "Note that, in order to use it, it needs to be enabled per export preset."
+#~ msgstr ""
+#~ "У результаті виконання цієї дії буде встановлено проєкт Android для "
+#~ "нетипового збирання.\n"
+#~ "Зауважте, що для того, щоб ним можна було скористатися, його слід "
+#~ "увімкнути експортуванням набору правил."
+
+#~ msgid "Reverse sorting."
+#~ msgstr "Обернений порядок."
+
+#~ msgid "Delete Node(s)?"
+#~ msgstr "Вилучити вузли?"
+
+#~ msgid "No Matches"
+#~ msgstr "Немає збігів"
+
+#~ msgid ""
+#~ "Can't open file_type_cache.cch for writing, not saving file type cache!"
+#~ msgstr ""
+#~ "Не вдається відкрити file_type_cache.cch для запису, не буде збережений "
+#~ "файл тип кешу!"
+
+#~ msgid "Cannot navigate to '%s' as it has not been found in the file system!"
+#~ msgstr ""
+#~ "Неможливо перейти до '%s' , оскільки він не був знайдений в файловій "
+#~ "системі!"
+
+#~ msgid "Error loading image:"
+#~ msgstr "Помилка завантаження зображення:"
+
+#~ msgid "No pixels with transparency > 128 in image..."
+#~ msgstr "В зображенні немає пікселів з прозорістю > 128..."
+
+#~ msgid "Parent has no solid faces to populate."
+#~ msgstr "Предок не має суцільних граней для заповнення."
+
+#~ msgid "Couldn't map area."
+#~ msgstr "Не вдалося відобразити ділянку."
+
+#~ msgid "Faces contain no area!"
+#~ msgstr "Грані не містять ділянки!"
+
+#~ msgid "No faces!"
+#~ msgstr "Немає граней!"
+
+#~ msgid "Error: could not load file."
+#~ msgstr "Помилка: не вдалося завантажити файл."
+
+#~ msgid "Error could not load file."
+#~ msgstr "Помилка: не вдалося завантажити файл."
+
+#~ msgid "Doppler Enable"
+#~ msgstr "Ефект Доплера"
+
+#~ msgid "Select Mode (Q)"
+#~ msgstr "Режим виділення (Q)"
+
+#~ msgid "Move Mode (W)"
+#~ msgstr "Режим пересування (W)"
+
+#~ msgid "Rotate Mode (E)"
+#~ msgstr "Режим обертання (E)"
+
+#~ msgid "Scale Mode (R)"
+#~ msgstr "Режим масштабування (R)"
+
+#~ msgid "Local Coords"
+#~ msgstr "Локальні координати"
+
+#~ msgid "Snap Mode (%s)"
+#~ msgstr "Режим прилипання (%s)"
+
+#~ msgid "Tool Select"
+#~ msgstr "Інструмент позначення"
+
+#~ msgid "Tool Move"
+#~ msgstr "Інструмент пересування"
+
+#~ msgid "Tool Rotate"
+#~ msgstr "Інструмент обертання"
+
+#~ msgid "Tool Scale"
+#~ msgstr "Інструмент масштабування"
+
+#~ msgid ""
+#~ "Remove all missing projects from the list? (Folders contents will not be "
+#~ "modified)"
+#~ msgstr ""
+#~ "Вилучити усі проєкти, які не знайдено, зі списку? (Вміст тек не буде "
+#~ "змінено)"
+
+#~ msgid "Project List"
+#~ msgstr "Список проєктів"
+
+#~ msgid "Exit"
+#~ msgstr "Вихід"
+
+#~ msgid "Could not execute PVRTC tool:"
+#~ msgstr "Не вдалося виконати інструмент PVRTC:"
+
+#~ msgid "Can't load back converted image using PVRTC tool:"
+#~ msgstr ""
+#~ "Не вдалося завантажити перетворене зображення за допомогою засобу PVRTC:"
+
+#~ msgid "Error initializing FreeType."
+#~ msgstr "Помилка ініціалізації FreeType."
+
+#~ msgid "Unknown font format."
+#~ msgstr "Невідомий формат шрифту."
+
+#~ msgid "Error loading font."
+#~ msgstr "Помилка завантаження шрифту."
+
+#~ msgid "Invalid font size."
+#~ msgstr "Некоректний розмір шрифту."
+
+#~ msgid "Previous Folder"
+#~ msgstr "Попередня тека"
+
+#~ msgid "Next Folder"
+#~ msgstr "Наступна тека"
+
+#~ msgid "Automatically Open Screenshots"
+#~ msgstr "Автоматично відкривати знімки вікон"
+
+#~ msgid "Open in an external image editor."
+#~ msgstr "Відкрити у зовнішньому редакторі зображень."
+
+#~ msgid "Reverse"
+#~ msgstr "Зворотний"
+
+#~ msgid "Mirror X"
+#~ msgstr "Віддзеркалити за X"
+
+#~ msgid "Mirror Y"
+#~ msgstr "Віддзеркалити за Y"
 
 #~ msgid "Generating solution..."
 #~ msgstr "Створення розв'язку..."
@@ -12077,9 +12661,6 @@ msgstr "Сталі не можна змінювати."
 #~ msgid "Instance the selected scene(s) as child of the selected node."
 #~ msgstr "Додати вибрану сцену(и), як нащадка вибраного вузла."
 
-#~ msgid "Warnings:"
-#~ msgstr "Попередження:"
-
 #~ msgid "Font Size:"
 #~ msgstr "Розмір шрифту:"
 
@@ -12118,9 +12699,6 @@ msgstr "Сталі не можна змінювати."
 
 #~ msgid "Select a split to erase it."
 #~ msgstr "Виберіть поділ для його витирання."
-
-#~ msgid "No name provided"
-#~ msgstr "Ім'я не вказано"
 
 #~ msgid "Add Node.."
 #~ msgstr "Додати вузол…"
@@ -12254,9 +12832,6 @@ msgstr "Сталі не можна змінювати."
 #~ msgid "Warning"
 #~ msgstr "Попередження"
 
-#~ msgid "Error:"
-#~ msgstr "Помилка:"
-
 #~ msgid "Function:"
 #~ msgstr "Функція:"
 
@@ -12337,9 +12912,6 @@ msgstr "Сталі не можна змінювати."
 
 #~ msgid "Duplicate Graph Node(s)"
 #~ msgstr "Дублювати вузли графу"
-
-#~ msgid "Delete Shader Graph Node(s)"
-#~ msgstr "Вилучити взули графу шейдера"
 
 #~ msgid "Error: Cyclic Connection Link"
 #~ msgstr "Помилка: циклічне посилання"
@@ -12520,9 +13092,6 @@ msgstr "Сталі не можна змінювати."
 
 #~ msgid "Erase selection"
 #~ msgstr "Витерти позначене"
-
-#~ msgid "Could not find tile:"
-#~ msgstr "Неможливо знайти плитку:"
 
 #~ msgid "Item name or ID:"
 #~ msgstr "Назва або ідентифікатор елемента:"

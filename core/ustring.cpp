@@ -31,7 +31,7 @@
 #include "ustring.h"
 
 #include "core/color.h"
-#include "core/math/crypto_core.h"
+#include "core/crypto/crypto_core.h"
 #include "core/math/math_funcs.h"
 #include "core/os/memory.h"
 #include "core/print_string.h"
@@ -40,6 +40,7 @@
 #include "core/variant.h"
 
 #include <wchar.h>
+#include <cstdint>
 
 #ifndef NO_USE_STDLIB
 #include <stdio.h>
@@ -1668,6 +1669,7 @@ int String::hex_to_int(bool p_with_prefix) const {
 			return 0;
 		}
 
+		ERR_FAIL_COND_V_MSG(hex > INT32_MAX / 16, sign == 1 ? INT32_MAX : INT32_MIN, "Cannot represent " + *this + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
 		hex *= 16;
 		hex += n;
 		s++;
@@ -1709,6 +1711,7 @@ int64_t String::hex_to_int64(bool p_with_prefix) const {
 			return 0;
 		}
 
+		ERR_FAIL_COND_V_MSG(hex > INT64_MAX / 16, sign == 1 ? INT64_MAX : INT64_MIN, "Cannot represent " + *this + " as 64-bit integer, provided value is " + (sign == 1 ? "too big." : "too small."));
 		hex *= 16;
 		hex += n;
 		s++;
@@ -1748,6 +1751,7 @@ int64_t String::bin_to_int64(bool p_with_prefix) const {
 			return 0;
 		}
 
+		ERR_FAIL_COND_V_MSG(binary > INT64_MAX / 2, sign == 1 ? INT64_MAX : INT64_MIN, "Cannot represent " + *this + " as 64-bit integer, provided value is " + (sign == 1 ? "too big." : "too small."));
 		binary *= 2;
 		binary += n;
 		s++;
@@ -1771,6 +1775,7 @@ int String::to_int() const {
 		CharType c = operator[](i);
 		if (c >= '0' && c <= '9') {
 
+			ERR_FAIL_COND_V_MSG(integer > INT32_MAX / 10, sign == 1 ? INT32_MAX : INT32_MIN, "Cannot represent " + *this + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
 			integer *= 10;
 			integer += c - '0';
 
@@ -1798,6 +1803,7 @@ int64_t String::to_int64() const {
 		CharType c = operator[](i);
 		if (c >= '0' && c <= '9') {
 
+			ERR_FAIL_COND_V_MSG(integer > INT64_MAX / 10, sign == 1 ? INT64_MAX : INT64_MIN, "Cannot represent " + *this + " as 64-bit integer, provided value is " + (sign == 1 ? "too big." : "too small."));
 			integer *= 10;
 			integer += c - '0';
 
@@ -1828,6 +1834,7 @@ int String::to_int(const char *p_str, int p_len) {
 		char c = p_str[i];
 		if (c >= '0' && c <= '9') {
 
+			ERR_FAIL_COND_V_MSG(integer > INT32_MAX / 10, sign == 1 ? INT32_MAX : INT32_MIN, "Cannot represent " + String(p_str).substr(0, to) + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
 			integer *= 10;
 			integer += c - '0';
 
@@ -2140,6 +2147,14 @@ int64_t String::to_int(const CharType *p_str, int p_len) {
 
 				if (c >= '0' && c <= '9') {
 
+					if (integer > INT64_MAX / 10) {
+						String number("");
+						str = p_str;
+						while (*str && str != limit) {
+							number += *(str++);
+						}
+						ERR_FAIL_V_MSG(sign == 1 ? INT64_MAX : INT64_MIN, "Cannot represent " + number + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
+					}
 					integer *= 10;
 					integer += c - '0';
 				} else {
@@ -2729,6 +2744,51 @@ bool String::is_quoted() const {
 	return is_enclosed_in("\"") || is_enclosed_in("'");
 }
 
+int String::_count(const String &p_string, int p_from, int p_to, bool p_case_insensitive) const {
+	if (p_string.empty()) {
+		return 0;
+	}
+	int len = length();
+	int slen = p_string.length();
+	if (len < slen) {
+		return 0;
+	}
+	String str;
+	if (p_from >= 0 && p_to >= 0) {
+		if (p_to == 0) {
+			p_to = len;
+		} else if (p_from >= p_to) {
+			return 0;
+		}
+		if (p_from == 0 && p_to == len) {
+			str = String();
+			str.copy_from_unchecked(&c_str()[0], len);
+		} else {
+			str = substr(p_from, p_to - p_from);
+		}
+	} else {
+		return 0;
+	}
+	int c = 0;
+	int idx = -1;
+	do {
+		idx = p_case_insensitive ? str.findn(p_string) : str.find(p_string);
+		if (idx != -1) {
+			str = str.substr(idx + slen, str.length() - slen);
+			++c;
+		}
+	} while (idx != -1);
+	return c;
+}
+
+int String::count(const String &p_string, int p_from, int p_to) const {
+	return _count(p_string, p_from, p_to, false);
+}
+
+int String::countn(const String &p_string, int p_from, int p_to) const {
+	return _count(p_string, p_from, p_to, true);
+}
+
 bool String::_base_is_subsequence_of(const String &p_string, bool case_insensitive) const {
 
 	int len = length();
@@ -2989,6 +3049,22 @@ String String::replacen(const String &p_key, const String &p_with) const {
 	return new_string;
 }
 
+String String::repeat(int p_count) const {
+
+	ERR_FAIL_COND_V_MSG(p_count < 0, "", "Parameter count should be a positive number.");
+
+	String new_string;
+	const CharType *src = this->c_str();
+
+	new_string.resize(length() * p_count + 1);
+
+	for (int i = 0; i < p_count; i++)
+		for (int j = 0; j < length(); j++)
+			new_string[i * length() + j] = src[j];
+
+	return new_string;
+}
+
 String String::left(int p_pos) const {
 
 	if (p_pos <= 0)
@@ -3212,9 +3288,7 @@ String String::simplify_path() const {
 
 static int _humanize_digits(int p_num) {
 
-	if (p_num < 10)
-		return 2;
-	else if (p_num < 100)
+	if (p_num < 100)
 		return 2;
 	else if (p_num < 1024)
 		return 1;
@@ -3222,21 +3296,29 @@ static int _humanize_digits(int p_num) {
 		return 0;
 }
 
-String String::humanize_size(size_t p_size) {
+String String::humanize_size(uint64_t p_size) {
 
 	uint64_t _div = 1;
-	static const char *prefix[] = { " Bytes", " KB", " MB", " GB", " TB", " PB", " EB", "" };
+	Vector<String> prefixes;
+	prefixes.push_back(RTR("B"));
+	prefixes.push_back(RTR("KiB"));
+	prefixes.push_back(RTR("MiB"));
+	prefixes.push_back(RTR("GiB"));
+	prefixes.push_back(RTR("TiB"));
+	prefixes.push_back(RTR("PiB"));
+	prefixes.push_back(RTR("EiB"));
+
 	int prefix_idx = 0;
 
-	while (p_size > (_div * 1024) && prefix[prefix_idx][0]) {
+	while (prefix_idx < prefixes.size() && p_size > (_div * 1024)) {
 		_div *= 1024;
 		prefix_idx++;
 	}
 
-	int digits = prefix_idx > 0 ? _humanize_digits(p_size / _div) : 0;
-	double divisor = prefix_idx > 0 ? _div : 1;
+	const int digits = prefix_idx > 0 ? _humanize_digits(p_size / _div) : 0;
+	const double divisor = prefix_idx > 0 ? _div : 1;
 
-	return String::num(p_size / divisor).pad_decimals(digits) + prefix[prefix_idx];
+	return String::num(p_size / divisor).pad_decimals(digits) + " " + prefixes[prefix_idx];
 }
 bool String::is_abs_path() const {
 

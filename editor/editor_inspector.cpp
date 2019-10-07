@@ -378,7 +378,7 @@ bool EditorPropertyRevert::get_instanced_node_original_property(Node *p_node, co
 		node = node->get_owner();
 	}
 
-	if (!found) {
+	if (!found && node) {
 		//if not found, try default class value
 		Variant attempt = ClassDB::class_get_default_property_value(node->get_class_name(), p_prop);
 		if (attempt.get_type() != Variant::NIL) {
@@ -504,7 +504,7 @@ bool EditorProperty::use_keying_next() const {
 		PropertyInfo &p = I->get();
 
 		if (p.name == property) {
-			return p.hint == PROPERTY_HINT_SPRITE_FRAME;
+			return (p.usage & PROPERTY_USAGE_KEYING_INCREMENTS);
 		}
 	}
 
@@ -1044,15 +1044,13 @@ void EditorInspectorSection::_notification(int p_what) {
 		Ref<Font> font = get_font("font", "Tree");
 		Ref<Texture> arrow;
 
-#ifdef TOOLS_ENABLED
 		if (foldable) {
 			if (object->editor_is_section_unfolded(section)) {
-				arrow = get_icon("arrow_up", "Tree");
-			} else {
 				arrow = get_icon("arrow", "Tree");
+			} else {
+				arrow = get_icon("arrow_collapsed", "Tree");
 			}
 		}
-#endif
 
 		Size2 size = get_size();
 		Point2 offset;
@@ -1087,15 +1085,13 @@ void EditorInspectorSection::_notification(int p_what) {
 
 		Ref<Texture> arrow;
 
-#ifdef TOOLS_ENABLED
 		if (foldable) {
 			if (object->editor_is_section_unfolded(section)) {
-				arrow = get_icon("arrow_up", "Tree");
-			} else {
 				arrow = get_icon("arrow", "Tree");
+			} else {
+				arrow = get_icon("arrow_collapsed", "Tree");
 			}
 		}
-#endif
 
 		Ref<Font> font = get_font("font", "Tree");
 
@@ -1107,13 +1103,12 @@ void EditorInspectorSection::_notification(int p_what) {
 
 		draw_rect(Rect2(Vector2(), Vector2(get_size().width, h)), bg_color);
 
-		int hs = get_constant("hseparation", "Tree");
-
+		const int arrow_margin = 3;
 		Color color = get_color("font_color", "Tree");
-		draw_string(font, Point2(hs, font->get_ascent() + (h - font->get_height()) / 2).floor(), label, color, get_size().width);
+		draw_string(font, Point2(Math::round((16 + arrow_margin) * EDSCALE), font->get_ascent() + (h - font->get_height()) / 2).floor(), label, color, get_size().width);
 
 		if (arrow.is_valid()) {
-			draw_texture(arrow, Point2(get_size().width - arrow->get_width(), (h - arrow->get_height()) / 2).floor());
+			draw_texture(arrow, Point2(Math::round(arrow_margin * EDSCALE), (h - arrow->get_height()) / 2).floor());
 		}
 	}
 }
@@ -1155,7 +1150,6 @@ void EditorInspectorSection::setup(const String &p_section, const String &p_labe
 		vbox_added = true;
 	}
 
-#ifdef TOOLS_ENABLED
 	if (foldable) {
 		_test_unfold();
 		if (object->editor_is_section_unfolded(section)) {
@@ -1164,7 +1158,6 @@ void EditorInspectorSection::setup(const String &p_section, const String &p_labe
 			vbox->hide();
 		}
 	}
-#endif
 }
 
 void EditorInspectorSection::_gui_input(const Ref<InputEvent> &p_event) {
@@ -1172,7 +1165,6 @@ void EditorInspectorSection::_gui_input(const Ref<InputEvent> &p_event) {
 	if (!foldable)
 		return;
 
-#ifdef TOOLS_ENABLED
 	Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 
@@ -1191,7 +1183,6 @@ void EditorInspectorSection::_gui_input(const Ref<InputEvent> &p_event) {
 			vbox->hide();
 		}
 	}
-#endif
 }
 
 VBoxContainer *EditorInspectorSection::get_vbox() {
@@ -1205,11 +1196,9 @@ void EditorInspectorSection::unfold() {
 
 	_test_unfold();
 
-#ifdef TOOLS_ENABLED
 	object->editor_set_section_unfold(section, true);
 	vbox->show();
 	update();
-#endif
 }
 
 void EditorInspectorSection::fold() {
@@ -1219,11 +1208,9 @@ void EditorInspectorSection::fold() {
 	if (!vbox_added)
 		return; //kinda pointless
 
-#ifdef TOOLS_ENABLED
 	object->editor_set_section_unfold(section, false);
 	vbox->hide();
 	update();
-#endif
 }
 
 void EditorInspectorSection::_bind_methods() {
@@ -1302,6 +1289,7 @@ void EditorInspector::remove_inspector_plugin(const Ref<EditorInspectorPlugin> &
 		}
 	}
 
+	ERR_FAIL_COND_MSG(idx == -1, "Trying to remove nonexistent inspector plugin.");
 	for (int i = idx; i < inspector_plugin_count - 1; i++) {
 		inspector_plugins[i] = inspector_plugins[i + 1];
 	}

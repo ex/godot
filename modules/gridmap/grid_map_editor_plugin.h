@@ -35,9 +35,6 @@
 #include "editor/editor_plugin.h"
 #include "editor/pane_drag.h"
 #include "grid_map.h"
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 
 class SpatialEditorPlugin;
 
@@ -159,7 +156,6 @@ class GridMapEditor : public VBoxContainer {
 	Transform cursor_transform;
 
 	Vector3 cursor_origin;
-	Vector3 last_mouseover;
 
 	int display_mode;
 	int selected_palette;
@@ -200,12 +196,16 @@ class GridMapEditor : public VBoxContainer {
 		RID instance;
 	};
 
+	ItemList *mesh_library_palette;
+	Label *info_message;
+
+	EditorNode *editor;
+
 	void update_grid();
 	void _configure();
 	void _menu_option(int);
 	void update_palette();
 	void _set_display_mode(int p_mode);
-	ItemList *mesh_library_palette;
 	void _item_selected_cbk(int idx);
 	void _update_cursor_transform();
 	void _update_cursor_instance();
@@ -230,7 +230,6 @@ class GridMapEditor : public VBoxContainer {
 	void _delete_selection();
 	void _fill_selection();
 
-	EditorNode *editor;
 	bool do_input_action(Camera *p_camera, const Point2 &p_point, bool p_click);
 
 	friend class GridMapEditorPlugin;

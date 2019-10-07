@@ -1241,8 +1241,7 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 				} break;
 				default: {
 
-					ERR_EXPLAIN("Bug in bytecode compiler, unexpected operator #" + itos(on->op) + " in parse tree while parsing expression.");
-					ERR_FAIL_V(0); //unreachable code
+					ERR_FAIL_V_MSG(0, "Bug in bytecode compiler, unexpected operator #" + itos(on->op) + " in parse tree while parsing expression."); //unreachable code
 
 				} break;
 			}
@@ -1255,8 +1254,7 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 		//TYPE_TYPE,
 		default: {
 
-			ERR_EXPLAIN("Bug in bytecode compiler, unexpected node in parse tree while parsing expression.");
-			ERR_FAIL_V(-1); //unreachable code
+			ERR_FAIL_V_MSG(-1, "Bug in bytecode compiler, unexpected node in parse tree while parsing expression."); //unreachable code
 		} break;
 	}
 }
@@ -1522,8 +1520,16 @@ Error GDScriptCompiler::_parse_block(CodeGen &codegen, const GDScriptParser::Blo
 				if (ret2 < 0)
 					return ERR_PARSE_ERROR;
 
+				int message_ret = 0;
+				if (as->message) {
+					message_ret = _parse_expression(codegen, as->message, p_stack_level + 1, false);
+					if (message_ret < 0)
+						return ERR_PARSE_ERROR;
+				}
+
 				codegen.opcodes.push_back(GDScriptFunction::OPCODE_ASSERT);
 				codegen.opcodes.push_back(ret2);
+				codegen.opcodes.push_back(message_ret);
 #endif
 			} break;
 			case GDScriptParser::Node::TYPE_BREAKPOINT: {
@@ -2066,7 +2072,7 @@ Error GDScriptCompiler::_parse_class_blocks(GDScript *p_script, const GDScriptPa
 					}
 					instance->owner->set_script_instance(instance);
 
-					/* STEP 2, INITIALIZE AND CONSRTUCT */
+					/* STEP 2, INITIALIZE AND CONSTRUCT */
 
 					Variant::CallError ce;
 					p_script->initializer->call(instance, NULL, 0, ce);

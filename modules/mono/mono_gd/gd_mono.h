@@ -80,6 +80,13 @@ String to_string(Type p_type);
 
 class GDMono {
 
+public:
+	enum UnhandledExceptionPolicy {
+		POLICY_TERMINATE_APP,
+		POLICY_LOG_ERROR
+	};
+
+private:
 	bool runtime_initialized;
 	bool finalizing_scripts_domain;
 
@@ -102,7 +109,11 @@ class GDMono {
 
 	HashMap<uint32_t, HashMap<String, GDMonoAssembly *> > assemblies;
 
+	UnhandledExceptionPolicy unhandled_exception_policy;
+
 	void _domain_assemblies_cleanup(uint32_t p_domain_id);
+
+	bool _are_api_assemblies_out_of_sync();
 
 	bool _load_corlib_assembly();
 	bool _load_core_api_assembly();
@@ -112,11 +123,8 @@ class GDMono {
 #endif
 	bool _load_project_assembly();
 
-	bool _load_api_assemblies();
-
-#ifdef TOOLS_ENABLED
-	String _get_api_assembly_metadata_path();
-#endif
+	bool _try_load_api_assemblies();
+	void _load_api_assemblies();
 
 	void _install_trace_listener();
 
@@ -143,6 +151,7 @@ protected:
 	static GDMono *singleton;
 
 public:
+#ifdef DEBUG_METHODS_ENABLED
 	uint64_t get_api_core_hash() {
 		if (api_core_hash == 0)
 			api_core_hash = ClassDB::get_api_hash(ClassDB::API_CORE);
@@ -154,17 +163,19 @@ public:
 			api_editor_hash = ClassDB::get_api_hash(ClassDB::API_EDITOR);
 		return api_editor_hash;
 	}
-#endif
+#endif // TOOLS_ENABLED
+#endif // DEBUG_METHODS_ENABLED
 
 #ifdef TOOLS_ENABLED
-	void metadata_set_api_assembly_invalidated(APIAssembly::Type p_api_type, bool p_invalidated);
-	bool metadata_is_api_assembly_invalidated(APIAssembly::Type p_api_type);
-	String get_invalidated_api_assembly_path(APIAssembly::Type p_api_type);
+	bool copy_prebuilt_api_assembly(APIAssembly::Type p_api_type, const String &p_config);
+	String update_api_assemblies_from_prebuilt();
 #endif
 
 	static GDMono *get_singleton() { return singleton; }
 
-	static void unhandled_exception_hook(MonoObject *p_exc, void *p_user_data);
+	GD_NORETURN static void unhandled_exception_hook(MonoObject *p_exc, void *p_user_data);
+
+	UnhandledExceptionPolicy get_unhandled_exception_policy() const { return unhandled_exception_policy; }
 
 	// Do not use these, unless you know what you're doing
 	void add_assembly(uint32_t p_domain_id, GDMonoAssembly *p_assembly);
@@ -203,6 +214,7 @@ public:
 	Error finalize_and_unload_domain(MonoDomain *p_domain);
 
 	void initialize();
+	void initialize_load_assemblies();
 
 	GDMono();
 	~GDMono();

@@ -443,10 +443,8 @@ String XMLParser::get_attribute_value(const String &p_name) const {
 		}
 	}
 
-	if (idx < 0) {
-		ERR_EXPLAIN("Attribute not found: " + p_name);
-	}
-	ERR_FAIL_COND_V(idx < 0, "");
+	ERR_FAIL_COND_V_MSG(idx < 0, "", "Attribute not found: " + p_name + ".");
+
 	return attributes[idx].value;
 }
 
@@ -486,7 +484,7 @@ Error XMLParser::open(const String &p_path) {
 	Error err;
 	FileAccess *file = FileAccess::open(p_path, FileAccess::READ, &err);
 
-	ERR_FAIL_COND_V(err != OK, err);
+	ERR_FAIL_COND_V_MSG(err != OK, err, "Cannot open file '" + p_path + "'.");
 
 	length = file->get_len();
 	ERR_FAIL_COND_V(length < 1, ERR_FILE_CORRUPT);

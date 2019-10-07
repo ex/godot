@@ -41,10 +41,6 @@
 #include "scene/gui/menu_button.h"
 #include "scene/gui/tool_button.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 class TileMapEditor : public VBoxContainer {
 
 	GDCLASS(TileMapEditor, VBoxContainer);
@@ -85,6 +81,8 @@ class TileMapEditor : public VBoxContainer {
 	HSlider *size_slider;
 	ItemList *palette;
 	ItemList *manual_palette;
+
+	Label *info_message;
 
 	HBoxContainer *toolbar;
 	HBoxContainer *toolbar_right;

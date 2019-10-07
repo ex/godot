@@ -246,6 +246,7 @@ public:
 };
 
 class AnimationTrackKeyEdit;
+class AnimationMultiTrackKeyEdit;
 class AnimationBezierTrackEdit;
 
 class AnimationTrackEditGroup : public Control {
@@ -302,6 +303,8 @@ class AnimationTrackEditor : public VBoxContainer {
 	ScrollContainer *scroll;
 	VBoxContainer *track_vbox;
 	AnimationBezierTrackEdit *bezier_edit;
+
+	Label *info_message;
 
 	AnimationTimelineEdit *timeline;
 	HSlider *zoom;
@@ -384,7 +387,7 @@ class AnimationTrackEditor : public VBoxContainer {
 	void _insert_key_from_track(float p_ofs, int p_track);
 	void _add_method_key(const String &p_method);
 
-	void _clear_selection();
+	void _clear_selection(bool p_update = false);
 	void _clear_selection_for_anim(const Ref<Animation> &p_anim);
 	void _select_at_anim(const Ref<Animation> &p_anim, int p_track, float p_pos);
 
@@ -415,6 +418,7 @@ class AnimationTrackEditor : public VBoxContainer {
 	void _move_selection_cancel();
 
 	AnimationTrackKeyEdit *key_edit;
+	AnimationMultiTrackKeyEdit *multi_key_edit;
 	void _update_key_edit();
 
 	void _clear_key_edit();
@@ -518,8 +522,8 @@ public:
 	bool is_key_selected(int p_track, int p_key) const;
 	bool is_selection_active() const;
 	bool is_moving_selection() const;
+	bool is_snap_enabled() const;
 	float get_moving_selection_offset() const;
-	bool is_snap_enabled();
 	float snap_time(float p_value);
 	bool is_grouping_tracks();
 

@@ -69,9 +69,9 @@
 				Commonly used to create a one-shot delay timer as in the following example:
 				[codeblock]
 				func some_function():
-					print("start")
-					yield(get_tree().create_timer(1.0), "timeout")
-					print("end")
+				    print("start")
+				    yield(get_tree().create_timer(1.0), "timeout")
+				    print("end")
 				[/codeblock]
 			</description>
 		</method>
@@ -322,6 +322,15 @@
 			</argument>
 			<description>
 				Emitted when files are dragged from the OS file manager and dropped in the game window. The arguments are a list of file paths and the identifier of the screen where the drag originated.
+			</description>
+		</signal>
+		<signal name="global_menu_action">
+			<argument index="0" name="id" type="Nil">
+			</argument>
+			<argument index="1" name="meta" type="Nil">
+			</argument>
+			<description>
+				Emitted whenever global menu item is clicked.
 			</description>
 		</signal>
 		<signal name="idle_frame">

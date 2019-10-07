@@ -114,14 +114,19 @@ void CSharpLanguage::init() {
 	gdmono = memnew(GDMono);
 	gdmono->initialize();
 
-#ifndef MONO_GLUE_ENABLED
-	WARN_PRINT("This binary is built with `mono_glue=no` and cannot be used for scripting");
-#endif
-
 #if defined(TOOLS_ENABLED) && defined(DEBUG_METHODS_ENABLED)
+	// Generate bindings here, before loading assemblies. 'initialize_load_assemblies' aborts
+	// the applications if the api assemblies or the main tools assembly is missing, but this
+	// is not a problem for BindingsGenerator as it only needs the tools project editor assembly.
 	List<String> cmdline_args = OS::get_singleton()->get_cmdline_args();
 	BindingsGenerator::handle_cmdline_args(cmdline_args);
 #endif
+
+#ifndef MONO_GLUE_ENABLED
+	print_line("Run this binary with '--generate-mono-glue path/to/modules/mono/glue'");
+#endif
+
+	gdmono->initialize_load_assemblies();
 
 #ifdef TOOLS_ENABLED
 	EditorNode::add_init_callback(&_editor_init_callback);
@@ -624,7 +629,6 @@ void CSharpLanguage::frame() {
 
 				if (exc) {
 					GDMonoUtils::debug_unhandled_exception(exc);
-					GD_UNREACHABLE();
 				}
 			}
 		}
@@ -709,14 +713,6 @@ bool CSharpLanguage::is_assembly_reloading_needed() {
 		if (!FileAccess::exists(GodotSharpDirs::get_res_temp_assemblies_dir().plus_file(appname_safe)))
 			return false; // No assembly to load
 	}
-
-#ifdef TOOLS_ENABLED
-	if (!gdmono->get_core_api_assembly() && gdmono->metadata_is_api_assembly_invalidated(APIAssembly::API_CORE))
-		return false; // The core API assembly to load is invalidated
-
-	if (!gdmono->get_editor_api_assembly() && gdmono->metadata_is_api_assembly_invalidated(APIAssembly::API_EDITOR))
-		return false; // The editor API assembly to load is invalidated
-#endif
 
 	return true;
 }
@@ -1040,6 +1036,7 @@ void CSharpLanguage::_load_scripts_metadata() {
 		String old_json;
 
 		Error ferr = read_all_file_utf8(scripts_metadata_path, old_json);
+
 		ERR_FAIL_COND(ferr != OK);
 
 		Variant old_dict_var;
@@ -1047,7 +1044,7 @@ void CSharpLanguage::_load_scripts_metadata() {
 		int err_line;
 		Error json_err = JSON::parse(old_json, old_dict_var, err_str, err_line);
 		if (json_err != OK) {
-			ERR_PRINTS("Failed to parse metadata file: '" + err_str + "' (" + String::num_int64(err_line) + ")");
+			ERR_PRINTS("Failed to parse metadata file: '" + err_str + "' (" + String::num_int64(err_line) + ").");
 			return;
 		}
 
@@ -1057,7 +1054,7 @@ void CSharpLanguage::_load_scripts_metadata() {
 		print_verbose("Successfully loaded scripts metadata");
 	} else {
 		if (!Engine::get_singleton()->is_editor_hint()) {
-			ERR_PRINT("Missing scripts metadata file");
+			ERR_PRINT("Missing scripts metadata file.");
 		}
 	}
 }
@@ -1104,7 +1101,7 @@ bool CSharpLanguage::debug_break_parse(const String &p_file, int p_line, const S
 		_debug_parse_err_line = p_line;
 		_debug_parse_err_file = p_file;
 		_debug_error = p_error;
-		ScriptDebugger::get_singleton()->debug(this, false);
+		ScriptDebugger::get_singleton()->debug(this, false, true);
 		return true;
 	} else {
 		return false;
@@ -1198,7 +1195,7 @@ void CSharpLanguage::release_script_gchandle(MonoObject *p_expected_obj, Ref<Mon
 
 CSharpLanguage::CSharpLanguage() {
 
-	ERR_FAIL_COND(singleton);
+	ERR_FAIL_COND_MSG(singleton, "C# singleton already exist.");
 	singleton = this;
 
 	finalizing = false;
@@ -1772,12 +1769,8 @@ MonoObject *CSharpInstance::_internal_new_managed() {
 
 	// Search the constructor first, to fail with an error if it's not found before allocating anything else.
 	GDMonoMethod *ctor = script->script_class->get_method(CACHED_STRING_NAME(dotctor), 0);
-	if (ctor == NULL) {
-		ERR_PRINTS("Cannot create script instance because the class does not define a parameterless constructor: " + script->get_path());
-
-		ERR_EXPLAIN("Constructor not found");
-		ERR_FAIL_V(NULL);
-	}
+	ERR_FAIL_NULL_V_MSG(ctor, NULL,
+			"Cannot create script instance because the class does not define a parameterless constructor: '" + script->get_path() + "'.");
 
 	CSharpLanguage::get_singleton()->release_script_gchandle(gchandle);
 
@@ -1796,8 +1789,7 @@ MonoObject *CSharpInstance::_internal_new_managed() {
 
 		owner = NULL;
 
-		ERR_EXPLAIN("Failed to allocate memory for the object");
-		ERR_FAIL_V(NULL);
+		ERR_FAIL_V_MSG(NULL, "Failed to allocate memory for the object.");
 	}
 
 	// Tie managed to unmanaged
@@ -2237,7 +2229,7 @@ bool CSharpScript::_update_exports() {
 		MonoObject *tmp_object = mono_object_new(mono_domain_get(), script_class->get_mono_ptr());
 
 		if (!tmp_object) {
-			ERR_PRINT("Failed to allocate temporary MonoObject");
+			ERR_PRINT("Failed to allocate temporary MonoObject.");
 			return false;
 		}
 
@@ -2245,12 +2237,8 @@ bool CSharpScript::_update_exports() {
 
 		GDMonoMethod *ctor = script_class->get_method(CACHED_STRING_NAME(dotctor), 0);
 
-		if (ctor == NULL) {
-			ERR_PRINTS("Cannot construct temporary MonoObject because the class does not define a parameterless constructor: " + get_path());
-
-			ERR_EXPLAIN("Constructor not found");
-			ERR_FAIL_V(NULL);
-		}
+		ERR_FAIL_NULL_V_MSG(ctor, NULL,
+				"Cannot construct temporary MonoObject because the class does not define a parameterless constructor: '" + get_path() + "'.");
 
 		MonoException *ctor_exc = NULL;
 		ctor->invoke(tmp_object, NULL, &ctor_exc);
@@ -2403,7 +2391,7 @@ bool CSharpScript::_get_signal(GDMonoClass *p_class, GDMonoClass *p_delegate, Ve
 					arg.type = GDMonoMarshal::managed_to_variant_type(types[i]);
 
 					if (arg.type == Variant::NIL) {
-						ERR_PRINTS("Unknown type of signal parameter: " + arg.name + " in " + p_class->get_full_name());
+						ERR_PRINTS("Unknown type of signal parameter: '" + arg.name + "' in '" + p_class->get_full_name() + "'.");
 						return false;
 					}
 
@@ -2431,7 +2419,7 @@ bool CSharpScript::_get_member_export(IMonoClassMember *p_member, bool p_inspect
 
 	if (p_member->is_static()) {
 		if (p_member->has_attribute(CACHED_CLASS(ExportAttribute)))
-			ERR_PRINTS("Cannot export member because it is static: " + MEMBER_FULL_QUALIFIED_NAME(p_member));
+			ERR_PRINTS("Cannot export member because it is static: '" + MEMBER_FULL_QUALIFIED_NAME(p_member) + "'.");
 		return false;
 	}
 
@@ -2454,12 +2442,12 @@ bool CSharpScript::_get_member_export(IMonoClassMember *p_member, bool p_inspect
 		GDMonoProperty *property = static_cast<GDMonoProperty *>(p_member);
 		if (!property->has_getter()) {
 			if (exported)
-				ERR_PRINTS("Read-only property cannot be exported: " + MEMBER_FULL_QUALIFIED_NAME(p_member));
+				ERR_PRINTS("Read-only property cannot be exported: '" + MEMBER_FULL_QUALIFIED_NAME(p_member) + "'.");
 			return false;
 		}
 		if (!property->has_setter()) {
 			if (exported)
-				ERR_PRINTS("Write-only property (without getter) cannot be exported: " + MEMBER_FULL_QUALIFIED_NAME(p_member));
+				ERR_PRINTS("Write-only property (without getter) cannot be exported: '" + MEMBER_FULL_QUALIFIED_NAME(p_member) + "'.");
 			return false;
 		}
 	}
@@ -2478,16 +2466,15 @@ bool CSharpScript::_get_member_export(IMonoClassMember *p_member, bool p_inspect
 	String hint_string;
 
 	if (variant_type == Variant::NIL) {
-		ERR_PRINTS("Unknown exported member type: " + MEMBER_FULL_QUALIFIED_NAME(p_member));
+		ERR_PRINTS("Unknown exported member type: '" + MEMBER_FULL_QUALIFIED_NAME(p_member) + "'.");
 		return false;
 	}
 
 	int hint_res = _try_get_member_export_hint(p_member, type, variant_type, /* allow_generics: */ true, hint, hint_string);
 
-	if (hint_res == -1) {
-		ERR_EXPLAIN("Error while trying to determine information about the exported member: " + MEMBER_FULL_QUALIFIED_NAME(p_member));
-		ERR_FAIL_V(false);
-	}
+	ERR_FAIL_COND_V_MSG(hint_res == -1, false,
+			"Error while trying to determine information about the exported member: '" +
+					MEMBER_FULL_QUALIFIED_NAME(p_member) + "'.");
 
 	if (hint_res == 0) {
 		hint = PropertyHint(CACHED_FIELD(ExportAttribute, hint)->get_int_value(attr));
@@ -2536,17 +2523,11 @@ int CSharpScript::_try_get_member_export_hint(IMonoClassMember *p_member, Manage
 
 			MonoObject *val_obj = mono_field_get_value_object(mono_domain_get(), field, NULL);
 
-			if (val_obj == NULL) {
-				ERR_EXPLAIN("Failed to get '" + enum_field_name + "' constant enum value");
-				ERR_FAIL_V(-1);
-			}
+			ERR_FAIL_NULL_V_MSG(val_obj, -1, "Failed to get '" + enum_field_name + "' constant enum value.");
 
 			bool r_error;
 			uint64_t val = GDMonoUtils::unbox_enum_value(val_obj, enum_basetype, r_error);
-			if (r_error) {
-				ERR_EXPLAIN("Failed to unbox '" + enum_field_name + "' constant enum value");
-				ERR_FAIL_V(-1);
-			}
+			ERR_FAIL_COND_V_MSG(r_error, -1, "Failed to unbox '" + enum_field_name + "' constant enum value.");
 
 			if (val != (unsigned int)i) {
 				uses_default_values = false;
@@ -2581,17 +2562,11 @@ int CSharpScript::_try_get_member_export_hint(IMonoClassMember *p_member, Manage
 		PropertyHint elem_hint = PROPERTY_HINT_NONE;
 		String elem_hint_string;
 
-		if (elem_variant_type == Variant::NIL) {
-			ERR_EXPLAIN("Unknown array element type");
-			ERR_FAIL_V(-1);
-		}
+		ERR_FAIL_COND_V_MSG(elem_variant_type == Variant::NIL, -1, "Unknown array element type.");
 
 		int hint_res = _try_get_member_export_hint(p_member, elem_type, elem_variant_type, /* allow_generics: */ false, elem_hint, elem_hint_string);
 
-		if (hint_res == -1) {
-			ERR_EXPLAIN("Error while trying to determine information about the array element type");
-			ERR_FAIL_V(-1);
-		}
+		ERR_FAIL_COND_V_MSG(hint_res == -1, -1, "Error while trying to determine information about the array element type.");
 
 		// Format: type/hint:hint_string
 		r_hint_string = itos(elem_variant_type) + "/" + itos(elem_hint) + ":" + elem_hint_string;
@@ -2686,7 +2661,7 @@ void CSharpScript::_get_property_list(List<PropertyInfo> *p_properties) const {
 
 void CSharpScript::_bind_methods() {
 
-	ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "new", &CSharpScript::_new, MethodInfo(Variant::OBJECT, "new"));
+	ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "new", &CSharpScript::_new, MethodInfo("new"));
 }
 
 Ref<CSharpScript> CSharpScript::create_for_managed_type(GDMonoClass *p_class, GDMonoClass *p_native) {
@@ -2779,7 +2754,7 @@ bool CSharpScript::can_instance() const {
 						"Compile",
 						ProjectSettings::get_singleton()->globalize_path(get_path()));
 			} else {
-				ERR_PRINTS("Cannot add " + get_path() + " to the C# project because it could not be created.");
+				ERR_PRINTS("C# project could not be created; cannot add file: '" + get_path() + "'.");
 			}
 		}
 	}
@@ -2797,12 +2772,10 @@ bool CSharpScript::can_instance() const {
 	if (extra_cond && !script_class) {
 		if (GDMono::get_singleton()->get_project_assembly() == NULL) {
 			// The project assembly is not loaded
-			ERR_EXPLAIN("Cannot instance script because the project assembly is not loaded. Script: " + get_path());
-			ERR_FAIL_V(NULL);
+			ERR_FAIL_V_MSG(NULL, "Cannot instance script because the project assembly is not loaded. Script: '" + get_path() + "'.");
 		} else {
 			// The project assembly is loaded, but the class could not found
-			ERR_EXPLAIN("Cannot instance script because the class '" + name + "' could not be found. Script: " + get_path());
-			ERR_FAIL_V(NULL);
+			ERR_FAIL_V_MSG(NULL, "Cannot instance script because the class '" + name + "' could not be found. Script: '" + get_path() + "'.");
 		}
 	}
 
@@ -2824,14 +2797,12 @@ CSharpInstance *CSharpScript::_create_instance(const Variant **p_args, int p_arg
 	// Search the constructor first, to fail with an error if it's not found before allocating anything else.
 	GDMonoMethod *ctor = script_class->get_method(CACHED_STRING_NAME(dotctor), p_argcount);
 	if (ctor == NULL) {
-		if (p_argcount == 0) {
-			String path = get_path();
-			ERR_PRINTS("Cannot create script instance. The class '" + script_class->get_full_name() +
-					   "' does not define a parameterless constructor." + (path.empty() ? String() : ". Path: " + path));
-		}
+		ERR_FAIL_COND_V_MSG(p_argcount == 0, NULL,
+				"Cannot create script instance. The class '" + script_class->get_full_name() +
+						"' does not define a parameterless constructor." +
+						(get_path().empty() ? String() : " Path: '" + get_path() + "'."));
 
-		ERR_EXPLAIN("Constructor not found");
-		ERR_FAIL_V(NULL);
+		ERR_FAIL_V_MSG(NULL, "Constructor not found.");
 	}
 
 	Ref<Reference> ref;
@@ -2882,8 +2853,7 @@ CSharpInstance *CSharpScript::_create_instance(const Variant **p_args, int p_arg
 
 		p_owner->set_script_instance(NULL);
 		r_error.error = Variant::CallError::CALL_ERROR_INSTANCE_IS_NULL;
-		ERR_EXPLAIN("Failed to allocate memory for the object");
-		ERR_FAIL_V(NULL);
+		ERR_FAIL_V_MSG(NULL, "Failed to allocate memory for the object.");
 	}
 
 	// Tie managed to unmanaged
@@ -2917,11 +2887,10 @@ Variant CSharpScript::_new(const Variant **p_args, int p_argcount, Variant::Call
 
 	r_error.error = Variant::CallError::CALL_OK;
 	REF ref;
-	Object *owner = NULL;
 
 	ERR_FAIL_NULL_V(native, Variant());
 
-	owner = ClassDB::instance(NATIVE_GDMONOCLASS_NAME(native));
+	Object *owner = ClassDB::instance(NATIVE_GDMONOCLASS_NAME(native));
 
 	Reference *r = Object::cast_to<Reference>(owner);
 	if (r) {
@@ -2955,8 +2924,8 @@ ScriptInstance *CSharpScript::instance_create(Object *p_this) {
 			if (ScriptDebugger::get_singleton()) {
 				CSharpLanguage::get_singleton()->debug_break_parse(get_path(), 0, "Script inherits from native type '" + native_name + "', so it can't be instanced in object of type: '" + p_this->get_class() + "'");
 			}
-			ERR_EXPLAIN("Script inherits from native type '" + native_name + "', so it can't be instanced in object of type: '" + p_this->get_class() + "'");
-			ERR_FAIL_V(NULL);
+			ERR_FAIL_V_MSG(NULL, "Script inherits from native type '" + native_name +
+										 "', so it can't be instanced in object of type: '" + p_this->get_class() + "'.");
 		}
 	}
 
@@ -3208,12 +3177,12 @@ int CSharpScript::get_member_line(const StringName &p_member) const {
 Error CSharpScript::load_source_code(const String &p_path) {
 
 	Error ferr = read_all_file_utf8(p_path, source);
-	if (ferr != OK) {
-		if (ferr == ERR_INVALID_DATA) {
-			ERR_EXPLAIN("Script '" + p_path + "' contains invalid unicode (utf-8), so it was not loaded. Please ensure that scripts are saved in valid utf-8 unicode.");
-		}
-		ERR_FAIL_V(ferr);
-	}
+
+	ERR_FAIL_COND_V_MSG(ferr != OK, ferr,
+			ferr == ERR_INVALID_DATA ?
+					"Script '" + p_path + "' contains invalid unicode (UTF-8), so it was not loaded."
+										  " Please ensure that scripts are saved in valid UTF-8 unicode." :
+					"Failed to read file: '" + p_path + "'.");
 
 #ifdef TOOLS_ENABLED
 	source_changed_cache = true;
@@ -3273,7 +3242,7 @@ RES ResourceFormatLoaderCSharpScript::load(const String &p_path, const String &p
 
 #if defined(DEBUG_ENABLED) || defined(TOOLS_ENABLED)
 	Error err = script->load_source_code(p_path);
-	ERR_FAIL_COND_V(err != OK, RES());
+	ERR_FAIL_COND_V_MSG(err != OK, RES(), "Cannot load C# script file '" + p_path + "'.");
 #endif
 
 	script->set_path(p_original_path);
@@ -3282,8 +3251,7 @@ RES ResourceFormatLoaderCSharpScript::load(const String &p_path, const String &p
 
 #ifdef DEBUG_ENABLED
 	// User is responsible for thread attach/detach
-	ERR_EXPLAIN("Thread is not attached");
-	CRASH_COND(mono_domain_get() == NULL);
+	CRASH_COND_MSG(mono_domain_get() == NULL, "Thread is not attached.");
 #endif
 
 #endif
@@ -3350,15 +3318,14 @@ Error ResourceFormatSaverCSharpScript::save(const String &p_path, const RES &p_r
 					"Compile",
 					ProjectSettings::get_singleton()->globalize_path(p_path));
 		} else {
-			ERR_PRINTS("Failed to create C# project");
-			ERR_PRINTS("Cannot add " + p_path + " to the C# project");
+			ERR_PRINTS("C# project could not be created; cannot add file: '" + p_path + "'.");
 		}
 	}
 #endif
 
 	Error err;
 	FileAccess *file = FileAccess::open(p_path, FileAccess::WRITE, &err);
-	ERR_FAIL_COND_V(err, err);
+	ERR_FAIL_COND_V_MSG(err != OK, err, "Cannot save C# script file '" + p_path + "'.");
 
 	file->store_string(source);
 

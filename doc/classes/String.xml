@@ -272,6 +272,32 @@
 				Performs a case-sensitive comparison to another string. Returns [code]-1[/code] if less than, [code]+1[/code] if greater than, or [code]0[/code] if equal.
 			</description>
 		</method>
+		<method name="count">
+			<return type="int">
+			</return>
+			<argument index="0" name="what" type="String">
+			</argument>
+			<argument index="1" name="from" type="int" default="0">
+			</argument>
+			<argument index="2" name="to" type="int" default="0">
+			</argument>
+			<description>
+				Returns the number of occurrences of substring [code]what[/code] between [code]from[/code] and [code]to[/code] positions. If [code]from[/code] and [code]to[/code] equals 0 the whole string will be used. If only [code]to[/code] equals 0 the remained substring will be used.
+			</description>
+		</method>
+		<method name="countn">
+			<return type="int">
+			</return>
+			<argument index="0" name="what" type="String">
+			</argument>
+			<argument index="1" name="from" type="int" default="0">
+			</argument>
+			<argument index="2" name="to" type="int" default="0">
+			</argument>
+			<description>
+				Returns the number of occurrences of substring [code]what[/code] (ignoring case) between [code]from[/code] and [code]to[/code] positions. If [code]from[/code] and [code]to[/code] equals 0 the whole string will be used. If only [code]to[/code] equals 0 the remained substring will be used.
+			</description>
+		</method>
 		<method name="dedent">
 			<return type="String">
 			</return>
@@ -408,6 +434,20 @@
 				Unescapes (decodes) a string in URL encoded format. Also referred to as 'URL decode'.
 				[codeblock]
 				print("https://example.org/?escaped=" + "Godot%20Engine%3A%27docs%27".http_unescape())
+				[/codeblock]
+			</description>
+		</method>
+		<method name="humanize_size">
+			<return type="String">
+			</return>
+			<argument index="0" name="size" type="int">
+			</argument>
+			<description>
+				Converts [code]size[/code] represented as number of bytes to human-readable format using internationalized set of data size units, namely: B, KiB, MiB, GiB, TiB, PiB, EiB. Note that the next smallest unit is picked automatically to hold at most 1024 units.
+				[codeblock]
+				var bytes = 133790307
+				var size = String.humanize_size(bytes)
+				print(size) # prints "127.5 MiB"
 				[/codeblock]
 			</description>
 		</method>
@@ -627,6 +667,15 @@
 			</argument>
 			<description>
 				If the string is a path, this concatenates [code]file[/code] at the end of the string as a subpath. E.g. [code]"this/is".plus_file("path") == "this/is/path"[/code].
+			</description>
+		</method>
+		<method name="repeat">
+			<return type="String">
+			</return>
+			<argument index="0" name="count" type="int">
+			</argument>
+			<description>
+				Returns original string repeated a number of times. The number of repetitions is given by the argument.
 			</description>
 		</method>
 		<method name="replace">

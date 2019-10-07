@@ -211,9 +211,11 @@ private:
 		int breakpoint_gutter_width;
 		int fold_gutter_width;
 		int info_gutter_width;
+		int minimap_width;
 	} cache;
 
 	Map<int, int> color_region_cache;
+	Map<int, Map<int, HighlighterInfo> > syntax_highlighting_cache;
 
 	struct TextOperation {
 
@@ -313,6 +315,10 @@ private:
 	bool hiding_enabled;
 	bool draw_info_gutter;
 	int info_gutter_width;
+	bool draw_minimap;
+	int minimap_width;
+	Point2 minimap_char_size;
+	int minimap_line_spacing;
 
 	bool highlight_all_occurrences;
 	bool scroll_past_end_of_file_enabled;
@@ -326,6 +332,12 @@ private:
 
 	bool smooth_scroll_enabled;
 	bool scrolling;
+	bool dragging_selection;
+	bool dragging_minimap;
+	bool can_drag_minimap;
+	bool minimap_clicked;
+	double minimap_scroll_ratio;
+	double minimap_scroll_click_pos;
 	float target_v_scroll;
 	float v_scroll_speed;
 
@@ -353,12 +365,19 @@ private:
 	int search_result_line;
 	int search_result_col;
 
+	bool selecting_enabled;
+
 	bool context_menu_enabled;
+	bool shortcut_keys_enabled;
 
 	int executing_line;
 
+	void _generate_context_menu();
+
 	int get_visible_rows() const;
 	int get_total_visible_rows() const;
+
+	int _get_minimap_visible_rows() const;
 
 	void update_cursor_wrap_offset();
 	void _update_wrap_at();
@@ -395,6 +414,8 @@ private:
 	void _update_selection_mode_word();
 	void _update_selection_mode_line();
 
+	void _update_minimap_click();
+	void _update_minimap_drag();
 	void _scroll_up(real_t p_delta);
 	void _scroll_down(real_t p_delta);
 
@@ -406,6 +427,7 @@ private:
 
 	//void mouse_motion(const Point& p_pos, const Point& p_rel, int p_button_mask);
 	Size2 get_minimum_size() const;
+	int _get_control_height() const;
 
 	int get_row_height() const;
 
@@ -484,6 +506,7 @@ public:
 	virtual CursorShape get_cursor_shape(const Point2 &p_pos = Point2i()) const;
 
 	void _get_mouse_pos(const Point2i &p_mouse, int &r_row, int &r_col) const;
+	void _get_minimap_mouse_row(const Point2i &p_mouse, int &r_row) const;
 
 	//void delete_char();
 	//void delete_line();
@@ -564,6 +587,7 @@ public:
 
 	int cursor_get_column() const;
 	int cursor_get_line() const;
+	Vector2i _get_cursor_pixel_pos();
 
 	bool cursor_get_blink_enabled() const;
 	void cursor_set_blink_enabled(const bool p_enabled);
@@ -697,6 +721,12 @@ public:
 	void set_info_gutter_width(int p_gutter_width);
 	int get_info_gutter_width() const;
 
+	void set_draw_minimap(bool p_draw);
+	bool is_drawing_minimap() const;
+
+	void set_minimap_width(int p_minimap_width);
+	int get_minimap_width() const;
+
 	void set_hiding_enabled(bool p_enabled);
 	bool is_hiding_enabled() const;
 
@@ -712,6 +742,12 @@ public:
 
 	void set_context_menu_enabled(bool p_enable);
 	bool is_context_menu_enabled();
+
+	void set_selecting_enabled(bool p_enabled);
+	bool is_selecting_enabled() const;
+
+	void set_shortcut_keys_enabled(bool p_enabled);
+	bool is_shortcut_keys_enabled() const;
 
 	PopupMenu *get_menu() const;
 

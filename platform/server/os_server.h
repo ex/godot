@@ -47,9 +47,6 @@
 #include "servers/visual_server.h"
 
 #undef CursorShape
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 
 class OS_Server : public OS_Unix {
 
@@ -74,6 +71,7 @@ class OS_Server : public OS_Unix {
 #endif
 
 	CrashHandler crash_handler;
+	CameraServer *camera_server;
 
 	int video_driver_index;
 

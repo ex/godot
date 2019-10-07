@@ -70,6 +70,7 @@ class SceneTreeDock : public VBoxContainer {
 		TOOL_MOVE_DOWN,
 		TOOL_DUPLICATE,
 		TOOL_REPARENT,
+		TOOL_REPARENT_TO_NEW_NODE,
 		TOOL_MAKE_ROOT,
 		TOOL_NEW_SCENE_FROM,
 		TOOL_MERGE_FROM_SCENE,
@@ -126,6 +127,7 @@ class SceneTreeDock : public VBoxContainer {
 	AcceptDialog *accept;
 	ConfirmationDialog *delete_dialog;
 	ConfirmationDialog *editable_instance_remove_dialog;
+	ConfirmationDialog *placeholder_editable_instance_remove_dialog;
 
 	ReparentDialog *reparent_dialog;
 	EditorQuickOpen *quick_open;
@@ -142,6 +144,7 @@ class SceneTreeDock : public VBoxContainer {
 	bool first_enter;
 
 	void _create();
+	void _do_create(Node *p_parent);
 	Node *scene_root;
 	Node *edited_scene;
 	EditorNode *editor;
@@ -181,6 +184,8 @@ class SceneTreeDock : public VBoxContainer {
 
 	void _toggle_editable_children_from_selection();
 	void _toggle_editable_children(Node *p_node);
+
+	void _toggle_placeholder_from_selection();
 
 	void _node_prerenamed(Node *p_node, const String &p_new_name);
 

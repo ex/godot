@@ -152,7 +152,7 @@ void IP_Unix::get_local_interfaces(Map<String, Interface_Info> *r_interfaces) co
 			Interface_Info info;
 			info.name = name;
 			info.name_friendly = hostname->DisplayName->Data();
-			info.index = 0;
+			info.index = String::num_uint64(0);
 			E = r_interfaces->insert(name, info);
 			ERR_CONTINUE(!E);
 		}
@@ -184,9 +184,7 @@ void IP_Unix::get_local_interfaces(Map<String, Interface_Info> *r_interfaces) co
 			continue; // will go back and alloc the right size
 		};
 
-		ERR_EXPLAIN("Call to GetAdaptersAddresses failed with error " + itos(err));
-		ERR_FAIL();
-		return;
+		ERR_FAIL_MSG("Call to GetAdaptersAddresses failed with error " + itos(err) + ".");
 	};
 
 	IP_ADAPTER_ADDRESSES *adapter = addrs;

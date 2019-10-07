@@ -5,6 +5,7 @@
 	</brief_description>
 	<description>
 		Contains global variables accessible from everywhere. Use [method get_setting], [method set_setting] or [method has_setting] to access them. Variables stored in [code]project.godot[/code] are also loaded into ProjectSettings, making this object very useful for reading custom game configuration options.
+		When naming a Project Settings property, use the full path to the setting including the category. For example, [code]"application/config/name"[/code] for the project name. Category and property names can be viewed in the Project Settings dialog.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -55,6 +56,11 @@
 			<argument index="0" name="name" type="String">
 			</argument>
 			<description>
+				Returns the value of a setting.
+				[b]Example:[/b]
+				[codeblock]
+				print(ProjectSettings.get_setting("application/config/name"))
+				[/codeblock]
 			</description>
 		</method>
 		<method name="globalize_path" qualifiers="const">
@@ -80,9 +86,11 @@
 			</return>
 			<argument index="0" name="pack" type="String">
 			</argument>
+			<argument index="1" name="replace_files" type="bool" default="true">
+			</argument>
 			<description>
 				Loads the contents of the .pck or .zip file specified by [code]pack[/code] into the resource filesystem ([code]res://[/code]). Returns [code]true[/code] on success.
-				[b]Note:[/b] If a file from [code]pack[/code] shares the same path as a file already in the resource filesystem, any attempts to load that file will use the file from [code]pack[/code].
+				[b]Note:[/b] If a file from [code]pack[/code] shares the same path as a file already in the resource filesystem, any attempts to load that file will use the file from [code]pack[/code] unless [code]replace_files[/code] is set to [code]false[/code].
 			</description>
 		</method>
 		<method name="localize_path" qualifiers="const">
@@ -179,6 +187,9 @@
 		<member name="application/config/custom_user_dir_name" type="String" setter="" getter="" default="&quot;&quot;">
 			This user directory is used for storing persistent data ([code]user://[/code] filesystem). If left empty, [code]user://[/code] resolves to a project-specific folder in Godot's own configuration folder (see [method OS.get_user_data_dir]). If a custom directory name is defined, this name will be used instead and appended to the system-specific user data directory (same parent folder as the Godot configuration folder documented in [method OS.get_user_data_dir]).
 			The [member application/config/use_custom_user_dir] setting must be enabled for this to take effect.
+		</member>
+		<member name="application/config/description" type="String" setter="" getter="" default="&quot;&quot;">
+			The project's description, displayed as a tooltip in the Project Manager when hovering the project.
 		</member>
 		<member name="application/config/icon" type="String" setter="" getter="" default="&quot;&quot;">
 			Icon used for the project, set when project loads. Exporters will also use this icon when possible.
@@ -392,25 +403,27 @@
 			Sets the window to full screen when it starts.
 		</member>
 		<member name="display/window/size/height" type="int" setter="" getter="" default="600">
-			Sets the main window height. On desktop, this is the default window size. Stretch mode settings use this also as a reference when enabled.
+			Sets the game's main viewport height. On desktop platforms, this is the default window size. Stretch mode settings also use this as a reference when enabled.
 		</member>
 		<member name="display/window/size/resizable" type="bool" setter="" getter="" default="true">
 			Allows the window to be resizable by default.
 		</member>
 		<member name="display/window/size/test_height" type="int" setter="" getter="" default="0">
-			If greater than zero, uses a different height for the window when running from the editor. The main use for this is to test with stretch modes.
+			If greater than zero, overrides the window height when running the game. Useful for testing stretch modes.
 		</member>
 		<member name="display/window/size/test_width" type="int" setter="" getter="" default="0">
-			If greater than zero, uses a different width for the window when running from the editor. The main use for this is to test with stretch modes.
+			If greater than zero, overrides the window width when running the game. Useful for testing stretch modes.
 		</member>
 		<member name="display/window/size/width" type="int" setter="" getter="" default="1024">
-			Sets the main window width. On desktop platforms, this is the default window size. Stretch mode settings use this also as a reference when enabled.
+			Sets the game's main viewport width. On desktop platforms, this is the default window size. Stretch mode settings also use this as a reference when enabled.
 		</member>
 		<member name="display/window/vsync/use_vsync" type="bool" setter="" getter="" default="true">
 			If [code]true[/code], enables vertical synchronization. This eliminates tearing that may appear in moving scenes, at the cost of higher input latency and stuttering at lower framerates. If [code]false[/code], vertical synchronization will be disabled, however, many platforms will enforce it regardless (such as mobile platforms and HTML5).
 		</member>
 		<member name="editor/active" type="bool" setter="" getter="" default="false">
 			Internal editor setting, don't touch.
+		</member>
+		<member name="editor/script_templates_search_path" type="String" setter="" getter="" default="&quot;res://script_templates&quot;">
 		</member>
 		<member name="editor/search_in_file_extensions" type="PoolStringArray" setter="" getter="" default="PoolStringArray( &quot;gd&quot;, &quot;shader&quot; )">
 		</member>
@@ -434,92 +447,31 @@
 		<member name="gui/timers/text_edit_idle_detect_sec" type="float" setter="" getter="" default="3">
 			Timer for detecting idle in the editor (in seconds).
 		</member>
-		<member name="input/ui_accept" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777221,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777222,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:32,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:0,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_accept" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777221,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777222,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:32,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:0,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_cancel" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777217,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:1,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_cancel" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777217,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:1,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_down" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777234,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:13,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_down" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777234,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:13,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_end" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777230,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_end" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777230,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_focus_next" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777218,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_focus_next" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777218,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_focus_prev" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:true,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777218,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_focus_prev" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:true,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777218,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_home" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777229,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_home" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777229,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_left" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777231,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:14,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_left" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777231,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:14,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_page_down" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777236,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_page_down" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777236,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_page_up" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777235,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_page_up" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777235,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_right" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777233,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:15,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_right" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777233,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:15,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_select" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:32,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:3,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_select" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:32,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:3,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
-		<member name="input/ui_up" type="Dictionary" setter="" getter="" default="{
-&quot;deadzone&quot;: 0.5,
-&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777232,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null)
-, Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:12,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null)
- ]
-}">
+		<member name="input/ui_up" type="Dictionary" setter="" getter="" default="{&quot;deadzone&quot;: 0.5,&quot;events&quot;: [ Object(InputEventKey,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;alt&quot;:false,&quot;shift&quot;:false,&quot;control&quot;:false,&quot;meta&quot;:false,&quot;command&quot;:false,&quot;pressed&quot;:false,&quot;scancode&quot;:16777232,&quot;unicode&quot;:0,&quot;echo&quot;:false,&quot;script&quot;:null), Object(InputEventJoypadButton,&quot;resource_local_to_scene&quot;:false,&quot;resource_name&quot;:&quot;&quot;,&quot;device&quot;:0,&quot;button_index&quot;:12,&quot;pressure&quot;:0.0,&quot;pressed&quot;:false,&quot;script&quot;:null) ]}">
 		</member>
 		<member name="input_devices/pointing/emulate_mouse_from_touch" type="bool" setter="" getter="" default="true">
 			If [code]true[/code], sends mouse input events when tapping or swiping on the touchscreen.
@@ -711,16 +663,21 @@
 		<member name="network/limits/debugger_stdout/max_chars_per_second" type="int" setter="" getter="" default="2048">
 			Maximum amount of characters allowed to send as output from the debugger. Over this value, content is dropped. This helps not to stall the debugger connection.
 		</member>
-		<member name="network/limits/debugger_stdout/max_errors_per_frame" type="int" setter="" getter="" default="10">
-			Maximum amount of errors allowed to send as output from the debugger. Over this value, content is dropped. This helps not to stall the debugger connection.
+		<member name="network/limits/debugger_stdout/max_errors_per_second" type="int" setter="" getter="" default="100">
+			Maximum number of errors allowed to be sent as output from the debugger. Over this value, content is dropped. This helps not to stall the debugger connection.
 		</member>
 		<member name="network/limits/debugger_stdout/max_messages_per_frame" type="int" setter="" getter="" default="10">
 			Maximum amount of messages allowed to send as output from the debugger. Over this value, content is dropped. This helps not to stall the debugger connection.
+		</member>
+		<member name="network/limits/debugger_stdout/max_warnings_per_second" type="int" setter="" getter="" default="100">
+			Maximum number of warnings allowed to be sent as output from the debugger. Over this value, content is dropped. This helps not to stall the debugger connection.
 		</member>
 		<member name="network/limits/packet_peer_stream/max_buffer_po2" type="int" setter="" getter="" default="16">
 			Default size of packet peer stream for deserializing Godot data. Over this size, data is dropped.
 		</member>
 		<member name="network/limits/tcp/connect_timeout_seconds" type="int" setter="" getter="" default="30">
+		</member>
+		<member name="network/limits/webrtc/max_channel_in_buffer_kb" type="int" setter="" getter="" default="64">
 		</member>
 		<member name="network/limits/websocket_client/max_in_buffer_kb" type="int" setter="" getter="" default="64">
 		</member>
@@ -743,6 +700,8 @@
 		</member>
 		<member name="network/remote_fs/page_size" type="int" setter="" getter="" default="65536">
 			Page size used by remote filesystem (in bytes).
+		</member>
+		<member name="network/ssl/certificates" type="String" setter="" getter="" default="&quot;&quot;">
 		</member>
 		<member name="node/name_casing" type="int" setter="" getter="" default="0">
 			When creating node names automatically, set the type of casing in this project. This is mostly an editor setting.
@@ -771,7 +730,7 @@
 			Fix to improve physics jitter, specially on monitors where refresh rate is different than the physics FPS.
 		</member>
 		<member name="rendering/environment/default_clear_color" type="Color" setter="" getter="" default="Color( 0.3, 0.3, 0.3, 1 )">
-			Default background clear color. Overriddable per [Viewport] using its [Environment]. See [member Environment.background_mode] and [member Environment.background_color] in particular. To change this default color programmatically, use [method VisualServer.set_default_clear_color].
+			Default background clear color. Overridable per [Viewport] using its [Environment]. See [member Environment.background_mode] and [member Environment.background_color] in particular. To change this default color programmatically, use [method VisualServer.set_default_clear_color].
 		</member>
 		<member name="rendering/limits/buffers/blend_shape_max_buffer_size_kb" type="int" setter="" getter="" default="4096">
 			Max buffer size for blend shapes. Any blend shape bigger than this will not work.
@@ -787,6 +746,12 @@
 		</member>
 		<member name="rendering/limits/rendering/max_renderable_elements" type="int" setter="" getter="" default="65536">
 			Max amount of elements renderable in a frame. If more than this are visible per frame, they will be dropped. Keep in mind elements refer to mesh surfaces and not meshes themselves.
+		</member>
+		<member name="rendering/limits/rendering/max_renderable_lights" type="int" setter="" getter="" default="4096">
+			Max number of lights renderable in a frame. If more than this number are used, they will be ignored. On some systems (particularly web) setting this number as low as possible can increase the speed of shader compilation.
+		</member>
+		<member name="rendering/limits/rendering/max_renderable_reflections" type="int" setter="" getter="" default="1024">
+			Max number of reflection probes renderable in a frame. If more than this number are used, they will be ignored. On some systems (particularly web) setting this number as low as possible can increase the speed of shader compilation.
 		</member>
 		<member name="rendering/limits/time/time_rollover_secs" type="float" setter="" getter="" default="3600">
 			Shaders have a time variable that constantly increases. At some point, it needs to be rolled back to zero to avoid precision errors on shader animations. This setting specifies when (in seconds).
@@ -805,7 +770,7 @@
 			If [code]true[/code], performs a previous depth pass before rendering materials. This increases performance in scenes with high overdraw, when complex materials and lighting are used.
 		</member>
 		<member name="rendering/quality/directional_shadow/size" type="int" setter="" getter="" default="4096">
-			The directional shadow's size in pixels. Higher values will result in sharper shadows, at the cost of performance.
+			The directional shadow's size in pixels. Higher values will result in sharper shadows, at the cost of performance. The value will be rounded up to the nearest power of 2.
 		</member>
 		<member name="rendering/quality/directional_shadow/size.mobile" type="int" setter="" getter="" default="2048">
 		</member>
@@ -886,7 +851,7 @@
 		<member name="rendering/quality/subsurface_scattering/weight_samples" type="bool" setter="" getter="" default="true">
 			Weight subsurface scattering samples. Helps to avoid reading samples from unrelated parts of the screen.
 		</member>
-		<member name="rendering/quality/voxel_cone_tracing/high_quality" type="bool" setter="" getter="" default="true">
+		<member name="rendering/quality/voxel_cone_tracing/high_quality" type="bool" setter="" getter="" default="false">
 			Use high-quality voxel cone tracing. This results in better-looking reflections, but is much more expensive on the GPU.
 		</member>
 		<member name="rendering/threads/thread_model" type="int" setter="" getter="" default="1">
@@ -907,7 +872,7 @@
 		<member name="rendering/vram_compression/import_s3tc" type="bool" setter="" getter="" default="true">
 			If [code]true[/code], the texture importer will import VRAM-compressed textures using the S3 Texture Compression algorithm. This algorithm is only supported on desktop platforms and consoles.
 		</member>
-		<member name="script" type="Script" setter="" getter="" default="null">
+		<member name="script" type="Script" setter="" getter="">
 		</member>
 	</members>
 	<constants>

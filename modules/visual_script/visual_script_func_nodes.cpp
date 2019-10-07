@@ -133,10 +133,12 @@ int VisualScriptFunctionCall::get_input_value_port_count() const {
 
 		MethodBind *mb = ClassDB::get_method(_get_base_type(), function);
 		if (mb) {
-			return mb->get_argument_count() + (call_mode == CALL_MODE_INSTANCE ? 1 : 0) + (rpc_call_mode >= RPC_RELIABLE_TO_ID ? 1 : 0) - use_default_args;
+			int defaulted_args = mb->get_argument_count() < use_default_args ? mb->get_argument_count() : use_default_args;
+			return mb->get_argument_count() + (call_mode == CALL_MODE_INSTANCE ? 1 : 0) + (rpc_call_mode >= RPC_RELIABLE_TO_ID ? 1 : 0) - defaulted_args;
 		}
 
-		return method_cache.arguments.size() + (call_mode == CALL_MODE_INSTANCE ? 1 : 0) + (rpc_call_mode >= RPC_RELIABLE_TO_ID ? 1 : 0) - use_default_args;
+		int defaulted_args = method_cache.arguments.size() < use_default_args ? method_cache.arguments.size() : use_default_args;
+		return method_cache.arguments.size() + (call_mode == CALL_MODE_INSTANCE ? 1 : 0) + (rpc_call_mode >= RPC_RELIABLE_TO_ID ? 1 : 0) - defaulted_args;
 	}
 }
 int VisualScriptFunctionCall::get_output_value_port_count() const {
@@ -1026,7 +1028,6 @@ void VisualScriptPropertySet::_adjust_input_index(PropertyInfo &pinfo) const {
 }
 
 PropertyInfo VisualScriptPropertySet::get_input_value_port_info(int p_idx) const {
-
 	if (call_mode == CALL_MODE_INSTANCE || call_mode == CALL_MODE_BASIC_TYPE) {
 		if (p_idx == 0) {
 			PropertyInfo pi;
@@ -1034,6 +1035,16 @@ PropertyInfo VisualScriptPropertySet::get_input_value_port_info(int p_idx) const
 			pi.name = (call_mode == CALL_MODE_INSTANCE ? String("instance") : Variant::get_type_name(basic_type).to_lower());
 			_adjust_input_index(pi);
 			return pi;
+		}
+	}
+
+	List<PropertyInfo> props;
+	ClassDB::get_property_list(_get_base_type(), &props, true);
+	for (List<PropertyInfo>::Element *E = props.front(); E; E = E->next()) {
+		if (E->get().name == property) {
+			PropertyInfo pinfo = PropertyInfo(E->get().type, "value", PROPERTY_HINT_TYPE_STRING, E->get().hint_string);
+			_adjust_input_index(pinfo);
+			return pinfo;
 		}
 	}
 
@@ -1796,14 +1807,12 @@ PropertyInfo VisualScriptPropertyGet::get_input_value_port_info(int p_idx) const
 }
 
 PropertyInfo VisualScriptPropertyGet::get_output_value_port_info(int p_idx) const {
-
-	if (index != StringName()) {
-
-		Variant v;
-		Variant::CallError ce;
-		v = Variant::construct(type_cache, NULL, 0, ce);
-		Variant i = v.get(index);
-		return PropertyInfo(i.get_type(), "value." + String(index));
+	List<PropertyInfo> props;
+	ClassDB::get_property_list(_get_base_type(), &props, true);
+	for (List<PropertyInfo>::Element *E = props.front(); E; E = E->next()) {
+		if (E->get().name == property) {
+			return PropertyInfo(E->get().type, "value." + String(index));
+		}
 	}
 
 	return PropertyInfo(type_cache, "value");
