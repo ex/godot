@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -349,16 +349,15 @@ private:
 
 	void _path_selected(const String &p_path) {
 
-		String p = p_path;
-		String sp = p.simplify_path();
+		String sp = p_path.simplify_path();
 		project_path->set_text(sp);
 		_path_text_changed(sp);
 		get_ok()->call_deferred("grab_focus");
 	}
 
 	void _install_path_selected(const String &p_path) {
-		String p = p_path;
-		String sp = p.simplify_path();
+
+		String sp = p_path.simplify_path();
 		install_path->set_text(sp);
 		_path_text_changed(sp);
 		get_ok()->call_deferred("grab_focus");
@@ -372,8 +371,8 @@ private:
 
 			fdialog->set_mode(FileDialog::MODE_OPEN_FILE);
 			fdialog->clear_filters();
-			fdialog->add_filter("project.godot ; " VERSION_NAME " Project");
-			fdialog->add_filter("*.zip ; Zip File");
+			fdialog->add_filter(vformat("project.godot ; %s %s", VERSION_NAME, TTR("Project")));
+			fdialog->add_filter("*.zip ; " + TTR("ZIP File"));
 		} else {
 			fdialog->set_mode(FileDialog::MODE_OPEN_DIR);
 		}
@@ -1023,6 +1022,7 @@ public:
 	ProjectList();
 	~ProjectList();
 
+	void update_dock_menu();
 	void load_projects();
 	void set_search_term(String p_search_term);
 	void set_order_option(ProjectListFilter::FilterOption p_option);
@@ -1210,7 +1210,6 @@ void ProjectList::load_projects() {
 	_projects.clear();
 	_last_clicked = "";
 	_selected_project_keys.clear();
-	OS::get_singleton()->global_menu_clear("_dock");
 
 	// Load data
 	// TODO Would be nice to change how projects and favourites are stored... it complicates things a bit.
@@ -1248,14 +1247,38 @@ void ProjectList::load_projects() {
 		create_project_item_control(i);
 	}
 
-	OS::get_singleton()->global_menu_add_separator("_dock");
-	OS::get_singleton()->global_menu_add_item("_dock", TTR("New Window"), GLOBAL_NEW_WINDOW, Variant());
-
 	sort_projects();
 
 	set_v_scroll(0);
 
 	update_icons_async();
+
+	update_dock_menu();
+}
+
+void ProjectList::update_dock_menu() {
+	OS::get_singleton()->global_menu_clear("_dock");
+
+	int favs_added = 0;
+	int total_added = 0;
+	for (int i = 0; i < _projects.size(); ++i) {
+		if (!_projects[i].grayed && !_projects[i].missing) {
+			if (_projects[i].favorite) {
+				favs_added++;
+			} else {
+				if (favs_added != 0) {
+					OS::get_singleton()->global_menu_add_separator("_dock");
+				}
+				favs_added = 0;
+			}
+			OS::get_singleton()->global_menu_add_item("_dock", _projects[i].project_name + " ( " + _projects[i].path + " )", GLOBAL_OPEN_PROJECT, Variant(_projects[i].path.plus_file("project.godot")));
+			total_added++;
+		}
+	}
+	if (total_added != 0) {
+		OS::get_singleton()->global_menu_add_separator("_dock");
+	}
+	OS::get_singleton()->global_menu_add_item("_dock", TTR("New Window"), GLOBAL_NEW_WINDOW, Variant());
 }
 
 void ProjectList::create_project_item_control(int p_index) {
@@ -1341,7 +1364,6 @@ void ProjectList::create_project_item_control(int p_index) {
 	fpath->set_clip_text(true);
 
 	_scroll_children->add_child(hb);
-	OS::get_singleton()->global_menu_add_item("_dock", item.project_name + " ( " + item.path + " )", GLOBAL_OPEN_PROJECT, Variant(item.path.plus_file("project.godot")));
 	item.control = hb;
 }
 
@@ -1387,13 +1409,13 @@ void ProjectList::sort_projects() {
 
 	for (int i = 0; i < _projects.size(); ++i) {
 		Item &item = _projects.write[i];
-		if (item.control->is_visible()) {
-			item.control->get_parent()->move_child(item.control, i);
-		}
+		item.control->get_parent()->move_child(item.control, i);
 	}
 
 	// Rewind the coroutine because order of projects changed
 	update_icons_async();
+
+	update_dock_menu();
 }
 
 const Set<String> &ProjectList::get_selected_project_keys() const {
@@ -1470,6 +1492,8 @@ void ProjectList::remove_project(int p_index, bool p_update_settings) {
 		EditorSettings::get_singleton()->erase("favorite_projects/" + item.project_key);
 		// Not actually saving the file, in case you are doing more changes to settings
 	}
+
+	update_dock_menu();
 }
 
 bool ProjectList::is_any_project_missing() const {
@@ -1568,6 +1592,7 @@ int ProjectList::refresh_project(const String &dir_path) {
 					ensure_project_visible(i);
 				}
 				load_project_icon(i);
+
 				index = i;
 				break;
 			}
@@ -1642,6 +1667,8 @@ void ProjectList::erase_selected_projects() {
 
 	_selected_project_keys.clear();
 	_last_clicked = "";
+
+	update_dock_menu();
 }
 
 // Draws selected project highlight
@@ -1725,6 +1752,8 @@ void ProjectList::_favorite_pressed(Node *p_hb) {
 			}
 		}
 	}
+
+	update_dock_menu();
 }
 
 void ProjectList::_show_project(const String &p_path) {
@@ -1752,6 +1781,12 @@ void ProjectManager::_notification(int p_what) {
 		case NOTIFICATION_ENTER_TREE: {
 
 			Engine::get_singleton()->set_editor_hint(false);
+		} break;
+		case NOTIFICATION_RESIZED: {
+
+			if (open_templates->is_visible()) {
+				open_templates->popup_centered_minsize();
+			}
 		} break;
 		case NOTIFICATION_READY: {
 
@@ -1923,6 +1958,8 @@ void ProjectManager::_on_projects_updated() {
 	if (index != -1) {
 		_project_list->ensure_project_visible(index);
 	}
+
+	_project_list->update_dock_menu();
 }
 
 void ProjectManager::_on_project_created(const String &dir) {
@@ -1931,6 +1968,8 @@ void ProjectManager::_on_project_created(const String &dir) {
 	_project_list->select_project(i);
 	_project_list->ensure_project_visible(i);
 	_open_selected_projects_ask();
+
+	_project_list->update_dock_menu();
 }
 
 void ProjectManager::_confirm_update_settings() {
@@ -1942,6 +1981,7 @@ void ProjectManager::_global_menu_action(const Variant &p_id, const Variant &p_m
 	int id = (int)p_id;
 	if (id == ProjectList::GLOBAL_NEW_WINDOW) {
 		List<String> args;
+		args.push_back("-p");
 		String exec = OS::get_singleton()->get_executable_path();
 
 		OS::ProcessID pid = 0;
@@ -2397,7 +2437,7 @@ ProjectManager::ProjectManager() {
 
 	String cp;
 	cp += 0xA9;
-	OS::get_singleton()->set_window_title(VERSION_NAME + String(" - ") + TTR("Project Manager") + " - " + cp + " 2007-2019 Juan Linietsky, Ariel Manzur & Godot Contributors");
+	OS::get_singleton()->set_window_title(VERSION_NAME + String(" - ") + TTR("Project Manager") + " - " + cp + " 2007-2020 Juan Linietsky, Ariel Manzur & Godot Contributors");
 
 	Control *center_box = memnew(Control);
 	center_box->set_v_size_flags(SIZE_EXPAND_FILL);
@@ -2424,9 +2464,9 @@ ProjectManager::ProjectManager() {
 	sort_label->set_text(TTR("Sort:"));
 	sort_filters->add_child(sort_label);
 	Vector<String> sort_filter_titles;
-	sort_filter_titles.push_back("Name");
-	sort_filter_titles.push_back("Path");
-	sort_filter_titles.push_back("Last Modified");
+	sort_filter_titles.push_back(TTR("Name"));
+	sort_filter_titles.push_back(TTR("Path"));
+	sort_filter_titles.push_back(TTR("Last Modified"));
 	project_order_filter = memnew(ProjectListFilter);
 	project_order_filter->add_filter_option();
 	project_order_filter->_setup_filters(sort_filter_titles);
@@ -2654,7 +2694,7 @@ void ProjectListFilter::_setup_filters(Vector<String> options) {
 
 	filter_option->clear();
 	for (int i = 0; i < options.size(); i++)
-		filter_option->add_item(TTR(options[i]));
+		filter_option->add_item(options[i]);
 }
 
 void ProjectListFilter::_search_text_changed(const String &p_newtext) {

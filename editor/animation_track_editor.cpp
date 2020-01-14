@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -266,7 +266,6 @@ public:
 				else
 					undo_redo->create_action(TTR("Anim Change Call"));
 
-				Variant prev = animation->track_get_key_value(track, key);
 				setting = true;
 				undo_redo->add_do_method(animation.ptr(), "track_set_key_value", track, key, d_new);
 				undo_redo->add_undo_method(animation.ptr(), "track_set_key_value", track, key, d_old);
@@ -2026,7 +2025,7 @@ void AnimationTrackEdit::_notification(int p_what) {
 
 				float offset = animation->track_get_key_time(track, i) - timeline->get_value();
 				if (editor->is_key_selected(track, i) && editor->is_moving_selection()) {
-					offset = editor->snap_time(offset + editor->get_moving_selection_offset());
+					offset = editor->snap_time(offset + editor->get_moving_selection_offset(), true);
 				}
 				offset = offset * scale + limit;
 				if (i < animation->track_get_key_count(track) - 1) {
@@ -3791,8 +3790,9 @@ void AnimationTrackEditor::insert_value_key(const String &p_property, const Vari
 				value = p_value; //all good
 			} else {
 				String tpath = animation->track_get_path(i);
-				if (NodePath(tpath.get_basename()) == np) {
-					String subindex = tpath.get_extension();
+				int index = tpath.find_last(":");
+				if (NodePath(tpath.substr(0, index + 1)) == np) {
+					String subindex = tpath.substr(index + 1, tpath.length() - index);
 					value = p_value.get(subindex);
 				} else {
 					continue;
@@ -4580,7 +4580,7 @@ void AnimationTrackEditor::_new_track_property_selected(String p_name) {
 			bool valid;
 			subindices = _get_bezier_subindices_for_type(h.type, &valid);
 			if (!valid) {
-				EditorNode::get_singleton()->show_warning("Invalid track for Bezier (no suitable sub-properties)");
+				EditorNode::get_singleton()->show_warning(TTR("Invalid track for Bezier (no suitable sub-properties)"));
 				return;
 			}
 		}
@@ -5703,7 +5703,7 @@ void AnimationTrackEditor::_selection_changed() {
 	}
 }
 
-float AnimationTrackEditor::snap_time(float p_value) {
+float AnimationTrackEditor::snap_time(float p_value, bool p_relative) {
 
 	if (is_snap_enabled()) {
 
@@ -5713,7 +5713,12 @@ float AnimationTrackEditor::snap_time(float p_value) {
 		else
 			snap_increment = step->get_value();
 
-		p_value = Math::stepify(p_value, snap_increment);
+		if (p_relative) {
+			double rel = Math::fmod(timeline->get_value(), snap_increment);
+			p_value = Math::stepify(p_value + rel, snap_increment) - rel;
+		} else {
+			p_value = Math::stepify(p_value, snap_increment);
+		}
 	}
 
 	return p_value;
@@ -5727,16 +5732,24 @@ void AnimationTrackEditor::_show_imported_anim_warning() const {
 }
 
 void AnimationTrackEditor::_select_all_tracks_for_copy() {
+
 	TreeItem *track = track_copy_select->get_root()->get_children();
+	if (!track)
+		return;
+
+	bool all_selected = true;
 	while (track) {
-		track->set_checked(0, selected_all_tracks);
+		if (!track->is_checked(0))
+			all_selected = false;
+
 		track = track->get_next();
 	}
-	selected_all_tracks = !selected_all_tracks;
-	if (selected_all_tracks)
-		select_all_button->set_text(TTR("Select All"));
-	else
-		select_all_button->set_text(TTR("Select None"));
+
+	track = track_copy_select->get_root()->get_children();
+	while (track) {
+		track->set_checked(0, !all_selected);
+		track = track->get_next();
+	}
 }
 
 void AnimationTrackEditor::_bind_methods() {
@@ -5810,6 +5823,7 @@ AnimationTrackEditor::AnimationTrackEditor() {
 	info_message->set_valign(Label::VALIGN_CENTER);
 	info_message->set_align(Label::ALIGN_CENTER);
 	info_message->set_autowrap(true);
+	info_message->set_custom_minimum_size(Size2(100 * EDSCALE, 0));
 	info_message->set_anchors_and_margins_preset(PRESET_WIDE, PRESET_MODE_KEEP_SIZE, 8 * EDSCALE);
 	main_panel->add_child(info_message);
 
@@ -6067,25 +6081,22 @@ AnimationTrackEditor::AnimationTrackEditor() {
 
 	track_copy_dialog = memnew(ConfirmationDialog);
 	add_child(track_copy_dialog);
-	track_copy_dialog->set_title(TTR("Select tracks to copy:"));
+	track_copy_dialog->set_title(TTR("Select Tracks to Copy"));
 	track_copy_dialog->get_ok()->set_text(TTR("Copy"));
 
 	VBoxContainer *track_vbox = memnew(VBoxContainer);
 	track_copy_dialog->add_child(track_vbox);
 
-	selected_all_tracks = true;
+	Button *select_all_button = memnew(Button);
+	select_all_button->set_text(TTR("Select All/None"));
+	select_all_button->connect("pressed", this, "_select_all_tracks_for_copy");
+	track_vbox->add_child(select_all_button);
 
 	track_copy_select = memnew(Tree);
 	track_copy_select->set_h_size_flags(SIZE_EXPAND_FILL);
 	track_copy_select->set_v_size_flags(SIZE_EXPAND_FILL);
 	track_copy_select->set_hide_root(true);
 	track_vbox->add_child(track_copy_select);
-	track_copy_options = memnew(HBoxContainer);
-	track_vbox->add_child(track_copy_options);
-	select_all_button = memnew(Button);
-	select_all_button->set_text(TTR("Select All"));
-	select_all_button->connect("pressed", this, "_select_all_tracks_for_copy");
-	track_copy_options->add_child(select_all_button);
 	track_copy_dialog->connect("confirmed", this, "_edit_menu_pressed", varray(EDIT_COPY_TRACKS_CONFIRM));
 	animation_changing_awaiting_update = false;
 }

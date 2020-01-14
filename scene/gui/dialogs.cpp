@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,6 +35,7 @@
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_node.h"
+#include "editor/editor_scale.h"
 #include "scene/main/viewport.h" // Only used to check for more modals when dimming the editor.
 #endif
 
@@ -161,7 +162,7 @@ void WindowDialog::_gui_input(const Ref<InputEvent> &p_event) {
 			global_pos.y = MAX(global_pos.y, 0); // Ensure title bar stays visible.
 
 			Rect2 rect = get_rect();
-			Size2 min_size = get_minimum_size();
+			Size2 min_size = get_combined_minimum_size();
 
 			if (drag_type == DRAG_MOVE) {
 				rect.position = global_pos - drag_offset;
@@ -239,12 +240,14 @@ void WindowDialog::_notification(int p_what) {
 
 #ifdef TOOLS_ENABLED
 		case NOTIFICATION_POST_POPUP: {
-			if (get_tree() && Engine::get_singleton()->is_editor_hint() && EditorNode::get_singleton())
+			if (get_tree() && Engine::get_singleton()->is_editor_hint() && EditorNode::get_singleton()) {
+				was_editor_dimmed = EditorNode::get_singleton()->is_editor_dimmed();
 				EditorNode::get_singleton()->dim_editor(true);
+			}
 		} break;
 
 		case NOTIFICATION_POPUP_HIDE: {
-			if (get_tree() && Engine::get_singleton()->is_editor_hint() && EditorNode::get_singleton() && !get_viewport()->gui_has_modal_stack())
+			if (get_tree() && Engine::get_singleton()->is_editor_hint() && EditorNode::get_singleton() && !was_editor_dimmed)
 				EditorNode::get_singleton()->dim_editor(false);
 		} break;
 #endif
@@ -345,6 +348,10 @@ WindowDialog::WindowDialog() {
 	close_button = memnew(TextureButton);
 	add_child(close_button);
 	close_button->connect("pressed", this, "_closed");
+
+#ifdef TOOLS_ENABLED
+	was_editor_dimmed = false;
+#endif
 }
 
 WindowDialog::~WindowDialog() {
@@ -356,7 +363,7 @@ void PopupDialog::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_DRAW) {
 		RID ci = get_canvas_item();
-		get_stylebox("panel", "PopupMenu")->draw(ci, Rect2(Point2(), get_size()));
+		get_stylebox("panel")->draw(ci, Rect2(Point2(), get_size()));
 	}
 }
 
@@ -437,7 +444,9 @@ bool AcceptDialog::has_autowrap() {
 void AcceptDialog::register_text_enter(Node *p_line_edit) {
 
 	ERR_FAIL_NULL(p_line_edit);
-	p_line_edit->connect("text_entered", this, "_builtin_text_entered");
+	LineEdit *line_edit = Object::cast_to<LineEdit>(p_line_edit);
+	if (line_edit)
+		line_edit->connect("text_entered", this, "_builtin_text_entered");
 }
 
 void AcceptDialog::_update_child_rects() {

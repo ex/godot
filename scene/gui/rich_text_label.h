@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -148,6 +148,7 @@ private:
 
 	struct ItemImage : public Item {
 		Ref<Texture> image;
+		Size2 size;
 		ItemImage() { type = ITEM_IMAGE; }
 	};
 
@@ -406,10 +407,15 @@ protected:
 public:
 	String get_text();
 	void add_text(const String &p_text);
-	void add_image(const Ref<Texture> &p_image);
+	void add_image(const Ref<Texture> &p_image, const int p_width = 0, const int p_height = 0);
 	void add_newline();
 	bool remove_line(const int p_line);
 	void push_font(const Ref<Font> &p_font);
+	void push_normal();
+	void push_bold();
+	void push_bold_italics();
+	void push_italics();
+	void push_mono();
 	void push_color(const Color &p_color);
 	void push_underline();
 	void push_strikethrough();

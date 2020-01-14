@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -199,7 +199,7 @@ StringName GDScript::get_instance_base_type() const {
 
 	if (native.is_valid())
 		return native->get_name();
-	if (base.is_valid())
+	if (base.is_valid() && base->is_valid())
 		return base->get_instance_base_type();
 	return StringName();
 }
@@ -486,7 +486,7 @@ bool GDScript::_update_exports() {
 
 	placeholder_fallback_enabled = false;
 
-	if (base_cache.is_valid()) {
+	if (base_cache.is_valid() && base_cache->is_valid()) {
 		if (base_cache->_update_exports()) {
 			changed = true;
 		}
@@ -946,18 +946,29 @@ bool GDScriptInstance::set(const StringName &p_name, const Variant &p_value) {
 	{
 		const Map<StringName, GDScript::MemberInfo>::Element *E = script->member_indices.find(p_name);
 		if (E) {
-			if (E->get().setter) {
+			const GDScript::MemberInfo *member = &E->get();
+			if (member->setter) {
 				const Variant *val = &p_value;
 				Variant::CallError err;
-				call(E->get().setter, &val, 1, err);
+				call(member->setter, &val, 1, err);
 				if (err.error == Variant::CallError::CALL_OK) {
 					return true; //function exists, call was successful
 				}
 			} else {
-				if (!E->get().data_type.is_type(p_value)) {
-					return false; // Type mismatch
+				if (!member->data_type.is_type(p_value)) {
+					// Try conversion
+					Variant::CallError ce;
+					const Variant *value = &p_value;
+					Variant converted = Variant::construct(member->data_type.builtin_type, &value, 1, ce);
+					if (ce.error == Variant::CallError::CALL_OK) {
+						members.write[member->index] = converted;
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					members.write[member->index] = p_value;
 				}
-				members.write[E->get().index] = p_value;
 			}
 			return true;
 		}
@@ -1154,8 +1165,6 @@ bool GDScriptInstance::has_method(const StringName &p_method) const {
 	return false;
 }
 Variant GDScriptInstance::call(const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
-
-	//printf("calling %ls:%i method %ls\n", script->get_path().c_str(), -1, String(p_method).c_str());
 
 	GDScript *sptr = script.ptr();
 	while (sptr) {
@@ -1952,11 +1961,11 @@ String GDScriptWarning::get_message() const {
 		} break;
 		case UNUSED_VARIABLE: {
 			CHECK_SYMBOLS(1);
-			return "The local variable '" + symbols[0] + "' is declared but never used in the block.";
+			return "The local variable '" + symbols[0] + "' is declared but never used in the block. If this is intended, prefix it with an underscore: '_" + symbols[0] + "'";
 		} break;
 		case SHADOWED_VARIABLE: {
 			CHECK_SYMBOLS(2);
-			return "The local variable '" + symbols[0] + "' is shadowing an already defined variable at line " + symbols[1] + ".";
+			return "The local variable '" + symbols[0] + "' is shadowing an already-defined variable at line " + symbols[1] + ".";
 		} break;
 		case UNUSED_CLASS_VARIABLE: {
 			CHECK_SYMBOLS(1);
@@ -1964,7 +1973,7 @@ String GDScriptWarning::get_message() const {
 		} break;
 		case UNUSED_ARGUMENT: {
 			CHECK_SYMBOLS(2);
-			return "The argument '" + symbols[1] + "' is never used in the function '" + symbols[0] + "'.";
+			return "The argument '" + symbols[1] + "' is never used in the function '" + symbols[0] + "'. If this is intended, prefix it with an underscore: '_" + symbols[1] + "'";
 		} break;
 		case UNREACHABLE_CODE: {
 			CHECK_SYMBOLS(1);
@@ -2042,6 +2051,9 @@ String GDScriptWarning::get_message() const {
 			CHECK_SYMBOLS(2);
 			return "The '" + symbols[0] + "' keyword is deprecated and will be removed in a future release, please replace its uses by '" + symbols[1] + "'.";
 		} break;
+		case STANDALONE_TERNARY: {
+			return "Standalone ternary conditional operator: the return value is being discarded.";
+		}
 		case WARNING_MAX: break; // Can't happen, but silences warning
 	}
 	ERR_FAIL_V_MSG(String(), "Invalid GDScript warning code: " + get_name_from_code(code) + ".");
@@ -2083,6 +2095,7 @@ String GDScriptWarning::get_name_from_code(Code p_code) {
 		"UNSAFE_CAST",
 		"UNSAFE_CALL_ARGUMENT",
 		"DEPRECATED_KEYWORD",
+		"STANDALONE_TERNARY",
 		NULL
 	};
 
@@ -2141,10 +2154,12 @@ GDScriptLanguage::GDScriptLanguage() {
 #ifdef DEBUG_ENABLED
 	GLOBAL_DEF("debug/gdscript/warnings/enable", true);
 	GLOBAL_DEF("debug/gdscript/warnings/treat_warnings_as_errors", false);
+	GLOBAL_DEF("debug/gdscript/warnings/exclude_addons", true);
 	GLOBAL_DEF("debug/gdscript/completion/autocomplete_setters_and_getters", false);
 	for (int i = 0; i < (int)GDScriptWarning::WARNING_MAX; i++) {
 		String warning = GDScriptWarning::get_name_from_code((GDScriptWarning::Code)i).to_lower();
-		GLOBAL_DEF("debug/gdscript/warnings/" + warning, !warning.begins_with("unsafe_"));
+		bool default_enabled = !warning.begins_with("unsafe_") && i != GDScriptWarning::UNUSED_CLASS_VARIABLE;
+		GLOBAL_DEF("debug/gdscript/warnings/" + warning, default_enabled);
 	}
 #endif // DEBUG_ENABLED
 }

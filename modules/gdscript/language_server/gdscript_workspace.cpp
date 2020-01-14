@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -102,9 +102,9 @@ const lsp::DocumentSymbol *GDScriptWorkspace::get_script_symbol(const String &p_
 }
 
 void GDScriptWorkspace::reload_all_workspace_scripts() {
-	List<String> pathes;
-	list_script_files("res://", pathes);
-	for (List<String>::Element *E = pathes.front(); E; E = E->next()) {
+	List<String> paths;
+	list_script_files("res://", paths);
+	for (List<String>::Element *E = paths.front(); E; E = E->next()) {
 		const String &path = E->get();
 		Error err;
 		String content = FileAccess::get_file_as_string(path, &err);
@@ -117,8 +117,7 @@ void GDScriptWorkspace::reload_all_workspace_scripts() {
 			if (S) {
 				err_msg += "\n" + S->get()->get_error();
 			}
-			ERR_EXPLAIN(err_msg);
-			ERR_CONTINUE(err != OK);
+			ERR_CONTINUE_MSG(err != OK, err_msg);
 		}
 	}
 }
@@ -253,6 +252,12 @@ Error GDScriptWorkspace::initialize() {
 			bool arg_default_value_started = false;
 			for (int j = 0; j < data.arguments.size(); j++) {
 				const DocData::ArgumentDoc &arg = data.arguments[j];
+
+				lsp::DocumentSymbol symbol_arg;
+				symbol_arg.name = arg.name;
+				symbol_arg.kind = lsp::SymbolKind::Variable;
+				symbol_arg.detail = arg.type;
+
 				if (!arg_default_value_started && !arg.default_value.empty()) {
 					arg_default_value_started = true;
 				}
@@ -264,12 +269,18 @@ Error GDScriptWorkspace::initialize() {
 					arg_str += ", ";
 				}
 				params += arg_str;
+
+				symbol.children.push_back(symbol_arg);
 			}
 			if (data.qualifiers.find("vararg") != -1) {
 				params += params.empty() ? "..." : ", ...";
 			}
 
-			symbol.detail = "func " + class_name + "." + data.name + "(" + params + ") -> " + data.return_type;
+			String return_type = data.return_type;
+			if (return_type.empty()) {
+				return_type = "void";
+			}
+			symbol.detail = "func " + class_name + "." + data.name + "(" + params + ") -> " + return_type;
 			symbol.documentation = data.description;
 			class_symbol.children.push_back(symbol);
 		}
@@ -508,6 +519,49 @@ Dictionary GDScriptWorkspace::generate_script_api(const String &p_path) {
 		api = parser->generate_api();
 	}
 	return api;
+}
+
+Error GDScriptWorkspace::resolve_signature(const lsp::TextDocumentPositionParams &p_doc_pos, lsp::SignatureHelp &r_signature) {
+	if (const ExtendGDScriptParser *parser = get_parse_result(get_file_path(p_doc_pos.textDocument.uri))) {
+
+		lsp::TextDocumentPositionParams text_pos;
+		text_pos.textDocument = p_doc_pos.textDocument;
+
+		if (parser->get_left_function_call(p_doc_pos.position, text_pos.position, r_signature.activeParameter) == OK) {
+
+			List<const lsp::DocumentSymbol *> symbols;
+
+			if (const lsp::DocumentSymbol *symbol = resolve_symbol(text_pos)) {
+				symbols.push_back(symbol);
+			} else if (GDScriptLanguageProtocol::get_singleton()->is_smart_resolve_enabled()) {
+				GDScriptLanguageProtocol::get_singleton()->get_workspace()->resolve_related_symbols(text_pos, symbols);
+			}
+
+			for (List<const lsp::DocumentSymbol *>::Element *E = symbols.front(); E; E = E->next()) {
+				const lsp::DocumentSymbol *symbol = E->get();
+				if (symbol->kind == lsp::SymbolKind::Method || symbol->kind == lsp::SymbolKind::Function) {
+
+					lsp::SignatureInformation signature_info;
+					signature_info.label = symbol->detail;
+					signature_info.documentation = symbol->render();
+
+					for (int i = 0; i < symbol->children.size(); i++) {
+						const lsp::DocumentSymbol &arg = symbol->children[i];
+						lsp::ParameterInformation arg_info;
+						arg_info.label = arg.name;
+						signature_info.parameters.push_back(arg_info);
+					}
+					r_signature.signatures.push_back(signature_info);
+					break;
+				}
+			}
+
+			if (r_signature.signatures.size()) {
+				return OK;
+			}
+		}
+	}
+	return ERR_METHOD_NOT_FOUND;
 }
 
 GDScriptWorkspace::GDScriptWorkspace() {

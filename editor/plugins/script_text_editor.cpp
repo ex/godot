@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,6 +33,7 @@
 #include "core/math/expression.h"
 #include "core/os/keyboard.h"
 #include "editor/editor_node.h"
+#include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
 #include "editor/script_editor_debugger.h"
 
@@ -571,6 +572,7 @@ void ScriptTextEditor::_validate_script() {
 		String error_text = "error(" + itos(line) + "," + itos(col) + "): " + errortxt;
 		code_editor->set_error(error_text);
 		code_editor->set_error_pos(line - 1, col - 1);
+		script_is_valid = false;
 	} else {
 		code_editor->set_error("");
 		line = -1;
@@ -585,6 +587,7 @@ void ScriptTextEditor::_validate_script() {
 
 			functions.push_back(E->get());
 		}
+		script_is_valid = true;
 	}
 	_update_connected_methods();
 
@@ -705,6 +708,7 @@ void ScriptTextEditor::_bookmark_item_pressed(int p_idx) {
 		_edit_option(bookmarks_menu->get_item_id(p_idx));
 	} else {
 		code_editor->goto_line(bookmarks_menu->get_item_metadata(p_idx));
+		code_editor->get_text_edit()->call_deferred("center_viewport_to_cursor"); //Need to be deferred, because goto uses call_deferred().
 	}
 }
 
@@ -854,6 +858,7 @@ void ScriptTextEditor::_breakpoint_item_pressed(int p_idx) {
 		_edit_option(breakpoints_menu->get_item_id(p_idx));
 	} else {
 		code_editor->goto_line(breakpoints_menu->get_item_metadata(p_idx));
+		code_editor->get_text_edit()->call_deferred("center_viewport_to_cursor"); //Need to be deferred, because goto uses call_deferred().
 	}
 }
 
@@ -962,10 +967,20 @@ void ScriptTextEditor::_lookup_symbol(const String &p_symbol, int p_row, int p_c
 	}
 }
 
+void ScriptTextEditor::update_toggle_scripts_button() {
+	if (code_editor != NULL) {
+		code_editor->update_toggle_scripts_button();
+	}
+}
+
 void ScriptTextEditor::_update_connected_methods() {
 	TextEdit *text_edit = code_editor->get_text_edit();
 	text_edit->clear_info_icons();
 	missing_connections.clear();
+
+	if (!script_is_valid) {
+		return;
+	}
 
 	Node *base = get_tree()->get_edited_scene_root();
 	if (!base) {
@@ -973,6 +988,7 @@ void ScriptTextEditor::_update_connected_methods() {
 	}
 
 	Vector<Node *> nodes = _find_all_node_for_script(base, base, script);
+	Set<StringName> methods_found;
 	for (int i = 0; i < nodes.size(); i++) {
 		List<Connection> connections;
 		nodes[i]->get_signals_connected_to_this(&connections);
@@ -989,28 +1005,41 @@ void ScriptTextEditor::_update_connected_methods() {
 				continue;
 			}
 
+			if (methods_found.has(connection.method)) {
+				continue;
+			}
+
 			if (!ClassDB::has_method(script->get_instance_base_type(), connection.method)) {
+				int line = -1;
 
-				int line = script->get_language()->find_function(connection.method, text_edit->get_text());
-				if (line < 0) {
-					// There is a chance that the method is inherited from another script.
-					bool found_inherited_function = false;
-					Ref<Script> inherited_script = script->get_base_script();
-					while (!inherited_script.is_null()) {
-						line = inherited_script->get_language()->find_function(connection.method, inherited_script->get_source_code());
-						if (line != -1) {
-							found_inherited_function = true;
-							break;
-						}
+				for (int j = 0; j < functions.size(); j++) {
+					String name = functions[j].get_slice(":", 0);
+					if (name == connection.method) {
+						line = functions[j].get_slice(":", 1).to_int();
+						text_edit->set_line_info_icon(line - 1, get_parent_control()->get_icon("Slot", "EditorIcons"), connection.method);
+						methods_found.insert(connection.method);
+						break;
+					}
+				}
 
-						inherited_script = inherited_script->get_base_script();
+				if (line >= 0) {
+					continue;
+				}
+
+				// There is a chance that the method is inherited from another script.
+				bool found_inherited_function = false;
+				Ref<Script> inherited_script = script->get_base_script();
+				while (!inherited_script.is_null()) {
+					if (inherited_script->has_method(connection.method)) {
+						found_inherited_function = true;
+						break;
 					}
 
-					if (!found_inherited_function) {
-						missing_connections.push_back(connection);
-					}
-				} else {
-					text_edit->set_line_info_icon(line - 1, get_parent_control()->get_icon("Slot", "EditorIcons"), connection.method);
+					inherited_script = inherited_script->get_base_script();
+				}
+
+				if (!found_inherited_function) {
+					missing_connections.push_back(connection);
 				}
 			}
 		}
@@ -1186,7 +1215,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 				if (expression.parse(line) == OK) {
 					Variant result = expression.execute(Array(), Variant(), false);
 					if (expression.get_error_text() == "") {
-						results.append(whitespace + (String)result);
+						results.append(whitespace + result.get_construct_string());
 					} else {
 						results.append(line);
 					}
@@ -1281,12 +1310,14 @@ void ScriptTextEditor::_edit_option(int p_op) {
 			if (line >= bpoints[bpoints.size() - 1]) {
 				tx->unfold_line(bpoints[0]);
 				tx->cursor_set_line(bpoints[0]);
+				tx->center_viewport_to_cursor();
 			} else {
 				for (List<int>::Element *E = bpoints.front(); E; E = E->next()) {
 					int bline = E->get();
 					if (bline > line) {
 						tx->unfold_line(bline);
 						tx->cursor_set_line(bline);
+						tx->center_viewport_to_cursor();
 						return;
 					}
 				}
@@ -1306,12 +1337,14 @@ void ScriptTextEditor::_edit_option(int p_op) {
 			if (line <= bpoints[0]) {
 				tx->unfold_line(bpoints[bpoints.size() - 1]);
 				tx->cursor_set_line(bpoints[bpoints.size() - 1]);
+				tx->center_viewport_to_cursor();
 			} else {
 				for (List<int>::Element *E = bpoints.back(); E; E = E->prev()) {
 					int bline = E->get();
 					if (bline < line) {
 						tx->unfold_line(bline);
 						tx->cursor_set_line(bline);
+						tx->center_viewport_to_cursor();
 						return;
 					}
 				}
@@ -1527,7 +1560,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 		Node *sn = _find_script_node(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root(), script);
 
 		if (!sn) {
-			EditorNode::get_singleton()->show_warning("Can't drop nodes because script '" + get_name() + "' is not used in this scene.");
+			EditorNode::get_singleton()->show_warning(vformat(TTR("Can't drop nodes because script '%s' is not used in this scene."), get_name()));
 			return;
 		}
 
@@ -1718,6 +1751,7 @@ void ScriptTextEditor::_make_context_menu(bool p_selection, bool p_color, bool p
 ScriptTextEditor::ScriptTextEditor() {
 
 	theme_loaded = false;
+	script_is_valid = false;
 
 	VSplitContainer *editor_box = memnew(VSplitContainer);
 	add_child(editor_box);
@@ -1735,6 +1769,7 @@ ScriptTextEditor::ScriptTextEditor() {
 	code_editor->get_text_edit()->connect("symbol_lookup", this, "_lookup_symbol");
 	code_editor->get_text_edit()->connect("info_clicked", this, "_lookup_connections");
 	code_editor->set_v_size_flags(SIZE_EXPAND_FILL);
+	code_editor->show_toggle_scripts_button();
 
 	warnings_panel = memnew(RichTextLabel);
 	editor_box->add_child(warnings_panel);

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -216,6 +216,25 @@ String str_format(const char *p_format, ...) {
 #endif
 
 String str_format(const char *p_format, va_list p_list) {
+	char *buffer = str_format_new(p_format, p_list);
+
+	String res(buffer);
+	memdelete_arr(buffer);
+
+	return res;
+}
+
+char *str_format_new(const char *p_format, ...) {
+	va_list list;
+
+	va_start(list, p_format);
+	char *res = str_format_new(p_format, list);
+	va_end(list);
+
+	return res;
+}
+
+char *str_format_new(const char *p_format, va_list p_list) {
 	va_list list;
 
 	va_copy(list, p_list);
@@ -230,8 +249,5 @@ String str_format(const char *p_format, va_list p_list) {
 	gd_vsnprintf(buffer, len, p_format, list);
 	va_end(list);
 
-	String res(buffer);
-	memdelete_arr(buffer);
-
-	return res;
+	return buffer;
 }

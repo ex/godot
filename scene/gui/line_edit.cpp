@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -557,8 +557,11 @@ void LineEdit::_gui_input(Ref<InputEvent> p_event) {
 					if (editable) {
 						selection_delete();
 						CharType ucodestr[2] = { (CharType)k->get_unicode(), 0 };
+						int prev_len = text.length();
 						append_at_cursor(ucodestr);
-						_text_changed();
+						if (text.length() != prev_len) {
+							_text_changed();
+						}
 						accept_event();
 					}
 
@@ -704,7 +707,7 @@ void LineEdit::_notification(int p_what) {
 			}
 
 			int x_ofs = 0;
-			bool using_placeholder = text.empty();
+			bool using_placeholder = text.empty() && ime_text.empty();
 			int cached_text_width = using_placeholder ? cached_placeholder_width : cached_width;
 
 			switch (align) {
@@ -823,7 +826,7 @@ void LineEdit::_notification(int p_what) {
 				int yofs = y_ofs + (caret_height - font->get_height()) / 2;
 				drawer.draw_char(ci, Point2(x_ofs, yofs + font_ascent), cchar, next, selected ? font_color_selected : font_color);
 
-				if (char_ofs == cursor_pos && draw_caret) {
+				if (char_ofs == cursor_pos && draw_caret && !using_placeholder) {
 					if (ime_text.length() == 0) {
 #ifdef TOOLS_ENABLED
 						VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(x_ofs, y_ofs), Size2(Math::round(EDSCALE), caret_height)), cursor_color);
@@ -866,12 +869,27 @@ void LineEdit::_notification(int p_what) {
 				}
 			}
 
-			if (char_ofs == cursor_pos && draw_caret) { // May be at the end.
+			if ((char_ofs == cursor_pos || using_placeholder) && draw_caret) { // May be at the end, or placeholder.
 				if (ime_text.length() == 0) {
+					int caret_x_ofs = x_ofs;
+					if (using_placeholder) {
+						switch (align) {
+							case ALIGN_LEFT:
+							case ALIGN_FILL: {
+								caret_x_ofs = style->get_offset().x;
+							} break;
+							case ALIGN_CENTER: {
+								caret_x_ofs = ofs_max / 2;
+							} break;
+							case ALIGN_RIGHT: {
+								caret_x_ofs = ofs_max;
+							} break;
+						}
+					}
 #ifdef TOOLS_ENABLED
-					VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(x_ofs, y_ofs), Size2(Math::round(EDSCALE), caret_height)), cursor_color);
+					VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(caret_x_ofs, y_ofs), Size2(Math::round(EDSCALE), caret_height)), cursor_color);
 #else
-					VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(x_ofs, y_ofs), Size2(1, caret_height)), cursor_color);
+					VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2(caret_x_ofs, y_ofs), Size2(1, caret_height)), cursor_color);
 #endif
 				}
 			}
@@ -946,11 +964,12 @@ void LineEdit::paste_text() {
 
 	if (paste_buffer != "") {
 
+		int prev_len = text.length();
 		if (selection.enabled) selection_delete();
 		append_at_cursor(paste_buffer);
 
 		if (!text_changed_dirty) {
-			if (is_inside_tree()) {
+			if (is_inside_tree() && text.length() != prev_len) {
 				MessageQueue::get_singleton()->push_call(this, "_text_changed");
 			}
 			text_changed_dirty = true;
@@ -970,6 +989,8 @@ void LineEdit::undo() {
 	undo_stack_pos = undo_stack_pos->prev();
 	TextOperation op = undo_stack_pos->get();
 	text = op.text;
+	cached_width = op.cached_width;
+	window_pos = op.window_pos;
 	set_cursor_position(op.cursor_pos);
 
 	if (expand_to_text_length)
@@ -988,6 +1009,8 @@ void LineEdit::redo() {
 	undo_stack_pos = undo_stack_pos->next();
 	TextOperation op = undo_stack_pos->get();
 	text = op.text;
+	cached_width = op.cached_width;
+	window_pos = op.window_pos;
 	set_cursor_position(op.cursor_pos);
 
 	if (expand_to_text_length)
@@ -1169,6 +1192,10 @@ void LineEdit::delete_char() {
 
 	set_cursor_position(get_cursor_position() - 1);
 
+	if (align == ALIGN_CENTER || align == ALIGN_RIGHT) {
+		window_pos = CLAMP(window_pos - 1, 0, MAX(text.length() - 1, 0));
+	}
+
 	_text_changed();
 }
 
@@ -1194,6 +1221,10 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 	if (window_pos > cursor_pos) {
 
 		window_pos = cursor_pos;
+	}
+
+	if (align == ALIGN_CENTER || align == ALIGN_RIGHT) {
+		window_pos = CLAMP(window_pos - (p_to_column - p_from_column), 0, MAX(text.length() - 1, 0));
 	}
 
 	if (!text_changed_dirty) {
@@ -1335,6 +1366,8 @@ void LineEdit::append_at_cursor(String p_text) {
 		String post = text.substr(cursor_pos, text.length() - cursor_pos);
 		text = pre + p_text + post;
 		set_cursor_position(cursor_pos + p_text.length());
+	} else {
+		emit_signal("text_change_rejected");
 	}
 }
 
@@ -1677,7 +1710,9 @@ void LineEdit::_clear_undo_stack() {
 void LineEdit::_create_undo_state() {
 	TextOperation op;
 	op.text = text;
+	op.cached_width = cached_width;
 	op.cursor_pos = cursor_pos;
+	op.window_pos = window_pos;
 	undo_stack.push_back(op);
 }
 
@@ -1752,6 +1787,7 @@ void LineEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_right_icon"), &LineEdit::get_right_icon);
 
 	ADD_SIGNAL(MethodInfo("text_changed", PropertyInfo(Variant::STRING, "new_text")));
+	ADD_SIGNAL(MethodInfo("text_change_rejected"));
 	ADD_SIGNAL(MethodInfo("text_entered", PropertyInfo(Variant::STRING, "new_text")));
 
 	BIND_ENUM_CONSTANT(ALIGN_LEFT);

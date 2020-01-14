@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,6 +37,7 @@
 #include "core/variant.h"
 #include "editor/editor_node.h"
 #include "editor/editor_resource_preview.h"
+#include "editor/editor_scale.h"
 #include "scene/main/viewport.h"
 #include "visual_script_expression.h"
 #include "visual_script_flow_control.h"
@@ -572,18 +573,18 @@ void VisualScriptEditor::_update_graph(int p_only_id) {
 				if (nd_list->is_input_port_editable()) {
 					has_gnode_text = true;
 					Button *btn = memnew(Button);
-					btn->set_text("Add Input Port");
+					btn->set_text(TTR("Add Input Port"));
 					hbnc->add_child(btn);
-					btn->connect("pressed", this, "_add_input_port", varray(E->get()));
+					btn->connect("pressed", this, "_add_input_port", varray(E->get()), CONNECT_DEFERRED);
 				}
 				if (nd_list->is_output_port_editable()) {
 					if (nd_list->is_input_port_editable())
 						hbnc->add_spacer();
 					has_gnode_text = true;
 					Button *btn = memnew(Button);
-					btn->set_text("Add Output Port");
+					btn->set_text(TTR("Add Output Port"));
 					hbnc->add_child(btn);
-					btn->connect("pressed", this, "_add_output_port", varray(E->get()));
+					btn->connect("pressed", this, "_add_output_port", varray(E->get()), CONNECT_DEFERRED);
 				}
 				gnode->add_child(hbnc);
 			} else if (Object::cast_to<VisualScriptExpression>(node.ptr())) {
@@ -1637,7 +1638,7 @@ void VisualScriptEditor::_on_nodes_duplicate() {
 
 	for (Set<int>::Element *F = to_duplicate.front(); F; F = F->next()) {
 
-		// duplicate from the specifc function but place it into the default func as it would lack the connections
+		// duplicate from the specific function but place it into the default func as it would lack the connections
 		StringName func = _get_function_of_node(F->get());
 		Ref<VisualScriptNode> node = script->get_node(func, F->get());
 
@@ -1916,8 +1917,6 @@ bool VisualScriptEditor::can_drop_data_fw(const Point2 &p_point, const Variant &
 	return false;
 }
 
-#ifdef TOOLS_ENABLED
-
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
 
 	if (p_edited_scene != p_current_node && p_current_node->get_owner() != p_edited_scene)
@@ -1936,8 +1935,6 @@ static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const
 
 	return NULL;
 }
-
-#endif
 
 void VisualScriptEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
 
@@ -2167,7 +2164,7 @@ void VisualScriptEditor::drop_data_fw(const Point2 &p_point, const Variant &p_da
 		Node *sn = _find_script_node(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root(), script);
 
 		if (!sn) {
-			EditorNode::get_singleton()->show_warning(TTR("Can't drop nodes because script '" + get_name() + "' is not used in this scene."));
+			EditorNode::get_singleton()->show_warning(vformat(TTR("Can't drop nodes because script '%s' is not used in this scene."), get_name()));
 			return;
 		}
 
@@ -2237,7 +2234,7 @@ void VisualScriptEditor::drop_data_fw(const Point2 &p_point, const Variant &p_da
 		Node *sn = _find_script_node(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root(), script);
 
 		if (!sn && !Input::get_singleton()->is_key_pressed(KEY_SHIFT)) {
-			EditorNode::get_singleton()->show_warning(TTR("Can't drop properties because script '" + get_name() + "' is not used in this scene.\nDrop holding 'Shift' to just copy the signature."));
+			EditorNode::get_singleton()->show_warning(vformat(TTR("Can't drop properties because script '%s' is not used in this scene.\nDrop holding 'Shift' to just copy the signature."), get_name()));
 			return;
 		}
 
@@ -2456,12 +2453,8 @@ Ref<Texture> VisualScriptEditor::get_icon() {
 }
 
 bool VisualScriptEditor::is_unsaved() {
-#ifdef TOOLS_ENABLED
 
 	return script->is_edited() || script->are_subnodes_edited();
-#else
-	return false;
-#endif
 }
 
 Variant VisualScriptEditor::get_edit_state() {
@@ -2946,7 +2939,7 @@ void VisualScriptEditor::_graph_connected(const String &p_from, int p_from_slot,
 					if ((to_node_pos.x - from_node_pos.x) < 0) {
 						// to is behind from node
 						if (to_node_pos.x > (from_node_pos.x - to_node_size.x - 240))
-							new_to_node_pos.x = from_node_pos.x - to_node_size.x - 240; // approx size of construtor node + padding
+							new_to_node_pos.x = from_node_pos.x - to_node_size.x - 240; // approx size of constructor node + padding
 						else
 							new_to_node_pos.x = to_node_pos.x;
 						new_to_node_pos.y = to_node_pos.y;
@@ -2955,7 +2948,7 @@ void VisualScriptEditor::_graph_connected(const String &p_from, int p_from_slot,
 					} else {
 						// to is ahead of from node
 						if (to_node_pos.x < (from_node_size.x + from_node_pos.x + 240))
-							new_to_node_pos.x = from_node_size.x + from_node_pos.x + 240; // approx size of construtor node + padding
+							new_to_node_pos.x = from_node_size.x + from_node_pos.x + 240; // approx size of constructor node + padding
 						else
 							new_to_node_pos.x = to_node_pos.x;
 						new_to_node_pos.y = to_node_pos.y;
@@ -3472,6 +3465,7 @@ void VisualScriptEditor::_selected_connect_node(const String &p_text, const Stri
 		ofs = ofs.snapped(Vector2(snap, snap));
 	}
 	ofs /= EDSCALE;
+	ofs /= graph->get_zoom();
 
 	Set<int> vn;
 
@@ -3523,6 +3517,7 @@ void VisualScriptEditor::_selected_connect_node(const String &p_text, const Stri
 	}
 
 	Ref<VisualScriptNode> vnode;
+	Ref<VisualScriptPropertySet> script_prop_set;
 
 	if (p_category == String("method")) {
 
@@ -3533,8 +3528,8 @@ void VisualScriptEditor::_selected_connect_node(const String &p_text, const Stri
 
 		Ref<VisualScriptPropertySet> n;
 		n.instance();
-		n->set_property(p_text);
 		vnode = n;
+		script_prop_set = n;
 	} else if (p_category == String("get")) {
 
 		Ref<VisualScriptPropertyGet> n;
@@ -3585,6 +3580,9 @@ void VisualScriptEditor::_selected_connect_node(const String &p_text, const Stri
 	undo_redo->add_do_method(this, "_update_graph", new_id);
 	undo_redo->add_undo_method(this, "_update_graph", new_id);
 	undo_redo->commit_action();
+
+	if (script_prop_set.is_valid())
+		script_prop_set->set_property(p_text);
 
 	port_action_new_node = new_id;
 
@@ -4229,7 +4227,7 @@ void VisualScriptEditor::_menu_option(int p_what) {
 				if (nd.is_valid() && nd->has_input_sequence_port())
 					start_node = nodes.front()->key();
 				else {
-					EditorNode::get_singleton()->show_warning(TTR("Select atleast one node with sequence port."));
+					EditorNode::get_singleton()->show_warning(TTR("Select at least one node with sequence port."));
 					return;
 				}
 			} else {
@@ -4260,7 +4258,7 @@ void VisualScriptEditor::_menu_option(int p_what) {
 					if (nd.is_valid() && nd->has_input_sequence_port())
 						start_node = top_nd;
 					else {
-						EditorNode::get_singleton()->show_warning(TTR("Select atleast one node with sequence port."));
+						EditorNode::get_singleton()->show_warning(TTR("Select at least one node with sequence port."));
 						return;
 					}
 				} else {
@@ -4759,7 +4757,7 @@ VisualScriptEditor::VisualScriptEditor() {
 	HBoxContainer *graph_hbc = graph->get_zoom_hbox();
 
 	Label *base_lbl = memnew(Label);
-	base_lbl->set_text("Change Base Type: ");
+	base_lbl->set_text(TTR("Change Base Type:") + " ");
 	graph_hbc->add_child(base_lbl);
 
 	base_type_select = memnew(Button);
@@ -4767,18 +4765,19 @@ VisualScriptEditor::VisualScriptEditor() {
 	graph_hbc->add_child(base_type_select);
 
 	Button *add_nds = memnew(Button);
-	add_nds->set_text("Add Nodes...");
+	add_nds->set_text(TTR("Add Nodes..."));
 	graph_hbc->add_child(add_nds);
 	add_nds->connect("pressed", this, "_add_node_dialog");
 
 	Button *fn_btn = memnew(Button);
-	fn_btn->set_text("Add Function...");
+	fn_btn->set_text(TTR("Add Function..."));
 	graph_hbc->add_child(fn_btn);
 	fn_btn->connect("pressed", this, "_create_function_dialog");
 
 	// Add Function Dialog.
 	VBoxContainer *function_vb = memnew(VBoxContainer);
 	function_vb->set_v_size_flags(SIZE_EXPAND_FILL);
+	function_vb->set_custom_minimum_size(Size2(450, 300) * EDSCALE);
 
 	HBoxContainer *func_name_hbox = memnew(HBoxContainer);
 	function_vb->add_child(func_name_hbox);
@@ -4813,7 +4812,6 @@ VisualScriptEditor::VisualScriptEditor() {
 	func_input_scroll->add_child(func_input_vbox);
 
 	function_create_dialog = memnew(ConfirmationDialog);
-	function_create_dialog->set_custom_minimum_size(Size2(450, 300) * EDSCALE);
 	function_create_dialog->set_v_size_flags(SIZE_EXPAND_FILL);
 	function_create_dialog->set_title(TTR("Create Function"));
 	function_create_dialog->add_child(function_vb);

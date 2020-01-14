@@ -29,6 +29,7 @@ name is available.
 
     Aaron Franke (aaronfranke)
     Alexander Holland (AlexHolly)
+    Alexey Khoroshavin (allkhor)
     Alket Rexhepi (alketii)
     Andrea Catania (AndreaCatania)
     Andreas Haas (Hinsbart)
@@ -55,23 +56,29 @@ name is available.
     Dana Olson (adolson)
     Daniel J. Ramirez (djrm)
     Daniel Rakos (aqnuep)
+    David Sichma (DavidSichma)
     Dharkael (lupoDharkael)
     Dmitry Koteroff (Krakean)
     DualMatrix
     Emmanuel Barroga (codecustard)
     Emmanuel Leblond (touilleMan)
+    Eoin O'Neill (Eoin-ONeill-Yokai)
     Eric Lasota (elasota)
+    Erik Selecký (rxlecky)
     est31
     Fabian Mathews (supagu)
     Fabio Alessandrelli (Faless)
     Ferenc Arn (tagcup)
     Franklin Sobrinho (TheHX)
+    Fredia Huya-Kouadio (m4gr3d)
     Geequlim
     George Marques (vnen)
     Gerrit Großkopf (Grosskopf)
     Gilles Roudiere (groud)
+    Gordon MacPherson (RevoluPowered)
     Guilherme Felipe de C. G. da Silva (guilhermefelipecgs)
     Hanif Bin Ariffin (hbina)
+    Haoyu Qiu (timothyqiu)
     Hein-Pieter van Braam-Stewart (hpvb)
     Hiroshi Ogawa (hi-ogawa)
     homer666
@@ -80,6 +87,7 @@ name is available.
     Ian Bishop (ianb96)
     Ibrahn Sahir (ibrahn)
     Ignacio Etcheverry (neikeq)
+    Ilaria Cislaghi (QbieShay)
     Indah Sylvia (ISylvox)
     J08nY
     Jakub Grzesik (kubecz3k)
@@ -96,6 +104,7 @@ name is available.
     Leon Krause (eska014)
     Lucien Menassol (Kanabenki)
     m4nu3lf
+    Marcel Admiraal (madmiraal)
     Marcelo Fernandez (marcelofg55)
     Marc Gilleron (Zylann)
     Marcin Zawiejski (dragmz)
@@ -109,7 +118,7 @@ name is available.
     Matthias Hölzl (hoelzl)
     Max Hilbrunner (mhilbrunner)
     merumelu
-    Michael Alexsander Silva Dias (YeldhamDev)
+    Michael Alexsander (YeldhamDev)
     MichiRecRoom (LikeLakers2)
     mrezai
     Nathan Warden (NathanWarden)
@@ -120,6 +129,7 @@ name is available.
     Patrick (firefly2442)
     Paul Batty (Paulb23)
     Paul Joannon (paulloz)
+    Paul Trojahn (ptrojahn)
     Pawel Kowal (pkowal1982)
     Pedro J. Estébanez (RandomShaper)
     Pieter-Jan Briers (PJB3005)
@@ -140,12 +150,13 @@ name is available.
     santouits
     SaracenOne
     sersoong
+    Shiqing (kawa-yoiko)
     Simon Wenner (swenner)
     Swarnim Arun (minraws)
     Theo Hallenius (TheoXD)
     Thomas Herzog (karroffel)
-    Timo (toger5)
     Timo Schwarzer (timoschwarzer)
+    Timo (toger5)
     Tomasz Chabora (KoBeWi)
     Twarit Waikar (IronicallySerious)
     Vinzenz Feenstra (vinzenz)
@@ -157,5 +168,6 @@ name is available.
     Xavier Cho (mysticfall)
     yg2f (SuperUserNameMan)
     Yuri Roubinsky (Chaosus)
+    Zak Stam (zaksnet)
     Zher Huei Lee (leezh)
     ZuBsPaCe

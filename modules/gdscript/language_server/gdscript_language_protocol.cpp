@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -134,6 +134,22 @@ Dictionary GDScriptLanguageProtocol::initialize(const Dictionary &p_params) {
 }
 
 void GDScriptLanguageProtocol::initialized(const Variant &p_params) {
+
+	lsp::GodotCapabilities capabilities;
+
+	DocData *doc = EditorHelp::get_doc_data();
+	for (Map<String, DocData::ClassDoc>::Element *E = doc->class_list.front(); E; E = E->next()) {
+
+		lsp::GodotNativeClassInfo gdclass;
+		gdclass.name = E->get().name;
+		gdclass.class_doc = &(E->get());
+		if (ClassDB::ClassInfo *ptr = ClassDB::classes.getptr(StringName(E->get().name))) {
+			gdclass.class_info = ptr;
+		}
+		capabilities.native_classes.push_back(gdclass);
+	}
+
+	notify_client("gdscript/capabilities", capabilities.to_json());
 }
 
 void GDScriptLanguageProtocol::poll() {

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -400,6 +400,10 @@ bool _OS::is_window_always_on_top() const {
 	return OS::get_singleton()->is_window_always_on_top();
 }
 
+bool _OS::is_window_focused() const {
+	return OS::get_singleton()->is_window_focused();
+}
+
 void _OS::set_borderless_window(bool p_borderless) {
 	OS::get_singleton()->set_borderless_window(p_borderless);
 }
@@ -466,6 +470,16 @@ void _OS::set_low_processor_usage_mode(bool p_enabled) {
 bool _OS::is_in_low_processor_usage_mode() const {
 
 	return OS::get_singleton()->is_in_low_processor_usage_mode();
+}
+
+void _OS::set_low_processor_usage_mode_sleep_usec(int p_usec) {
+
+	OS::get_singleton()->set_low_processor_usage_mode_sleep_usec(p_usec);
+}
+
+int _OS::get_low_processor_usage_mode_sleep_usec() const {
+
+	return OS::get_singleton()->get_low_processor_usage_mode_sleep_usec();
 }
 
 String _OS::get_executable_path() const {
@@ -574,6 +588,15 @@ bool _OS::is_vsync_enabled() const {
 	return OS::get_singleton()->is_vsync_enabled();
 }
 
+void _OS::set_vsync_via_compositor(bool p_enable) {
+	OS::get_singleton()->set_vsync_via_compositor(p_enable);
+}
+
+bool _OS::is_vsync_via_compositor_enabled() const {
+
+	return OS::get_singleton()->is_vsync_via_compositor_enabled();
+}
+
 _OS::PowerState _OS::get_power_state() {
 	return _OS::PowerState(OS::get_singleton()->get_power_state());
 }
@@ -666,6 +689,10 @@ int _OS::get_exit_code() const {
 }
 
 void _OS::set_exit_code(int p_code) {
+
+	if (p_code < 0 || p_code > 125) {
+		WARN_PRINT("For portability reasons, the exit code should be set between 0 and 125 (inclusive).");
+	}
 
 	OS::get_singleton()->set_exit_code(p_code);
 }
@@ -1136,6 +1163,16 @@ bool _OS::request_permission(const String &p_name) {
 	return OS::get_singleton()->request_permission(p_name);
 }
 
+bool _OS::request_permissions() {
+
+	return OS::get_singleton()->request_permissions();
+}
+
+Vector<String> _OS::get_granted_permissions() const {
+
+	return OS::get_singleton()->get_granted_permissions();
+}
+
 _OS *_OS::singleton = NULL;
 
 void _OS::_bind_methods() {
@@ -1193,6 +1230,7 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_window_maximized"), &_OS::is_window_maximized);
 	ClassDB::bind_method(D_METHOD("set_window_always_on_top", "enabled"), &_OS::set_window_always_on_top);
 	ClassDB::bind_method(D_METHOD("is_window_always_on_top"), &_OS::is_window_always_on_top);
+	ClassDB::bind_method(D_METHOD("is_window_focused"), &_OS::is_window_focused);
 	ClassDB::bind_method(D_METHOD("request_attention"), &_OS::request_attention);
 	ClassDB::bind_method(D_METHOD("get_real_window_size"), &_OS::get_real_window_size);
 	ClassDB::bind_method(D_METHOD("center_window"), &_OS::center_window);
@@ -1221,6 +1259,9 @@ void _OS::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_low_processor_usage_mode", "enable"), &_OS::set_low_processor_usage_mode);
 	ClassDB::bind_method(D_METHOD("is_in_low_processor_usage_mode"), &_OS::is_in_low_processor_usage_mode);
+
+	ClassDB::bind_method(D_METHOD("set_low_processor_usage_mode_sleep_usec", "usec"), &_OS::set_low_processor_usage_mode_sleep_usec);
+	ClassDB::bind_method(D_METHOD("get_low_processor_usage_mode_sleep_usec"), &_OS::get_low_processor_usage_mode_sleep_usec);
 
 	ClassDB::bind_method(D_METHOD("get_processor_count"), &_OS::get_processor_count);
 
@@ -1312,6 +1353,9 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_use_vsync", "enable"), &_OS::set_use_vsync);
 	ClassDB::bind_method(D_METHOD("is_vsync_enabled"), &_OS::is_vsync_enabled);
 
+	ClassDB::bind_method(D_METHOD("set_vsync_via_compositor", "enable"), &_OS::set_vsync_via_compositor);
+	ClassDB::bind_method(D_METHOD("is_vsync_via_compositor_enabled"), &_OS::is_vsync_via_compositor_enabled);
+
 	ClassDB::bind_method(D_METHOD("has_feature", "tag_name"), &_OS::has_feature);
 
 	ClassDB::bind_method(D_METHOD("get_power_state"), &_OS::get_power_state);
@@ -1319,12 +1363,16 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_power_percent_left"), &_OS::get_power_percent_left);
 
 	ClassDB::bind_method(D_METHOD("request_permission", "name"), &_OS::request_permission);
+	ClassDB::bind_method(D_METHOD("request_permissions"), &_OS::request_permissions);
+	ClassDB::bind_method(D_METHOD("get_granted_permissions"), &_OS::get_granted_permissions);
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "clipboard"), "set_clipboard", "get_clipboard");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "current_screen"), "set_current_screen", "get_current_screen");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "exit_code"), "set_exit_code", "get_exit_code");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "vsync_enabled"), "set_use_vsync", "is_vsync_enabled");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "vsync_via_compositor"), "set_vsync_via_compositor", "is_vsync_via_compositor_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "low_processor_usage_mode"), "set_low_processor_usage_mode", "is_in_low_processor_usage_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "low_processor_usage_mode_sleep_usec"), "set_low_processor_usage_mode_sleep_usec", "get_low_processor_usage_mode_sleep_usec");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "keep_screen_on"), "set_keep_screen_on", "is_keep_screen_on");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "min_window_size"), "set_min_window_size", "get_min_window_size");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "max_window_size"), "set_max_window_size", "get_max_window_size");
@@ -1345,7 +1393,9 @@ void _OS::_bind_methods() {
 	ADD_PROPERTY_DEFAULT("current_screen", 0);
 	ADD_PROPERTY_DEFAULT("exit_code", 0);
 	ADD_PROPERTY_DEFAULT("vsync_enabled", true);
+	ADD_PROPERTY_DEFAULT("vsync_via_compositor", false);
 	ADD_PROPERTY_DEFAULT("low_processor_usage_mode", false);
+	ADD_PROPERTY_DEFAULT("low_processor_usage_mode_sleep_usec", 6900);
 	ADD_PROPERTY_DEFAULT("keep_screen_on", true);
 	ADD_PROPERTY_DEFAULT("min_window_size", Vector2());
 	ADD_PROPERTY_DEFAULT("max_window_size", Vector2());
@@ -2974,6 +3024,16 @@ float _Engine::get_frames_per_second() const {
 	return Engine::get_singleton()->get_frames_per_second();
 }
 
+uint64_t _Engine::get_physics_frames() const {
+
+	return Engine::get_singleton()->get_physics_frames();
+}
+
+uint64_t _Engine::get_idle_frames() const {
+
+	return Engine::get_singleton()->get_idle_frames();
+}
+
 void _Engine::set_time_scale(float p_scale) {
 	Engine::get_singleton()->set_time_scale(p_scale);
 }
@@ -3058,6 +3118,8 @@ void _Engine::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_frames_drawn"), &_Engine::get_frames_drawn);
 	ClassDB::bind_method(D_METHOD("get_frames_per_second"), &_Engine::get_frames_per_second);
+	ClassDB::bind_method(D_METHOD("get_physics_frames"), &_Engine::get_physics_frames);
+	ClassDB::bind_method(D_METHOD("get_idle_frames"), &_Engine::get_idle_frames);
 
 	ClassDB::bind_method(D_METHOD("get_main_loop"), &_Engine::get_main_loop);
 
@@ -3153,6 +3215,9 @@ Ref<JSONParseResult> _JSON::parse(const String &p_json) {
 
 	result->error = JSON::parse(p_json, result->result, result->error_string, result->error_line);
 
+	if (result->error != OK) {
+		ERR_PRINTS(vformat("Error parsing JSON at line %s: %s", result->error_line, result->error_string));
+	}
 	return result;
 }
 

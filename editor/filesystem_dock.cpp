@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -36,8 +36,12 @@
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
+#include "editor_feature_profile.h"
 #include "editor_node.h"
+#include "editor_resource_preview.h"
+#include "editor_scale.h"
 #include "editor_settings.h"
+#include "import_dock.h"
 #include "scene/main/viewport.h"
 #include "scene/resources/packed_scene.h"
 
@@ -52,7 +56,7 @@ Ref<Texture> FileSystemDock::_get_tree_item_icon(EditorFileSystemDirectory *p_di
 	return file_icon;
 }
 
-bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory *p_dir, Vector<String> &uncollapsed_paths, bool p_select_in_favorites) {
+bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory *p_dir, Vector<String> &uncollapsed_paths, bool p_select_in_favorites, bool p_unfold_path) {
 	bool parent_should_expand = false;
 
 	// Create a tree item for the subdirectory.
@@ -71,7 +75,7 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 		subdirectory_item->select(0);
 	}
 
-	if ((path.begins_with(lpath) && path != lpath)) {
+	if (p_unfold_path && path.begins_with(lpath) && path != lpath) {
 		subdirectory_item->set_collapsed(false);
 	} else {
 		subdirectory_item->set_collapsed(uncollapsed_paths.find(lpath) < 0);
@@ -82,10 +86,11 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 
 	// Create items for all subdirectories.
 	for (int i = 0; i < p_dir->get_subdir_count(); i++)
-		parent_should_expand = (_create_tree(subdirectory_item, p_dir->get_subdir(i), uncollapsed_paths, p_select_in_favorites) || parent_should_expand);
+		parent_should_expand = (_create_tree(subdirectory_item, p_dir->get_subdir(i), uncollapsed_paths, p_select_in_favorites, p_unfold_path) || parent_should_expand);
 
 	// Create all items for the files in the subdirectory.
 	if (display_mode == DISPLAY_MODE_TREE_ONLY) {
+		String main_scene = ProjectSettings::get_singleton()->get("application/run/main_scene");
 		for (int i = 0; i < p_dir->get_file_count(); i++) {
 
 			String file_type = p_dir->get_file_type(i);
@@ -115,10 +120,18 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 				file_item->select(0);
 				file_item->set_as_cursor(0);
 			}
+			if (main_scene == file_metadata) {
+				file_item->set_custom_color(0, get_color("accent_color", "Editor"));
+			}
 			Array udata;
 			udata.push_back(tree_update_id);
 			udata.push_back(file_item);
 			EditorResourcePreview::get_singleton()->queue_resource_preview(file_metadata, this, "_tree_thumbnail_done", udata);
+		}
+	} else if (display_mode == DISPLAY_MODE_SPLIT) {
+		if (lpath.get_base_dir() == path.get_base_dir()) {
+			subdirectory_item->select(0);
+			subdirectory_item->set_as_cursor(0);
 		}
 	}
 
@@ -164,7 +177,7 @@ Vector<String> FileSystemDock::_compute_uncollapsed_paths() {
 	return uncollapsed_paths;
 }
 
-void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, bool p_uncollapse_root, bool p_select_in_favorites) {
+void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, bool p_uncollapse_root, bool p_select_in_favorites, bool p_unfold_path) {
 	// Recreate the tree.
 	tree->clear();
 	tree_update_id++;
@@ -237,7 +250,7 @@ void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, boo
 	}
 
 	// Create the remaining of the tree.
-	_create_tree(root, EditorFileSystem::get_singleton()->get_filesystem(), uncollapsed_paths, p_select_in_favorites);
+	_create_tree(root, EditorFileSystem::get_singleton()->get_filesystem(), uncollapsed_paths, p_select_in_favorites, p_unfold_path);
 	tree->ensure_cursor_is_visible();
 	updating_tree = false;
 }
@@ -333,10 +346,11 @@ void FileSystemDock::_notification(int p_what) {
 		case NOTIFICATION_DRAG_BEGIN: {
 			Dictionary dd = get_viewport()->gui_get_drag_data();
 			if (tree->is_visible_in_tree() && dd.has("type")) {
-				if ((String(dd["type"]) == "files") || (String(dd["type"]) == "files_and_dirs") || (String(dd["type"]) == "resource")) {
+				if (dd.has("favorite")) {
+					if ((String(dd["favorite"]) == "all"))
+						tree->set_drop_mode_flags(Tree::DROP_MODE_INBETWEEN);
+				} else if ((String(dd["type"]) == "files") || (String(dd["type"]) == "files_and_dirs") || (String(dd["type"]) == "resource")) {
 					tree->set_drop_mode_flags(Tree::DROP_MODE_ON_ITEM | Tree::DROP_MODE_INBETWEEN);
-				} else if ((String(dd["type"]) == "favorite")) {
-					tree->set_drop_mode_flags(Tree::DROP_MODE_INBETWEEN);
 				}
 			}
 		} break;
@@ -458,7 +472,7 @@ void FileSystemDock::_navigate_to_path(const String &p_path, bool p_select_in_fa
 	_set_current_path_text(path);
 	_push_to_history();
 
-	_update_tree(_compute_uncollapsed_paths(), false, p_select_in_favorites);
+	_update_tree(_compute_uncollapsed_paths(), false, p_select_in_favorites, true);
 	if (display_mode == DISPLAY_MODE_SPLIT) {
 		_update_file_list(false);
 		files->get_v_scroll()->set_value(0);
@@ -736,6 +750,7 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 	}
 
 	// Fills the ItemList control node from the FileInfos.
+	String main_scene = ProjectSettings::get_singleton()->get("application/run/main_scene");
 	String oi = "Object";
 	for (List<FileInfo>::Element *E = filelist.front(); E; E = E->next()) {
 		FileInfo *finfo = &(E->get());
@@ -770,6 +785,10 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 			files->add_item(fname, type_icon, true);
 			item_index = files->get_item_count() - 1;
 			files->set_item_metadata(item_index, fpath);
+		}
+
+		if (fpath == main_scene) {
+			files->set_item_custom_fg_color(item_index, get_color("accent_color", "Editor"));
 		}
 
 		// Generate the preview.
@@ -1564,6 +1583,16 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			}
 		} break;
 
+		case FILE_MAIN_SCENE: {
+			// Set as main scene with selected scene file.
+			if (p_selected.size() == 1) {
+				ProjectSettings::get_singleton()->set("application/run/main_scene", p_selected[0]);
+				ProjectSettings::get_singleton()->save();
+				_update_tree(_compute_uncollapsed_paths());
+				_update_file_list(true);
+			}
+		} break;
+
 		case FILE_INSTANCE: {
 			// Instance all selected scenes.
 			Vector<String> paths;
@@ -1732,8 +1761,8 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			if (!fpath.ends_with("/")) {
 				fpath = fpath.get_base_dir();
 			}
-			make_script_dialog_text->config("Node", fpath.plus_file("new_script.gd"), false);
-			make_script_dialog_text->popup_centered(Size2(300, 300) * EDSCALE);
+			make_script_dialog->config("Node", fpath.plus_file("new_script.gd"), false, false);
+			make_script_dialog->popup_centered();
 		} break;
 
 		case FILE_COPY_PATH: {
@@ -1770,7 +1799,7 @@ void FileSystemDock::_resource_created() const {
 }
 
 void FileSystemDock::_search_changed(const String &p_text, const Control *p_from) {
-	if (searched_string.length() == 0 && p_text.length() > 0) {
+	if (searched_string.length() == 0) {
 		// Register the uncollapsed paths before they change.
 		uncollapsed_paths_before_search = _compute_uncollapsed_paths();
 	}
@@ -1782,13 +1811,14 @@ void FileSystemDock::_search_changed(const String &p_text, const Control *p_from
 	else // File_list_search_box.
 		tree_search_box->set_text(searched_string);
 
+	bool unfold_path = (p_text == String() && path != String());
 	switch (display_mode) {
 		case DISPLAY_MODE_TREE_ONLY: {
-			_update_tree(searched_string.length() == 0 ? uncollapsed_paths_before_search : Vector<String>());
+			_update_tree(searched_string.length() == 0 ? uncollapsed_paths_before_search : Vector<String>(), false, false, unfold_path);
 		} break;
 		case DISPLAY_MODE_SPLIT: {
 			_update_file_list(false);
-			_update_tree(searched_string.length() == 0 ? uncollapsed_paths_before_search : Vector<String>());
+			_update_tree(searched_string.length() == 0 ? uncollapsed_paths_before_search : Vector<String>(), false, false, unfold_path);
 		} break;
 	}
 }
@@ -1839,7 +1869,7 @@ Variant FileSystemDock::get_drag_data_fw(const Point2 &p_point, Control *p_from)
 			all_not_favorites &= !is_favorite;
 			selected = tree->get_next_selected(selected);
 		}
-		if (all_favorites) {
+		if (!all_not_favorites) {
 			paths = _tree_get_selected(false);
 		} else {
 			paths = _tree_get_selected();
@@ -1857,12 +1887,9 @@ Variant FileSystemDock::get_drag_data_fw(const Point2 &p_point, Control *p_from)
 	if (paths.empty())
 		return Variant();
 
-	if (!all_favorites && !all_not_favorites)
-		return Variant();
-
 	Dictionary drag_data = EditorNode::get_singleton()->drag_files_and_dirs(paths, p_from);
-	if (all_favorites) {
-		drag_data["type"] = "favorite";
+	if (!all_not_favorites) {
+		drag_data["favorite"] = all_favorites ? "all" : "mixed";
 	}
 	return drag_data;
 }
@@ -1870,7 +1897,11 @@ Variant FileSystemDock::get_drag_data_fw(const Point2 &p_point, Control *p_from)
 bool FileSystemDock::can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
 	Dictionary drag_data = p_data;
 
-	if (drag_data.has("type") && String(drag_data["type"]) == "favorite") {
+	if (drag_data.has("favorite")) {
+
+		if (String(drag_data["favorite"]) != "all") {
+			return false;
+		}
 
 		// Moving favorite around.
 		TreeItem *ti = tree->get_item_at_position(p_point);
@@ -1937,7 +1968,11 @@ void FileSystemDock::drop_data_fw(const Point2 &p_point, const Variant &p_data, 
 
 	Vector<String> dirs = EditorSettings::get_singleton()->get_favorites();
 
-	if (drag_data.has("type") && String(drag_data["type"]) == "favorite") {
+	if (drag_data.has("favorite")) {
+
+		if (String(drag_data["favorite"]) != "all") {
+			return;
+		}
 		// Moving favorite around.
 		TreeItem *ti = tree->get_item_at_position(p_point);
 		if (!ti)
@@ -2132,6 +2167,9 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 			if (filenames.size() == 1) {
 				p_popup->add_icon_item(get_icon("Load", "EditorIcons"), TTR("Open Scene"), FILE_OPEN);
 				p_popup->add_icon_item(get_icon("CreateNewSceneFrom", "EditorIcons"), TTR("New Inherited Scene"), FILE_INHERIT);
+				if (ProjectSettings::get_singleton()->get("application/run/main_scene") != filenames[0]) {
+					p_popup->add_icon_item(get_icon("PlayScene", "EditorIcons"), TTR("Set As Main Scene"), FILE_MAIN_SCENE);
+				}
 			} else {
 				p_popup->add_icon_item(get_icon("Load", "EditorIcons"), TTR("Open Scenes"), FILE_OPEN);
 			}
@@ -2659,9 +2697,9 @@ FileSystemDock::FileSystemDock(EditorNode *p_editor) {
 	make_scene_dialog->register_text_enter(make_scene_dialog_text);
 	make_scene_dialog->connect("confirmed", this, "_make_scene_confirm");
 
-	make_script_dialog_text = memnew(ScriptCreateDialog);
-	make_script_dialog_text->set_title(TTR("Create Script"));
-	add_child(make_script_dialog_text);
+	make_script_dialog = memnew(ScriptCreateDialog);
+	make_script_dialog->set_title(TTR("Create Script"));
+	add_child(make_script_dialog);
 
 	new_resource_dialog = memnew(CreateDialog);
 	add_child(new_resource_dialog);

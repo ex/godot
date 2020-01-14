@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -385,6 +385,7 @@ public:
 	}
 
 	inline int size() const;
+	inline bool empty() const;
 	T get(int p_index) const;
 	void set(int p_index, const T &p_val);
 	void push_back(const T &p_val);
@@ -472,6 +473,12 @@ template <class T>
 int PoolVector<T>::size() const {
 
 	return alloc ? alloc->size / sizeof(T) : 0;
+}
+
+template <class T>
+bool PoolVector<T>::empty() const {
+
+	return alloc ? alloc->size == 0 : true;
 }
 
 template <class T>

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,6 +27,10 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS // to disable build-time warning which suggested to use strcpy_s instead strcpy
+#endif
 
 #include "ustring.h"
 
@@ -1337,7 +1341,17 @@ String String::num_scientific(double p_num) {
 	char buf[256];
 
 #if defined(__GNUC__) || defined(_MSC_VER)
+
+#if (defined(__MINGW32__) || (defined(_MSC_VER) && _MSC_VER < 1900)) && defined(_TWO_DIGIT_EXPONENT) && !defined(_UCRT)
+	// MinGW and old MSC require _set_output_format() to conform to C99 output for printf
+	unsigned int old_exponent_format = _set_output_format(_TWO_DIGIT_EXPONENT);
+#endif
 	snprintf(buf, 256, "%lg", p_num);
+
+#if (defined(__MINGW32__) || (defined(_MSC_VER) && _MSC_VER < 1900)) && defined(_TWO_DIGIT_EXPONENT) && !defined(_UCRT)
+	_set_output_format(old_exponent_format);
+#endif
+
 #else
 	sprintf(buf, "%.16lg", p_num);
 #endif
@@ -1406,7 +1420,7 @@ bool String::parse_utf8(const char *p_utf8, int p_len) {
 
 			if (skip == 0) {
 
-				uint8_t c = *ptrtmp;
+				uint8_t c = *ptrtmp >= 0 ? *ptrtmp : uint8_t(256 + *ptrtmp);
 
 				/* Determine the number of characters in sequence */
 				if ((c & 0x80) == 0)
@@ -1907,7 +1921,7 @@ static double built_in_strtod(const C *string, /* A decimal ASCII floating-point
 		1.0e256
 	};
 
-	int sign, expSign = false;
+	bool sign, expSign = false;
 	double fraction, dblExp;
 	const double *d;
 	const C *p;
@@ -3782,7 +3796,8 @@ bool String::is_valid_float() const {
 
 String String::path_to_file(const String &p_path) const {
 
-	String src = this->replace("\\", "/").get_base_dir();
+	// Don't get base dir for src, this is expected to be a dir already.
+	String src = this->replace("\\", "/");
 	String dst = p_path.replace("\\", "/").get_base_dir();
 	String rel = src.path_to(dst);
 	if (rel == dst) // failed
@@ -4044,6 +4059,19 @@ String String::percent_decode() const {
 	return String::utf8(pe.ptr());
 }
 
+String String::property_name_encode() const {
+	// Escape and quote strings with extended ASCII or further Unicode characters
+	// as well as '"', '=' or ' ' (32)
+	const CharType *cstr = c_str();
+	for (int i = 0; cstr[i]; i++) {
+		if (cstr[i] == '=' || cstr[i] == '"' || cstr[i] < 33 || cstr[i] > 126) {
+			return "\"" + c_escape_multiline() + "\"";
+		}
+	}
+	// Keep as is
+	return *this;
+}
+
 String String::get_basename() const {
 
 	int pos = find_last(".");
@@ -4056,6 +4084,11 @@ String String::get_basename() const {
 String itos(int64_t p_val) {
 
 	return String::num_int64(p_val);
+}
+
+String uitos(uint64_t p_val) {
+
+	return String::num_uint64(p_val);
 }
 
 String rtos(double p_val) {

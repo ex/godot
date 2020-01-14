@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -42,6 +42,7 @@
 #include "editor/bindings_generator.h"
 #include "editor/csharp_project.h"
 #include "editor/editor_node.h"
+#include "editor/node_dock.h"
 #endif
 
 #ifdef DEBUG_METHODS_ENABLED
@@ -50,8 +51,10 @@
 
 #include "editor/editor_internal_calls.h"
 #include "godotsharp_dirs.h"
+#include "mono_gd/gd_mono_cache.h"
 #include "mono_gd/gd_mono_class.h"
 #include "mono_gd/gd_mono_marshal.h"
+#include "mono_gd/gd_mono_utils.h"
 #include "signal_awaiter_utils.h"
 #include "utils/macros.h"
 #include "utils/mutex_utils.h"
@@ -126,12 +129,11 @@ void CSharpLanguage::init() {
 	print_line("Run this binary with '--generate-mono-glue path/to/modules/mono/glue'");
 #endif
 
-	gdmono->initialize_load_assemblies();
+	if (gdmono->is_runtime_initialized())
+		gdmono->initialize_load_assemblies();
 
 #ifdef TOOLS_ENABLED
 	EditorNode::add_init_callback(&_editor_init_callback);
-
-	GLOBAL_DEF("mono/export/include_scripts_content", false);
 #endif
 }
 
@@ -156,6 +158,19 @@ void CSharpLanguage::finish() {
 
 	// Clear here, after finalizing all domains to make sure there is nothing else referencing the elements.
 	script_bindings.clear();
+
+#ifdef DEBUG_ENABLED
+	for (List<ObjectID>::Element *E = unsafely_referenced_objects.front(); E; E = E->next()) {
+		const ObjectID &id = E->get();
+		Object *obj = ObjectDB::get_instance(id);
+
+		if (obj) {
+			ERR_PRINTS("Leaked unsafe reference to object: " + obj->get_class() + ":" + itos(id));
+		} else {
+			ERR_PRINTS("Leaked unsafe reference to deleted object: " + itos(id));
+		}
+	}
+#endif
 
 	finalizing = false;
 }
@@ -545,7 +560,7 @@ Vector<ScriptLanguage::StackInfo> CSharpLanguage::debug_get_current_stack_info()
 #ifdef DEBUG_ENABLED
 	_TLS_RECURSION_GUARD_V_(Vector<StackInfo>());
 
-	if (!gdmono->is_runtime_initialized() || !GDMono::get_singleton()->get_core_api_assembly() || !GDMonoUtils::mono_cache.corlib_cache_updated)
+	if (!gdmono->is_runtime_initialized() || !GDMono::get_singleton()->get_core_api_assembly() || !GDMonoCache::cached_data.corlib_cache_updated)
 		return Vector<StackInfo>();
 
 	MonoObject *stack_trace = mono_object_new(mono_domain_get(), CACHED_CLASS(System_Diagnostics_StackTrace)->get_mono_ptr());
@@ -571,7 +586,7 @@ Vector<ScriptLanguage::StackInfo> CSharpLanguage::stack_trace_get_info(MonoObjec
 
 	MonoException *exc = NULL;
 
-	MonoArray *frames = invoke_method_thunk(CACHED_METHOD_THUNK(System_Diagnostics_StackTrace, GetFrames), p_stack_trace, &exc);
+	MonoArray *frames = CACHED_METHOD_THUNK(System_Diagnostics_StackTrace, GetFrames).invoke(p_stack_trace, &exc);
 
 	if (exc) {
 		GDMonoUtils::debug_print_unhandled_exception(exc);
@@ -583,8 +598,6 @@ Vector<ScriptLanguage::StackInfo> CSharpLanguage::stack_trace_get_info(MonoObjec
 	if (frame_count <= 0)
 		return Vector<StackInfo>();
 
-	GDMonoUtils::DebugUtils_StackFrameInfo get_sf_info = CACHED_METHOD_THUNK(DebuggingUtils, GetStackFrameInfo);
-
 	Vector<StackInfo> si;
 	si.resize(frame_count);
 
@@ -595,7 +608,7 @@ Vector<ScriptLanguage::StackInfo> CSharpLanguage::stack_trace_get_info(MonoObjec
 		MonoString *file_name;
 		int file_line_num;
 		MonoString *method_decl;
-		invoke_method_thunk(get_sf_info, frame, &file_name, &file_line_num, &method_decl, &exc);
+		CACHED_METHOD_THUNK(DebuggingUtils, GetStackFrameInfo).invoke(frame, &file_name, &file_line_num, &method_decl, &exc);
 
 		if (exc) {
 			GDMonoUtils::debug_print_unhandled_exception(exc);
@@ -615,17 +628,34 @@ Vector<ScriptLanguage::StackInfo> CSharpLanguage::stack_trace_get_info(MonoObjec
 }
 #endif
 
+void CSharpLanguage::post_unsafe_reference(Object *p_obj) {
+#ifdef DEBUG_ENABLED
+	ObjectID id = p_obj->get_instance_id();
+	ERR_FAIL_COND_MSG(unsafely_referenced_objects.find(id), "Multiple unsafe references for object: " + p_obj->get_class() + ":" + itos(id));
+	unsafely_referenced_objects.push_back(id);
+#endif
+}
+
+void CSharpLanguage::pre_unsafe_unreference(Object *p_obj) {
+#ifdef DEBUG_ENABLED
+	ObjectID id = p_obj->get_instance_id();
+	List<ObjectID>::Element *elem = unsafely_referenced_objects.find(id);
+	ERR_FAIL_NULL(elem);
+	unsafely_referenced_objects.erase(elem);
+#endif
+}
+
 void CSharpLanguage::frame() {
 
 	if (gdmono && gdmono->is_runtime_initialized() && gdmono->get_core_api_assembly() != NULL) {
-		const Ref<MonoGCHandle> &task_scheduler_handle = GDMonoUtils::mono_cache.task_scheduler_handle;
+		const Ref<MonoGCHandle> &task_scheduler_handle = GDMonoCache::cached_data.task_scheduler_handle;
 
 		if (task_scheduler_handle.is_valid()) {
 			MonoObject *task_scheduler = task_scheduler_handle->get_target();
 
 			if (task_scheduler) {
 				MonoException *exc = NULL;
-				invoke_method_thunk(CACHED_METHOD_THUNK(GodotTaskScheduler, Activate), task_scheduler, &exc);
+				CACHED_METHOD_THUNK(GodotTaskScheduler, Activate).invoke(task_scheduler, &exc);
 
 				if (exc) {
 					GDMonoUtils::debug_unhandled_exception(exc);
@@ -1079,7 +1109,7 @@ bool CSharpLanguage::overrides_external_editor() {
 void CSharpLanguage::thread_enter() {
 
 #if 0
-	if (mono->is_runtime_initialized()) {
+	if (gdmono->is_runtime_initialized()) {
 		GDMonoUtils::attach_current_thread();
 	}
 #endif
@@ -1088,7 +1118,7 @@ void CSharpLanguage::thread_enter() {
 void CSharpLanguage::thread_exit() {
 
 #if 0
-	if (mono->is_runtime_initialized()) {
+	if (gdmono->is_runtime_initialized()) {
 		GDMonoUtils::detach_current_thread();
 	}
 #endif
@@ -1286,6 +1316,7 @@ bool CSharpLanguage::setup_csharp_script_binding(CSharpScriptBinding &r_script_b
 		// See: godot_icall_Reference_Dtor(MonoObject *p_obj, Object *p_ptr)
 
 		ref->reference();
+		CSharpLanguage::get_singleton()->post_unsafe_reference(ref);
 	}
 
 	return true;
@@ -1736,9 +1767,12 @@ bool CSharpInstance::_reference_owner_unsafe() {
 	// See: _unreference_owner_unsafe()
 
 	// May not me referenced yet, so we must use init_ref() instead of reference()
-	bool success = Object::cast_to<Reference>(owner)->init_ref();
-	unsafe_referenced = success;
-	return success;
+	if (static_cast<Reference *>(owner)->init_ref()) {
+		CSharpLanguage::get_singleton()->post_unsafe_reference(owner);
+		unsafe_referenced = true;
+	}
+
+	return unsafe_referenced;
 }
 
 bool CSharpInstance::_unreference_owner_unsafe() {
@@ -1759,6 +1793,7 @@ bool CSharpInstance::_unreference_owner_unsafe() {
 	// See: _reference_owner_unsafe()
 
 	// Destroying the owner here means self destructing, so we defer the owner destruction to the caller.
+	CSharpLanguage::get_singleton()->pre_unsafe_unreference(owner);
 	return static_cast<Reference *>(owner)->unreference();
 }
 
@@ -2243,7 +2278,11 @@ bool CSharpScript::_update_exports() {
 		MonoException *ctor_exc = NULL;
 		ctor->invoke(tmp_object, NULL, &ctor_exc);
 
+		Object *tmp_native = GDMonoMarshal::unbox<Object *>(CACHED_FIELD(GodotObject, ptr)->get_value(tmp_object));
+
 		if (ctor_exc) {
+			// TODO: Should we free 'tmp_native' if the exception was thrown after its creation?
+
 			MonoGCHandle::free_handle(tmp_pinned_gchandle);
 			tmp_object = NULL;
 
@@ -2322,6 +2361,15 @@ bool CSharpScript::_update_exports() {
 
 		MonoGCHandle::free_handle(tmp_pinned_gchandle);
 		tmp_object = NULL;
+
+		if (tmp_native && !Object::cast_to<Reference>(tmp_native)) {
+			Node *node = Object::cast_to<Node>(tmp_native);
+			if (node && node->is_inside_tree()) {
+				ERR_PRINTS("Temporary instance was added to the scene tree.");
+			} else {
+				memdelete(tmp_native);
+			}
+		}
 	}
 
 	placeholder_fallback_enabled = false;

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -465,11 +465,8 @@ class AnimationTrackEditor : public VBoxContainer {
 
 	void _selection_changed();
 
-	bool selected_all_tracks;
 	ConfirmationDialog *track_copy_dialog;
 	Tree *track_copy_select;
-	HBoxContainer *track_copy_options;
-	Button *select_all_button;
 
 	struct TrackClipboard {
 		NodePath full_path;
@@ -524,7 +521,7 @@ public:
 	bool is_moving_selection() const;
 	bool is_snap_enabled() const;
 	float get_moving_selection_offset() const;
-	float snap_time(float p_value);
+	float snap_time(float p_value, bool p_relative = false);
 	bool is_grouping_tracks();
 
 	MenuButton *get_edit_menu();
