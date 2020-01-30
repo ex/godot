@@ -1954,12 +1954,27 @@ msgid "Inherited by:"
 msgstr "Děděná z:"
 
 #: editor/editor_help.cpp
-msgid "Brief Description"
-msgstr "Stručný popis"
+#, fuzzy
+msgid "Description"
+msgstr "Popis:"
+
+#: editor/editor_help.cpp
+msgid "Online Tutorials"
+msgstr "Online návody"
 
 #: editor/editor_help.cpp
 msgid "Properties"
 msgstr "Vlastnosti"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "override:"
+msgstr "Přepsat"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "Výchozí"
 
 #: editor/editor_help.cpp
 msgid "Methods"
@@ -1974,34 +1989,17 @@ msgid "Enumerations"
 msgstr "Výčty"
 
 #: editor/editor_help.cpp
-msgid "enum  "
-msgstr "výčet  "
-
-#: editor/editor_help.cpp
 msgid "Constants"
 msgstr "Konstanty"
 
 #: editor/editor_help.cpp
-msgid "Class Description"
-msgstr "Popis třídy"
-
-#: editor/editor_help.cpp
-msgid "Online Tutorials"
-msgstr "Online návody"
-
-#: editor/editor_help.cpp
-msgid ""
-"There are currently no tutorials for this class, you can [color=$color][url="
-"$url]contribute one[/url][/color] or [color=$color][url=$url2]request one[/"
-"url][/color]."
-msgstr ""
-"V současné době pro tuto třídu neexistují žádné návody, můžete nějaký [color="
-"$color][url=$url]vytvořit[/url][/color] nebo o něj [color=$color][url="
-"$url2]zažádat[/url][/color]."
-
-#: editor/editor_help.cpp
 msgid "Property Descriptions"
 msgstr "Popis vlastnosti"
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "(value)"
+msgstr "Hodnota"
 
 #: editor/editor_help.cpp
 msgid ""
@@ -4572,7 +4570,6 @@ msgid "Animation Tools"
 msgstr "Nástroje pro animaci"
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Animation"
 msgstr "Animace"
 
@@ -5655,6 +5652,11 @@ msgid "Auto Insert Key"
 msgstr "Animace: vložit klíč"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
+#, fuzzy
+msgid "Animation Key and Pose Options"
+msgstr "Animační klíč vložen."
+
+#: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
 msgstr "Vložit klíč (existující stopy)"
 
@@ -5949,7 +5951,6 @@ msgid "No mesh to debug."
 msgstr "Žádná mesh pro debugování."
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
-#: editor/plugins/sprite_editor_plugin.cpp
 msgid "Model has no UV in this layer"
 msgstr "Model nemá UV v této vrstvě"
 
@@ -7360,6 +7361,10 @@ msgstr "Povolit filtrování"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Cinematic Preview"
+msgstr ""
+
+#: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
@@ -12725,6 +12730,24 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr "Konstanty není možné upravovat."
+
+#~ msgid ""
+#~ "There are currently no tutorials for this class, you can [color=$color]"
+#~ "[url=$url]contribute one[/url][/color] or [color=$color][url="
+#~ "$url2]request one[/url][/color]."
+#~ msgstr ""
+#~ "V současné době pro tuto třídu neexistují žádné návody, můžete nějaký "
+#~ "[color=$color][url=$url]vytvořit[/url][/color] nebo o něj [color=$color]"
+#~ "[url=$url2]zažádat[/url][/color]."
+
+#~ msgid "enum  "
+#~ msgstr "výčet  "
+
+#~ msgid "Brief Description"
+#~ msgstr "Stručný popis"
+
+#~ msgid "Class Description"
+#~ msgstr "Popis třídy"
 
 #~ msgid "Project export failed with error code %d."
 #~ msgstr "Export projektu selhal s chybovým kódem %d."

@@ -539,16 +539,16 @@ Error ExtendGDScriptParser::get_left_function_call(const lsp::Position &p_positi
 		}
 
 		while (c >= 0) {
-			const CharType &charactor = line[c];
-			if (charactor == ')') {
+			const CharType &character = line[c];
+			if (character == ')') {
 				++bracket_stack;
-			} else if (charactor == '(') {
+			} else if (character == '(') {
 				--bracket_stack;
 				if (bracket_stack < 0) {
 					found = true;
 				}
 			}
-			if (bracket_stack <= 0 && charactor == ',') {
+			if (bracket_stack <= 0 && character == ',') {
 				++index;
 			}
 			--c;
@@ -757,7 +757,7 @@ Dictionary ExtendGDScriptParser::dump_class_api(const GDScriptParser::ClassNode 
 
 	Array static_functions;
 	for (int i = 0; i < p_class->static_functions.size(); ++i) {
-		static_functions.append(dump_function_api(p_class->functions[i]));
+		static_functions.append(dump_function_api(p_class->static_functions[i]));
 	}
 	class_api["static_functions"] = static_functions;
 
