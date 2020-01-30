@@ -94,7 +94,7 @@ logs/
 x64/
 build/
 bld/
-[Bb]in/
+#[Bb]in/
 [Oo]bj/
 *.debug
 *.dSYM
