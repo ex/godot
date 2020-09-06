@@ -34,7 +34,6 @@
 #include "scene/gui/base_button.h"
 
 class Button : public BaseButton {
-
 	GDCLASS(Button, BaseButton);
 
 public:
@@ -48,7 +47,7 @@ private:
 	bool flat;
 	String text;
 	String xl_text;
-	Ref<Texture> icon;
+	Ref<Texture2D> icon;
 	bool expand_icon;
 	bool clip_text;
 	TextAlign align;
@@ -60,13 +59,13 @@ protected:
 	static void _bind_methods();
 
 public:
-	virtual Size2 get_minimum_size() const;
+	virtual Size2 get_minimum_size() const override;
 
 	void set_text(const String &p_text);
 	String get_text() const;
 
-	void set_icon(const Ref<Texture> &p_icon);
-	Ref<Texture> get_icon() const;
+	void set_icon(const Ref<Texture2D> &p_icon);
+	Ref<Texture2D> get_icon() const;
 
 	void set_expand_icon(bool p_expand_icon);
 	bool is_expand_icon() const;

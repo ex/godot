@@ -217,7 +217,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - This makes it possible to change its value at runtime, rather than just defining it once in the Project Settings.
 - `SceneTree.quit()` now accepts an optional argument with an exit code.
   - If set to a value greater than or equal to 0, it will override the `OS.exit_code` property.
-- `VisualServer.get_video_adapter_name()` and `VisualServer.get_video_adapter_vendor()` methods to retreive the user's graphics card model and vendor.
+- `VisualServer.get_video_adapter_name()` and `VisualServer.get_video_adapter_vendor()` methods to retrieve the user's graphics card model and vendor.
 - `VisualServer.multimesh_create()` is now exposed to scripting.
 - Ability to override how scripted objects are converted to strings by defining a `_to_string()` method.
 - Export hints for 2D and 3D physics/render layers.
@@ -250,6 +250,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Drag-and-drop support in the TileSet editor.
 - Ability to attach scripts to nodes by dragging a name from the script list to a node in the scene tree.
 - Icons are now displayed next to code completion items, making their type easier to distinguish.
+- TileMap property `centered_textures` can be used to center textures on their tile, instead of using the tile's top-left corner as position for the texture.
 - "Ignore" flag to ignore specific tiles when autotiling in the TileMap editor.
 - Keyboard shortcuts to rotate tiles in the TileMap editor.
   - Default shortcuts are <kbd>A</kbd> (rotate left), <kbd>S</kbd> (rotate right), <kbd>X</kbd> (flip horizontally), <kbd>Y</kbd> (flip vertically).
@@ -519,6 +520,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Graph lines are now thinner and opaque.
   - Graph line widths are now resized to match the editor scale.
   - Rounded values now display trailing zeroes to make their precision clearer.
+- TileMap support for transform operations on cell textures bigger than the cell size has been reworked to properly support isometric tiles.
+  - Breaks compatibility with some TileMaps from previous Godot versions. An opt-in `compatibility_mode` property can be used to restore the previous behavior.
 - Some TileMap editor options were moved to the toolbar.
 - The TileMap editor now displays coordinate information in the 2D viewport's bottom-left corner.
   - This fixes the TileMap editor width changing when hovering tiles in a small window.
@@ -882,7 +885,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `editor` and `standalone` feature tags to check whether the project is running from an editor or non-editor binary.
 - `android_add_asset_dir("...")` method to Android module Gradle build configuration.
 - **iOS:** Support for exporting to the iPhone X.
-- **iOS:** Readded support for in-app purchases.
+- **iOS:** Re-added support for in-app purchases.
 
 ### Changed
 

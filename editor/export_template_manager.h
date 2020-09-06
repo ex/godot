@@ -69,11 +69,11 @@ class ExportTemplateManager : public ConfirmationDialog {
 	void _uninstall_template(const String &p_version);
 	void _uninstall_template_confirm();
 
-	virtual void ok_pressed();
+	virtual void ok_pressed() override;
 	bool _install_from_file(const String &p_file, bool p_use_progress = true);
 
-	void _http_download_mirror_completed(int p_status, int p_code, const PoolStringArray &headers, const PoolByteArray &p_data);
-	void _http_download_templates_completed(int p_status, int p_code, const PoolStringArray &headers, const PoolByteArray &p_data);
+	void _http_download_mirror_completed(int p_status, int p_code, const PackedStringArray &headers, const PackedByteArray &p_data);
+	void _http_download_templates_completed(int p_status, int p_code, const PackedStringArray &headers, const PackedByteArray &p_data);
 
 	void _begin_template_download(const String &p_url);
 

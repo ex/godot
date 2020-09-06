@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="Button" inherits="BaseButton" version="3.2">
+<class name="Button" inherits="BaseButton" version="4.0">
 	<brief_description>
 		Standard themed Button.
 	</brief_description>
 	<description>
 		Button is the standard themed button. It can contain text and an icon, and will display them according to the current [Theme].
+		[b]Example of creating a button and assigning an action when pressed by code:[/b]
+		[codeblock]
+		func _ready():
+		    var button = Button.new()
+		    button.text = "Click me"
+		    button.connect("pressed", self, "_button_pressed")
+		    add_child(button)
+
+		func _button_pressed():
+		    print("Hello world!")
+		[/codeblock]
+		Buttons (like all Control nodes) can also be created in the editor, but some situations may require creating them from code.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -23,7 +35,7 @@
 		<member name="flat" type="bool" setter="set_flat" getter="is_flat" default="false">
 			Flat buttons don't display decoration.
 		</member>
-		<member name="icon" type="Texture" setter="set_button_icon" getter="get_button_icon">
+		<member name="icon" type="Texture2D" setter="set_button_icon" getter="get_button_icon">
 			Button's icon, if text is present the icon will be placed before the text.
 		</member>
 		<member name="text" type="String" setter="set_text" getter="get_text" default="&quot;&quot;">

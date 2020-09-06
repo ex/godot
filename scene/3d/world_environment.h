@@ -31,13 +31,15 @@
 #ifndef SCENARIO_FX_H
 #define SCENARIO_FX_H
 
-#include "scene/3d/spatial.h"
+#include "scene/3d/node_3d.h"
+#include "scene/resources/camera_effects.h"
+#include "scene/resources/environment.h"
 
 class WorldEnvironment : public Node {
-
 	GDCLASS(WorldEnvironment, Node);
 
 	Ref<Environment> environment;
+	Ref<CameraEffects> camera_effects;
 
 protected:
 	void _notification(int p_what);
@@ -47,7 +49,10 @@ public:
 	void set_environment(const Ref<Environment> &p_environment);
 	Ref<Environment> get_environment() const;
 
-	String get_configuration_warning() const;
+	void set_camera_effects(const Ref<CameraEffects> &p_camera_effects);
+	Ref<CameraEffects> get_camera_effects() const;
+
+	String get_configuration_warning() const override;
 
 	WorldEnvironment();
 };

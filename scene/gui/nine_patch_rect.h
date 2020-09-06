@@ -34,7 +34,6 @@
 #include "scene/gui/control.h"
 
 class NinePatchRect : public Control {
-
 	GDCLASS(NinePatchRect, Control);
 
 public:
@@ -47,18 +46,18 @@ public:
 	bool draw_center;
 	int margin[4];
 	Rect2 region_rect;
-	Ref<Texture> texture;
+	Ref<Texture2D> texture;
 
 	AxisStretchMode axis_h, axis_v;
 
 protected:
 	void _notification(int p_what);
-	virtual Size2 get_minimum_size() const;
+	virtual Size2 get_minimum_size() const override;
 	static void _bind_methods();
 
 public:
-	void set_texture(const Ref<Texture> &p_tex);
-	Ref<Texture> get_texture() const;
+	void set_texture(const Ref<Texture2D> &p_tex);
+	Ref<Texture2D> get_texture() const;
 
 	void set_patch_margin(Margin p_margin, int p_size);
 	int get_patch_margin(Margin p_margin) const;

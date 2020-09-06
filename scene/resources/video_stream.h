@@ -34,7 +34,6 @@
 #include "scene/resources/texture.h"
 
 class VideoStreamPlayback : public Resource {
-
 	GDCLASS(VideoStreamPlayback, Resource);
 
 public:
@@ -58,7 +57,8 @@ public:
 
 	virtual void set_audio_track(int p_idx) = 0;
 
-	virtual Ref<Texture> get_texture() const = 0;
+	virtual Ref<Texture2D> get_texture() const = 0;
+
 	virtual void update(float p_delta) = 0;
 
 	virtual void set_mix_callback(AudioMixCallback p_callback, void *p_userdata) = 0;
@@ -67,7 +67,6 @@ public:
 };
 
 class VideoStream : public Resource {
-
 	GDCLASS(VideoStream, Resource);
 	OBJ_SAVE_TYPE(VideoStream); // Saves derived classes with common type so they can be interchanged.
 
