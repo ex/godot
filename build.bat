@@ -1,1 +1,1 @@
-scons p=windows vsproj=yes
+scons p=windows target=release_debug optimize=size
