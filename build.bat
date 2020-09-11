@@ -1,0 +1,1 @@
+scons p=windows vsproj=yes
