@@ -1,24 +1,6 @@
 # Third party libraries
 
 
-## assimp
-
-- Upstream: http://github.com/assimp/assimp
-- Version: git (308db73d0b3c2d1870cd3e465eaa283692a4cf23, 2019)
-- License: BSD-3-Clause
-
-Files extracted from upstream source:
-
-- Run `cmake .` in root folder to generate files
-- `code/{CApi,Common,FBX,Material,PostProcessing}/`
-- `contrib/utf8cpp/source/`
-- `include/`
-- `revision.h`
-- `CREDITS` and `LICENSE` files
-- `rm -f code/Common/ZipArchiveIOSystem.cpp include/assimp/ZipArchiveIOSystem.h
-   include/assimp/irrXMLWrapper.h`
-
-
 ## bullet
 
 - Upstream: https://github.com/bulletphysics/bullet3
@@ -120,7 +102,7 @@ Use UI font variant if available, because it has tight vertical metrics and good
 ## freetype
 
 - Upstream: https://www.freetype.org
-- Version: 2.10.1 (2019)
+- Version: 2.10.4 (2020)
 - License: FreeType License (BSD-like)
 
 Files extracted from upstream source:
@@ -465,7 +447,7 @@ comments and a patch is provided in the squish/ folder.
 ## tinyexr
 
 - Upstream: https://github.com/syoyo/tinyexr
-- Version: git (4dbd05a22f51a2d7462311569b8b0cba0bbe2ac5, 2020)
+- Version: 1.0.0 (e4b7840d9448b7d57a88384ce26143004f3c0c71, 2020)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -529,7 +511,7 @@ Files extracted from upstream source:
 ## zstd
 
 - Upstream: https://github.com/facebook/zstd
-- Version: 1.4.4 (2019)
+- Version: 1.4.5 (2020)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:

@@ -32,16 +32,21 @@ package org.godotengine.godot;
 
 import org.godotengine.godot.input.*;
 
+import android.app.Activity;
 import android.content.*;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
+import android.graphics.Point;
 import android.media.*;
 import android.net.Uri;
 import android.os.*;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Display;
+import android.view.DisplayCutout;
+import android.view.WindowInsets;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,7 +57,7 @@ import java.util.Locale;
 public class GodotIO {
 
 	AssetManager am;
-	Godot activity;
+	final Activity activity;
 	GodotEditText edit;
 
 	MediaPlayer mediaPlayer;
@@ -340,7 +345,7 @@ public class GodotIO {
 		dirs.remove(id);
 	}
 
-	GodotIO(Godot p_activity) {
+	GodotIO(Activity p_activity) {
 
 		am = p_activity.getAssets();
 		activity = p_activity;
@@ -491,6 +496,28 @@ public class GodotIO {
 	public int getScreenDPI() {
 		DisplayMetrics metrics = activity.getApplicationContext().getResources().getDisplayMetrics();
 		return (int)(metrics.density * 160f);
+	}
+
+	public int[] getWindowSafeArea() {
+		DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
+		Display display = activity.getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getRealSize(size);
+
+		int result[] = { 0, 0, size.x, size.y };
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+			WindowInsets insets = activity.getWindow().getDecorView().getRootWindowInsets();
+			DisplayCutout cutout = insets.getDisplayCutout();
+			if (cutout != null) {
+				int insetLeft = cutout.getSafeInsetLeft();
+				int insetTop = cutout.getSafeInsetTop();
+				result[0] = insetLeft;
+				result[1] = insetTop;
+				result[2] -= insetLeft + cutout.getSafeInsetRight();
+				result[3] -= insetTop + cutout.getSafeInsetBottom();
+			}
+		}
+		return result;
 	}
 
 	public void showKeyboard(String p_existing_text, boolean p_multiline, int p_max_input_length, int p_cursor_start, int p_cursor_end) {

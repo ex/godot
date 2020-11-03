@@ -3735,7 +3735,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 			return;
 		}
 
-		if (!scancode_handled && !k->get_command()) { // For German keyboards.
+		if (!scancode_handled && (!k->get_command() || (k->get_command() && k->get_alt()))) { // For German keyboards.
 
 			if (k->get_unicode() >= 32) {
 
@@ -6745,7 +6745,7 @@ void TextEdit::set_tooltip_request_func(Object *p_obj, const StringName &p_funct
 }
 
 void TextEdit::set_line(int line, String new_text) {
-	if (line < 0 || line > text.size())
+	if (line < 0 || line >= text.size())
 		return;
 	_remove_text(line, 0, line, text[line].length());
 	_insert_text(line, 0, new_text);
